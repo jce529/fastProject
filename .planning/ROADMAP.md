@@ -27,7 +27,12 @@
   2. Player can tap-jump for a short hop or hold-jump for a higher arc, with full air-direction control throughout the jump
   3. Player falling off any platform edge reappears on the last-stood platform position within half a second, with a brief visual invincibility indicator active on arrival
   4. All of the above remain stable: no physics tunneling, no stuck states, no console errors after 2 minutes of freeform testing
-**Plans**: TBD
+**Plans**: 3 plans
+
+Plans:
+- [ ] 01-01-PLAN.md — Scene layout, layer matrix, and CameraFollow script
+- [ ] 01-02-PLAN.md — PlayerController: instant reversal, jump cut, full air control (MOVE-01)
+- [ ] 01-03-PLAN.md — FallDetector + InvincibilityHandler: teleport recovery + sprite flicker (MOVE-02)
 
 ---
 
@@ -78,7 +83,7 @@
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Foundation & Movement | 0/? | Not started | - |
+| 1. Foundation & Movement | 0/3 | Not started | - |
 | 2. Combat Core | 0/? | Not started | - |
 | 3. Enemy System | 0/? | Not started | - |
 | 4. HUD & Game Loop | 0/? | Not started | - |
@@ -121,4 +126,4 @@
 
 ---
 *Roadmap created: 2026-05-27*
-*Last updated: 2026-05-27 after initial roadmap generation*
+*Last updated: 2026-05-27 after Phase 1 planning*
