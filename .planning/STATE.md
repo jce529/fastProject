@@ -1,3 +1,18 @@
+---
+gsd_state_version: 1.0
+milestone: v1.0
+milestone_name: milestone
+current_phase: 1 — Foundation & Movement
+current_plan: None (not started)
+status: unknown
+last_updated: "2026-05-27T13:43:15.862Z"
+progress:
+  total_phases: 4
+  completed_phases: 0
+  total_plans: 0
+  completed_plans: 0
+---
+
 # Project State: Fast (가칭)
 
 *Single source of truth for project memory across sessions.*
@@ -27,6 +42,7 @@ Progress: [ ] Phase 1  [ ] Phase 2  [ ] Phase 3  [ ] Phase 4
 ```
 
 **Phase Goals:**
+
 - Phase 1: Player moves responsively, falls recover to last platform
 - Phase 2: Hold-aim / release-dash loop + gauge + roll + hit-freeze fully playable
 - Phase 3: Melee and ranged enemies with telegraph, FSM, one-shot-kill both ways
@@ -95,7 +111,7 @@ None.
 4. Check which phase plan exists in `.planning/` (e.g., `PLAN-phase-1.md`)
 5. Continue from Current Phase listed above
 
-**Last session:** 2026-05-27 — Roadmap created, STATE.md initialized. No code written yet.
+**Last session:** 2026-05-27T13:43:15.857Z
 
 ---
 *State initialized: 2026-05-27*
