@@ -69,29 +69,29 @@
 
 ## Traceability
 
-*로드맵 생성 후 업데이트됨*
+*Updated: 2026-05-27 after roadmap creation*
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| MOVE-01 | — | Pending |
-| MOVE-02 | — | Pending |
-| MOVE-03 | — | Pending |
-| ATCK-01 | — | Pending |
-| ATCK-02 | — | Pending |
-| ATCK-03 | — | Pending |
-| ATCK-04 | — | Pending |
-| ATCK-05 | — | Pending |
-| FEEL-01 | — | Pending |
-| ENMY-01 | — | Pending |
-| ENMY-02 | — | Pending |
-| UI-01 | — | Pending |
-| UI-02 | — | Pending |
+| MOVE-01 | Phase 1 | Pending |
+| MOVE-02 | Phase 1 | Pending |
+| MOVE-03 | Phase 2 | Pending |
+| ATCK-01 | Phase 2 | Pending |
+| ATCK-02 | Phase 2 | Pending |
+| ATCK-03 | Phase 2 | Pending |
+| ATCK-04 | Phase 2 | Pending |
+| ATCK-05 | Phase 2 | Pending |
+| FEEL-01 | Phase 2 | Pending |
+| ENMY-01 | Phase 3 | Pending |
+| ENMY-02 | Phase 3 | Pending |
+| UI-01 | Phase 4 | Pending |
+| UI-02 | Phase 4 | Pending |
 
 **Coverage:**
 - v1 requirements: 13 total
-- Mapped to phases: 0 (로드맵 생성 전)
-- Unmapped: 13 ⚠️
+- Mapped to phases: 13/13
+- Unmapped: 0
 
 ---
 *Requirements defined: 2026-05-27*
-*Last updated: 2026-05-27 after initial definition*
+*Last updated: 2026-05-27 after roadmap creation*
