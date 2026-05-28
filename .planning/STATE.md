@@ -4,13 +4,14 @@ milestone: v1.0
 milestone_name: milestone
 current_phase: 01
 current_plan: 3
-status: executing
-last_updated: "2026-05-28T01:00:00.000Z"
+status: unknown
+stopped_at: Completed 01-03-PLAN.md (FallDetector + InvincibilityHandler + FallZoneTrigger + SampleScene wiring)
+last_updated: "2026-05-28T00:50:17.037Z"
 progress:
   total_phases: 4
-  completed_phases: 0
+  completed_phases: 1
   total_plans: 3
-  completed_plans: 2
+  completed_plans: 3
 ---
 
 # Project State: Fast (가칭)
@@ -31,16 +32,16 @@ progress:
 
 ## Current Position
 
-Phase: 01 (foundation-movement) — EXECUTING
+Phase: 01 (foundation-movement) — COMPLETE
 Plan: 3 of 3
 **Current Phase:** 01
-**Current Plan:** 3
-**Phase Status:** In Progress (2 of 3 plans complete)
+**Current Plan:** 3 (complete — awaiting verification)
+**Phase Status:** Complete (3 of 3 plans done)
 
 ```
-Progress: [ ] Phase 1  [ ] Phase 2  [ ] Phase 3  [ ] Phase 4
+Progress: [X] Phase 1  [ ] Phase 2  [ ] Phase 3  [ ] Phase 4
            |___________|___________|___________|___________|
-                  0%                                    100%
+                 25%                                    100%
 ```
 
 **Phase Goals:**
@@ -63,6 +64,7 @@ Progress: [ ] Phase 1  [ ] Phase 2  [ ] Phase 3  [ ] Phase 4
 ---
 | Phase 01-foundation-movement P01 | 4 | 2 tasks | 7 files |
 | Phase 01-foundation-movement P02 | ~3min | 2 tasks | 4 files |
+| Phase 01-foundation-movement P03 | 8 | 2 tasks | 4 files |
 
 ## Accumulated Context
 
@@ -78,6 +80,9 @@ Progress: [ ] Phase 1  [ ] Phase 2  [ ] Phase 3  [ ] Phase 4
 | jumpCutMultiplier = 0.4 (D-02) | Drops ascending velocity to 40% on button release — clear tap-vs-hold arc difference |
 | Time.timeScale compensation in Phase 1 | 1f / Time.timeScale in ApplyMovement baked in now — Phase 2 slow-mo requires no PlayerController rewrite |
 | PlayerInput notification = SendMessages (0) | PlayerController reads actions directly via playerInput.actions[], behavior mode is irrelevant |
+| WaitForSecondsRealtime for i-frames (01-03) | Phase 2 sets timeScale ~0.2; WaitForSeconds would extend 1s to 5s. WaitForSecondsRealtime is timeScale-immune. |
+| Vector3 _lastSafePosition value type (01-03) | Storing Transform reference would become stale null ref when floor objects recycled in v2. Vector3 copy is immune (Pitfall 14). |
+| Layer constants hardcoded 7/8 (01-03) | Matches TagManager.asset from Plan 01. Avoids LayerMask.NameToLayer() string lookup overhead each call. |
 
 ### Technical Constraints to Enforce Every Phase
 
@@ -118,8 +123,8 @@ None.
 4. Check which phase plan exists in `.planning/` (e.g., `PLAN-phase-1.md`)
 5. Continue from Current Phase listed above
 
-**Last session:** 2026-05-28T01:00:00.000Z
-**Stopped at:** Completed 01-02-PLAN.md (PlayerController + SampleScene wiring)
+**Last session:** 2026-05-28T00:50:17.032Z
+**Stopped at:** Completed 01-03-PLAN.md (FallDetector + InvincibilityHandler + FallZoneTrigger + SampleScene wiring)
 
 ---
 *State initialized: 2026-05-27*

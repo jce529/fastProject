@@ -9,7 +9,7 @@
 
 ## Phases
 
-- [ ] **Phase 1: Foundation & Movement** - Project infrastructure + player locomotion on a static test floor
+- [x] **Phase 1: Foundation & Movement** - Project infrastructure + player locomotion on a static test floor (completed 2026-05-28)
 - [ ] **Phase 2: Combat Core** - Slow-motion aiming, dash-kill, roll, and all gauge mechanics
 - [ ] **Phase 3: Enemy System** - Melee and ranged enemies with FSM behavior and one-shot-kill logic
 - [ ] **Phase 4: HUD & Game Loop** - All on-screen feedback, death screen, and restart flow
@@ -32,7 +32,7 @@
 Plans:
 - [x] 01-01-PLAN.md — Scene layout, layer matrix, and CameraFollow script
 - [x] 01-02-PLAN.md — PlayerController: instant reversal, jump cut, full air control (MOVE-01)
-- [ ] 01-03-PLAN.md — FallDetector + InvincibilityHandler: teleport recovery + sprite flicker (MOVE-02)
+- [x] 01-03-PLAN.md — FallDetector + InvincibilityHandler: teleport recovery + sprite flicker (MOVE-02)
 
 ---
 
@@ -83,7 +83,7 @@ Plans:
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Foundation & Movement | 2/3 | In Progress|  |
+| 1. Foundation & Movement | 3/3 | Complete   | 2026-05-28 |
 | 2. Combat Core | 0/? | Not started | - |
 | 3. Enemy System | 0/? | Not started | - |
 | 4. HUD & Game Loop | 0/? | Not started | - |
