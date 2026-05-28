@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 current_phase: 01
-current_plan: 1
-status: unknown
-last_updated: "2026-05-28T00:37:49.638Z"
+current_plan: 3
+status: executing
+last_updated: "2026-05-28T01:00:00.000Z"
 progress:
   total_phases: 4
   completed_phases: 0
   total_plans: 3
-  completed_plans: 1
+  completed_plans: 2
 ---
 
 # Project State: Fast (가칭)
@@ -32,10 +32,10 @@ progress:
 ## Current Position
 
 Phase: 01 (foundation-movement) — EXECUTING
-Plan: 2 of 3
+Plan: 3 of 3
 **Current Phase:** 01
-**Current Plan:** 1
-**Phase Status:** Not started
+**Current Plan:** 3
+**Phase Status:** In Progress (2 of 3 plans complete)
 
 ```
 Progress: [ ] Phase 1  [ ] Phase 2  [ ] Phase 3  [ ] Phase 4
@@ -58,10 +58,11 @@ Progress: [ ] Phase 1  [ ] Phase 2  [ ] Phase 3  [ ] Phase 4
 |--------|--------|---------|
 | v1 Requirements mapped | 13/13 | 13/13 |
 | Phases completed | 4 | 0 |
-| Plans completed | TBD | 0 |
+| Plans completed | TBD | 2 |
 
 ---
 | Phase 01-foundation-movement P01 | 4 | 2 tasks | 7 files |
+| Phase 01-foundation-movement P02 | ~3min | 2 tasks | 4 files |
 
 ## Accumulated Context
 
@@ -74,6 +75,9 @@ Progress: [ ] Phase 1  [ ] Phase 2  [ ] Phase 3  [ ] Phase 4
 | FEEL-01 (hit-freeze) in Phase 2 | Must ship with the attack system — hit-freeze is the punctuation of the kill, cannot be validated separately |
 | Floor system deferred to v2 | User decision: validate combat feel in a single test room first |
 | Phase 5 polish not created | No v1 requirements are polish-only; tuning lives inside Phase 2-3 success criteria |
+| jumpCutMultiplier = 0.4 (D-02) | Drops ascending velocity to 40% on button release — clear tap-vs-hold arc difference |
+| Time.timeScale compensation in Phase 1 | 1f / Time.timeScale in ApplyMovement baked in now — Phase 2 slow-mo requires no PlayerController rewrite |
+| PlayerInput notification = SendMessages (0) | PlayerController reads actions directly via playerInput.actions[], behavior mode is irrelevant |
 
 ### Technical Constraints to Enforce Every Phase
 
@@ -114,7 +118,8 @@ None.
 4. Check which phase plan exists in `.planning/` (e.g., `PLAN-phase-1.md`)
 5. Continue from Current Phase listed above
 
-**Last session:** 2026-05-28T00:37:49.632Z
+**Last session:** 2026-05-28T01:00:00.000Z
+**Stopped at:** Completed 01-02-PLAN.md (PlayerController + SampleScene wiring)
 
 ---
 *State initialized: 2026-05-27*
