@@ -1,0 +1,53 @@
+# Unity generated
+[Ll]ibrary/
+[Tt]emp/
+[Oo]bj/
+[Bb]uild/
+[Bb]uilds/
+[Ll]ogs/
+[Uu]ser[Ss]ettings/
+MemoryCaptures/
+
+# Asset meta data should only be ignored when using PLastic SCM
+# *.meta
+
+# Unity3D generated meta files
+*.pidb.meta
+*.pdb.meta
+*.mdb.meta
+
+# Unity3D generated file on crash reports
+sysinfo.txt
+
+# Builds
+*.apk
+*.aab
+*.unitypackage
+*.app
+
+# Crashlytics generated file
+crashlytics-build.properties
+
+# Rider
+.idea/
+*.sln.DotSettings.user
+
+# Visual Studio
+.vs/
+*.csproj
+*.sln
+*.slnx
+
+# Gradle
+*.gradle
+
+# Node
+node_modules/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# GSD / Claude
+.gemini/
+.claude/worktrees/
