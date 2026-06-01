@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: ff8716fd498244242b1cd19d8d5ef63b
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 7400000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 221542
+  packageName: Pixel Prototype Player Sprites
+  packageVersion: 1.3
+  assetPath: Assets/DeadRevolver/PixelPrototypePlayerSprites/Art/Animations/SwordRunAltGrip.anim
+  uploadId: 701437

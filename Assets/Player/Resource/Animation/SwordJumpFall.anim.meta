@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 13aaa28aa318c2d41b920b2b9ec1e904
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 7400000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 221542
+  packageName: Pixel Prototype Player Sprites
+  packageVersion: 1.3
+  assetPath: Assets/DeadRevolver/PixelPrototypePlayerSprites/Art/Animations/SwordJumpFall.anim
+  uploadId: 701437
