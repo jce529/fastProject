@@ -23,6 +23,8 @@ public class PlayerController : MonoBehaviour
     /// 0.4 = velocity drops to 40% -> clear short-hop vs. hold-jump difference (per D-02).
     /// </summary>
     [SerializeField] private float jumpCutMultiplier = 0.4f;
+    [SerializeField] private float acceleration = 60f;
+    [SerializeField] private float deceleration = 80f;
 
     /// <summary>Small overlap circle below feet to detect ground contact.</summary>
     [SerializeField] private float groundCheckRadius = 0.1f;
@@ -110,17 +112,19 @@ public class PlayerController : MonoBehaviour
     {
         float horizontal = _moveAction.ReadValue<Vector2>().x;
 
-        // Instant direction reversal -- set velocity directly, no acceleration accumulation (per D-04).
-        // Air control is full and identical to ground control (per D-03).
-        // Time.timeScale compensation for slow-motion: multiply by (1f / Time.timeScale).
-        // Phase 1 has no slow-motion (timeScale = 1), but the pattern is established here
-        // so Phase 2 slow-mo does not require a rewrite.
-        float compensatedSpeed = moveSpeed * (1f / Time.timeScale);
-        _rb.linearVelocity = new Vector2(horizontal * compensatedSpeed, _rb.linearVelocity.y);
+        // Time.timeScale compensation — Phase 2 slow-mo requires no rewrite (per D-04).
+        float compensatedMax = moveSpeed * (1f / Time.timeScale);
+        float target = horizontal * compensatedMax;
+        float rate = (Mathf.Abs(horizontal) > 0.01f) ? acceleration : deceleration;
+        float newX = Mathf.MoveTowards(_rb.linearVelocity.x, target, rate * Time.fixedDeltaTime);
+        _rb.linearVelocity = new Vector2(newX, _rb.linearVelocity.y);
     }
 
     // -- Public accessors for FallDetector (Plan 03) -----------------------------
 
     /// <summary>True when the player is touching a Platform layer collider.</summary>
     public bool IsGrounded => _isGrounded;
+
+    /// <summary>최고 이동 속도. PlayerAnimatorController가 스프린트 비율 계산에 사용.</summary>
+    public float MoveSpeed => moveSpeed;
 }

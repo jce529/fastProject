@@ -116,6 +116,7 @@ None.
 | # | Description | Date | Commit | Directory |
 |---|-------------|------|--------|-----------|
 | 260601-lzr | InputManager 생성 — WASD 이동, Shift 구르기, 마우스 클릭 공격 (Unity New Input System) | 2026-06-01 | — | [260601-lzr](./quick/260601-lzr-inputmanager-wasd-shift-unity-new-input-/) |
+| 260601-mrm | 이동 가속도 기반 변경, Sprint가 기본 달리기, Idle→Sprint 전환 중 Walk 애니메이션 | 2026-06-01 | ca4a70e | [260601-mrm](./quick/260601-mrm-sprint-idle-sprint-walk/) |
 
 ---
 
@@ -130,7 +131,7 @@ None.
 5. Continue from Current Phase listed above
 
 **Last session:** 2026-06-01
-**Stopped at:** Completed quick-260601-lzr: InputManager singleton facade (WASD/Shift/LMB)
+**Stopped at:** Completed quick-260601-mrm: 가속도 이동 + Sprint/Walk 애니메이터 상태 추가
 
 ---
 *State initialized: 2026-05-27*
