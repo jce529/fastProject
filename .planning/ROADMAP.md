@@ -47,8 +47,14 @@ Plans:
   4. Releasing the attack button with no dummy in range plays a whiff animation and imposes a longer lockout than a successful kill — the penalty is clearly longer than the success delay
   5. The time-stop gauge drains while holding the attack button, auto-recovers when released, and refills visibly on each kill; depleting the gauge releases slow-motion but the player can still release the attack button to dash
   6. Roll button activates during both normal time and slow-motion, grants a brief invincibility window, and cannot be triggered again until the cooldown expires — cooldown timer runs in real time regardless of timeScale
-**Plans**: TBD
+**Plans**: 4 plans
 **UI hint**: yes
+
+Plans:
+- [ ] 02-01-PLAN.md — AttackTypeSelector Canvas overlay + DummyEnemy + scene layout (ATCK-01)
+- [ ] 02-02-PLAN.md — CombatController + GaugeController: slow-mo, dash, whiff, hit-freeze, gauge (ATCK-02/03/04/05/FEEL-01)
+- [ ] 02-03-PLAN.md — RangeDisplay LineRenderer + RollController with i-frames (MOVE-03, ATCK-02)
+- [ ] 02-04-PLAN.md — Test infrastructure: PlayMode.asmdef + CombatTests + RollTests (all requirements)
 
 ---
 
@@ -84,7 +90,7 @@ Plans:
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Foundation & Movement | 3/3 | Complete   | 2026-05-28 |
-| 2. Combat Core | 0/? | Not started | - |
+| 2. Combat Core | 0/4 | Planned | - |
 | 3. Enemy System | 0/? | Not started | - |
 | 4. HUD & Game Loop | 0/? | Not started | - |
 
@@ -126,4 +132,4 @@ Plans:
 
 ---
 *Roadmap created: 2026-05-27*
-*Last updated: 2026-05-27 after Phase 1 planning*
+*Last updated: 2026-06-02 after Phase 2 planning*
