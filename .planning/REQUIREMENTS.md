@@ -16,14 +16,14 @@
 ### 전투 (Combat)
 
 - [x] **ATCK-01**: 게임 시작 전 직선형 / 부채꼴형 공격 타입을 선택할 수 있다 (단순 버튼 2개)
-- [ ] **ATCK-02**: 공격 버튼을 누르고 있으면 슬로우 모션이 발동되고 공격 범위가 표시된다 (시간정지 게이지 소모)
-- [ ] **ATCK-03**: 공격 버튼을 떼면 공격 범위 내 가장 가까운 적에게 돌진하여 원샷 처치한다 (돌진 중 무적, 처치 후 짧은 딜레이)
-- [ ] **ATCK-04**: 공격 범위 내 적이 없으면 헛베기 애니메이션 재생 후 더 긴 페널티 딜레이가 발생한다
-- [ ] **ATCK-05**: 시간정지 게이지는 시간이 지나면 자동 회복되고, 적 처치 시에도 일부 회복된다
+- [x] **ATCK-02**: 공격 버튼을 누르고 있으면 슬로우 모션이 발동되고 공격 범위가 표시된다 (시간정지 게이지 소모)
+- [x] **ATCK-03**: 공격 버튼을 떼면 공격 범위 내 가장 가까운 적에게 돌진하여 원샷 처치한다 (돌진 중 무적, 처치 후 짧은 딜레이)
+- [x] **ATCK-04**: 공격 범위 내 적이 없으면 헛베기 애니메이션 재생 후 더 긴 페널티 딜레이가 발생한다
+- [x] **ATCK-05**: 시간정지 게이지는 시간이 지나면 자동 회복되고, 적 처치 시에도 일부 회복된다
 
 ### 타격감 (Game Feel)
 
-- [ ] **FEEL-01**: 적 처치 시 히트프리즈 발생 (50-100ms `Time.timeScale = 0`) — 킬의 타격감 핵심
+- [x] **FEEL-01**: 적 처치 시 히트프리즈 발생 (50-100ms `Time.timeScale = 0`) — 킬의 타격감 핵심
 
 ### 적 (Enemies)
 
@@ -77,11 +77,11 @@
 | MOVE-02 | Phase 1 | Complete |
 | MOVE-03 | Phase 2 | Pending |
 | ATCK-01 | Phase 2 | Complete |
-| ATCK-02 | Phase 2 | Pending |
-| ATCK-03 | Phase 2 | Pending |
-| ATCK-04 | Phase 2 | Pending |
-| ATCK-05 | Phase 2 | Pending |
-| FEEL-01 | Phase 2 | Pending |
+| ATCK-02 | Phase 2 | Complete |
+| ATCK-03 | Phase 2 | Complete |
+| ATCK-04 | Phase 2 | Complete |
+| ATCK-05 | Phase 2 | Complete |
+| FEEL-01 | Phase 2 | Complete |
 | ENMY-01 | Phase 3 | Pending |
 | ENMY-02 | Phase 3 | Pending |
 | UI-01 | Phase 4 | Pending |
