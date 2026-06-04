@@ -119,6 +119,7 @@ None.
 |---|-------------|------|--------|-----------|
 | 260601-lzr | InputManager 생성 — WASD 이동, Shift 구르기, 마우스 클릭 공격 (Unity New Input System) | 2026-06-01 | — | [260601-lzr](./quick/260601-lzr-inputmanager-wasd-shift-unity-new-input-/) |
 | 260601-mrm | 이동 가속도 기반 변경, Sprint가 기본 달리기, Idle→Sprint 전환 중 Walk 애니메이션 | 2026-06-01 | ca4a70e | [260601-mrm](./quick/260601-mrm-sprint-idle-sprint-walk/) |
+| 260604-sou | 적(DummyEnemy) 크기를 키우고 콜라이더를 크기에 맞게 조정 | 2026-06-04 | — | [260604-sou](./quick/260604-sou-dummyenemy/) |
 
 ---
 
@@ -132,7 +133,7 @@ None.
 4. Check which phase plan exists in `.planning/` (e.g., `PLAN-phase-1.md`)
 5. Continue from Current Phase listed above
 
-**Last session:** 2026-06-02T03:44:38.848Z
+**Last session:** 2026-06-04 - Completed quick task 260604-sou: 적(DummyEnemy) 크기를 키우고 콜라이더를 크기에 맞게 조정
 **Stopped at:** Completed 02-02-PLAN.md
 
 ---
