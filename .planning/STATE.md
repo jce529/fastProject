@@ -121,6 +121,7 @@ None.
 | 260601-lzr | InputManager 생성 — WASD 이동, Shift 구르기, 마우스 클릭 공격 (Unity New Input System) | 2026-06-01 | — | [260601-lzr](./quick/260601-lzr-inputmanager-wasd-shift-unity-new-input-/) |
 | 260601-mrm | 이동 가속도 기반 변경, Sprint가 기본 달리기, Idle→Sprint 전환 중 Walk 애니메이션 | 2026-06-01 | ca4a70e | [260601-mrm](./quick/260601-mrm-sprint-idle-sprint-walk/) |
 | 260604-sou | 적(DummyEnemy) 크기를 키우고 콜라이더를 크기에 맞게 조정 | 2026-06-04 | — | [260604-sou](./quick/260604-sou-dummyenemy/) |
+| 260604-vst | Phase 2-4 테스트러너 제거 에디터 직접 플레이테스트로 전환 | 2026-06-04 | — | [260604-vst](./quick/260604-vst-phase-2-4/) |
 
 ---
 
@@ -134,8 +135,8 @@ None.
 4. Check which phase plan exists in `.planning/` (e.g., `PLAN-phase-1.md`)
 5. Continue from Current Phase listed above
 
-**Last session:** 2026-06-04T13:05:01.920Z
-**Stopped at:** Completed 02-03-PLAN.md
+**Last session:** 2026-06-04
+**Stopped at:** Completed quick task 260604-vst: Phase 2-4 에디터 플레이테스트 전환
 
 ---
 *State initialized: 2026-05-27*
