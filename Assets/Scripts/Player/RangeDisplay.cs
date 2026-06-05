@@ -14,6 +14,7 @@ public class RangeDisplay : MonoBehaviour
 {
     // -- Linear beam settings (D-01, D-05) -----------------------------------------
     [SerializeField] private float linearLength = 10f;  // Claude's discretion: 10 units covers typical room width
+    [SerializeField] private float lineWidth = 0.12f;  // beam thickness
 
     // -- Fan arc settings (D-02, D-05) -----------------------------------------------
     [SerializeField] private float fanRadius       = 7f;   // Claude's discretion: 7 units
@@ -50,7 +51,7 @@ public class RangeDisplay : MonoBehaviour
         bool isLinear = AttackTypeSelector.Selected == AttackType.Linear;
 
         if (_leftBeam  != null) _leftBeam.enabled  = isLinear;
-        if (_rightBeam != null) _rightBeam.enabled  = isLinear;
+        if (_rightBeam != null) _rightBeam.enabled  = false;   // single-beam mode — right beam unused
         if (_arcLine   != null) _arcLine.enabled    = !isLinear;
     }
 
@@ -78,24 +79,23 @@ public class RangeDisplay : MonoBehaviour
 
     private void UpdateLinearDisplay()
     {
+        if (_leftBeam == null) return;
+
         Vector2 origin = transform.position;
 
-        // Linear fires both directions regardless of facing (D-01 spec)
-        if (_leftBeam != null)
-        {
-            _leftBeam.positionCount = 2;
-            _leftBeam.SetPosition(0, origin);
-            _leftBeam.SetPosition(1, origin + Vector2.left  * linearLength);
-            _leftBeam.startColor = _leftBeam.endColor = ColorDefault;
-        }
+        // Mouse direction in world space
+        Vector3 mouseScreen = Input.mousePosition;
+        mouseScreen.z = Mathf.Abs(Camera.main.transform.position.z);
+        Vector2 mouseWorld = Camera.main.ScreenToWorldPoint(mouseScreen);
+        Vector2 dir = (mouseWorld - origin);
+        if (dir.sqrMagnitude < 0.001f) dir = Vector2.right;
+        dir.Normalize();
 
-        if (_rightBeam != null)
-        {
-            _rightBeam.positionCount = 2;
-            _rightBeam.SetPosition(0, origin);
-            _rightBeam.SetPosition(1, origin + Vector2.right * linearLength);
-            _rightBeam.startColor = _rightBeam.endColor = ColorDefault;
-        }
+        _leftBeam.positionCount = 2;
+        _leftBeam.SetPosition(0, origin);
+        _leftBeam.SetPosition(1, origin + dir * linearLength);
+        _leftBeam.startWidth = _leftBeam.endWidth = lineWidth;
+        _leftBeam.startColor = _leftBeam.endColor = ColorDefault;
     }
 
     // -- Fan display (D-02) ----------------------------------------------------------
@@ -106,17 +106,19 @@ public class RangeDisplay : MonoBehaviour
 
         Vector2 facing    = (_playerSprite != null && _playerSprite.flipX) ? Vector2.left : Vector2.right;
         float   baseAngle = Mathf.Atan2(facing.y, facing.x) * Mathf.Rad2Deg;
+        Vector2 origin    = transform.position;
 
-        _arcLine.positionCount = arcSegments + 1;
+        _arcLine.positionCount = arcSegments + 3;
+        _arcLine.SetPosition(0, origin);                          // center start
         for (int i = 0; i <= arcSegments; i++)
         {
             float t     = (float)i / arcSegments;
             float angle = (baseAngle - fanHalfAngleDeg + t * fanHalfAngleDeg * 2f) * Mathf.Deg2Rad;
-            Vector2 pt  = (Vector2)transform.position
-                        + new Vector2(Mathf.Cos(angle), Mathf.Sin(angle)) * fanRadius;
-            _arcLine.SetPosition(i, pt);
+            Vector2 pt  = origin + new Vector2(Mathf.Cos(angle), Mathf.Sin(angle)) * fanRadius;
+            _arcLine.SetPosition(i + 1, pt);                      // arc points at 1..arcSegments+1
         }
-
+        _arcLine.SetPosition(arcSegments + 2, origin);            // center end — closes sector
+        _arcLine.startWidth = _arcLine.endWidth = lineWidth;
         _arcLine.startColor = _arcLine.endColor = ColorDefault;
     }
 

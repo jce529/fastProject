@@ -124,6 +124,7 @@ None.
 | 260604-vst | Phase 2-4 테스트러너 제거 에디터 직접 플레이테스트로 전환 | 2026-06-04 | — | [260604-vst](./quick/260604-vst-phase-2-4/) |
 | 260605-l0c | Phase 2 에디터 플레이테스트 가이드 재작성 (코드 기준 수치 반영) | 2026-06-05 | 1b20012 | [260605-l0c](./quick/260605-l0c-phase-2/) |
 | 260605-r61 | enemy 프리팹 콜라이더(0.16→0.8x1.2) + Rigidbody2D Kinematic 교정 | 2026-06-05 | 2056400 | [260605-r61-enemy](./quick/260605-r61-enemy/) |
+| 260605-rhs | RangeDisplay lineWidth + 마우스 단일 빔 + 닫힌 부채꼴 Fan | 2026-06-05 | 1a04a21 | [260605-rhs](./quick/260605-rhs-rangedisplay-3-1-linewidth-2-linear-3-fa/) |
 
 ---
 
@@ -138,7 +139,7 @@ None.
 5. Continue from Current Phase listed above
 
 **Last session:** 2026-06-05
-**Stopped at:** Completed quick task 260605-r61: DummyEnemy 콜라이더 + Rigidbody2D Kinematic 교정
+**Stopped at:** Completed quick task 260605-rhs: RangeDisplay lineWidth + 마우스 단일 빔 + 닫힌 부채꼴 Fan
 
 ---
 *State initialized: 2026-05-27*
