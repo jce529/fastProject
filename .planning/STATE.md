@@ -123,6 +123,7 @@ None.
 | 260604-sou | 적(DummyEnemy) 크기를 키우고 콜라이더를 크기에 맞게 조정 | 2026-06-04 | — | [260604-sou](./quick/260604-sou-dummyenemy/) |
 | 260604-vst | Phase 2-4 테스트러너 제거 에디터 직접 플레이테스트로 전환 | 2026-06-04 | — | [260604-vst](./quick/260604-vst-phase-2-4/) |
 | 260605-l0c | Phase 2 에디터 플레이테스트 가이드 재작성 (코드 기준 수치 반영) | 2026-06-05 | 1b20012 | [260605-l0c](./quick/260605-l0c-phase-2/) |
+| 260605-tss | CombatController 슬로우모션 하이라이트 버그 2종 수정 — Update() 매 프레임 갱신 + ExitSlowMotion 이중 호출 제거 | 2026-06-05 | ac19ef4 | [260605-tss](./quick/260605-tss-combatcontroller-1-update-findnearestene/) |
 
 ---
 
@@ -137,7 +138,7 @@ None.
 5. Continue from Current Phase listed above
 
 **Last session:** 2026-06-05
-**Stopped at:** Completed quick task 260605-l0c: Phase 2 에디터 플레이테스트 가이드 재작성
+**Stopped at:** Completed quick task 260605-tss: CombatController 슬로우모션 하이라이트 버그 수정
 
 ---
 *State initialized: 2026-05-27*
