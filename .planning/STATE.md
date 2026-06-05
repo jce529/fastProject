@@ -141,8 +141,12 @@ None.
 5. Continue from Current Phase listed above
 
 **Last session:** 2026-06-05
+<<<<<<< Updated upstream
 **Stopped at:** Completed quick task 260605-tss: CombatController 슬로우모션 하이라이트 버그 수정
+=======
+**Stopped at:** Cleaned up .planning/quick/ — 13개 quick task 디렉토리 삭제, STATE.md Quick Tasks 테이블 정리
+>>>>>>> Stashed changes
 
 ---
 *State initialized: 2026-05-27*
-*Last updated: 2026-05-27 after roadmap creation*
+*Last updated: 2026-06-05 quick task dirs cleanup*

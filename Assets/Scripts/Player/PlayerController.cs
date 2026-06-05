@@ -63,6 +63,7 @@ public class PlayerController : MonoBehaviour
 
         _jumpAction.performed += OnJumpPerformed;
         _jumpAction.canceled  += OnJumpCanceled;
+        _jumpAction.Enable();
     }
 
     private void OnDisable()
