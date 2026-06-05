@@ -116,6 +116,10 @@ public class CombatController : MonoBehaviour
         if (_isSlowMo && Time.unscaledTime > _slowMoStartTime + maxSlowMoDuration)
             ExitSlowMotion();
 
+        // 슬로우모션 유지 중 — 가장 가까운 적 하이라이트 갱신 (D-04)
+        if (_isSlowMo && !_isBusy)
+            UpdateHighlight(FindNearestEnemyInRange());
+
         // Gauge-empty auto-exit: slow-mo ends but player can still release to dash
         if (_isSlowMo && _gauge.IsEmpty)
             ExitSlowMotion();
@@ -295,19 +299,24 @@ public class CombatController : MonoBehaviour
             }
         }
 
-        // Update enemy highlight (D-04): red on nearest, clear previous
-        if (nearest != _lastHighlighted)
-        {
-            if (_lastHighlighted != null) _lastHighlighted.ClearHighlight();
-            if (nearest != null)
-            {
-                var sr = nearest.GetComponent<SpriteRenderer>();
-                if (sr != null) sr.color = Color.red;
-            }
-            _lastHighlighted = nearest;
-        }
-
         return nearest;
+    }
+
+    /// <summary>
+    /// Update enemy highlight (D-04): red on nearest, clear previous.
+    /// Called only from Update() while _isSlowMo is true — ensures highlight
+    /// persists until ExitSlowMotion() clears it, preventing one-frame flash.
+    /// </summary>
+    private void UpdateHighlight(DummyEnemy nearest)
+    {
+        if (nearest == _lastHighlighted) return;
+        if (_lastHighlighted != null) _lastHighlighted.ClearHighlight();
+        if (nearest != null)
+        {
+            var sr = nearest.GetComponent<SpriteRenderer>();
+            if (sr != null) sr.color = Color.red;
+        }
+        _lastHighlighted = nearest;
     }
 
     /// <summary>

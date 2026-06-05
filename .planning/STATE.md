@@ -126,6 +126,7 @@ None.
 | 260605-r61 | enemy 프리팹 콜라이더(0.16→0.8x1.2) + Rigidbody2D Kinematic 교정 | 2026-06-05 | 2056400 | [260605-r61-enemy](./quick/260605-r61-enemy/) |
 | 260605-rhs | RangeDisplay lineWidth + 마우스 단일 빔 + 닫힌 부채꼴 Fan | 2026-06-05 | 1a04a21 | [260605-rhs](./quick/260605-rhs-rangedisplay-3-1-linewidth-2-linear-3-fa/) |
 | 260605-sj2 | CheckGround offset 0.51f→0.05f — CapsuleCollider2D pivot 기준 수정 | 2026-06-05 | 0e42dba | [260605-sj2](./quick/260605-sj2-groundcheck-offset-fix-capsulecollider2d/) |
+| 260605-tss | CombatController 슬로우모션 하이라이트 버그 2종 수정 — Update() 매 프레임 갱신 + ExitSlowMotion 이중 호출 제거 | 2026-06-05 | ac19ef4 | [260605-tss](./quick/260605-tss-combatcontroller-1-update-findnearestene/) |
 
 ---
 
@@ -140,7 +141,7 @@ None.
 5. Continue from Current Phase listed above
 
 **Last session:** 2026-06-05
-**Stopped at:** Completed quick task 260605-sj2: CheckGround offset 0.51f→0.05f (CapsuleCollider2D fix)
+**Stopped at:** Completed quick task 260605-tss: CombatController 슬로우모션 하이라이트 버그 수정
 
 ---
 *State initialized: 2026-05-27*
