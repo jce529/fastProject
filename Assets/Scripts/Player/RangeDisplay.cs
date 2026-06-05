@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 /// <summary>
 /// ATCK-02 (range display): Renders the attack range during slow-motion.
@@ -83,10 +84,13 @@ public class RangeDisplay : MonoBehaviour
 
         Vector2 origin = transform.position;
 
-        // Mouse direction in world space
-        Vector3 mouseScreen = Input.mousePosition;
-        mouseScreen.z = Mathf.Abs(Camera.main.transform.position.z);
-        Vector2 mouseWorld = Camera.main.ScreenToWorldPoint(mouseScreen);
+        // Mouse direction in world space (new Input System)
+        Vector2 mouseScreen = Mouse.current != null
+            ? Mouse.current.position.ReadValue()
+            : (Vector2)Camera.main.WorldToScreenPoint(origin);
+        Vector3 mouseScreen3 = new Vector3(mouseScreen.x, mouseScreen.y,
+            Mathf.Abs(Camera.main.transform.position.z));
+        Vector2 mouseWorld = Camera.main.ScreenToWorldPoint(mouseScreen3);
         Vector2 dir = (mouseWorld - origin);
         if (dir.sqrMagnitude < 0.001f) dir = Vector2.right;
         dir.Normalize();
