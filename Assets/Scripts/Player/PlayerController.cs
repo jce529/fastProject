@@ -104,7 +104,7 @@ public class PlayerController : MonoBehaviour
     private void CheckGround()
     {
         // Overlap circle slightly below the player's feet pivot.
-        Vector2 origin = (Vector2)_transform.position + Vector2.down * 0.51f;
+        Vector2 origin = (Vector2)_transform.position + Vector2.down * 0.05f;
         _isGrounded = Physics2D.OverlapCircle(origin, groundCheckRadius, groundLayer);
     }
 

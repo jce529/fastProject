@@ -125,6 +125,7 @@ None.
 | 260605-l0c | Phase 2 에디터 플레이테스트 가이드 재작성 (코드 기준 수치 반영) | 2026-06-05 | 1b20012 | [260605-l0c](./quick/260605-l0c-phase-2/) |
 | 260605-r61 | enemy 프리팹 콜라이더(0.16→0.8x1.2) + Rigidbody2D Kinematic 교정 | 2026-06-05 | 2056400 | [260605-r61-enemy](./quick/260605-r61-enemy/) |
 | 260605-rhs | RangeDisplay lineWidth + 마우스 단일 빔 + 닫힌 부채꼴 Fan | 2026-06-05 | 1a04a21 | [260605-rhs](./quick/260605-rhs-rangedisplay-3-1-linewidth-2-linear-3-fa/) |
+| 260605-sj2 | CheckGround offset 0.51f→0.05f — CapsuleCollider2D pivot 기준 수정 | 2026-06-05 | 0e42dba | [260605-sj2](./quick/260605-sj2-groundcheck-offset-fix-capsulecollider2d/) |
 
 ---
 
@@ -139,7 +140,7 @@ None.
 5. Continue from Current Phase listed above
 
 **Last session:** 2026-06-05
-**Stopped at:** Completed quick task 260605-rhs: RangeDisplay lineWidth + 마우스 단일 빔 + 닫힌 부채꼴 Fan
+**Stopped at:** Completed quick task 260605-sj2: CheckGround offset 0.51f→0.05f (CapsuleCollider2D fix)
 
 ---
 *State initialized: 2026-05-27*
