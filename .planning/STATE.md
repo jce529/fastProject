@@ -123,6 +123,7 @@ None.
 | 260604-sou | 적(DummyEnemy) 크기를 키우고 콜라이더를 크기에 맞게 조정 | 2026-06-04 | — | [260604-sou](./quick/260604-sou-dummyenemy/) |
 | 260604-vst | Phase 2-4 테스트러너 제거 에디터 직접 플레이테스트로 전환 | 2026-06-04 | — | [260604-vst](./quick/260604-vst-phase-2-4/) |
 | 260605-l0c | Phase 2 에디터 플레이테스트 가이드 재작성 (코드 기준 수치 반영) | 2026-06-05 | 1b20012 | [260605-l0c](./quick/260605-l0c-phase-2/) |
+| 260605-r61 | enemy 프리팹 콜라이더(0.16→0.8x1.2) + Rigidbody2D Kinematic 교정 | 2026-06-05 | 2056400 | [260605-r61-enemy](./quick/260605-r61-enemy/) |
 
 ---
 
@@ -137,7 +138,7 @@ None.
 5. Continue from Current Phase listed above
 
 **Last session:** 2026-06-05
-**Stopped at:** Completed quick task 260605-l0c: Phase 2 에디터 플레이테스트 가이드 재작성
+**Stopped at:** Completed quick task 260605-r61: DummyEnemy 콜라이더 + Rigidbody2D Kinematic 교정
 
 ---
 *State initialized: 2026-05-27*
