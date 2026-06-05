@@ -13,11 +13,9 @@ using UnityEngine;
 ///
 /// Review fixes applied:
 ///   [HIGH]   Obstacle linecast: ExecuteDash linecast-checks the path before dashing;
-///            blocked path converts the attack to a whiff (Gemini review concern).
+///            blocked path converts the attack to a whiff.
 ///   [MEDIUM] Slow-mo timeout: maxSlowMoDuration safety timer prevents infinite slow-mo
-///            if Input System drops the release event (Gemini review concern).
-///   [MEDIUM] Race condition guard: EnterSlowMotion checks AttackTypeSelector.IsSelecting;
-///            returns early if the selection overlay is still active (Gemini review concern).
+///            if Input System drops the release event.
 /// </summary>
 [RequireComponent(typeof(Rigidbody2D))]
 [RequireComponent(typeof(InvincibilityHandler))]
@@ -126,17 +124,9 @@ public class CombatController : MonoBehaviour
     /// <summary>
     /// Enter slow-motion. ALWAYS sets both timeScale AND fixedDeltaTime (ROADMAP Stack Constraint).
     /// Records _slowMoStartTime for the safety timeout check.
-    ///
-    /// [MEDIUM — Gemini] Guard: returns early if AttackTypeSelector.IsSelecting is true.
-    /// This prevents combat input from being processed while the selection overlay is active,
-    /// closing the timeScale race condition where the selector's timeScale=0 could interact
-    /// with a combat EnterSlowMotion call during UI transitions.
     /// </summary>
     private void EnterSlowMotion()
     {
-        // [MEDIUM — Gemini] Race condition guard: do not enter slow-mo while selector is active
-        if (AttackTypeSelector.IsSelecting) return;
-
         Time.timeScale      = slowTimeScale;
         Time.fixedDeltaTime = 0.02f * Time.timeScale; // always paired
         _isSlowMo           = true;

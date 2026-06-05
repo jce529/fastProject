@@ -1,5 +1,12 @@
 fileFormatVersion: 2
 guid: cc5e571ecbbe9684683094ae9af9031f
+AssetOrigin:
+  serializedVersion: 1
+  productId: 221542
+  packageName: Pixel Prototype Player Sprites
+  packageVersion: 1.3
+  assetPath: Assets/DeadRevolver/PixelPrototypePlayerSprites/Art/Sprites/Combat/SwordIdle/SwordIdle07.png
+  uploadId: 701437
 TextureImporter:
   internalIDToNameTable: []
   externalObjects: {}
@@ -53,7 +60,7 @@ TextureImporter:
   spriteGenerateFallbackPhysicsShape: 1
   alphaUsage: 1
   alphaIsTransparency: 1
-  spriteTessellationDetail: -1
+  spriteTessellationDetail: 1
   textureType: 8
   textureShape: 1
   singleChannelComponent: 0
@@ -67,7 +74,7 @@ TextureImporter:
   swizzle: 50462976
   cookieLightType: 0
   platformSettings:
-  - serializedVersion: 3
+  - serializedVersion: 4
     buildTarget: DefaultTexturePlatform
     maxTextureSize: 2048
     resizeAlgorithm: 0
@@ -80,7 +87,7 @@ TextureImporter:
     ignorePlatformSupport: 0
     androidETC2FallbackOverride: 0
     forceMaximumCompressionQuality_BC6H_BC7: 0
-  - serializedVersion: 3
+  - serializedVersion: 4
     buildTarget: Standalone
     maxTextureSize: 2048
     resizeAlgorithm: 0
@@ -93,8 +100,21 @@ TextureImporter:
     ignorePlatformSupport: 0
     androidETC2FallbackOverride: 0
     forceMaximumCompressionQuality_BC6H_BC7: 0
-  - serializedVersion: 3
+  - serializedVersion: 4
     buildTarget: WebGL
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: WindowsStoreApps
     maxTextureSize: 2048
     resizeAlgorithm: 0
     textureFormat: -1
@@ -109,7 +129,42 @@ TextureImporter:
   spriteSheet:
     serializedVersion: 2
     sprites: []
-    outline: []
+    outline:
+    - - {x: -2, y: -40}
+      - {x: -1, y: -37}
+      - {x: -1, y: -42}
+      - {x: 7, y: -42}
+      - {x: 5, y: -38}
+      - {x: 7, y: -35}
+      - {x: 7, y: -31}
+      - {x: 16, y: -31}
+      - {x: 19, y: -28}
+      - {x: 18, y: -25}
+      - {x: 9, y: -25}
+      - {x: 9, y: -17}
+      - {x: 8, y: -16}
+      - {x: 8, y: -14}
+      - {x: 5, y: -11}
+      - {x: 5, y: -4}
+      - {x: 1, y: 0}
+      - {x: -3, y: 0}
+      - {x: -6, y: -3}
+      - {x: -6, y: -10}
+      - {x: -8, y: -12}
+      - {x: -8, y: -14}
+      - {x: -9, y: -15}
+      - {x: -9, y: -25}
+      - {x: -10, y: -25}
+      - {x: -12, y: -26}
+      - {x: -12, y: -29}
+      - {x: -10, y: -31}
+      - {x: -7, y: -31}
+      - {x: -8, y: -33}
+      - {x: -8, y: -38}
+      - {x: -9, y: -39}
+      - {x: -9, y: -42}
+      - {x: -2, y: -42}
+    customData: 
     physicsShape: []
     bones: []
     spriteID: 5e97eb03825dee720800000000000000
@@ -119,16 +174,11 @@ TextureImporter:
     edges: []
     weights: []
     secondaryTextures: []
+    spriteCustomMetadata:
+      entries: []
     nameFileIdTable: {}
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 
   assetBundleName: 
   assetBundleVariant: 
-AssetOrigin:
-  serializedVersion: 1
-  productId: 221542
-  packageName: Pixel Prototype Player Sprites
-  packageVersion: 1.3
-  assetPath: Assets/DeadRevolver/PixelPrototypePlayerSprites/Art/Sprites/Combat/SwordIdle/SwordIdle07.png
-  uploadId: 701437
