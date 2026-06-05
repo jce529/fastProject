@@ -3,44 +3,40 @@ using UnityEngine;
 public enum AttackType { Linear, Fan }
 
 // Zone-based attack type selector — always visible on screen.
-// Polls input position every frame; if inside zoneRect, left half = Linear, right half = Fan.
-// Works on both PC (mouse) and mobile (first touch). Not affected by timeScale.
+// Type is set externally by AttackTypeZone triggers in the world.
+// Not affected by timeScale.
 //
 // Inspector setup:
-//   - Assign zoneRect to the zone panel's RectTransform (Screen Space - Overlay canvas)
 //   - Optionally assign linearHighlight / fanHighlight Image for visual feedback
+//   - Place AttackTypeZone components on world colliders to drive type changes
 public class AttackTypeSelector : MonoBehaviour
 {
     public static AttackType Selected { get; private set; } = AttackType.Linear;
 
-    // Zone is always present — never blocks gameplay or pauses timeScale
     public static bool IsSelecting => false;
 
-    [SerializeField] private RectTransform zoneRect;
     [SerializeField] private UnityEngine.UI.Image linearHighlight;
     [SerializeField] private UnityEngine.UI.Image fanHighlight;
 
-    private void Start() => RefreshHighlights();
+    private static AttackTypeSelector _instance;
 
-    private void Update()
+    private void Awake()
     {
-        if (zoneRect == null) return;
-
-        Vector2 pos = Input.touchCount > 0
-            ? Input.GetTouch(0).position
-            : (Vector2)Input.mousePosition;
-
-        if (!RectTransformUtility.RectangleContainsScreenPoint(zoneRect, pos, null)) return;
-
-        RectTransformUtility.ScreenPointToLocalPointInRectangle(zoneRect, pos, null, out Vector2 local);
-        Select(local.x >= 0f ? AttackType.Fan : AttackType.Linear);
+        _instance = this;
     }
 
-    private void Select(AttackType type)
+    private void Start() => RefreshHighlights();
+
+    /// <summary>
+    /// Called by AttackTypeZone when player enters a zone.
+    /// Updates Selected and refreshes UI highlights.
+    /// </summary>
+    public static void SetType(AttackType type)
     {
+        if (_instance == null) return;
         if (Selected == type) return;
         Selected = type;
-        RefreshHighlights();
+        _instance.RefreshHighlights();
     }
 
     private void RefreshHighlights()

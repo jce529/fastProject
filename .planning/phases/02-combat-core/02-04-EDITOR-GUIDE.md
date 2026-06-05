@@ -38,24 +38,34 @@ Play 전에 Hierarchy에서 Player GameObject를 선택하고 Inspector에서 �
 
 RangeDisplay 컴포넌트에서 `_leftBeam`, `_rightBeam`, `_arcLine` 세 필드에 LineRenderer가 Inspector에서 할당되어 있는지 확인한다. 미할당 시 범위 표시가 나타나지 않는다.
 
+**AttackTypeZone 배치 안내:**
+씬에 빈 GameObject를 생성하고 다음 컴포넌트를 추가한다:
+- `BoxCollider2D` (또는 다른 2D 콜라이더) — Inspector에서 **Is Trigger = true** 체크
+- `AttackTypeZone` 스크립트 — Inspector에서 `Zone Type` 선택 (Linear 또는 Fan)
+
+최소 두 개의 존(Linear 하나, Fan 하나)을 플레이어 이동 경로 양쪽에 배치하여 타입 전환 동작을 확인한다.
+
 ---
 
 ## ATCK-01: 공격 타입 선택 존
 
-선택 존(AttackTypeSelector 패널)은 항상 화면에 고정 표시된다. 공격 버튼을 누르지 않아도 보여야 한다.
+선택 존(AttackTypeSelector 패널)은 항상 화면에 고정 표시된다.
 
 **AttackTypeSelector 동작 원리:**
-커서(PC) 또는 첫 번째 터치(모바일)가 존 내부에 있을 때, 커서 위치에 따라 타입이 실시간 전환된다.
-- 존의 **왼쪽 절반**에 커서를 올리면 → **Linear** 하이라이트 (`local.x < 0`)
-- 존의 **오른쪽 절반**에 커서를 올리면 → **Fan** 하이라이트 (`local.x >= 0`)
-- 존 외부에서는 마지막으로 선택된 타입이 유지된다
+플레이어가 월드에 배치된 AttackTypeZone 트리거에 진입하면 공격 타입이 전환된다.
+- **Linear 존** 진입 → Linear 하이라이트 (전방 좌우 직선)
+- **Fan 존** 진입 → Fan 하이라이트 (전방 110° 부채꼴)
+- 어떤 존에도 없으면 마지막 선택 타입 유지
 
-**실행:** Game 뷰에서 AttackTypeSelector 패널 위로 마우스를 이동한다.
+**씬 배치:** 각 존은 Collider2D(IsTrigger=true) + `AttackTypeZone` 컴포넌트가 있는 GameObject.
+Inspector에서 `Zone Type` 필드를 Linear 또는 Fan으로 설정.
+
+**실행:** 플레이어를 Linear 존과 Fan 존 사이를 넘나들며 이동한다.
 
 **확인:**
 - [ ] 선택 존이 게임 시작과 동시에 항상 화면에 표시된다 (오버레이 팝업 방식 아님)
-- [ ] 마우스를 존 **왼쪽 절반**으로 이동하면 Linear가 하이라이트된다
-- [ ] 마우스를 존 **오른쪽 절반**으로 이동하면 Fan이 하이라이트된다
+- [ ] Linear 존에 진입하면 Linear가 하이라이트된다
+- [ ] Fan 존에 진입하면 Fan이 하이라이트된다
 - [ ] 타입 전환 시 존이 사라지거나 게임이 멈추지 않는다
 
 ---
@@ -96,6 +106,8 @@ RangeDisplay 컴포넌트에서 `_leftBeam`, `_rightBeam`, `_arcLine` 세 필드
 - [ ] 적이 즉시 제거된다 (DummyEnemy 사라짐)
 - [ ] 대시 후 시간이 정상 속도로 복귀한다
 - [ ] 벽/플랫폼이 경로를 막고 있으면 대시하지 않고 whiff로 전환된다 (Default 레이어 linecast)
+- [ ] 처치 후 이동(WASD)은 즉시 가능하다 — 이동 경직 없음
+- [ ] 처치 후 0.2초(`postKillLockout = 0.2`) 내 공격 버튼을 눌러도 슬로우모션이 발동하지 않는다 (공격만 쿨다운)
 
 ---
 
@@ -163,6 +175,8 @@ RangeDisplay 컴포넌트에서 `_leftBeam`, `_rightBeam`, `_arcLine` 세 필드
 1. 슬로우 모션 발동 중 Shift 입력
 2. **확인:** 구르기 속도가 게임 속도에 영향받지 않고 정상 동작한다 (timeScale 보상 적용)
 3. **확인:** 쿨다운은 실제 시간 기준 1.0초 (슬로우 모션 중에도 동일 — `unscaledDeltaTime` 사용)
+4. **확인:** Shift 입력 시 슬로우 모션이 즉시 취소된다 (Roll이 슬로우모션 탈출 수단으로 동작)
+5. **확인:** Roll로 슬로우모션 취소 후 공격 버튼을 떼어도 대시가 발동하지 않는다
 
 ---
 
@@ -170,13 +184,13 @@ RangeDisplay 컴포넌트에서 `_leftBeam`, `_rightBeam`, `_arcLine` 세 필드
 
 | 요구사항 | 통과 | 비고 |
 |----------|------|------|
-| ATCK-01 존 표시 및 타입 전환 (좌=Linear, 우=Fan) | ⬜ | |
+| ATCK-01 존 표시 및 타입 전환 | ⬜ | AttackTypeZone 트리거 필요 |
 | ATCK-02 슬로우 모션 즉시 발동 (20% 속도) | ⬜ | |
 | ATCK-02 슬로우 모션 자동 타임아웃 (5s) | ⬜ | |
-| ATCK-03 대시 처치 | ⬜ | |
+| ATCK-03 대시 처치 | ⬜ | 처치 후 이동 자유(공격 쿨다운만 0.2s) |
 | ATCK-04 whiff + 이동 불가 (원위치 복귀 없음) | ⬜ | |
 | ATCK-05 게이지 드레인(~4s)/회복(~6.7s)/킬보너스(+20%) | ⬜ | |
 | FEEL-01 hitFreeze (~75ms) | ⬜ | |
-| MOVE-03 구르기 방향 고정 + 1.0s 쿨다운 | ⬜ | |
+| MOVE-03 구르기 방향 고정 + 1.0s 쿨다운 + 슬로우모션 취소 | ⬜ | |
 
 모든 항목 통과 → Phase 2 검증 완료.

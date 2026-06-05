@@ -52,6 +52,8 @@ public class CombatController : MonoBehaviour
     private bool  _isBusy;    // Prevents re-entrance during dash/whiff/lockout coroutines
     private bool  _isSlowMo;
     private float _slowMoStartTime; // [MEDIUM — Gemini] unscaled timestamp when slow-mo began
+    private bool  _slowMoCancelledByRoll; // true: 이번 슬로우모션이 Roll로 취소됨
+    private float _attackCooldown;        // 처치 후 공격 재사용 대기 (unscaledDeltaTime)
 
     // -- Enemy detection buffer (pre-allocated — no GC per frame) ------------------
     private readonly Collider2D[] _hitBuffer = new Collider2D[16];
@@ -89,11 +91,23 @@ public class CombatController : MonoBehaviour
 
         var input = InputManager.Instance;
 
+        // 공격 쿨다운 카운트다운 (처치 후 공격만 제한, 이동은 자유)
+        if (_attackCooldown > 0f)
+            _attackCooldown -= Time.unscaledDeltaTime;
+
+        // Roll 입력이 있으면 슬로우모션 취소 (대시는 발동하지 않음)
+        if (_isSlowMo && input.RollPressed)
+        {
+            ExitSlowMotion();
+            _slowMoCancelledByRoll = true;
+            return;
+        }
+
         // Gauge drains every frame Attack is held (uses unscaledDeltaTime internally)
-        _gauge.SetDraining(input.IsAttackDown);
+        _gauge.SetDraining(input.IsAttackDown && _attackCooldown <= 0f);
 
         // Enter slow-motion on the frame Attack button is first pressed
-        if (input.AttackHeld && !_isSlowMo)
+        if (input.AttackHeld && !_isSlowMo && _attackCooldown <= 0f)
             EnterSlowMotion();
 
         // [MEDIUM — Gemini] Safety timeout: force-exit slow-mo if it has lasted longer
@@ -115,6 +129,12 @@ public class CombatController : MonoBehaviour
         {
             if (_isSlowMo)
                 ExitSlowMotion();
+            // Roll로 슬로우모션이 취소된 경우 대시/whiff 발동 안 함
+            if (_slowMoCancelledByRoll)
+            {
+                _slowMoCancelledByRoll = false;
+                return;
+            }
             StartCoroutine(DashOrWhiff());
         }
     }
@@ -217,8 +237,8 @@ public class CombatController : MonoBehaviour
         // 7. Hit-freeze: timeScale=0 for hitFreezeDuration real seconds (FEEL-01)
         yield return StartCoroutine(HitFreeze(hitFreezeDuration));
 
-        // 8. Post-kill lockout in real time (player cannot act during this window)
-        yield return new WaitForSecondsRealtime(postKillLockout);
+        // 8. Post-kill cooldown: 공격만 제한, 이동은 자유 (WaitForSecondsRealtime 제거)
+        _attackCooldown = postKillLockout;
 
         // 9. Partial gauge recovery on kill (ATCK-05)
         _gauge.AddKillBonus();
