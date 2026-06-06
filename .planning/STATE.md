@@ -127,6 +127,7 @@ None.
 | 260605-rhs | RangeDisplay lineWidth + 마우스 단일 빔 + 닫힌 부채꼴 Fan | 2026-06-05 | 1a04a21 | [260605-rhs](./quick/260605-rhs-rangedisplay-3-1-linewidth-2-linear-3-fa/) |
 | 260605-sj2 | CheckGround offset 0.51f→0.05f — CapsuleCollider2D pivot 기준 수정 | 2026-06-05 | 0e42dba | [260605-sj2](./quick/260605-sj2-groundcheck-offset-fix-capsulecollider2d/) |
 | 260605-tss | CombatController 슬로우모션 하이라이트 버그 2종 수정 — Update() 매 프레임 갱신 + ExitSlowMotion 이중 호출 제거 | 2026-06-05 | ac19ef4 | [260605-tss](./quick/260605-tss-combatcontroller-1-update-findnearestene/) |
+| 260607-19i | FastPlayerAnimator에 IsDashing Bool 파라미터 + Dash 스테이트 + AnyState→Dash / Dash→Idle 트랜지션 추가 | 2026-06-07 | e23f2cf | [260607-19i](./quick/260607-19i-fastplayeranimator-controller-isdashing-/) |
 
 ---
 
@@ -140,12 +141,8 @@ None.
 4. Check which phase plan exists in `.planning/` (e.g., `PLAN-phase-1.md`)
 5. Continue from Current Phase listed above
 
-**Last session:** 2026-06-05
-<<<<<<< Updated upstream
-**Stopped at:** Completed quick task 260605-tss: CombatController 슬로우모션 하이라이트 버그 수정
-=======
-**Stopped at:** Cleaned up .planning/quick/ — 13개 quick task 디렉토리 삭제, STATE.md Quick Tasks 테이블 정리
->>>>>>> Stashed changes
+**Last session:** 2026-06-07
+**Stopped at:** Completed quick task 260607-19i: FastPlayerAnimator IsDashing Bool + Dash 스테이트 추가
 
 ---
 *State initialized: 2026-05-27*
