@@ -319,8 +319,11 @@ public class CombatController : MonoBehaviour
         }
         else
         {
-            // Fan attack uses player facing direction
-            attackDir = _spriteRenderer.flipX ? Vector2.left : Vector2.right;
+            // Fan attack uses mouse-driven direction (matches RangeDisplay)
+            UnityEngine.InputSystem.Mouse mouse = UnityEngine.InputSystem.Mouse.current;
+            Vector2 mousePos = mouse != null ? mouse.position.ReadValue() : (Vector2)_mainCamera.WorldToScreenPoint(origin);
+            Vector3 mouseWorld = _mainCamera.ScreenToWorldPoint(new Vector3(mousePos.x, mousePos.y, Mathf.Abs(_mainCamera.transform.position.z)));
+            attackDir = ((Vector2)mouseWorld - origin).normalized;
             currentMaxDist = fanRadius; // matches fanRadius=7
         }
 

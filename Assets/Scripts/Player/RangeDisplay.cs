@@ -115,9 +115,19 @@ public class RangeDisplay : MonoBehaviour
     {
         if (_arcLine == null) return;
 
-        Vector2 facing    = (_playerSprite != null && _playerSprite.flipX) ? Vector2.left : Vector2.right;
-        float   baseAngle = Mathf.Atan2(facing.y, facing.x) * Mathf.Rad2Deg;
-        Vector2 origin    = transform.position;
+        Vector2 origin = transform.position;
+
+        Vector2 mouseScreen = Mouse.current != null
+            ? Mouse.current.position.ReadValue()
+            : (Vector2)Camera.main.WorldToScreenPoint(origin);
+        Vector3 mouseScreen3 = new Vector3(mouseScreen.x, mouseScreen.y,
+            Mathf.Abs(Camera.main.transform.position.z));
+        Vector2 mouseWorld = Camera.main.ScreenToWorldPoint(mouseScreen3);
+        Vector2 dir = (mouseWorld - origin);
+        if (dir.sqrMagnitude < 0.001f) dir = Vector2.right;
+        dir.Normalize();
+
+        float baseAngle = Mathf.Atan2(dir.y, dir.x) * Mathf.Rad2Deg;
 
         _arcLine.positionCount = arcSegments + 3;
         _arcLine.SetPosition(0, origin);                          // center start
