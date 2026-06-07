@@ -197,6 +197,7 @@ public class CombatController : MonoBehaviour
     {
         Debug.Log("[Combat] Coroutine: DashOrWhiff started.");
         _isBusy = true;
+        _animator?.SetBool("IsAttacking", true);
 
         // 하이라이트된 적을 우선 사용, 없으면 재탐색
         var target = (cachedTarget != null && cachedTarget.IsAlive)
@@ -214,6 +215,7 @@ public class CombatController : MonoBehaviour
             yield return ExecuteWhiff();
         }
 
+        _animator?.SetBool("IsAttacking", false);
         Debug.Log("[Combat] DashOrWhiff: Setting _isBusy = false and exiting.");
         _isBusy = false;
     }

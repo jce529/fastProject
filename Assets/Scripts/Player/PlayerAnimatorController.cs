@@ -13,7 +13,6 @@ public class PlayerAnimatorController : MonoBehaviour
     private static readonly int IsMoving    = Animator.StringToHash("IsMoving");
     private static readonly int IsGrounded  = Animator.StringToHash("IsGrounded");
     private static readonly int VelocityY   = Animator.StringToHash("VelocityY");
-    private static readonly int IsAttacking = Animator.StringToHash("IsAttacking");
     private static readonly int IsRolling   = Animator.StringToHash("IsRolling");
     private static readonly int IsSprinting = Animator.StringToHash("IsSprinting");
 
@@ -43,11 +42,11 @@ public class PlayerAnimatorController : MonoBehaviour
         _animator.SetFloat(VelocityY,  velY);
         _animator.SetBool(IsSprinting, isSprinting);
 
-        // InputManager가 씬에 있을 때만 공격/구르기 파라미터 구동
+        // InputManager가 씬에 있을 때만 구르기 파라미터 구동
+        // IsAttacking은 CombatController.DashOrWhiff()에서 키 릴리즈 시점에 설정
         if (InputManager.Instance != null)
         {
-            _animator.SetBool(IsAttacking, InputManager.Instance.AttackHeld);
-            _animator.SetBool(IsRolling,   InputManager.Instance.RollPressed);
+            _animator.SetBool(IsRolling, InputManager.Instance.RollPressed);
         }
 
         // Flip sprite based on movement direction.

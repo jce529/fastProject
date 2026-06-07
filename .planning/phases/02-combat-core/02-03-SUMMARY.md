@@ -14,7 +14,7 @@ requires:
 
 provides:
   - RangeDisplay.cs Show/Hide API, linear 2-beam, fan wireframe arc, HighlightEnemy
-  - RollController.cs Roll coroutine, timeScale-compensated velocity, InvincibilityHandler reuse, 0.8s unscaled cooldown
+  - RollController.cs Roll coroutine, timeScale-compensated velocity, InvincibilityHandler reuse, 0.8s unscaled cooldown (02-04에서 1.0s로 변경됨)
   - SampleScene RangeDisplay child GO with LeftBeam RightBeam ArcLine LineRenderers disabled
   - FastPlayerAnimator Roll trigger, Whiff trigger, Whiff state, AnyState transitions
 
@@ -43,7 +43,7 @@ completed: 2026-06-04
 ## Accomplishments
 
 - **RangeDisplay.cs**: Show()/Hide() API, UpdateLinearDisplay (2 yellow beams L+R), UpdateFanDisplay (24-segment arc), all LineRenderers start disabled
-- **RollController.cs**: Shift input, rollSpeed=12f compensated for timeScale, rollDuration=0.3f real seconds, iFrameDuration=0.4f via InvincibilityHandler, rollCooldown=0.8f via unscaledDeltaTime
+- **RollController.cs**: Shift input, rollSpeed=12f compensated for timeScale, rollDuration=0.3f real seconds, iFrameDuration=0.4f via InvincibilityHandler, rollCooldown=0.8f via unscaledDeltaTime (**02-04에서 1.0f로 변경**)
 - **SampleScene**: CombatController + GaugeController + RollController on Player; RangeDisplay child GO with LeftBeam, RightBeam, ArcLine wired in Inspector
 - **FastPlayerAnimator**: Roll + Whiff trigger params; Whiff state (Idle placeholder); AnyState transitions TransitionDuration=0
 

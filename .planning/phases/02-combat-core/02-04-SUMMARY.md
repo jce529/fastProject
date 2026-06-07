@@ -12,6 +12,11 @@ key-decisions:
   - "테스트 러너 제거: Unity Test Framework PlayMode 테스트를 삭제하고 에디터 직접 플레이테스트로 전환"
   - "삭제된 파일: Assets/Tests/PlayMode/PlayMode.asmdef, CombatTests.cs, RollTests.cs (+ .meta 파일들)"
   - "검증 방식: 자동화 assertion 대신 플레이어가 직접 에디터 Play 모드에서 각 메카닉을 실행하며 눈으로 확인"
+  - "AttackTypeSelector 리디자인: 오버레이 팝업(버튼 2개) → 화면 내 고정 존(zone) 방식으로 교체. 존은 항상 표시되며 커서/터치 위치로 Linear/Fan 전환"
+  - "슬로우 모션 트리거 변경: 타입 선택 완료 후 → 공격 버튼 누르는 순간으로 변경 (CombatController.AttackHeld 즉시 반응)"
+  - "Whiff 동작 변경: 원위치 복귀(코루틴 MovePosition) → 검 휘두르기 애니메이션 + 이동 불가 경직으로 교체 (ExecuteWhiff: Whiff 트리거 + WaitForSecondsRealtime(0.5f))"
+  - "RollController 쿨다운 변경: 0.8s → 1.0s (rollCooldown 필드 값 변경)"
+  - "RollController 방향 고정 추가: 구르기 시작 시 dir 고정, 코루틴 내 방향 전환 불가"
 
 requirements-verified: [ATCK-01, ATCK-02, ATCK-03, ATCK-04, ATCK-05, FEEL-01, MOVE-03]
 

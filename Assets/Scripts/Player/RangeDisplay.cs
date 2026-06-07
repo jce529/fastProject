@@ -26,10 +26,14 @@ public class RangeDisplay : MonoBehaviour
     private static readonly Color ColorDefault  = Color.yellow;
     private static readonly Color ColorTargeted = Color.red;
 
+    // -- Circle display settings -------------------------------------------------------
+    [SerializeField] private int circleSegments = 36;  // 10-degree steps — smooth enough
+
     // -- LineRenderer references (assign in Inspector after creating child objects) ---
     [SerializeField] private LineRenderer _leftBeam;   // Linear mode — left ray
     [SerializeField] private LineRenderer _rightBeam;  // Linear mode — right ray
     [SerializeField] private LineRenderer _arcLine;    // Fan mode — wireframe arc
+    [SerializeField] private LineRenderer _rangeCircle; // Max range circle — both modes
 
     private SpriteRenderer _playerSprite;
     private bool _isShown;
@@ -51,9 +55,10 @@ public class RangeDisplay : MonoBehaviour
         _isShown = true;
         bool isLinear = AttackTypeSelector.Selected == AttackType.Linear;
 
-        if (_leftBeam  != null) _leftBeam.enabled  = isLinear;
-        if (_rightBeam != null) _rightBeam.enabled  = false;   // single-beam mode — right beam unused
-        if (_arcLine   != null) _arcLine.enabled    = !isLinear;
+        if (_leftBeam    != null) _leftBeam.enabled    = isLinear;
+        if (_rightBeam   != null) _rightBeam.enabled   = false;   // single-beam mode — right beam unused
+        if (_arcLine     != null) _arcLine.enabled     = !isLinear;
+        if (_rangeCircle != null) _rangeCircle.enabled = true;
     }
 
     /// <summary>Deactivate the range display and reset all line colors to default.</summary>
@@ -74,6 +79,8 @@ public class RangeDisplay : MonoBehaviour
             UpdateLinearDisplay();
         else
             UpdateFanDisplay();
+
+        UpdateCircleDisplay();
     }
 
     // -- Linear display (D-01) -------------------------------------------------------
@@ -126,6 +133,26 @@ public class RangeDisplay : MonoBehaviour
         _arcLine.startColor = _arcLine.endColor = ColorDefault;
     }
 
+    // -- Circle display ---------------------------------------------------------------
+
+    private void UpdateCircleDisplay()
+    {
+        if (_rangeCircle == null) return;
+
+        float radius = AttackTypeSelector.Selected == AttackType.Linear ? linearLength : fanRadius;
+        Vector2 origin = transform.position;
+
+        _rangeCircle.loop = true;
+        _rangeCircle.positionCount = circleSegments;
+        for (int i = 0; i < circleSegments; i++)
+        {
+            float angle = (float)i / circleSegments * Mathf.PI * 2f;
+            _rangeCircle.SetPosition(i, origin + new Vector2(Mathf.Cos(angle), Mathf.Sin(angle)) * radius);
+        }
+        _rangeCircle.startWidth = _rangeCircle.endWidth = lineWidth;
+        _rangeCircle.startColor = _rangeCircle.endColor = ColorDefault;
+    }
+
     // -- Enemy highlight (D-04) — called by CombatController when nearest changes ---
 
     /// <summary>
@@ -142,15 +169,17 @@ public class RangeDisplay : MonoBehaviour
 
     private void SetAllRenderers(bool enabled)
     {
-        if (_leftBeam  != null) _leftBeam.enabled  = enabled;
-        if (_rightBeam != null) _rightBeam.enabled  = enabled;
-        if (_arcLine   != null) _arcLine.enabled    = enabled;
+        if (_leftBeam    != null) _leftBeam.enabled    = enabled;
+        if (_rightBeam   != null) _rightBeam.enabled   = enabled;
+        if (_arcLine     != null) _arcLine.enabled     = enabled;
+        if (_rangeCircle != null) _rangeCircle.enabled = enabled;
     }
 
     private void ResetColors()
     {
-        if (_leftBeam  != null) { _leftBeam.startColor  = _leftBeam.endColor  = ColorDefault; }
-        if (_rightBeam != null) { _rightBeam.startColor = _rightBeam.endColor = ColorDefault; }
-        if (_arcLine   != null) { _arcLine.startColor   = _arcLine.endColor   = ColorDefault; }
+        if (_leftBeam    != null) { _leftBeam.startColor    = _leftBeam.endColor    = ColorDefault; }
+        if (_rightBeam   != null) { _rightBeam.startColor   = _rightBeam.endColor   = ColorDefault; }
+        if (_arcLine     != null) { _arcLine.startColor     = _arcLine.endColor     = ColorDefault; }
+        if (_rangeCircle != null) { _rangeCircle.startColor = _rangeCircle.endColor = ColorDefault; }
     }
 }
