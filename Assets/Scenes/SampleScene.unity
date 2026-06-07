@@ -338,7 +338,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4d139d8dd633bcb42ac1c4e5a5d48968, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::AttackTypeZone
-  zoneType: 0
+  zoneType: 1
 --- !u!61 &182679356
 BoxCollider2D:
   m_ObjectHideFlags: 0
