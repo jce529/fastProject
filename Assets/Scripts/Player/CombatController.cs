@@ -24,12 +24,14 @@ public class CombatController : MonoBehaviour
 {
     // -- Tunable values (expose for playtest tuning) --------------------------------
     [SerializeField] private float slowTimeScale      = 0.2f;   // Claude's discretion: 0.15-0.25x range
-    [SerializeField] private float dashDurationFrames = 3f;     // MovePosition spread over N FixedUpdate frames
+    [SerializeField] private float dashDuration       = 0.15f;  // 대시 이동 시간 (초)
     [SerializeField] private float hitFreezeDuration  = 0.075f; // 75ms — midpoint of 50-100ms FEEL-01 range
     [SerializeField] private float postKillLockout    = 0.2f;   // real seconds after kill before control returns
     [SerializeField] private float whiffLockout       = 0.5f;   // real seconds — must be > postKillLockout (ATCK-04)
     [SerializeField] private float searchRadius       = 10f;    // OverlapCircle radius — covers linear beam length
+    [SerializeField] private float fanRadius          = 7f;     // [NEW] radius for fan detection (matches RangeDisplay)
     [SerializeField] private float fanHalfAngleDeg    = 55f;    // half of 110-degree fan arc
+    [SerializeField] private float linearHalfAngleDeg = 30f;    // [UPDATED] 15 -> 30 for more forgiving aim
     /// <summary>
     /// [MEDIUM — Gemini] Safety timeout: if slow-mo stays active this many real seconds
     /// without a release event (e.g. Input System dropped the event), force-exit slow-motion.
@@ -43,7 +45,9 @@ public class CombatController : MonoBehaviour
     private InvincibilityHandler _invincibilityHandler;
     private GaugeController      _gauge;
     private SpriteRenderer       _spriteRenderer;
-    private TrailRenderer        _trailRenderer; // assigned from child in Awake
+    private TrailRenderer        _trailRenderer;
+    private Camera               _mainCamera;
+    private Animator             _animator;
 
     // RangeDisplay reference — found via GetComponentInChildren in Start
     private RangeDisplay _rangeDisplay;
@@ -71,6 +75,8 @@ public class CombatController : MonoBehaviour
         _gauge                = GetComponent<GaugeController>();
         _spriteRenderer       = GetComponent<SpriteRenderer>();
         _trailRenderer        = GetComponentInChildren<TrailRenderer>();
+        _mainCamera           = Camera.main;
+        _animator             = GetComponent<Animator>();
 
         // Cache layer masks once in Awake — avoid NameToLayer in Update (ROADMAP constraint)
         _enemyLayerMask = LayerMask.GetMask("Enemy");
@@ -131,15 +137,19 @@ public class CombatController : MonoBehaviour
         // Release event: start dash or whiff
         if (input.AttackReleased)
         {
+            Debug.Log("[Combat] Attack released. Checking dash condition.");
+            // ExitSlowMotion이 _lastHighlighted를 지우기 전에 캐시
+            DummyEnemy cachedTarget = _lastHighlighted;
             if (_isSlowMo)
                 ExitSlowMotion();
             // Roll로 슬로우모션이 취소된 경우 대시/whiff 발동 안 함
             if (_slowMoCancelledByRoll)
             {
+                Debug.Log("[Combat] Attack released but slowMo was cancelled by roll. Ignored.");
                 _slowMoCancelledByRoll = false;
                 return;
             }
-            StartCoroutine(DashOrWhiff());
+            StartCoroutine(DashOrWhiff(cachedTarget));
         }
     }
 
@@ -151,6 +161,7 @@ public class CombatController : MonoBehaviour
     /// </summary>
     private void EnterSlowMotion()
     {
+        if (_isSlowMo) return; // Prevent double entry
         Time.timeScale      = slowTimeScale;
         Time.fixedDeltaTime = 0.02f * Time.timeScale; // always paired
         _isSlowMo           = true;
@@ -164,10 +175,13 @@ public class CombatController : MonoBehaviour
     /// </summary>
     private void ExitSlowMotion()
     {
+        if (!_isSlowMo) return; // Safely handle multiple calls
         Time.timeScale      = 1f;
         Time.fixedDeltaTime = 0.02f; // restore standard fixed step
         _isSlowMo           = false;
-        _rangeDisplay?.Hide();
+        
+        if (_rangeDisplay != null)
+            _rangeDisplay.Hide();
 
         // Clear enemy highlight on exit
         if (_lastHighlighted != null)
@@ -179,80 +193,93 @@ public class CombatController : MonoBehaviour
 
     // -- Combat coroutine chain ----------------------------------------------------
 
-    private IEnumerator DashOrWhiff()
+    private IEnumerator DashOrWhiff(DummyEnemy cachedTarget = null)
     {
-        // Set _isBusy BEFORE any yield — prevents double activation (Pitfall 4)
+        Debug.Log("[Combat] Coroutine: DashOrWhiff started.");
         _isBusy = true;
 
-        var target = FindNearestEnemyInRange();
+        // 하이라이트된 적을 우선 사용, 없으면 재탐색
+        var target = (cachedTarget != null && cachedTarget.IsAlive)
+            ? cachedTarget
+            : FindNearestEnemyInRange();
         if (target != null)
-            yield return StartCoroutine(ExecuteDash(target));
+        {
+            Debug.Log($"[Combat] DashOrWhiff: Target '{target.name}' confirmed. Jumping to ExecuteDash.");
+            yield return ExecuteDash(target);
+            Debug.Log("[Combat] DashOrWhiff: ExecuteDash yield returned.");
+        }
         else
-            yield return StartCoroutine(ExecuteWhiff());
+        {
+            Debug.Log("[Combat] DashOrWhiff: No target. Jumping to ExecuteWhiff.");
+            yield return ExecuteWhiff();
+        }
 
+        Debug.Log("[Combat] DashOrWhiff: Setting _isBusy = false and exiting.");
         _isBusy = false;
     }
 
     private IEnumerator ExecuteDash(DummyEnemy target)
     {
-        // 1. ExitSlowMotion BEFORE first yield — ensures MovePosition runs at timeScale=1
-        //    (Pitfall 1: if still in slow-mo, MovePosition moves 5x slower than intended)
-        ExitSlowMotion();
-
-        // 2. [HIGH — Gemini] Obstacle check: linecast from player to target.
-        //    If a Default-layer collider (platform/wall) blocks the path, the attack whiffs
-        //    instead of producing a broken partial dash where the player stops mid-air.
-        //    This is a prototype — a single linecast against the Default layer is sufficient.
-        Vector2 startPos    = _rb.position;
-        Vector2 destination = (Vector2)target.transform.position;
-        RaycastHit2D obstacleHit = Physics2D.Linecast(startPos, destination, _obstacleMask);
-        if (obstacleHit.collider != null)
-        {
-            // Path blocked — whiff instead. Do NOT start a partial dash.
-            yield return StartCoroutine(ExecuteWhiff());
+        Debug.Log("[Combat] ExecuteDash: ENTRANCE - Coroutine effectively started.");
+        
+        if (target == null) {
+            Debug.LogError("[Combat] ExecuteDash: TARGET IS NULL at start! Aborting.");
             yield break;
         }
 
-        // 3. Grant i-frames for the dash window
-        _invincibilityHandler.StartInvincibility(0.2f);
+        // 1. ExitSlowMotion BEFORE first yield — ensures MovePosition runs at timeScale=1
+        Debug.Log("[Combat] ExecuteDash: Calling ExitSlowMotion.");
+        ExitSlowMotion();
+        Debug.Log("[Combat] ExecuteDash: ExitSlowMotion finished.");
 
-        // 4. Enable trail visual (D-06)
+        Vector2 startPos    = _rb.position;
+        Vector2 destination = (Vector2)target.transform.position;
+        Vector2 dirToTarget = (destination - startPos).normalized;
+
+        Debug.Log($"[Combat] ExecuteDash: StartPos={startPos}, Dest={destination}, Dir={dirToTarget}");
+
+        Debug.Log("[Combat] ExecuteDash: Path clear. Preparing movement.");
+
+        // 3. 대상 방향으로 스프라이트 전환
+        _spriteRenderer.flipX = destination.x < startPos.x;
+
+        // 4. Setup visual, animation, invincibility
+        _animator?.SetBool("IsDashing", true);
+        _invincibilityHandler.StartInvincibility(dashDuration + 0.05f);
         if (_trailRenderer != null) _trailRenderer.emitting = true;
+        _rb.linearVelocity = Vector2.zero;
 
-        float dashDuration = dashDurationFrames * Time.fixedDeltaTime; // 3 * 0.02 = 0.06s
-
+        // 5. 대시 이동 (smoothstep 보간으로 가속-감속 느낌)
         float elapsed = 0f;
         while (elapsed < dashDuration)
         {
             float t = elapsed / dashDuration;
-            _rb.MovePosition(Vector2.Lerp(startPos, destination, t));
+            float smooth = t * t * (3f - 2f * t); // smoothstep
+            _rb.MovePosition(Vector2.Lerp(startPos, destination, smooth));
             elapsed += Time.fixedDeltaTime;
             yield return new WaitForFixedUpdate();
         }
-        // Snap to exact destination to avoid sub-pixel drift
         _rb.MovePosition(destination);
 
-        // 5. Disable trail
+        Debug.Log("[Combat] ExecuteDash: Arrived at target");
+
+        // 6. Cleanup visual and animation
+        _animator?.SetBool("IsDashing", false);
         if (_trailRenderer != null) _trailRenderer.emitting = false;
 
-        // 6. Kill the enemy BEFORE hit-freeze (freeze is the punctuation of the kill)
+        // 6. Kill and effects
         target.OnDashHit();
-
-        // 7. Hit-freeze: timeScale=0 for hitFreezeDuration real seconds (FEEL-01)
         yield return StartCoroutine(HitFreeze(hitFreezeDuration));
 
-        // 8. Post-kill cooldown: 공격만 제한, 이동은 자유 (WaitForSecondsRealtime 제거)
         _attackCooldown = postKillLockout;
-
-        // 9. Partial gauge recovery on kill (ATCK-05)
         _gauge.AddKillBonus();
+        Debug.Log("[Combat] ExecuteDash: Sequence Complete");
     }
 
     private IEnumerator ExecuteWhiff()
     {
-        // Trigger whiff animation (Animator must have "Whiff" trigger — set up in scene)
-        var animator = GetComponent<Animator>();
-        if (animator != null) animator.SetTrigger("Whiff");
+        Debug.Log("[Combat] Executing Whiff (Penalty)");
+        _animator?.SetTrigger("Whiff");
 
         // Longer lockout than kill — ATCK-04: whiff penalty must be clearly longer
         yield return new WaitForSecondsRealtime(whiffLockout);
@@ -274,9 +301,29 @@ public class CombatController : MonoBehaviour
 
     private DummyEnemy FindNearestEnemyInRange()
     {
+        Vector2 origin = (Vector2)transform.position;
+        Vector2 attackDir = Vector2.right;
+        float currentMaxDist = searchRadius;
+
+        // [D-01/D-02 Integration] Calculate direction and specific radius once per search
+        if (AttackTypeSelector.Selected == AttackType.Linear)
+        {
+            // Linear attack uses mouse-driven direction (matches RangeDisplay)
+            UnityEngine.InputSystem.Mouse mouse = UnityEngine.InputSystem.Mouse.current;
+            Vector2 mousePos = mouse != null ? mouse.position.ReadValue() : (Vector2)_mainCamera.WorldToScreenPoint(origin);
+            Vector3 mouseWorld = _mainCamera.ScreenToWorldPoint(new Vector3(mousePos.x, mousePos.y, Mathf.Abs(_mainCamera.transform.position.z)));
+            attackDir = ((Vector2)mouseWorld - origin).normalized;
+            currentMaxDist = searchRadius; // matches linearLength=10
+        }
+        else
+        {
+            // Fan attack uses player facing direction
+            attackDir = _spriteRenderer.flipX ? Vector2.left : Vector2.right;
+            currentMaxDist = fanRadius; // matches fanRadius=7
+        }
+
         // Pre-allocated buffer — no GC (ROADMAP Stack Constraint)
-        int count = Physics2D.OverlapCircleNonAlloc(
-            transform.position, searchRadius, _hitBuffer, _enemyLayerMask);
+        int count = Physics2D.OverlapCircleNonAlloc(origin, searchRadius, _hitBuffer, _enemyLayerMask);
 
         DummyEnemy nearest   = null;
         float      bestSqDist = float.MaxValue;
@@ -286,12 +333,16 @@ public class CombatController : MonoBehaviour
             var dummy = _hitBuffer[i].GetComponent<DummyEnemy>();
             // Skip dead enemies — physics broadphase may lag behind collider.enabled=false (Pitfall 6)
             if (dummy == null || !dummy.IsAlive) continue;
-            // Shape filter: linear accepts all in radius; fan checks angle
-            if (!IsInAttackShape((Vector2)_hitBuffer[i].transform.position)) continue;
+
+            Vector2 targetPos = (Vector2)_hitBuffer[i].transform.position;
+            Vector2 toTarget = targetPos - origin;
+            float dist = toTarget.magnitude;
+
+            // Shape and distance filter: checks specific arc/beam and radius
+            if (!IsInAttackShape(toTarget / dist, dist, attackDir, currentMaxDist)) continue;
 
             // SqrMagnitude avoids sqrt — sufficient for closest-enemy comparison
-            float sqDist = ((Vector2)_hitBuffer[i].transform.position
-                           - (Vector2)transform.position).sqrMagnitude;
+            float sqDist = dist * dist;
             if (sqDist < bestSqDist)
             {
                 bestSqDist = sqDist;
@@ -320,17 +371,18 @@ public class CombatController : MonoBehaviour
     }
 
     /// <summary>
-    /// Fan shape angle filter. Linear mode: always true (radius handles range).
-    /// Fan mode: checks that the target is within the forward-facing arc.
+    /// Filter enemies by attack shape and distance.
+    /// Linear mode: checks narrow beam towards aim.
+    /// Fan mode: checks forward-facing arc and fan radius.
     /// </summary>
-    private bool IsInAttackShape(Vector2 targetPos)
+    private bool IsInAttackShape(Vector2 normalizedToTarget, float distance, Vector2 attackDir, float maxDistance)
     {
-        if (AttackTypeSelector.Selected == AttackType.Linear) return true;
+        if (distance > maxDistance) return false;
 
-        Vector2 toTarget = (targetPos - (Vector2)transform.position).normalized;
-        Vector2 facing   = _spriteRenderer.flipX ? Vector2.left : Vector2.right;
-        float   dot      = Vector2.Dot(facing, toTarget);
-        float   cosHalf  = Mathf.Cos(fanHalfAngleDeg * Mathf.Deg2Rad);
+        float dot = Vector2.Dot(attackDir, normalizedToTarget);
+        float thresholdAngle = (AttackTypeSelector.Selected == AttackType.Linear) ? linearHalfAngleDeg : fanHalfAngleDeg;
+        float cosHalf = Mathf.Cos(thresholdAngle * Mathf.Deg2Rad);
+        
         return dot >= cosHalf;
     }
 }

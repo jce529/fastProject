@@ -128,7 +128,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 80822778}
-  m_Layer: 0
+  m_Layer: 10
   m_Name: EnemyGroup
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1386,7 +1386,9 @@ MonoBehaviour:
   postKillLockout: 0.2
   whiffLockout: 0.5
   searchRadius: 10
+  fanRadius: 7
   fanHalfAngleDeg: 55
+  linearHalfAngleDeg: 15
   maxSlowMoDuration: 5
 --- !u!114 &1394403465
 MonoBehaviour:
