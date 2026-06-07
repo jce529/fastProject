@@ -33,10 +33,9 @@ public class AttackTypeSelector : MonoBehaviour
     /// </summary>
     public static void SetType(AttackType type)
     {
-        if (_instance == null) return;
         if (Selected == type) return;
         Selected = type;
-        _instance.RefreshHighlights();
+        _instance?.RefreshHighlights();
     }
 
     private void RefreshHighlights()
