@@ -130,7 +130,7 @@ None.
 | 260607-19i | FastPlayerAnimator에 IsDashing Bool 파라미터 + Dash 스테이트 + AnyState→Dash / Dash→Idle 트랜지션 추가 | 2026-06-07 | e23f2cf | [260607-19i](./quick/260607-19i-fastplayeranimator-controller-isdashing-/) |
 | 260607-kif | AttackType 디버그 오버레이 생성 — OnGUI 기반 Linear/Fan 실시간 표시 + Player 자동 부착 에디터 스크립트 | 2026-06-07 | aff97da | [260607-kif](./quick/260607-kif-debug-attack-type-tracker/) |
 | 260607-ku4 | AttackTypeSelector.SetType null-instance 가드 제거 — Selected 무조건 갱신, RefreshHighlights null-conditional | 2026-06-07 | fb1e0b6 | [260607-ku4](./quick/260607-ku4-attacktypeselector-settype-instance-null/) |
-| 260607-vot | 카메라가 플레이어를 따라가도록 구현 — CameraFollow 컴포넌트를 Main Camera에 부착, Player Transform 연결 | 2026-06-07 | — | [260607-vot](./quick/260607-vot-camera-follow-player/) |
+| 260607-vot | 카메라가 플레이어를 따라가도록 구현 — CameraFollow 컴포넌트를 Main Camera에 부착, Player Transform 연결 | 2026-06-07 | a2557fc | [260607-vot](./quick/260607-vot-camera-follow-player/) |
 
 ---
 
