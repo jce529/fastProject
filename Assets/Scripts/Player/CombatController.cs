@@ -71,7 +71,7 @@ public class CombatController : MonoBehaviour
     private int _obstacleMask;
 
     // -- Enemy highlight tracking ---------------------------------------------------
-    private DummyEnemy _lastHighlighted;
+    private IEnemy _lastHighlighted;
 
     private void Awake()
     {
@@ -144,7 +144,7 @@ public class CombatController : MonoBehaviour
         {
             Debug.Log("[Combat] Attack released. Checking dash condition.");
             // ExitSlowMotion이 _lastHighlighted를 지우기 전에 캐시
-            DummyEnemy cachedTarget = _lastHighlighted;
+            IEnemy cachedTarget = _lastHighlighted;
             if (_isSlowMo)
                 ExitSlowMotion();
             // Roll로 슬로우모션이 취소된 경우 대시/whiff 발동 안 함
@@ -198,7 +198,7 @@ public class CombatController : MonoBehaviour
 
     // -- Combat coroutine chain ----------------------------------------------------
 
-    private IEnumerator DashOrWhiff(DummyEnemy cachedTarget = null)
+    private IEnumerator DashOrWhiff(IEnemy cachedTarget = null)
     {
         Debug.Log("[Combat] Coroutine: DashOrWhiff started.");
         _isBusy = true;
@@ -210,7 +210,7 @@ public class CombatController : MonoBehaviour
             : FindNearestEnemyInRange();
         if (target != null)
         {
-            Debug.Log($"[Combat] DashOrWhiff: Target '{target.name}' confirmed. Jumping to ExecuteDash.");
+            Debug.Log($"[Combat] DashOrWhiff: Target '{((MonoBehaviour)target).name}' confirmed. Jumping to ExecuteDash.");
             yield return ExecuteDash(target);
             Debug.Log("[Combat] DashOrWhiff: ExecuteDash yield returned.");
         }
@@ -225,10 +225,10 @@ public class CombatController : MonoBehaviour
         _isBusy = false;
     }
 
-    private IEnumerator ExecuteDash(DummyEnemy target)
+    private IEnumerator ExecuteDash(IEnemy target)
     {
         Debug.Log("[Combat] ExecuteDash: ENTRANCE - Coroutine effectively started.");
-        
+
         if (target == null) {
             Debug.LogError("[Combat] ExecuteDash: TARGET IS NULL at start! Aborting.");
             yield break;
@@ -240,7 +240,7 @@ public class CombatController : MonoBehaviour
         Debug.Log("[Combat] ExecuteDash: ExitSlowMotion finished.");
 
         Vector2 startPos    = _rb.position;
-        Vector2 destination = (Vector2)target.transform.position;
+        Vector2 destination = (Vector2)((MonoBehaviour)target).transform.position;
         Vector2 dirToTarget = (destination - startPos).normalized;
 
         Debug.Log($"[Combat] ExecuteDash: StartPos={startPos}, Dest={destination}, Dir={dirToTarget}");
@@ -306,7 +306,7 @@ public class CombatController : MonoBehaviour
 
     // -- Enemy detection -----------------------------------------------------------
 
-    private DummyEnemy FindNearestEnemyInRange()
+    private IEnemy FindNearestEnemyInRange()
     {
         Vector2 origin = (Vector2)transform.position;
         Vector2 attackDir = Vector2.right;
@@ -336,14 +336,14 @@ public class CombatController : MonoBehaviour
         // Pre-allocated buffer — no GC (ROADMAP Stack Constraint)
         int count = Physics2D.OverlapCircleNonAlloc(origin, searchRadius, _hitBuffer, _enemyLayerMask);
 
-        DummyEnemy nearest   = null;
-        float      bestSqDist = float.MaxValue;
+        IEnemy nearest    = null;
+        float  bestSqDist = float.MaxValue;
 
         for (int i = 0; i < count; i++)
         {
-            var dummy = _hitBuffer[i].GetComponent<DummyEnemy>();
+            var enemy = _hitBuffer[i].GetComponent<IEnemy>();
             // Skip dead enemies — physics broadphase may lag behind collider.enabled=false (Pitfall 6)
-            if (dummy == null || !dummy.IsAlive) continue;
+            if (enemy == null || !enemy.IsAlive) continue;
 
             Vector2 targetPos = (Vector2)_hitBuffer[i].transform.position;
             Vector2 toTarget = targetPos - origin;
@@ -357,7 +357,7 @@ public class CombatController : MonoBehaviour
             if (sqDist < bestSqDist)
             {
                 bestSqDist = sqDist;
-                nearest    = dummy;
+                nearest    = enemy;
             }
         }
 
@@ -369,13 +369,13 @@ public class CombatController : MonoBehaviour
     /// Called only from Update() while _isSlowMo is true — ensures highlight
     /// persists until ExitSlowMotion() clears it, preventing one-frame flash.
     /// </summary>
-    private void UpdateHighlight(DummyEnemy nearest)
+    private void UpdateHighlight(IEnemy nearest)
     {
         if (nearest == _lastHighlighted) return;
         if (_lastHighlighted != null) _lastHighlighted.ClearHighlight();
         if (nearest != null)
         {
-            var sr = nearest.GetComponent<SpriteRenderer>();
+            var sr = (nearest as MonoBehaviour)?.GetComponent<SpriteRenderer>();
             if (sr != null) sr.color = Color.red;
         }
         _lastHighlighted = nearest;

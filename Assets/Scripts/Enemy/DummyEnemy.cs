@@ -8,7 +8,7 @@ using UnityEngine;
 ///
 /// D-08: Gray placeholder visual. D-09: 3-5 placed in scene. D-10: 2s real-time respawn.
 /// </summary>
-public class DummyEnemy : MonoBehaviour
+public class DummyEnemy : MonoBehaviour, IEnemy
 {
     [SerializeField] private float respawnDelay = 2f; // real seconds — WaitForSecondsRealtime
 
