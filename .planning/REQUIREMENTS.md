@@ -27,8 +27,8 @@
 
 ### 적 (Enemies)
 
-- [ ] **ENMY-01**: 근접형 적이 플레이어를 감지하면 접근하고, 공격 전 예고 모션 후 근접 공격한다 (원샷원킬 양방향)
-- [ ] **ENMY-02**: 원거리형 적이 플레이어를 감지하면 조준선을 표시 후 투사체를 발사한다 (원샷원킬 양방향)
+- [x] **ENMY-01**: 근접형 적이 플레이어를 감지하면 접근하고, 공격 전 예고 모션 후 근접 공격한다 (원샷원킬 양방향)
+- [x] **ENMY-02**: 원거리형 적이 플레이어를 감지하면 조준선을 표시 후 투사체를 발사한다 (원샷원킬 양방향)
 
 ### UI
 
@@ -82,8 +82,8 @@
 | ATCK-04 | Phase 2 | Complete |
 | ATCK-05 | Phase 2 | Complete |
 | FEEL-01 | Phase 2 | Complete |
-| ENMY-01 | Phase 3 | Pending |
-| ENMY-02 | Phase 3 | Pending |
+| ENMY-01 | Phase 3 | Complete |
+| ENMY-02 | Phase 3 | Complete |
 | UI-01 | Phase 4 | Pending |
 | UI-02 | Phase 4 | Pending |
 

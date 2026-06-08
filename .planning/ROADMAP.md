@@ -70,7 +70,7 @@ Plans:
 **Plans**: 4 plans
 
 Plans:
-- [ ] 03-01-PLAN.md — IEnemy interface + DummyEnemy implements IEnemy + CombatController DummyEnemy→IEnemy migration (ENMY-01, ENMY-02)
+- [x] 03-01-PLAN.md — IEnemy interface + DummyEnemy implements IEnemy + CombatController DummyEnemy→IEnemy migration (ENMY-01, ENMY-02)
 - [ ] 03-02-PLAN.md — PlayerDeath event + PlayerDeathHandler + FallDetector rewrite (D-17) + EnemyProjectile layer + Physics2D matrix (ENMY-01, ENMY-02)
 - [ ] 03-03-PLAN.md — MeleeEnemy FSM: patrol, chase, 0.8s telegraph, hitbox attack (ENMY-01)
 - [ ] 03-04-PLAN.md — RangedEnemy FSM + ProjectileController: aim line, projectile fire (ENMY-02)
@@ -97,7 +97,7 @@ Plans:
 |-------|----------------|--------|-----------|
 | 1. Foundation & Movement | 3/3 | Complete   | 2026-05-28 |
 | 2. Combat Core | 0/4 | Planned | - |
-| 3. Enemy System | 0/4 | Planned | - |
+| 3. Enemy System | 1/4 | In Progress|  |
 | 4. HUD & Game Loop | 0/? | Not started | - |
 
 ---
