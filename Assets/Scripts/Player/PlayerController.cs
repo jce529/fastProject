@@ -48,6 +48,8 @@ public class PlayerController : MonoBehaviour
     /// </summary>
     public static event Action OnPlayerDeath;
 
+    public static void TriggerDeath() => OnPlayerDeath?.Invoke();
+
     // -- Cached transform for ground check pivot ---------------------------------
     private Transform _transform;
 

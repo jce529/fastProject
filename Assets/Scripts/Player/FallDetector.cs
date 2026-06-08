@@ -14,6 +14,6 @@ public class FallDetector : MonoBehaviour
     /// </summary>
     public void OnFall()
     {
-        PlayerController.OnPlayerDeath?.Invoke();
+        PlayerController.TriggerDeath();
     }
 }
