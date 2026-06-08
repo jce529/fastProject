@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -38,6 +39,14 @@ public class PlayerController : MonoBehaviour
     private InputAction _jumpAction;
     private bool _isGrounded;
     private bool _jumpHeld;
+
+    // -- Phase 3: Player death notification (D-13) ----------------------------
+    /// <summary>
+    /// Fired by FallDetector (D-17), enemy hitbox, and projectile on player death.
+    /// Phase 4 UIManager subscribes to this — Phase 3 code never needs modification (D-15).
+    /// Static event: unsubscribe in OnDisable to prevent stale subscriptions on Play Mode restart.
+    /// </summary>
+    public static event Action OnPlayerDeath;
 
     // -- Cached transform for ground check pivot ---------------------------------
     private Transform _transform;
