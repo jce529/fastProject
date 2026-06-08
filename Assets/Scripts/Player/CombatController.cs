@@ -29,8 +29,8 @@ public class CombatController : MonoBehaviour
     [SerializeField] private float postKillLockout    = 0.2f;   // real seconds after kill before control returns
     [SerializeField] private float whiffLockout       = 0.5f;   // real seconds — must be > postKillLockout (ATCK-04)
     [SerializeField] private float searchRadius       = 10f;    // OverlapCircle radius — covers linear beam length
-    [SerializeField] private float fanRadius          = 7f;     // [NEW] radius for fan detection (matches RangeDisplay)
-    [SerializeField] private float fanHalfAngleDeg    = 55f;    // half of 110-degree fan arc
+    [SerializeField] private float fanRadius          = 4f;     // [NEW] radius for fan detection (matches RangeDisplay)
+    [SerializeField] private float fanHalfAngleDeg    = 35f;    // half of 70-degree fan arc
     [SerializeField] private float linearHalfAngleDeg = 30f;    // [UPDATED] 15 -> 30 for more forgiving aim
     /// <summary>
     /// [MEDIUM — Gemini] Safety timeout: if slow-mo stays active this many real seconds
@@ -58,6 +58,11 @@ public class CombatController : MonoBehaviour
     private float _slowMoStartTime; // [MEDIUM — Gemini] unscaled timestamp when slow-mo began
     private bool  _slowMoCancelledByRoll; // true: 이번 슬로우모션이 Roll로 취소됨
     private float _attackCooldown;        // 처치 후 공격 재사용 대기 (unscaledDeltaTime)
+
+    // -- Range display accessors (RangeDisplay reads these — single source of truth) ----
+    public float FanRadius       => fanRadius;
+    public float FanHalfAngleDeg => fanHalfAngleDeg;
+    public float SearchRadius    => searchRadius;
 
     // -- Enemy detection buffer (pre-allocated — no GC per frame) ------------------
     private readonly Collider2D[] _hitBuffer = new Collider2D[16];
@@ -321,10 +326,11 @@ public class CombatController : MonoBehaviour
         {
             // Fan attack uses mouse-driven direction (matches RangeDisplay)
             UnityEngine.InputSystem.Mouse mouse = UnityEngine.InputSystem.Mouse.current;
-            Vector2 mousePos = mouse != null ? mouse.position.ReadValue() : (Vector2)_mainCamera.WorldToScreenPoint(origin);
-            Vector3 mouseWorld = _mainCamera.ScreenToWorldPoint(new Vector3(mousePos.x, mousePos.y, Mathf.Abs(_mainCamera.transform.position.z)));
-            attackDir = ((Vector2)mouseWorld - origin).normalized;
-            currentMaxDist = fanRadius; // matches fanRadius=7
+            Vector2 mousePos2 = mouse != null ? mouse.position.ReadValue() : (Vector2)_mainCamera.WorldToScreenPoint(origin);
+            Vector3 mouseWorld2 = _mainCamera.ScreenToWorldPoint(new Vector3(mousePos2.x, mousePos2.y, Mathf.Abs(_mainCamera.transform.position.z)));
+            Vector2 dir = (Vector2)mouseWorld2 - origin;
+            attackDir = dir.sqrMagnitude > 0.001f ? dir.normalized : Vector2.right;
+            currentMaxDist = fanRadius;
         }
 
         // Pre-allocated buffer — no GC (ROADMAP Stack Constraint)

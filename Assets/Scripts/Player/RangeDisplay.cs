@@ -14,12 +14,9 @@ using UnityEngine.InputSystem;
 public class RangeDisplay : MonoBehaviour
 {
     // -- Linear beam settings (D-01, D-05) -----------------------------------------
-    [SerializeField] private float linearLength = 10f;  // Claude's discretion: 10 units covers typical room width
     [SerializeField] private float lineWidth = 0.12f;  // beam thickness
 
     // -- Fan arc settings (D-02, D-05) -----------------------------------------------
-    [SerializeField] private float fanRadius       = 7f;   // Claude's discretion: 7 units
-    [SerializeField] private float fanHalfAngleDeg = 55f;  // half of 110-degree arc (matches CombatController)
     [SerializeField] private int   arcSegments     = 24;   // 24 points — smooth at 1080p
 
     // -- Colors (D-03, D-04) ----------------------------------------------------------
@@ -35,11 +32,16 @@ public class RangeDisplay : MonoBehaviour
     [SerializeField] private LineRenderer _arcLine;    // Fan mode — wireframe arc
     [SerializeField] private LineRenderer _rangeCircle; // Max range circle — both modes
 
+    // -- CombatController reference (single source of truth for range values) ----------
+    private CombatController _combat;
+
     private SpriteRenderer _playerSprite;
     private bool _isShown;
 
     private void Awake()
     {
+        _combat = GetComponentInParent<CombatController>();
+
         // Player sprite is on the parent (Player GameObject)
         _playerSprite = GetComponentInParent<SpriteRenderer>();
 
@@ -104,7 +106,7 @@ public class RangeDisplay : MonoBehaviour
 
         _leftBeam.positionCount = 2;
         _leftBeam.SetPosition(0, origin);
-        _leftBeam.SetPosition(1, origin + dir * linearLength);
+        _leftBeam.SetPosition(1, origin + dir * _combat.SearchRadius);
         _leftBeam.startWidth = _leftBeam.endWidth = lineWidth;
         _leftBeam.startColor = _leftBeam.endColor = ColorDefault;
     }
@@ -120,22 +122,19 @@ public class RangeDisplay : MonoBehaviour
         Vector2 mouseScreen = Mouse.current != null
             ? Mouse.current.position.ReadValue()
             : (Vector2)Camera.main.WorldToScreenPoint(origin);
-        Vector3 mouseScreen3 = new Vector3(mouseScreen.x, mouseScreen.y,
-            Mathf.Abs(Camera.main.transform.position.z));
-        Vector2 mouseWorld = Camera.main.ScreenToWorldPoint(mouseScreen3);
-        Vector2 dir = (mouseWorld - origin);
-        if (dir.sqrMagnitude < 0.001f) dir = Vector2.right;
-        dir.Normalize();
-
-        float baseAngle = Mathf.Atan2(dir.y, dir.x) * Mathf.Rad2Deg;
+        Vector3 mouseScreen3 = new Vector3(mouseScreen.x, mouseScreen.y, Mathf.Abs(Camera.main.transform.position.z));
+        Vector2 mouseDir = (Vector2)Camera.main.ScreenToWorldPoint(mouseScreen3) - origin;
+        if (mouseDir.sqrMagnitude < 0.001f) mouseDir = Vector2.right;
+        mouseDir.Normalize();
+        float baseAngle = Mathf.Atan2(mouseDir.y, mouseDir.x) * Mathf.Rad2Deg;
 
         _arcLine.positionCount = arcSegments + 3;
         _arcLine.SetPosition(0, origin);                          // center start
         for (int i = 0; i <= arcSegments; i++)
         {
             float t     = (float)i / arcSegments;
-            float angle = (baseAngle - fanHalfAngleDeg + t * fanHalfAngleDeg * 2f) * Mathf.Deg2Rad;
-            Vector2 pt  = origin + new Vector2(Mathf.Cos(angle), Mathf.Sin(angle)) * fanRadius;
+            float angle = (baseAngle - _combat.FanHalfAngleDeg + t * _combat.FanHalfAngleDeg * 2f) * Mathf.Deg2Rad;
+            Vector2 pt  = origin + new Vector2(Mathf.Cos(angle), Mathf.Sin(angle)) * _combat.FanRadius;
             _arcLine.SetPosition(i + 1, pt);                      // arc points at 1..arcSegments+1
         }
         _arcLine.SetPosition(arcSegments + 2, origin);            // center end — closes sector
@@ -149,7 +148,7 @@ public class RangeDisplay : MonoBehaviour
     {
         if (_rangeCircle == null) return;
 
-        float radius = AttackTypeSelector.Selected == AttackType.Linear ? linearLength : fanRadius;
+        float radius = AttackTypeSelector.Selected == AttackType.Linear ? _combat.SearchRadius : _combat.FanRadius;
         Vector2 origin = transform.position;
 
         _rangeCircle.loop = true;

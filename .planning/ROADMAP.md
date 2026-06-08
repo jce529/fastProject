@@ -67,7 +67,13 @@ Plans:
   2. A ranged enemy detects the player, displays a visible aim indicator line, then fires a projectile along that line — a playtester can read the aim direction before the projectile launches
   3. One successful player dash-attack kills either enemy type instantly (one-shot); one melee hit or one projectile hit kills the player instantly (one-shot the other way)
   4. Both enemy types can be targeted by the attack range indicator and eliminated cleanly, with FEEL-01 hit-freeze firing on each kill
-**Plans**: TBD
+**Plans**: 4 plans
+
+Plans:
+- [ ] 03-01-PLAN.md — IEnemy interface + DummyEnemy implements IEnemy + CombatController DummyEnemy→IEnemy migration (ENMY-01, ENMY-02)
+- [ ] 03-02-PLAN.md — PlayerDeath event + PlayerDeathHandler + FallDetector rewrite (D-17) + EnemyProjectile layer + Physics2D matrix (ENMY-01, ENMY-02)
+- [ ] 03-03-PLAN.md — MeleeEnemy FSM: patrol, chase, 0.8s telegraph, hitbox attack (ENMY-01)
+- [ ] 03-04-PLAN.md — RangedEnemy FSM + ProjectileController: aim line, projectile fire (ENMY-02)
 
 ---
 
@@ -91,7 +97,7 @@ Plans:
 |-------|----------------|--------|-----------|
 | 1. Foundation & Movement | 3/3 | Complete   | 2026-05-28 |
 | 2. Combat Core | 0/4 | Planned | - |
-| 3. Enemy System | 0/? | Not started | - |
+| 3. Enemy System | 0/4 | Planned | - |
 | 4. HUD & Game Loop | 0/? | Not started | - |
 
 ---
@@ -132,4 +138,4 @@ Plans:
 
 ---
 *Roadmap created: 2026-05-27*
-*Last updated: 2026-06-02 after Phase 2 planning*
+*Last updated: 2026-06-08 after Phase 3 planning*
