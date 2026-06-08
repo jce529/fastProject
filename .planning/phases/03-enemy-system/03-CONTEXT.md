@@ -36,9 +36,10 @@
 
 ### 플레이어 즉사 처리
 - **D-13:** `PlayerController` (또는 별도 `PlayerHealth` 컴포넌트)에 `static event Action OnPlayerDeath` 선언.
-- **D-14:** Phase 3 임시 동작: 플레이어 피격 시 `OnPlayerDeath` 발동 → GameObject.SetActive(false) + `Debug.Log("Player died")`. 에디터에서 Play Mode 종료로 재시작.
+- **D-14:** Phase 3 임시 동작: 플레이어 피격/낙사 시 `OnPlayerDeath` 발동 → GameObject.SetActive(false) + `Debug.Log("Player died")`. 에디터에서 Play Mode 종료로 재시작.
 - **D-15:** Phase 4에서 UIManager/DeathScreen이 `OnPlayerDeath`를 구독 — Phase 3 코드 수정 없음.
 - **D-16:** 피격 조건: 플레이어가 `PlayerInvincible` 레이어일 때 적 Trigger 무시 (기존 레이어 스왑 패턴 활용).
+- **D-17:** 낙사 = 즉사. `FallDetector.cs` 직접 수정 — 순간이동(회복) 로직 제거, `OnPlayerDeath` 발동으로 교체. Phase 1의 마지막 발판 저장 로직도 제거.
 
 ### Claude's Discretion
 - 탐지 반경 수치 (권장: 8~12 units) — 플레이테스트 후 조정
@@ -71,6 +72,7 @@
 - `Assets/Scripts/Player/CombatController.cs` — `FindNearestEnemyInRange()` DummyEnemy→IEnemy 교체 대상, `UpdateHighlight()` IEnemy 참조 교체 대상
 - `Assets/Scripts/Player/InvincibilityHandler.cs` — PlayerHurtbox/PlayerInvincible 레이어 스왑, D-16 피격 조건에 활용
 - `Assets/Scripts/Player/PlayerController.cs` — `OnPlayerDeath` 이벤트 추가 위치 (또는 별도 PlayerHealth)
+- `Assets/Scripts/Player/FallDetector.cs` — 순간이동 로직 제거 후 `OnPlayerDeath` 발동으로 교체 (D-17)
 
 ### Technical Constraints (from ROADMAP.md Stack Constraints)
 - `Time.unscaledDeltaTime` — 모든 쿨다운/예고 타이머 (슬로우모션 중에도 실시간 유지)
