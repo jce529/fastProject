@@ -3,10 +3,10 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 current_phase: 03
-current_plan: 2
-status: executing
-stopped_at: "03-02-PLAN.md complete — PlayerDeath event + FallDetector rewrite + EnemyProjectile layer + Physics2D matrix"
-last_updated: "2026-06-08T10:48:59.093Z"
+current_plan: 3
+status: checkpoint
+stopped_at: "03-03-T2 — MeleeEnemy.cs complete (623910c); T2/T3 require Unity Editor (human)"
+last_updated: "2026-06-09T13:50:42Z"
 progress:
   total_phases: 4
   completed_phases: 2
@@ -33,10 +33,10 @@ progress:
 ## Current Position
 
 Phase: 03 (enemy-system) — EXECUTING
-Plan: 2 of 4
+Plan: 3 of 4
 **Current Phase:** 03
-**Current Plan:** 2
-**Phase Status:** In Progress (1 of 4 plans done — 03-01 complete, 03-02 complete)
+**Current Plan:** 3
+**Phase Status:** In Progress (03-01 done, 03-02 done, 03-03 checkpoint at T2)
 
 ```
 Progress: [X] Phase 1  [ ] Phase 2  [ ] Phase 3  [ ] Phase 4
@@ -68,7 +68,7 @@ Progress: [X] Phase 1  [ ] Phase 2  [ ] Phase 3  [ ] Phase 4
 | Phase 02-combat-core P02-01 | 25 | 2 tasks | 7 files |
 | Phase 02-combat-core P02-02 | 3 | 2 tasks | 3 files |
 | Phase 02-combat-core P02-03 | 15 | 2 tasks | 8 files |
-| Phase 03-enemy-system P03-02 | 20 | 3 tasks | 5 files |
+| Phase 03-enemy-system P03-03 | 98s | 1 task (T1) | 1 file |
 
 ## Accumulated Context
 
@@ -87,9 +87,7 @@ Progress: [X] Phase 1  [ ] Phase 2  [ ] Phase 3  [ ] Phase 4
 | WaitForSecondsRealtime for i-frames (01-03) | Phase 2 sets timeScale ~0.2; WaitForSeconds would extend 1s to 5s. WaitForSecondsRealtime is timeScale-immune. |
 | Vector3 _lastSafePosition value type (01-03) | Storing Transform reference would become stale null ref when floor objects recycled in v2. Vector3 copy is immune (Pitfall 14). |
 | Layer constants hardcoded 7/8 (01-03) | Matches TagManager.asset from Plan 01. Avoids LayerMask.NameToLayer() string lookup overhead each call. |
-| OnPlayerDeath static event on PlayerController (03-02) | Phase 4 UIManager subscribes without modifying Phase 3 code — static event + OnEnable/OnDisable guard prevents stale subs on domain reload (D-15) |
-| FallDetector rewritten: fall = instant death (03-02) | Phase 1 teleport recovery semantics removed per D-17 — Phase 3+ has no recovery path, simplifies logic to single event invoke |
-| Physics2D matrix: Enemy/EnemyProjectile x PlayerInvincible disabled (03-02) | Invincibility via layer swap confirmed — four collision pairs disabled so rolling player is immune to melee and projectile hits |
+| MeleeEnemy OnTriggerEnter2D on root, hitbox.enabled guard (03-03) | Child hitbox collider raises trigger on root MonoBehaviour; _meleeHitbox.enabled guard ensures only the active attack window fires the death event |
 
 ### Technical Constraints to Enforce Every Phase
 
@@ -150,8 +148,8 @@ None.
 4. Check which phase plan exists in `.planning/` (e.g., `PLAN-phase-1.md`)
 5. Continue from Current Phase listed above
 
-**Last session:** 2026-06-08
-**Stopped at:** Completed 03-02-PLAN.md — PlayerDeath event + FallDetector rewrite + EnemyProjectile layer + Physics2D matrix
+**Last session:** 2026-06-09
+**Stopped at:** 03-03 checkpoint at T2 — MeleeEnemy.cs created (623910c), T2/T3 require Unity Editor (human)
 
 ---
 *State initialized: 2026-05-27*
