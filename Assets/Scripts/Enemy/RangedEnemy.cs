@@ -92,6 +92,7 @@ public class RangedEnemy : MonoBehaviour, IEnemy
         // Freeze physics so corpse stays in place
         if (_rb != null) { _rb.linearVelocity = Vector2.zero; _rb.bodyType = RigidbodyType2D.Static; }
 
+        foreach (var c in GetComponents<Collider2D>()) c.enabled = false;
         GetComponent<Animator>()?.SetBool("isDead", true);
     }
 
