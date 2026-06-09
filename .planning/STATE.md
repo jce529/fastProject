@@ -2,16 +2,16 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-current_phase: 02
-current_plan: 1
-status: unknown
-stopped_at: Phase 3 context gathered
-last_updated: "2026-06-08T07:04:56.759Z"
+current_phase: 03
+current_plan: 4
+status: in-progress
+stopped_at: "03-04-T3 checkpoint:human-action — Projectile prefab + RangedEnemy scene setup requires Unity Editor"
+last_updated: "2026-06-09T13:51:18Z"
 progress:
   total_phases: 4
   completed_phases: 2
-  total_plans: 7
-  completed_plans: 7
+  total_plans: 11
+  completed_plans: 9
 ---
 
 # Project State: Fast (가칭)
@@ -32,11 +32,11 @@ progress:
 
 ## Current Position
 
-Phase: 02 (combat-core) — EXECUTING
-Plan: 2 of 4
-**Current Phase:** 02
-**Current Plan:** 1
-**Phase Status:** Complete (3 of 3 plans done)
+Phase: 03 (enemy-system) — EXECUTING
+Plan: 4 of 4
+**Current Phase:** 03
+**Current Plan:** 4
+**Phase Status:** In Progress (03-01 done, 03-02 done, 03-03 in-progress, 03-04 code complete — T3/T4 need human)
 
 ```
 Progress: [X] Phase 1  [ ] Phase 2  [ ] Phase 3  [ ] Phase 4
@@ -68,6 +68,7 @@ Progress: [X] Phase 1  [ ] Phase 2  [ ] Phase 3  [ ] Phase 4
 | Phase 02-combat-core P02-01 | 25 | 2 tasks | 7 files |
 | Phase 02-combat-core P02-02 | 3 | 2 tasks | 3 files |
 | Phase 02-combat-core P02-03 | 15 | 2 tasks | 8 files |
+| Phase 03-enemy-system P03-04 | ~8min | 2 tasks | 2 files |
 
 ## Accumulated Context
 
@@ -86,6 +87,8 @@ Progress: [X] Phase 1  [ ] Phase 2  [ ] Phase 3  [ ] Phase 4
 | WaitForSecondsRealtime for i-frames (01-03) | Phase 2 sets timeScale ~0.2; WaitForSeconds would extend 1s to 5s. WaitForSecondsRealtime is timeScale-immune. |
 | Vector3 _lastSafePosition value type (01-03) | Storing Transform reference would become stale null ref when floor objects recycled in v2. Vector3 copy is immune (Pitfall 14). |
 | Layer constants hardcoded 7/8 (01-03) | Matches TagManager.asset from Plan 01. Avoids LayerMask.NameToLayer() string lookup overhead each call. |
+| RangedEnemy moveSpeed=0f default (03-04) | Stationary at start per D-10 — Chase state immediately telegraphs (Risk 6 mitigation: no distance-check needed). Inspector-adjustable post-playtest. |
+| TelegraphAndFire uses yield return null + unscaledDeltaTime (03-04) | Frame-by-frame alpha accumulation matches RangeDisplay pattern, fully timeScale-immune for slow-mo compatibility. |
 
 ### Technical Constraints to Enforce Every Phase
 
@@ -146,8 +149,8 @@ None.
 4. Check which phase plan exists in `.planning/` (e.g., `PLAN-phase-1.md`)
 5. Continue from Current Phase listed above
 
-**Last session:** 2026-06-08
-**Stopped at:** Phase 3 context gathered + quick task 260608-09z: Fan 공격방식 마우스 방향 기준으로 변경
+**Last session:** 2026-06-09
+**Stopped at:** 03-04 T3 checkpoint — ProjectileController.cs + RangedEnemy.cs code complete (T1+T2 committed). T3 requires Unity Editor: Projectile prefab creation + RangedEnemy scene setup.
 
 ---
 *State initialized: 2026-05-27*
