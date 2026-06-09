@@ -160,6 +160,37 @@ Material:
     - _RendererColor: {r: 1, g: 1, b: 1, a: 1}
   m_BuildTextureStacks: []
   m_AllowLocking: 1
+--- !u!1 &39141184
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 39141185}
+  m_Layer: 0
+  m_Name: MeleeEnemy
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &39141185
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 39141184}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -5.2274, y: -1.00163, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &80822777
 GameObject:
   m_ObjectHideFlags: 0
@@ -732,10 +763,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1d4691d140c341a46bd8d0c543069313, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::RangeDisplay
-  linearLength: 10
   lineWidth: 0.12
-  fanRadius: 7
-  fanHalfAngleDeg: 55
   arcSegments: 24
   circleSegments: 36
   _leftBeam: {fileID: 1485462211}
@@ -890,7 +918,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::CameraFollow
   target: {fileID: 1394403462}
   offset: {x: 0, y: 1, z: -10}
@@ -2105,3 +2133,4 @@ SceneRoots:
   - {fileID: 80822778}
   - {fileID: 353645807}
   - {fileID: 182679357}
+  - {fileID: 39141185}
