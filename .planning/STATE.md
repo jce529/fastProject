@@ -136,6 +136,7 @@ None.
 | 260607-vot | 카메라가 플레이어를 따라가도록 구현 — CameraFollow 컴포넌트를 Main Camera에 부착, Player Transform 연결 | 2026-06-07 | a2557fc | [260607-vot](./quick/260607-vot-camera-follow-player/) |
 | 260608-lb9 | CombatController 공개 프로퍼티 3개 추가 + RangeDisplay 중복 SerializeField 제거 — 단일 진실 소스 연결 | 2026-06-08 | 3af0077 | [260608-lb9](./quick/260608-lb9-combatcontroller-fanradius-fanhalfangled/) |
 | 260608-09z | Fan 공격방식 마우스 방향 기준으로 변경 — RangeDisplay 표시 + CombatController 판정 모두 교체 | 2026-06-08 | 3713b57 | [260608-09z](./quick/260608-09z-fan/) |
+| 260609-wvp | Enemy 오브젝트들이 죽으면 삭제하지 않고 Die 애니메이션 재생 후 죽은 상태로 씬에 남겨놓기 | 2026-06-09 | — | [260609-wvp-enemy-die](./quick/260609-wvp-enemy-die/) |
 
 ---
 
@@ -151,6 +152,7 @@ None.
 
 **Last session:** 2026-06-09
 **Stopped at:** 03-04 T3 checkpoint — ProjectileController.cs + RangedEnemy.cs code complete (T1+T2 committed). T3 requires Unity Editor: Projectile prefab creation + RangedEnemy scene setup.
+**Last activity:** 2026-06-09 - Completed quick task 260609-wvp: Enemy 오브젝트들이 죽으면 삭제하지 않고 Die 애니메이션 재생 후 죽은 상태로 씬에 남겨놓기
 
 ---
 *State initialized: 2026-05-27*

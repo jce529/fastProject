@@ -75,7 +75,13 @@ public class MeleeEnemy : MonoBehaviour, IEnemy
         if (!IsAlive) return;
         IsAlive = false;
         if (_attackCoroutine != null) StopCoroutine(_attackCoroutine);
-        gameObject.SetActive(false);
+        if (_meleeHitbox     != null) _meleeHitbox.enabled    = false;
+        if (_exclamationIcon != null) _exclamationIcon.enabled = false;
+
+        // Freeze physics so corpse stays in place
+        if (_rb != null) { _rb.linearVelocity = Vector2.zero; _rb.bodyType = RigidbodyType2D.Static; }
+
+        GetComponent<Animator>()?.SetBool("isDead", true);
     }
 
     public void ClearHighlight()
@@ -190,7 +196,7 @@ public class MeleeEnemy : MonoBehaviour, IEnemy
         if (_meleeHitbox == null || !_meleeHitbox.enabled) return;
         if (other.CompareTag("Player"))
         {
-            PlayerController.OnPlayerDeath?.Invoke();
+            PlayerController.TriggerDeath();
         }
     }
 

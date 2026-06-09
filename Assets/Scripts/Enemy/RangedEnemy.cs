@@ -88,7 +88,11 @@ public class RangedEnemy : MonoBehaviour, IEnemy
         IsAlive = false;
         if (_telegraphCoroutine != null) StopCoroutine(_telegraphCoroutine);
         if (_aimLine != null) _aimLine.enabled = false;
-        gameObject.SetActive(false);
+
+        // Freeze physics so corpse stays in place
+        if (_rb != null) { _rb.linearVelocity = Vector2.zero; _rb.bodyType = RigidbodyType2D.Static; }
+
+        GetComponent<Animator>()?.SetBool("isDead", true);
     }
 
     public void ClearHighlight()
