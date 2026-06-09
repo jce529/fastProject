@@ -3,10 +3,10 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 current_phase: 03
-current_plan: 3
-status: checkpoint
-stopped_at: "03-03-T2 — MeleeEnemy.cs complete (623910c); T2/T3 require Unity Editor (human)"
-last_updated: "2026-06-09T13:50:42Z"
+current_plan: 4
+status: in-progress
+stopped_at: "03-04-T3 checkpoint:human-action — Projectile prefab + RangedEnemy scene setup requires Unity Editor"
+last_updated: "2026-06-09T13:51:18Z"
 progress:
   total_phases: 4
   completed_phases: 2
@@ -33,10 +33,10 @@ progress:
 ## Current Position
 
 Phase: 03 (enemy-system) — EXECUTING
-Plan: 3 of 4
+Plan: 4 of 4
 **Current Phase:** 03
-**Current Plan:** 3
-**Phase Status:** In Progress (03-01 done, 03-02 done, 03-03 checkpoint at T2)
+**Current Plan:** 4
+**Phase Status:** In Progress (03-01 done, 03-02 done, 03-03 in-progress, 03-04 code complete — T3/T4 need human)
 
 ```
 Progress: [X] Phase 1  [ ] Phase 2  [ ] Phase 3  [ ] Phase 4
@@ -68,7 +68,7 @@ Progress: [X] Phase 1  [ ] Phase 2  [ ] Phase 3  [ ] Phase 4
 | Phase 02-combat-core P02-01 | 25 | 2 tasks | 7 files |
 | Phase 02-combat-core P02-02 | 3 | 2 tasks | 3 files |
 | Phase 02-combat-core P02-03 | 15 | 2 tasks | 8 files |
-| Phase 03-enemy-system P03-03 | 98s | 1 task (T1) | 1 file |
+| Phase 03-enemy-system P03-04 | ~8min | 2 tasks | 2 files |
 
 ## Accumulated Context
 
@@ -87,7 +87,8 @@ Progress: [X] Phase 1  [ ] Phase 2  [ ] Phase 3  [ ] Phase 4
 | WaitForSecondsRealtime for i-frames (01-03) | Phase 2 sets timeScale ~0.2; WaitForSeconds would extend 1s to 5s. WaitForSecondsRealtime is timeScale-immune. |
 | Vector3 _lastSafePosition value type (01-03) | Storing Transform reference would become stale null ref when floor objects recycled in v2. Vector3 copy is immune (Pitfall 14). |
 | Layer constants hardcoded 7/8 (01-03) | Matches TagManager.asset from Plan 01. Avoids LayerMask.NameToLayer() string lookup overhead each call. |
-| MeleeEnemy OnTriggerEnter2D on root, hitbox.enabled guard (03-03) | Child hitbox collider raises trigger on root MonoBehaviour; _meleeHitbox.enabled guard ensures only the active attack window fires the death event |
+| RangedEnemy moveSpeed=0f default (03-04) | Stationary at start per D-10 — Chase state immediately telegraphs (Risk 6 mitigation: no distance-check needed). Inspector-adjustable post-playtest. |
+| TelegraphAndFire uses yield return null + unscaledDeltaTime (03-04) | Frame-by-frame alpha accumulation matches RangeDisplay pattern, fully timeScale-immune for slow-mo compatibility. |
 
 ### Technical Constraints to Enforce Every Phase
 
@@ -149,7 +150,7 @@ None.
 5. Continue from Current Phase listed above
 
 **Last session:** 2026-06-09
-**Stopped at:** 03-03 checkpoint at T2 — MeleeEnemy.cs created (623910c), T2/T3 require Unity Editor (human)
+**Stopped at:** 03-04 T3 checkpoint — ProjectileController.cs + RangedEnemy.cs code complete (T1+T2 committed). T3 requires Unity Editor: Projectile prefab creation + RangedEnemy scene setup.
 
 ---
 *State initialized: 2026-05-27*
