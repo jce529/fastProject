@@ -200,6 +200,7 @@ public class RangedEnemy : MonoBehaviour, IEnemy
         // Hide aim line, fire projectile
         if (_aimLine != null) _aimLine.enabled = false;
 
+        GetComponent<Animator>()?.SetTrigger("isAttacking");
         FireProjectile(aimDir, origin);
 
         _state = EnemyState.Idle;

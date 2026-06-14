@@ -169,6 +169,7 @@ public class MeleeEnemy : MonoBehaviour, IEnemy
 
         if (_exclamationIcon != null) _exclamationIcon.enabled = false;
         _state = EnemyState.Attack;
+        GetComponent<Animator>()?.SetTrigger("isAttacking");
 
         // Activate melee hitbox briefly (D-07, D-08)
         if (_meleeHitbox != null)
