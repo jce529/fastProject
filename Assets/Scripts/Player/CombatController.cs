@@ -327,7 +327,7 @@ public class CombatController : MonoBehaviour
         }
         else
         {
-            // Fan attack uses mouse direction (same as Linear)
+            // Fan attack uses mouse-driven direction (matches RangeDisplay)
             UnityEngine.InputSystem.Mouse mouse = UnityEngine.InputSystem.Mouse.current;
             Vector2 mousePos2 = mouse != null ? mouse.position.ReadValue() : (Vector2)_mainCamera.WorldToScreenPoint(origin);
             Vector3 mouseWorld2 = _mainCamera.ScreenToWorldPoint(new Vector3(mousePos2.x, mousePos2.y, Mathf.Abs(_mainCamera.transform.position.z)));

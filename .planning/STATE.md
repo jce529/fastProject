@@ -130,7 +130,9 @@ None.
 | 260607-19i | FastPlayerAnimator에 IsDashing Bool 파라미터 + Dash 스테이트 + AnyState→Dash / Dash→Idle 트랜지션 추가 | 2026-06-07 | e23f2cf | [260607-19i](./quick/260607-19i-fastplayeranimator-controller-isdashing-/) |
 | 260607-kif | AttackType 디버그 오버레이 생성 — OnGUI 기반 Linear/Fan 실시간 표시 + Player 자동 부착 에디터 스크립트 | 2026-06-07 | aff97da | [260607-kif](./quick/260607-kif-debug-attack-type-tracker/) |
 | 260607-ku4 | AttackTypeSelector.SetType null-instance 가드 제거 — Selected 무조건 갱신, RefreshHighlights null-conditional | 2026-06-07 | fb1e0b6 | [260607-ku4](./quick/260607-ku4-attacktypeselector-settype-instance-null/) |
+| 260607-vot | 카메라가 플레이어를 따라가도록 구현 — CameraFollow 컴포넌트를 Main Camera에 부착, Player Transform 연결 | 2026-06-07 | a2557fc | [260607-vot](./quick/260607-vot-camera-follow-player/) |
 | 260608-lb9 | CombatController 공개 프로퍼티 3개 추가 + RangeDisplay 중복 SerializeField 제거 — 단일 진실 소스 연결 | 2026-06-08 | 3af0077 | [260608-lb9](./quick/260608-lb9-combatcontroller-fanradius-fanhalfangled/) |
+| 260608-09z | Fan 공격방식 마우스 방향 기준으로 변경 — RangeDisplay 표시 + CombatController 판정 모두 교체 | 2026-06-08 | 3713b57 | [260608-09z](./quick/260608-09z-fan/) |
 
 ---
 
@@ -144,8 +146,8 @@ None.
 4. Check which phase plan exists in `.planning/` (e.g., `PLAN-phase-1.md`)
 5. Continue from Current Phase listed above
 
-**Last session:** 2026-06-08T07:04:56.753Z
-**Stopped at:** Phase 3 context gathered
+**Last session:** 2026-06-08
+**Stopped at:** Phase 3 context gathered + quick task 260608-09z: Fan 공격방식 마우스 방향 기준으로 변경
 
 ---
 *State initialized: 2026-05-27*
