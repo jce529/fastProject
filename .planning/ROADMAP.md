@@ -137,5 +137,18 @@ Plans:
 - HUD text updates: `TextMeshProUGUI.SetText("{0}", value)` — no string allocation
 
 ---
+
+## Backlog
+
+### Phase 999.1: v2 절차적 타워 생성 시스템 (BACKLOG)
+
+**Goal:** [Captured for future planning] 끝없이 올라가는 탑의 각 층(floor)을 자동으로 생성하는 시스템. 현재 층 + 다음 층만 유지하고 이전 층은 제거하는 모바일 메모리 관리 전략 필요. v1에서는 "Floor system deferred to v2" 결정에 따라 단일 테스트룸으로 진행 중이며, 이 항목은 v2 마일스톤 시작 시 설계/계획 진행.
+**Requirements:** TBD
+**Plans:** 0 plans
+
+Plans:
+- [ ] TBD (promote with /gsd:review-backlog when ready)
+
+---
 *Roadmap created: 2026-05-27*
 *Last updated: 2026-06-08 after Phase 3 planning*
