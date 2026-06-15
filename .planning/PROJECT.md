@@ -12,21 +12,19 @@
 
 ### Validated
 
-(None yet — ship to validate)
+**Validated in Phase 2: Combat Core**
+- [x] 공격 버튼 누름 시 슬로우 모션 발동, 공격 범위 표시, 손을 떼면 돌진 공격 (ATCK-02/03, FEEL-01 hit-freeze)
+- [x] 별도 버튼으로 구르기 발동 — 무적 판정 + 쿨타임, 슬로우 중에도 사용 가능 (MOVE-03)
+- [x] 직선형 / 부채꼴형 두 가지 공격 타입 — AttackTypeZone 기반 인게임 전환으로 구현 (사전 버튼 선택 → 존 진입 전환으로 설계 변경, ATCK-01)
+- [x] 공격 범위 안 가장 가까운 적 자동 선택 후 돌진 — 돌진 중 무적 (ATCK-03)
+- [x] 범위 안 적 없으면 헛베기 — 검 휘두르기 + 이동불가 (적 처치 성공보다 긴 딜레이) (ATCK-04)
+- [x] 시간정지 게이지: 자동 회복 + 적 처치 시 회복 (ATCK-05)
 
 ### Active
 
 **플레이어 조작**
 - [ ] 플레이어가 빠르게 좌우 이동 및 점프할 수 있다
-- [ ] 공격 버튼 누름 시 슬로우 모션 발동, 공격 범위 표시, 손을 떼면 돌진 공격
-- [ ] 별도 버튼으로 구르기 발동 — 무적 판정 + 쿨타임, 슬로우 중에도 사용 가능
 - [ ] 낙사 시 사망하지 않고 마지막 플랫폼으로 복귀 + 짧은 무적
-
-**공격 시스템**
-- [ ] 직선형 / 부채꼴형 두 가지 공격 타입 중 게임 시작 전 선택 (단순 버튼 2개)
-- [ ] 공격 범위 안 가장 가까운 적 자동 선택 후 돌진 — 돌진 중 무적
-- [ ] 범위 안 적 없으면 헛베기 (적 처치 성공보다 긴 딜레이)
-- [ ] 시간정지 게이지: 자동 회복 + 적 처치 시 회복, 게이지 소진 시 슬로우 해제되나 공격 입력은 유지
 
 **적**
 - [ ] 근접형 적: 접근 후 공격 예고 모션 → 근접 공격 (원샷원킬 양방향)
@@ -64,7 +62,7 @@
 5. 적을 모두 죽이지 않아도 되는 등반 플레이가 재미있는가?
 6. 낙사 복귀 방식이 액션감을 해치지 않는가?
 
-**코드베이스 현황:** Unity 기본 씬(SampleScene) 외 게임 로직 없음. 패키지는 모두 설치된 상태.
+**코드베이스 현황:** Phase 1 (이동/낙사복구) + Phase 2 (전투 코어: 슬로우모션 대시처치, 게이지, 구르기, 히트프리즈) 완료. AttackTypeZone 기반 인게임 타입 전환, RangeDisplay, RollController, CombatController, GaugeController 구현됨.
 
 ## Constraints
 
@@ -102,4 +100,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-05-27 after initialization*
+*Last updated: 2026-06-15 after Phase 2 completion*
