@@ -37,7 +37,6 @@ public class PlayerController : MonoBehaviour
     private InputAction _moveAction;
     private InputAction _jumpAction;
     private bool _isGrounded;
-    private bool _jumpHeld;
 
     // -- Cached transform for ground check pivot ---------------------------------
     private Transform _transform;
@@ -78,7 +77,6 @@ public class PlayerController : MonoBehaviour
     {
         if (!_isGrounded) return;
         _rb.linearVelocity = new Vector2(_rb.linearVelocity.x, jumpForce);
-        _jumpHeld = true;
     }
 
     private void OnJumpCanceled(InputAction.CallbackContext ctx)
@@ -91,7 +89,6 @@ public class PlayerController : MonoBehaviour
                 _rb.linearVelocity.y * jumpCutMultiplier
             );
         }
-        _jumpHeld = false;
     }
 
     // -- Physics update ----------------------------------------------------------

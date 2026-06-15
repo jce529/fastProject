@@ -67,6 +67,7 @@ public class CombatController : MonoBehaviour
     // -- Enemy detection buffer (pre-allocated — no GC per frame) ------------------
     private readonly Collider2D[] _hitBuffer = new Collider2D[16];
     private int _enemyLayerMask;
+    private ContactFilter2D _enemyFilter;
     /// <summary>[HIGH — Gemini] Layer mask for environment obstacles (Default layer = platforms/walls).</summary>
     private int _obstacleMask;
 
@@ -85,6 +86,8 @@ public class CombatController : MonoBehaviour
 
         // Cache layer masks once in Awake — avoid NameToLayer in Update (ROADMAP constraint)
         _enemyLayerMask = LayerMask.GetMask("Enemy");
+        _enemyFilter.SetLayerMask(_enemyLayerMask);
+        _enemyFilter.useTriggers = true;
         // [HIGH — Gemini] Default layer contains platforms and walls for the obstacle linecast.
         _obstacleMask   = LayerMask.GetMask("Default");
     }
@@ -334,7 +337,7 @@ public class CombatController : MonoBehaviour
         }
 
         // Pre-allocated buffer — no GC (ROADMAP Stack Constraint)
-        int count = Physics2D.OverlapCircleNonAlloc(origin, searchRadius, _hitBuffer, _enemyLayerMask);
+        int count = Physics2D.OverlapCircle(origin, searchRadius, _enemyFilter, _hitBuffer);
 
         DummyEnemy nearest   = null;
         float      bestSqDist = float.MaxValue;
