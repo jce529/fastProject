@@ -1,13 +1,12 @@
 using UnityEngine;
 
 /// <summary>
-/// ATCK-05: Time-stop gauge that drains while Attack is held and regens when released.
-/// Exposed as a [0, 1] float for HUD (Phase 4) to read directly.
+/// ATCK-05: 크로노 게이지(Chrono Gauge) — Attack을 누르는 동안 소모되고, 떼면 자동 충전.
+/// HUD (Phase 4)가 직접 읽는 [0, 1] float 값으로 노출.
 ///
-/// All timing uses Time.unscaledDeltaTime — drain rate is independent of timeScale.
-/// This means the gauge drains at the same wall-clock speed during slow-motion as in normal time.
+/// 모든 타이밍은 Time.unscaledDeltaTime 기준 — 슬로우 모션 중에도 실제 시간 속도로 소모.
 /// </summary>
-public class GaugeController : MonoBehaviour
+public class ChronoGaugeController : MonoBehaviour
 {
     [SerializeField] private float drainPerSecond = 0.25f; // 4 seconds to empty
     [SerializeField] private float regenPerSecond = 0.15f; // ~6.7 seconds to full
