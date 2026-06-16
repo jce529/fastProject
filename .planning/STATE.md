@@ -2,16 +2,16 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-current_phase: 03
-current_plan: 4
-status: in-progress
-stopped_at: "03-04-T3 checkpoint:human-action — Projectile prefab + RangedEnemy scene setup requires Unity Editor"
-last_updated: "2026-06-09T13:51:18Z"
+current_phase: 04
+current_plan: 1
+status: checkpoint
+stopped_at: "04-01-T3 checkpoint — Canvas HUD hierarchy requires Unity Editor"
+last_updated: "2026-06-16T07:59:31Z"
 progress:
-  total_phases: 4
-  completed_phases: 2
-  total_plans: 11
-  completed_plans: 9
+  total_phases: 5
+  completed_phases: 3
+  total_plans: 13
+  completed_plans: 11
 ---
 
 # Project State: Fast (가칭)
@@ -32,11 +32,11 @@ progress:
 
 ## Current Position
 
-Phase: 03 (enemy-system) — EXECUTING
-Plan: 4 of 4
-**Current Phase:** 03
-**Current Plan:** 4
-**Phase Status:** In Progress (03-01 done, 03-02 done, 03-03 in-progress, 03-04 code complete — T3/T4 need human)
+Phase: 04 (hud-game-loop) — IN PROGRESS
+Plan: 1 of 2
+**Current Phase:** 04
+**Current Plan:** 1
+**Phase Status:** Checkpoint at T3 — T1/T2 code complete, T3 requires Unity Editor GUI
 
 ```
 Progress: [X] Phase 1  [ ] Phase 2  [ ] Phase 3  [ ] Phase 4
@@ -69,6 +69,7 @@ Progress: [X] Phase 1  [ ] Phase 2  [ ] Phase 3  [ ] Phase 4
 | Phase 02-combat-core P02-02 | 3 | 2 tasks | 3 files |
 | Phase 02-combat-core P02-03 | 15 | 2 tasks | 8 files |
 | Phase 03-enemy-system P03-04 | ~8min | 2 tasks | 2 files |
+| Phase 04-hud-game-loop P04-01 | ~5min | 2 tasks (T3 pending human) | 2 files |
 
 ## Accumulated Context
 
@@ -89,6 +90,9 @@ Progress: [X] Phase 1  [ ] Phase 2  [ ] Phase 3  [ ] Phase 4
 | Layer constants hardcoded 7/8 (01-03) | Matches TagManager.asset from Plan 01. Avoids LayerMask.NameToLayer() string lookup overhead each call. |
 | RangedEnemy moveSpeed=0f default (03-04) | Stationary at start per D-10 — Chase state immediately telegraphs (Risk 6 mitigation: no distance-check needed). Inspector-adjustable post-playtest. |
 | TelegraphAndFire uses yield return null + unscaledDeltaTime (03-04) | Frame-by-frame alpha accumulation matches RangeDisplay pattern, fully timeScale-immune for slow-mo compatibility. |
+| FloorManager as static class, not MonoBehaviour (04-01) | Data-only int needs no scene lifecycle; static field is sufficient and avoids scene coupling |
+| (AttackType)(-1) dirty-check sentinel (04-01) | Forces first-frame label update; -1 is never a valid AttackType so it always differs on first Update() |
+| SetText("{0}", int) over string interpolation (04-01) | TMP's int overload uses internal char buffer — zero allocation per frame vs. $"" allocating new string every frame |
 
 ### Technical Constraints to Enforce Every Phase
 
@@ -151,9 +155,8 @@ None.
 4. Check which phase plan exists in `.planning/` (e.g., `PLAN-phase-1.md`)
 5. Continue from Current Phase listed above
 
-**Last session:** 2026-06-09
-**Stopped at:** 03-04 T3 checkpoint — ProjectileController.cs + RangedEnemy.cs code complete (T1+T2 committed). T3 requires Unity Editor: Projectile prefab creation + RangedEnemy scene setup.
-**Last activity:** 2026-06-14 - Completed quick task 260609-x6d: 두 Enemy 오브젝트에 공격 애니메이션 추가 — MeleeEnemy에 SwordAttack.anim, RangedEnemy에 GunFire.anim 연결
+**Last session:** 2026-06-16T07:59:31Z
+**Stopped at:** 04-01-T3 checkpoint — FloorManager.cs and HUDController.cs committed; Canvas hierarchy awaits Unity Editor
 
 ---
 *State initialized: 2026-05-27*
