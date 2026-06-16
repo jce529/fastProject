@@ -137,5 +137,25 @@ Plans:
 - HUD text updates: `TextMeshProUGUI.SetText("{0}", value)` — no string allocation
 
 ---
+
+## Backlog
+
+### Phase 999.1: 절차적 맵 생성 — 무한 스테이지 (BACKLOG)
+
+**Goal:** 청크 기반 절차적 생성으로 플레이어가 탑을 무한히 올라갈 수 있는 스테이지 구성. FloorManager가 플레이어 고도를 감지해 새 층 스폰 + 지나간 층 파괴(모바일 메모리 관리).
+**Requirements:** TBD (v2 마일스톤에서 정의 예정)
+**Plans:** 0 plans
+
+**Design Notes (captured 2026-06-16):**
+- 4~6종 층 레이아웃 프리팹 풀 → 가중치 랜덤 선택
+- 플레이어 고도 임계값 도달 시 위로 새 층 스폰
+- 현재 층 + 다음 층만 유지, 이전 층 파괴 (CLAUDE.md 모바일 메모리 제약)
+- 층 번호 → 적 수/배치 난이도 스케일링
+- HUD 층 카운터(UI-01)와 연동 필요
+
+Plans:
+- [ ] TBD (promote with /gsd:review-backlog when ready)
+
+---
 *Roadmap created: 2026-05-27*
-*Last updated: 2026-06-08 after Phase 3 planning*
+*Last updated: 2026-06-16 after adding backlog item 999.1*
