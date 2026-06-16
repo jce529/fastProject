@@ -7,7 +7,7 @@ using UnityEngine;
 /// D-09: LineRenderer reuse from RangeDisplay pattern.
 /// D-10: moveSpeed=0f default — stationary. Inspector-adjustable post-playtest.
 /// D-11, D-12: Projectile via ProjectileController.
-/// Risk 6 mitigation: detectionRadius == telegraph trigger distance (moveSpeed=0 so Chase is immediate).
+/// D-10: 0 = stationary. Chase waits for player to enter aimLineLength before telegraphing.
 /// </summary>
 public class RangedEnemy : MonoBehaviour, IEnemy
 {
@@ -139,10 +139,9 @@ public class RangedEnemy : MonoBehaviour, IEnemy
             _rb.MovePosition(new Vector2(newX, _rb.position.y));
         }
 
-        // Detection check — transition immediately to Telegraph (Risk 6 mitigation: skip Chase)
         if (IsPlayerInRange(detectionRadius))
         {
-            _state = EnemyState.Chase; // Chase will immediately → Telegraph when player found
+            _state = EnemyState.Chase;
         }
     }
 
@@ -154,9 +153,17 @@ public class RangedEnemy : MonoBehaviour, IEnemy
             if (_playerTransform == null) { _state = EnemyState.Idle; return; }
         }
 
-        // RangedEnemy with moveSpeed=0: no movement in Chase, immediately telegraph
-        // (Risk 6 mitigation: detection radius == telegraph trigger distance)
-        _telegraphCoroutine = StartCoroutine(TelegraphAndFire());
+        if (!IsPlayerInRange(detectionRadius))
+        {
+            _playerTransform = null;
+            _state = EnemyState.Idle;
+            return;
+        }
+
+        if (IsPlayerInRange(aimLineLength) && _telegraphCoroutine == null)
+        {
+            _telegraphCoroutine = StartCoroutine(TelegraphAndFire());
+        }
     }
 
     private IEnumerator TelegraphAndFire()
