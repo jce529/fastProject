@@ -8,7 +8,7 @@ using UnityEngine;
 /// dash to nearest enemy (MovePosition over 3 FixedUpdate frames), whiff branch,
 /// hit-freeze sequence, and _isBusy lockout to prevent re-entrance.
 ///
-/// Does NOT own the gauge — GaugeController handles drain/regen.
+/// Does NOT own the gauge — ChronoGaugeController handles drain/regen.
 /// Does NOT own range display — RangeDisplay (Plan 02-03) handles visual feedback.
 ///
 /// Review fixes applied:
@@ -19,7 +19,7 @@ using UnityEngine;
 /// </summary>
 [RequireComponent(typeof(Rigidbody2D))]
 [RequireComponent(typeof(InvincibilityHandler))]
-[RequireComponent(typeof(GaugeController))]
+[RequireComponent(typeof(ChronoGaugeController))]
 public class CombatController : MonoBehaviour
 {
     // -- Tunable values (expose for playtest tuning) --------------------------------
@@ -43,7 +43,7 @@ public class CombatController : MonoBehaviour
     // -- Component references -------------------------------------------------------
     private Rigidbody2D          _rb;
     private InvincibilityHandler _invincibilityHandler;
-    private GaugeController      _gauge;
+    private ChronoGaugeController _gauge;
     private SpriteRenderer       _spriteRenderer;
     private TrailRenderer        _trailRenderer;
     private Camera               _mainCamera;
@@ -77,7 +77,7 @@ public class CombatController : MonoBehaviour
     {
         _rb                   = GetComponent<Rigidbody2D>();
         _invincibilityHandler = GetComponent<InvincibilityHandler>();
-        _gauge                = GetComponent<GaugeController>();
+        _gauge                = GetComponent<ChronoGaugeController>();
         _spriteRenderer       = GetComponent<SpriteRenderer>();
         _trailRenderer        = GetComponentInChildren<TrailRenderer>();
         _mainCamera           = Camera.main;

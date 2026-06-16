@@ -7,7 +7,7 @@ public class HUDController : MonoBehaviour
     [SerializeField] private TextMeshProUGUI _floorLabel;
     [SerializeField] private Image           _gaugeFill;
     [SerializeField] private TextMeshProUGUI _attackTypeLabel;
-    [SerializeField] private GaugeController _gauge;
+    [SerializeField] private ChronoGaugeController _gauge;
 
     private AttackType _lastType = (AttackType)(-1);
 
