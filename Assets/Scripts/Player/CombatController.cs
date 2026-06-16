@@ -56,7 +56,7 @@ public class CombatController : MonoBehaviour
     private bool  _isBusy;    // Prevents re-entrance during dash/whiff/lockout coroutines
     private bool  _isSlowMo;
     private float _slowMoStartTime; // [MEDIUM — Gemini] unscaled timestamp when slow-mo began
-    private bool  _slowMoCancelledByRoll; // true: 이번 슬로우모션이 Roll로 취소됨
+    private bool  _isAttackPending; // true: attack 버튼이 눌린 채 대시 대기 중
     private float _attackCooldown;        // 처치 후 공격 재사용 대기 (unscaledDeltaTime)
 
     // -- Range display accessors (RangeDisplay reads these — single source of truth) ----
@@ -107,18 +107,18 @@ public class CombatController : MonoBehaviour
             _attackCooldown -= Time.unscaledDeltaTime;
 
         // Roll 입력이 있으면 슬로우모션 취소 (대시는 발동하지 않음)
-        if (_isSlowMo && input.RollPressed)
+        if (_isAttackPending && input.RollPressed)
         {
             ExitSlowMotion();
-            _slowMoCancelledByRoll = true;
+            ExitAttackPending();
             return;
         }
 
         // Gauge drains every frame Attack is held (uses unscaledDeltaTime internally)
-        _gauge.SetDraining(input.IsAttackDown && _attackCooldown <= 0f);
+        _gauge.SetDraining(input.IsAttackDown && _isAttackPending && _attackCooldown <= 0f);
 
         // Enter slow-motion on the frame Attack button is first pressed
-        if (input.AttackHeld && !_isSlowMo && _attackCooldown <= 0f)
+        if (input.AttackHeld && !_isSlowMo && !_isAttackPending && _attackCooldown <= 0f)
             EnterSlowMotion();
 
         // [MEDIUM — Gemini] Safety timeout: force-exit slow-mo if it has lasted longer
@@ -127,8 +127,8 @@ public class CombatController : MonoBehaviour
         if (_isSlowMo && Time.unscaledTime > _slowMoStartTime + maxSlowMoDuration)
             ExitSlowMotion();
 
-        // 슬로우모션 유지 중 — 가장 가까운 적 하이라이트 갱신 (D-04)
-        if (_isSlowMo && !_isBusy)
+        // 공격 대기 중 — 가장 가까운 적 하이라이트 갱신 (D-04)
+        if (_isAttackPending && !_isBusy)
             UpdateHighlight(FindNearestEnemyInRange());
 
         // Gauge-empty auto-exit: slow-mo ends but player can still release to dash
@@ -136,24 +136,20 @@ public class CombatController : MonoBehaviour
             ExitSlowMotion();
 
         // Exit slow-motion if no longer holding (e.g. quick tap without release event)
-        if (_isSlowMo && !input.IsAttackDown && !input.AttackReleased)
+        if (_isAttackPending && !input.IsAttackDown && !input.AttackReleased)
+        {
             ExitSlowMotion();
+            ExitAttackPending();
+        }
 
         // Release event: start dash or whiff
-        if (input.AttackReleased)
+        if (input.AttackReleased && _isAttackPending)
         {
             Debug.Log("[Combat] Attack released. Checking dash condition.");
-            // ExitSlowMotion이 _lastHighlighted를 지우기 전에 캐시
             IEnemy cachedTarget = _lastHighlighted;
             if (_isSlowMo)
                 ExitSlowMotion();
-            // Roll로 슬로우모션이 취소된 경우 대시/whiff 발동 안 함
-            if (_slowMoCancelledByRoll)
-            {
-                Debug.Log("[Combat] Attack released but slowMo was cancelled by roll. Ignored.");
-                _slowMoCancelledByRoll = false;
-                return;
-            }
+            ExitAttackPending();
             StartCoroutine(DashOrWhiff(cachedTarget));
         }
     }
@@ -167,6 +163,7 @@ public class CombatController : MonoBehaviour
     private void EnterSlowMotion()
     {
         if (_isSlowMo) return; // Prevent double entry
+        _isAttackPending    = true;
         Time.timeScale      = slowTimeScale;
         Time.fixedDeltaTime = 0.02f * Time.timeScale; // always paired
         _isSlowMo           = true;
@@ -177,6 +174,7 @@ public class CombatController : MonoBehaviour
     /// <summary>
     /// Exit slow-motion. ALWAYS restores both timeScale AND fixedDeltaTime.
     /// Called BEFORE dash yields so MovePosition moves at full speed.
+    /// Does NOT hide range display — ExitAttackPending() owns that.
     /// </summary>
     private void ExitSlowMotion()
     {
@@ -184,11 +182,18 @@ public class CombatController : MonoBehaviour
         Time.timeScale      = 1f;
         Time.fixedDeltaTime = 0.02f; // restore standard fixed step
         _isSlowMo           = false;
-        
-        if (_rangeDisplay != null)
-            _rangeDisplay.Hide();
+    }
 
-        // Clear enemy highlight on exit
+    /// <summary>
+    /// End the attack waiting state: hide range display and clear enemy highlight.
+    /// Separated from ExitSlowMotion so gauge-empty only exits slow-mo while
+    /// keeping range display and dash-on-release alive.
+    /// </summary>
+    private void ExitAttackPending()
+    {
+        if (!_isAttackPending) return;
+        _isAttackPending = false;
+        _rangeDisplay?.Hide();
         if (_lastHighlighted != null)
         {
             _lastHighlighted.ClearHighlight();
@@ -229,7 +234,8 @@ public class CombatController : MonoBehaviour
     {
         Debug.Log("[Combat] ExecuteDash: ENTRANCE - Coroutine effectively started.");
 
-        if (target == null) {
+        if (target == null)
+        {
             Debug.LogError("[Combat] ExecuteDash: TARGET IS NULL at start! Aborting.");
             yield break;
         }
@@ -366,8 +372,7 @@ public class CombatController : MonoBehaviour
 
     /// <summary>
     /// Update enemy highlight (D-04): red on nearest, clear previous.
-    /// Called only from Update() while _isSlowMo is true — ensures highlight
-    /// persists until ExitSlowMotion() clears it, preventing one-frame flash.
+    /// Called while _isAttackPending — persists through slow-mo exit on gauge empty.
     /// </summary>
     private void UpdateHighlight(IEnemy nearest)
     {
@@ -393,7 +398,7 @@ public class CombatController : MonoBehaviour
         float dot = Vector2.Dot(attackDir, normalizedToTarget);
         float thresholdAngle = (AttackTypeSelector.Selected == AttackType.Linear) ? linearHalfAngleDeg : fanHalfAngleDeg;
         float cosHalf = Mathf.Cos(thresholdAngle * Mathf.Deg2Rad);
-        
+
         return dot >= cosHalf;
     }
 }

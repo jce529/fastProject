@@ -143,6 +143,7 @@ None.
 | 260609-wvp | Enemy 오브젝트들이 죽으면 삭제하지 않고 Die 애니메이션 재생 후 죽은 상태로 씬에 남겨놓기 | 2026-06-09 | — | [260609-wvp-enemy-die](./quick/260609-wvp-enemy-die/) |
 | 260609-x6d | 두 Enemy 오브젝트에 공격 애니메이션 추가 — MeleeEnemy에 SwordAttack.anim, RangedEnemy에 GunFire.anim 연결 | 2026-06-14 | 3b625ea, e86fa00 | [260609-x6d](./quick/260609-x6d-enemy-meleeenemy-swordattack-anim-ranged/) |
 | 260616-qlg | GaugeController 클래스 이름을 ChronoGaugeController로 변경 | 2026-06-16 | 9213d55, 91e7f1d | [260616-qlg](./quick/260616-qlg-gaugecontroller-chronogaugecontroller/) |
+| 260616-s3m | ChronoGauge 버그 2종 수정: HUDController 게이지 미반영 + 게이지 소진 시 범위 표시 유지 | 2026-06-16 | — | [260616-s3m](./quick/260616-s3m-chronogauge-hudcontroller/) |
 
 ---
 
@@ -158,6 +159,7 @@ None.
 
 **Last session:** 2026-06-16
 **Stopped at:** 04-01-T3 checkpoint — FloorManager.cs and HUDController.cs committed; Canvas hierarchy awaits Unity Editor
+**Last activity:** 2026-06-16 - Completed quick task 260616-s3m: ChronoGauge 버그 2종 수정
 
 ---
 *State initialized: 2026-05-27*

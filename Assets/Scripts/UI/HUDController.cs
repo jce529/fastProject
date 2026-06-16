@@ -11,10 +11,17 @@ public class HUDController : MonoBehaviour
 
     private AttackType _lastType = (AttackType)(-1);
 
+    private void Start()
+    {
+        if (_gauge == null)
+            _gauge = FindFirstObjectByType<ChronoGaugeController>();
+    }
+
     private void Update()
     {
         _floorLabel.SetText("Floor {0}", FloorManager.CurrentFloor);
-        _gaugeFill.fillAmount = _gauge.Value;
+        if (_gauge != null)
+            _gaugeFill.fillAmount = _gauge.Value;
 
         AttackType t = AttackTypeSelector.Selected;
         if (t != _lastType)
