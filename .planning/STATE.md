@@ -142,6 +142,7 @@ None.
 | 260608-09z | Fan 공격방식 마우스 방향 기준으로 변경 — RangeDisplay 표시 + CombatController 판정 모두 교체 | 2026-06-08 | 3713b57 | [260608-09z](./quick/260608-09z-fan/) |
 | 260609-wvp | Enemy 오브젝트들이 죽으면 삭제하지 않고 Die 애니메이션 재생 후 죽은 상태로 씬에 남겨놓기 | 2026-06-09 | — | [260609-wvp-enemy-die](./quick/260609-wvp-enemy-die/) |
 | 260609-x6d | 두 Enemy 오브젝트에 공격 애니메이션 추가 — MeleeEnemy에 SwordAttack.anim, RangedEnemy에 GunFire.anim 연결 | 2026-06-14 | 3b625ea, e86fa00 | [260609-x6d](./quick/260609-x6d-enemy-meleeenemy-swordattack-anim-ranged/) |
+| 260616-qlg | GaugeController 클래스 이름을 ChronoGaugeController로 변경 | 2026-06-16 | 9213d55, 91e7f1d | [260616-qlg](./quick/260616-qlg-gaugecontroller-chronogaugecontroller/) |
 
 ---
 
@@ -155,7 +156,7 @@ None.
 4. Check which phase plan exists in `.planning/` (e.g., `PLAN-phase-1.md`)
 5. Continue from Current Phase listed above
 
-**Last session:** 2026-06-16T07:59:31Z
+**Last session:** 2026-06-16
 **Stopped at:** 04-01-T3 checkpoint — FloorManager.cs and HUDController.cs committed; Canvas hierarchy awaits Unity Editor
 
 ---
