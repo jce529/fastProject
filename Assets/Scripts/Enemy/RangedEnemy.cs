@@ -35,6 +35,7 @@ public class RangedEnemy : MonoBehaviour, IEnemy
 
     // -- Runtime refs ---------------------------------------------------------------
     private Rigidbody2D  _rb;
+    private Animator     _animator;
     private LineRenderer _aimLine;
     private Transform    _playerTransform;
     private Vector3      _spawnPosition;
@@ -49,6 +50,7 @@ public class RangedEnemy : MonoBehaviour, IEnemy
     private void Awake()
     {
         _rb            = GetComponent<Rigidbody2D>();
+        _animator      = GetComponent<Animator>();
         _aimLine       = GetComponent<LineRenderer>();
         _spawnPosition = transform.position;
 
@@ -93,7 +95,7 @@ public class RangedEnemy : MonoBehaviour, IEnemy
         if (_rb != null) { _rb.linearVelocity = Vector2.zero; _rb.bodyType = RigidbodyType2D.Static; }
 
         foreach (var c in GetComponents<Collider2D>()) c.enabled = false;
-        GetComponent<Animator>()?.SetBool("isDead", true);
+        _animator?.SetBool("isDead", true);
     }
 
     public void ClearHighlight()
@@ -108,6 +110,7 @@ public class RangedEnemy : MonoBehaviour, IEnemy
     {
         if (_telegraphCoroutine != null) StopCoroutine(_telegraphCoroutine);
         if (_aimLine != null) _aimLine.enabled = false;
+        _animator?.SetBool("isMoving", false);
         _state = EnemyState.Idle;
     }
 
@@ -137,6 +140,11 @@ public class RangedEnemy : MonoBehaviour, IEnemy
             if (Mathf.Abs(newX - _spawnPosition.x) >= patrolHalfRange)
                 _patrolDir *= -1f;
             _rb.MovePosition(new Vector2(newX, _rb.position.y));
+            _animator?.SetBool("isMoving", true);
+        }
+        else
+        {
+            _animator?.SetBool("isMoving", false);
         }
 
         if (IsPlayerInRange(detectionRadius))
@@ -147,6 +155,7 @@ public class RangedEnemy : MonoBehaviour, IEnemy
 
     private void UpdateChase()
     {
+        _animator?.SetBool("isMoving", false);
         if (_playerTransform == null)
         {
             FindPlayerTransform();
@@ -169,6 +178,7 @@ public class RangedEnemy : MonoBehaviour, IEnemy
     private IEnumerator TelegraphAndFire()
     {
         _state = EnemyState.Telegraph;
+        _animator?.SetBool("isMoving", false);
 
         // Telegraph line starts from firePoint (if assigned), matching where the projectile actually fires from.
         Vector2 origin    = firePoint != null ? (Vector2)firePoint.position : (Vector2)transform.position;
@@ -207,7 +217,7 @@ public class RangedEnemy : MonoBehaviour, IEnemy
         // Hide aim line, fire projectile
         if (_aimLine != null) _aimLine.enabled = false;
 
-        GetComponent<Animator>()?.SetTrigger("isAttacking");
+        _animator?.SetTrigger("isAttacking");
         FireProjectile(aimDir, origin);
 
         _state = EnemyState.Idle;

@@ -147,6 +147,7 @@ None.
 | 260616-vo4 | HUDController.Start()에 _gauge null 체크 디버그 로그 추가 (원인 진단용 임시 코드) | 2026-06-16 | 1ad0e0f | [260616-vo4](./quick/260616-vo4-hudcontroller-start-gauge-null/) |
 | 260617-02t | RangeDisplay chestOffset 추가(가슴 오프셋 기준 origin) + RangedEnemy 텔레그래프 origin → firePoint 기준 교체 | 2026-06-17 | 0e779c5, f9b8827 | [260617-02t](./quick/260617-02t-rangedisplay-rangedenemy-transform-posit/) |
 | 260617-0el | RangedEnemy detectionRadius(감지)/aimLineLength(공격 트리거) 분리 — Chase 중 aimLineLength 진입 시에만 텔레그래프 시작 | 2026-06-17 | bd63875 | [260617-0el](./quick/260617-0el-rangedenemy-detectionradius-aimlinelengt/) |
+| 260617-0t2 | MeleeEnemy patrol→SwordWalk/chase→SwordRunAltGrip 분리, RangedEnemy patrol→GunWalk 추가, _animator 캐시 통일 | 2026-06-17 | 926bb8f, b5d2438 | [260617-0t2](./quick/260617-0t2-meleeenemy-swordwalk-swordrunaltgrip-ran/) |
 
 ---
 
@@ -162,7 +163,7 @@ None.
 
 **Last session:** 2026-06-17
 **Stopped at:** 04-01-T3 checkpoint — FloorManager.cs and HUDController.cs committed; Canvas hierarchy awaits Unity Editor
-**Last activity:** 2026-06-17 - Completed quick task 260617-0el: RangedEnemy detectionRadius/aimLineLength 분리
+**Last activity:** 2026-06-17 - Completed quick task 260617-0t2: MeleeEnemy SwordWalk/SwordRunAltGrip + RangedEnemy GunWalk 이동 애니메이션 FSM 연결
 
 ---
 *State initialized: 2026-05-27*

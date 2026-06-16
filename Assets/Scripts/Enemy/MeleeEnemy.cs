@@ -33,6 +33,7 @@ public class MeleeEnemy : MonoBehaviour, IEnemy
 
     // -- Runtime refs ---------------------------------------------------------------
     private Rigidbody2D _rb;
+    private Animator     _animator;
     private Transform   _playerTransform;
     private Vector3     _spawnPosition;
     private float       _patrolDir = 1f;
@@ -46,6 +47,7 @@ public class MeleeEnemy : MonoBehaviour, IEnemy
     private void Awake()
     {
         _rb            = GetComponent<Rigidbody2D>();
+        _animator      = GetComponent<Animator>();
         _spawnPosition = transform.position;
 
         // Cache filter once — avoids LayerMask.GetMask() string lookup in Update (ROADMAP constraint)
@@ -82,7 +84,7 @@ public class MeleeEnemy : MonoBehaviour, IEnemy
         if (_rb != null) { _rb.linearVelocity = Vector2.zero; _rb.bodyType = RigidbodyType2D.Static; }
 
         foreach (var c in GetComponents<Collider2D>()) c.enabled = false;
-        GetComponent<Animator>()?.SetBool("isDead", true);
+        _animator?.SetBool("isDead", true);
     }
 
     public void ClearHighlight()
@@ -98,6 +100,8 @@ public class MeleeEnemy : MonoBehaviour, IEnemy
         if (_attackCoroutine != null) StopCoroutine(_attackCoroutine);
         if (_exclamationIcon != null) _exclamationIcon.enabled = false;
         if (_meleeHitbox     != null) _meleeHitbox.enabled     = false;
+        _animator?.SetBool("isMoving", false);
+        _animator?.SetBool("isChasing", false);
         _state = EnemyState.Idle;
     }
 
@@ -125,6 +129,8 @@ public class MeleeEnemy : MonoBehaviour, IEnemy
         if (Mathf.Abs(newX - _spawnPosition.x) >= patrolHalfRange)
             _patrolDir *= -1f;
         _rb.MovePosition(new Vector2(newX, _rb.position.y));
+        _animator?.SetBool("isMoving", true);
+        _animator?.SetBool("isChasing", false);
 
         // Detection check every frame (buffer pre-allocated — no alloc)
         if (IsPlayerInRange(detectionRadius))
@@ -151,11 +157,15 @@ public class MeleeEnemy : MonoBehaviour, IEnemy
         // Move toward player
         Vector2 dir = ((Vector2)_playerTransform.position - _rb.position).normalized;
         _rb.MovePosition(_rb.position + dir * chaseSpeed * Time.deltaTime);
+        _animator?.SetBool("isMoving", true);
+        _animator?.SetBool("isChasing", true);
     }
 
     private IEnumerator TelegraphAndAttack()
     {
         _state = EnemyState.Telegraph;
+        _animator?.SetBool("isMoving", false);
+        _animator?.SetBool("isChasing", false);
 
         // Show "!" icon (D-05)
         if (_exclamationIcon != null) _exclamationIcon.enabled = true;
@@ -169,7 +179,7 @@ public class MeleeEnemy : MonoBehaviour, IEnemy
 
         if (_exclamationIcon != null) _exclamationIcon.enabled = false;
         _state = EnemyState.Attack;
-        GetComponent<Animator>()?.SetTrigger("isAttacking");
+        _animator?.SetTrigger("isAttacking");
 
         // Activate melee hitbox briefly (D-07, D-08)
         if (_meleeHitbox != null)
