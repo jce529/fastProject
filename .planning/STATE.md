@@ -146,6 +146,7 @@ None.
 | 260616-s3m | ChronoGauge 버그 2종 수정: HUDController 게이지 미반영 + 게이지 소진 시 범위 표시 유지 | 2026-06-16 | — | [260616-s3m](./quick/260616-s3m-chronogauge-hudcontroller/) |
 | 260616-vo4 | HUDController.Start()에 _gauge null 체크 디버그 로그 추가 (원인 진단용 임시 코드) | 2026-06-16 | 1ad0e0f | [260616-vo4](./quick/260616-vo4-hudcontroller-start-gauge-null/) |
 | 260617-02t | RangeDisplay chestOffset 추가(가슴 오프셋 기준 origin) + RangedEnemy 텔레그래프 origin → firePoint 기준 교체 | 2026-06-17 | 0e779c5, f9b8827 | [260617-02t](./quick/260617-02t-rangedisplay-rangedenemy-transform-posit/) |
+| 260617-0el | RangedEnemy detectionRadius(감지)/aimLineLength(공격 트리거) 분리 — Chase 중 aimLineLength 진입 시에만 텔레그래프 시작 | 2026-06-17 | bd63875 | [260617-0el](./quick/260617-0el-rangedenemy-detectionradius-aimlinelengt/) |
 
 ---
 
@@ -161,7 +162,7 @@ None.
 
 **Last session:** 2026-06-17
 **Stopped at:** 04-01-T3 checkpoint — FloorManager.cs and HUDController.cs committed; Canvas hierarchy awaits Unity Editor
-**Last activity:** 2026-06-17 - Completed quick task 260617-02t: RangeDisplay chestOffset + RangedEnemy firePoint origin
+**Last activity:** 2026-06-17 - Completed quick task 260617-0el: RangedEnemy detectionRadius/aimLineLength 분리
 
 ---
 *State initialized: 2026-05-27*
