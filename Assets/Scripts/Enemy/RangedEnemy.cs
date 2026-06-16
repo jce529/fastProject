@@ -163,7 +163,7 @@ public class RangedEnemy : MonoBehaviour, IEnemy
     {
         _state = EnemyState.Telegraph;
 
-        // Lock aim direction at telegraph start — player can move after seeing the line (D-09)
+        // Telegraph line starts from firePoint (if assigned), matching where the projectile actually fires from.
         Vector2 origin    = firePoint != null ? (Vector2)firePoint.position : (Vector2)transform.position;
         Vector2 aimDir    = (_playerTransform != null)
             ? ((Vector2)_playerTransform.position - origin).normalized
