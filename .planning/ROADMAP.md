@@ -13,6 +13,7 @@
 - [ ] **Phase 2: Combat Core** - Slow-motion aiming, dash-kill, roll, and all gauge mechanics
 - [ ] **Phase 3: Enemy System** - Melee and ranged enemies with FSM behavior and one-shot-kill logic
 - [ ] **Phase 4: HUD & Game Loop** - All on-screen feedback, death screen, and restart flow
+- [ ] **Phase 5: 절차적 맵 생성 — 무한 스테이지** - 청크 기반 절차적 생성으로 플레이어가 탑을 무한히 올라갈 수 있는 스테이지 구성
 
 ---
 
@@ -99,6 +100,27 @@ Plans:
 | 2. Combat Core | 0/4 | Planned | - |
 | 3. Enemy System | 2/4 | In Progress|  |
 | 4. HUD & Game Loop | 0/? | Not started | - |
+| 5. 절차적 맵 생성 | 0/? | Not started | - |
+
+---
+
+### Phase 5: 절차적 맵 생성 — 무한 스테이지
+**Goal**: 청크 기반 절차적 생성으로 플레이어가 탑을 무한히 올라갈 수 있는 스테이지 구성. FloorManager가 플레이어 고도를 감지해 새 층 스폰 + 지나간 층 파괴(모바일 메모리 관리).
+**Depends on**: Phase 4
+**Requirements**: TBD
+**Success Criteria** (what must be TRUE):
+  TBD — 논의 후 확정
+**Plans**: TBD
+
+**Design Notes (captured 2026-06-16):**
+- 4~6종 층 레이아웃 프리팹 풀 → 가중치 랜덤 선택
+- 플레이어 고도 임계값 도달 시 위로 새 층 스폰
+- 현재 층 + 다음 층만 유지, 이전 층 파괴 (CLAUDE.md 모바일 메모리 제약)
+- 층 번호 → 적 수/배치 난이도 스케일링
+- HUD 층 카운터(UI-01)와 연동 필요
+
+Plans:
+- [ ] TBD (run /gsd:plan-phase 5 to break down)
 
 ---
 
@@ -140,21 +162,7 @@ Plans:
 
 ## Backlog
 
-### Phase 999.1: 절차적 맵 생성 — 무한 스테이지 (BACKLOG)
-
-**Goal:** 청크 기반 절차적 생성으로 플레이어가 탑을 무한히 올라갈 수 있는 스테이지 구성. FloorManager가 플레이어 고도를 감지해 새 층 스폰 + 지나간 층 파괴(모바일 메모리 관리).
-**Requirements:** TBD (v2 마일스톤에서 정의 예정)
-**Plans:** 0 plans
-
-**Design Notes (captured 2026-06-16):**
-- 4~6종 층 레이아웃 프리팹 풀 → 가중치 랜덤 선택
-- 플레이어 고도 임계값 도달 시 위로 새 층 스폰
-- 현재 층 + 다음 층만 유지, 이전 층 파괴 (CLAUDE.md 모바일 메모리 제약)
-- 층 번호 → 적 수/배치 난이도 스케일링
-- HUD 층 카운터(UI-01)와 연동 필요
-
-Plans:
-- [ ] TBD (promote with /gsd:review-backlog when ready)
+*(비어 있음 — 모든 항목이 활성 Phase로 승격됨)*
 
 ---
 *Roadmap created: 2026-05-27*
