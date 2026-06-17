@@ -100,27 +100,32 @@ Plans:
 | 2. Combat Core | 0/4 | Planned | - |
 | 3. Enemy System | 2/4 | In Progress|  |
 | 4. HUD & Game Loop | 0/? | Not started | - |
-| 5. 절차적 맵 생성 | 0/? | Not started | - |
+| 5. 절차적 맵 생성 | 0/2 | Planned | - |
 
 ---
 
 ### Phase 5: 절차적 맵 생성 — 무한 스테이지
-**Goal**: 청크 기반 절차적 생성으로 플레이어가 탑을 무한히 올라갈 수 있는 스테이지 구성. FloorManager가 플레이어 고도를 감지해 새 층 스폰 + 지나간 층 파괴(모바일 메모리 관리).
+**Goal**: 출구 트리거 기반 Room 프리팹 스폰으로 플레이어가 탑을 무한히 올라갈 수 있는 스테이지 구성. FloorSpawner가 6단계 전환 시퀀스를 실행하고 이전 층을 즉시 파괴해 모바일 메모리를 관리한다.
 **Depends on**: Phase 4
-**Requirements**: TBD
+**Requirements**: FLOOR-01, FLOOR-02, FLOOR-03, FLOOR-04
 **Success Criteria** (what must be TRUE):
-  TBD — 논의 후 확정
-**Plans**: TBD
+  1. 게임 시작 시 Room_Combat(1층)이 자동 스폰되고 HUD에 "Floor: 1"이 표시된다
+  2. 출구 트리거를 밟으면 6단계 전환 시퀀스(입력잠금→이동→카메라→적활성→재개)가 발동된다
+  3. 전환 완료 후 이전 층 GameObject가 씬에서 사라지고 현재 층만 남는다
+  4. 2층 이상부터 4개 Room 중 랜덤으로 선택되며 D-07 난이도 테이블에 따라 적이 스폰된다
+  5. 사망 후 재시작 시 1층으로 정상 리셋된다
+**Plans**: 2 plans
 
 **Design Notes (captured 2026-06-16):**
 - 4~6종 층 레이아웃 프리팹 풀 → 가중치 랜덤 선택
-- 플레이어 고도 임계값 도달 시 위로 새 층 스폰
+- 출구 트리거(Trigger Collider2D) 감지 → FloorTransitionSequence() 코루틴
 - 현재 층 + 다음 층만 유지, 이전 층 파괴 (CLAUDE.md 모바일 메모리 제약)
-- 층 번호 → 적 수/배치 난이도 스케일링
-- HUD 층 카운터(UI-01)와 연동 필요
+- 층 번호 → 적 수/배치 난이도 스케일링 (D-07)
+- HUD 층 카운터(UI-01)와 연동 — FloorManager.CurrentFloor 증가로 자동 갱신
 
 Plans:
-- [ ] TBD (run /gsd:plan-phase 5 to break down)
+- [ ] 05-01-PLAN.md — FloorSpawner.cs + RoomExit.cs 신규 생성 + PlayerController 입력 잠금 + CombatController 가드 (FLOOR-02, FLOOR-03, FLOOR-04)
+- [ ] 05-02-PLAN.md — Room 프리팹 4개 제작(Unity Editor) + FloorSpawner 씬 배치 및 Inspector 연결 (FLOOR-01, FLOOR-02, FLOOR-03)
 
 ---
 
@@ -141,8 +146,13 @@ Plans:
 | ENMY-02 | Phase 3 | Ranged enemy |
 | UI-01 | Phase 4 | HUD |
 | UI-02 | Phase 4 | Death screen + restart |
+| FLOOR-01 | Phase 5 | 프리셋 기반 층 생성 |
+| FLOOR-02 | Phase 5 | 층 전환 시퀀스 6단계 |
+| FLOOR-03 | Phase 5 | 전환 중 적 비활성화 |
+| FLOOR-04 | Phase 5 | 이전 층 파괴 (모바일 메모리) |
 
 **v1 Coverage: 13/13 requirements mapped. No orphans.**
+**v2 Floor Coverage: 4/4 FLOOR requirements mapped to Phase 5.**
 
 ---
 
@@ -157,6 +167,7 @@ Plans:
 - Invincibility: layer swap between `PlayerHurtbox` and `PlayerInvincible` layers, not `Physics2D.IgnoreLayerCollision`
 - Animator transitions for action states: Transition Duration = 0
 - HUD text updates: `TextMeshProUGUI.SetText("{0}", value)` — no string allocation
+- Floor transition: `WaitForSecondsRealtime` only — `Time.timeScale` may be 0 at transition start
 
 ---
 
@@ -166,4 +177,4 @@ Plans:
 
 ---
 *Roadmap created: 2026-05-27*
-*Last updated: 2026-06-16 after adding backlog item 999.1*
+*Last updated: 2026-06-17 after Phase 5 planning*
