@@ -148,6 +148,7 @@ None.
 | 260617-02t | RangeDisplay chestOffset 추가(가슴 오프셋 기준 origin) + RangedEnemy 텔레그래프 origin → firePoint 기준 교체 | 2026-06-17 | 0e779c5, f9b8827 | [260617-02t](./quick/260617-02t-rangedisplay-rangedenemy-transform-posit/) |
 | 260617-0el | RangedEnemy detectionRadius(감지)/aimLineLength(공격 트리거) 분리 — Chase 중 aimLineLength 진입 시에만 텔레그래프 시작 | 2026-06-17 | bd63875 | [260617-0el](./quick/260617-0el-rangedenemy-detectionradius-aimlinelengt/) |
 | 260617-0t2 | MeleeEnemy patrol→SwordWalk/chase→SwordRunAltGrip 분리, RangedEnemy patrol→GunWalk 추가, _animator 캐시 통일 | 2026-06-17 | 926bb8f, b5d2438 | [260617-0t2](./quick/260617-0t2-meleeenemy-swordwalk-swordrunaltgrip-ran/) |
+| 260617-jwe | Room 프리팹 폴더 구조 생성 (Assets/Prefabs/Rooms/ 아래 14개 Room 폴더) | 2026-06-17 | — | [260617-jwe](./quick/260617-jwe-room/) |
 
 ---
 
@@ -163,7 +164,7 @@ None.
 
 **Last session:** 2026-06-17
 **Stopped at:** 04-01-T3 checkpoint — FloorManager.cs and HUDController.cs committed; Canvas hierarchy awaits Unity Editor
-**Last activity:** 2026-06-17 - Completed quick task 260617-0t2: MeleeEnemy SwordWalk/SwordRunAltGrip + RangedEnemy GunWalk 이동 애니메이션 FSM 연결
+**Last activity:** 2026-06-17 - Completed quick task 260617-jwe: Room 프리팹 폴더 구조 생성 (Assets/Prefabs/Rooms/ 14개 폴더)
 
 ---
 *State initialized: 2026-05-27*
