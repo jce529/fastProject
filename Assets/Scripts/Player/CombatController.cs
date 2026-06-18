@@ -58,6 +58,7 @@ public class CombatController : MonoBehaviour
     private float _slowMoStartTime; // [MEDIUM — Gemini] unscaled timestamp when slow-mo began
     private bool  _isAttackPending; // true: attack 버튼이 눌린 채 대시 대기 중
     private float _attackCooldown;        // 처치 후 공격 재사용 대기 (unscaledDeltaTime)
+    private bool  _lastDrainCond;        // [DEBUG] 드레인 상태 변화 추적용 — 확인 후 제거
 
     // -- Range display accessors (RangeDisplay reads these — single source of truth) ----
     public float FanRadius       => fanRadius;
@@ -115,7 +116,13 @@ public class CombatController : MonoBehaviour
         }
 
         // Gauge drains every frame Attack is held (uses unscaledDeltaTime internally)
-        _gauge.SetDraining(input.IsAttackDown && _isAttackPending && _attackCooldown <= 0f);
+        bool drainCond = input.IsAttackDown && _isAttackPending && _attackCooldown <= 0f;
+        if (drainCond != _lastDrainCond) // [DEBUG] 상태 변화 시만 출력 — 확인 후 제거
+        {
+            _lastDrainCond = drainCond;
+            Debug.Log($"[Combat] drain→{drainCond} | IsAttackDown={input.IsAttackDown} _isAttackPending={_isAttackPending} cooldown={_attackCooldown:F2}");
+        }
+        _gauge.SetDraining(drainCond);
 
         // Enter slow-motion on the frame Attack button is first pressed
         if (input.AttackHeld && !_isSlowMo && !_isAttackPending && _attackCooldown <= 0f)

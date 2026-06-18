@@ -56,7 +56,7 @@ public class ProjectileController : MonoBehaviour
         // CompareTag is faster than GetComponent for kill check.
         if (other.CompareTag("Player"))
         {
-            PlayerController.OnPlayerDeath?.Invoke();
+            PlayerController.TriggerDeath();
             Destroy(gameObject);
         }
     }
