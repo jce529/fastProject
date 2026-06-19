@@ -39,6 +39,7 @@ public class PlayerController : MonoBehaviour
     private InputAction _jumpAction;
     private bool _isGrounded;
     private bool _jumpHeld;
+    private bool _inputLocked;
 
     // -- Phase 3: Player death notification (D-13) ----------------------------
     /// <summary>
@@ -87,7 +88,7 @@ public class PlayerController : MonoBehaviour
 
     private void OnJumpPerformed(InputAction.CallbackContext ctx)
     {
-        if (!_isGrounded) return;
+        if (_inputLocked || !_isGrounded) return;
         _rb.linearVelocity = new Vector2(_rb.linearVelocity.x, jumpForce);
         _jumpHeld = true;
     }
@@ -110,7 +111,7 @@ public class PlayerController : MonoBehaviour
     private void FixedUpdate()
     {
         CheckGround();
-        ApplyMovement();
+        if (!_inputLocked) ApplyMovement();
     }
 
     private void CheckGround()
@@ -139,4 +140,17 @@ public class PlayerController : MonoBehaviour
 
     /// <summary>최고 이동 속도. PlayerAnimatorController가 스프린트 비율 계산에 사용.</summary>
     public float MoveSpeed => moveSpeed;
+
+    /// <summary>FloorSpawner가 층 전환 시퀀스 중 읽는다. CombatController가 Update 진입 차단에 사용.</summary>
+    public bool InputLocked => _inputLocked;
+
+    /// <summary>층 전환 시퀀스 1단계 — 이동/점프 입력 잠금, 속도 즉시 0.</summary>
+    public void LockInput()
+    {
+        _inputLocked = true;
+        _rb.linearVelocity = Vector2.zero;
+    }
+
+    /// <summary>층 전환 시퀀스 6단계 — 입력 잠금 해제.</summary>
+    public void UnlockInput() => _inputLocked = false;
 }

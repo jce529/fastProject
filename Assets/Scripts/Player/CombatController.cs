@@ -41,6 +41,7 @@ public class CombatController : MonoBehaviour
     [SerializeField] private float maxSlowMoDuration  = 5f;
 
     // -- Component references -------------------------------------------------------
+    [SerializeField] private PlayerController _player;
     private Rigidbody2D          _rb;
     private InvincibilityHandler _invincibilityHandler;
     private ChronoGaugeController _gauge;
@@ -98,6 +99,7 @@ public class CombatController : MonoBehaviour
 
     private void Update()
     {
+        if (_player != null && _player.InputLocked) return;
         // _isBusy lockout: all attack state transitions blocked during dash/whiff/lockout
         if (_isBusy) return;
 
