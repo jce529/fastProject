@@ -100,7 +100,7 @@ Plans:
 | 2. Combat Core | 0/4 | Planned | - |
 | 3. Enemy System | 2/4 | In Progress|  |
 | 4. HUD & Game Loop | 0/? | Not started | - |
-| 5. 절차적 맵 생성 | 0/2 | Planned | - |
+| 5. 절차적 맵 생성 | 0/2 | Planned    |  |
 
 ---
 
