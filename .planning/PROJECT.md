@@ -8,6 +8,17 @@
 
 **공격 버튼을 누르면 시간이 느려지고, 손을 떼면 적에게 돌진해 한 방에 처치하는 손맛 — 이것이 재미있어야 게임이 살아난다.**
 
+## Current Milestone: v2.0 게임 시작 플로우
+
+**Goal:** 개발자 도움 없이 앱 실행 → 공격 방식 선택 → 게임 진입까지 완전한 시작 흐름을 갖춘 플레이테스트 빌드
+
+**Target features:**
+- MainMenu.unity — 타이틀 + Start / Quit 버튼
+- AttackSelect.unity — Linear / Fan 선택 후 게임 진입
+- 씬 플로우: MainMenu → AttackSelect → SampleScene
+- 선택한 공격 방식이 SampleScene에서 유지 (씬 간 데이터 전달)
+- 사망 후 MainMenu로 복귀
+
 ## Requirements
 
 ### Validated
@@ -102,4 +113,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-05-27 after initialization*
+*Last updated: 2026-06-23 — v2.0 milestone started*

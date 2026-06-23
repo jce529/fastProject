@@ -1,18 +1,18 @@
 ---
 gsd_state_version: 1.0
-milestone: v1.0
-milestone_name: milestone
-current_phase: 05
-current_plan: 1
-status: unknown
-stopped_at: "Completed 05-01-PLAN.md — checkpoint:human-verify at Task 3"
-last_updated: "2026-06-19T08:30:25.142Z"
-last_activity: 2026-06-19
+milestone: v2.0
+milestone_name: 게임 시작 플로우
+current_phase: ~
+current_plan: ~
+status: defining-requirements
+stopped_at: "v2.0 milestone started — defining requirements"
+last_updated: "2026-06-23T00:00:00.000Z"
+last_activity: 2026-06-23
 progress:
-  total_phases: 5
-  completed_phases: 3
-  total_plans: 15
-  completed_plans: 13
+  total_phases: ~
+  completed_phases: 0
+  total_plans: ~
+  completed_plans: 0
 ---
 
 # Project State: Fast (가칭)
@@ -33,24 +33,12 @@ progress:
 
 ## Current Position
 
-Phase: 05 (procedural-map-infinite-stages) — EXECUTING
-Plan: 1 of 2
-**Current Phase:** 05
-**Current Plan:** 1
-**Phase Status:** Checkpoint at T3 — T1/T2 code complete, T3 requires Unity Editor GUI
+Phase: Not started (defining requirements)
+Plan: —
+Status: Defining requirements
+Last activity: 2026-06-23 — Milestone v2.0 started
 
-```
-Progress: [X] Phase 1  [ ] Phase 2  [ ] Phase 3  [ ] Phase 4
-           |___________|___________|___________|___________|
-                 25%                                    100%
-```
-
-**Phase Goals:**
-
-- Phase 1: Player moves responsively, falls recover to last platform
-- Phase 2: Hold-aim / release-dash loop + gauge + roll + hit-freeze fully playable
-- Phase 3: Melee and ranged enemies with telegraph, FSM, one-shot-kill both ways
-- Phase 4: HUD always visible, death screen, restart in under 3 seconds
+**Previous Milestone v1.0 (complete):** 5 phases, 15 plans — 플레이어 이동/전투/적/HUD/절차적 맵 전체 구현
 
 ---
 
