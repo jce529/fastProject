@@ -23,7 +23,11 @@
 
 ### Validated
 
-(None yet — ship to validate)
+**게임 시작 플로우 — MainMenu (Validated in Phase 6: MainMenu Scene)**
+- [x] MainMenu.unity가 Build index 0으로 등록되어 앱 실행 시 첫 화면이 된다 (MENU-01)
+- [x] Start 버튼 onClick → SceneManager.LoadScene("AttackSelect") 영구 직렬화 (MENU-02)
+- [x] Quit 버튼 onClick → 에디터 PlayMode 종료 / 빌드에서 Application.Quit() (MENU-03)
+- [x] EventSystem에 InputSystemUIInputModule 사용 (New Input System 전용 프로젝트 요건 확인)
 
 ### Active
 
@@ -113,4 +117,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-06-23 — v2.0 milestone started*
+*Last updated: 2026-06-23 — Phase 6 complete (MainMenu Scene: MENU-01/02/03 validated)*

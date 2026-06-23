@@ -189,7 +189,7 @@ Plans:
 
 ## v2.0 Phases
 
-- [ ] **Phase 6: MainMenu Scene** - 앱 실행 시 MainMenu가 첫 화면이 되고, Start/Quit 버튼이 동작한다
+- [x] **Phase 6: MainMenu Scene** - 앱 실행 시 MainMenu가 첫 화면이 되고, Start/Quit 버튼이 동작한다 (completed 2026-06-23)
 - [ ] **Phase 7: AttackSelect Scene & Scene Flow** - AttackSelect 씬에서 공격 방식을 선택하면 SampleScene이 로드되고 선택값이 유지되며, 사망 후 AttackSelect로 복귀한다
 
 ---
@@ -228,7 +228,7 @@ Plans:
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 6. MainMenu Scene | 0/? | Not started | - |
+| 6. MainMenu Scene | 1/1 | Complete | 2026-06-23 |
 | 7. AttackSelect Scene & Scene Flow | 0/? | Not started | - |
 
 ---

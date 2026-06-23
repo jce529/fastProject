@@ -2,15 +2,15 @@
 gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: Phases
-status: "Roadmap ready — awaiting /gsd:plan-phase 6"
-stopped_at: Phase 6 context gathered
-last_updated: "2026-06-23T13:00:39.285Z"
+status: "Phase 6 complete — awaiting /gsd:plan-phase 7"
+stopped_at: Phase 6 complete
+last_updated: "2026-06-23T00:00:00.000Z"
 last_activity: 2026-06-23
 progress:
   total_phases: 7
-  completed_phases: 4
-  total_plans: 15
-  completed_plans: 14
+  completed_phases: 5
+  total_plans: 16
+  completed_plans: 15
 ---
 
 # Project State: Fast (가칭)
@@ -31,10 +31,10 @@ progress:
 
 ## Current Position
 
-Phase: 6 — MainMenu Scene & Death Return (not started)
+Phase: 7 — AttackSelect Scene & Scene Flow (not started)
 Plan: —
-Status: Roadmap ready — awaiting /gsd:plan-phase 6
-Last activity: 2026-06-23 — v2.0 roadmap created (Phases 6-7)
+Status: Phase 6 complete — awaiting /gsd:plan-phase 7
+Last activity: 2026-06-23 — Phase 6 complete (MainMenu Scene)
 
 **Previous Milestone v1.0 (complete):** 5 phases, 15 plans — 플레이어 이동/전투/적/HUD/절차적 맵 전체 구현
 
