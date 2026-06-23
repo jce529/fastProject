@@ -1,18 +1,16 @@
 ---
 gsd_state_version: 1.0
 milestone: v2.0
-milestone_name: 게임 시작 플로우
-current_phase: 6
-current_plan: ~
-status: roadmap-ready
-stopped_at: "v2.0 roadmap created — Phase 6 pending planning"
-last_updated: "2026-06-23T00:00:00.000Z"
+milestone_name: Phases
+status: "Roadmap ready — awaiting /gsd:plan-phase 6"
+stopped_at: Phase 6 context gathered
+last_updated: "2026-06-23T13:00:39.285Z"
 last_activity: 2026-06-23
 progress:
-  total_phases: 2
-  completed_phases: 0
-  total_plans: ~
-  completed_plans: 0
+  total_phases: 7
+  completed_phases: 4
+  total_plans: 15
+  completed_plans: 14
 ---
 
 # Project State: Fast (가칭)
@@ -159,8 +157,8 @@ None.
 4. Check which phase plan exists in `.planning/` (e.g., `PLAN-phase-1.md`)
 5. Continue from Current Phase listed above
 
-**Last session:** 2026-06-23T00:00:00.000Z
-**Stopped at:** v2.0 roadmap created — Phase 6 pending /gsd:plan-phase 6
+**Last session:** 2026-06-23T13:00:39.279Z
+**Stopped at:** Phase 6 context gathered
 **Last activity:** 2026-06-23
 
 ---
