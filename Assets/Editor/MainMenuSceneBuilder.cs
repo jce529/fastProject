@@ -11,7 +11,7 @@ public static class MainMenuSceneBuilder
     public static void BuildMainMenuScene()
     {
         // 1. Create empty scene
-        var scene = EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Single);
+        EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Single);
 
         // 2. Camera
         var cameraGO = new GameObject("Main Camera");
@@ -33,10 +33,10 @@ public static class MainMenuSceneBuilder
         // 4. EventSystem
         var esGO = new GameObject("EventSystem");
         esGO.AddComponent<UnityEngine.EventSystems.EventSystem>();
-        esGO.AddComponent<UnityEngine.EventSystems.StandaloneInputModule>();
+        esGO.AddComponent<UnityEngine.InputSystem.UI.InputSystemUIInputModule>();
 
-        // 5. Title text
-        var titleGO = new GameObject("TitleText");
+        // 5. Title text — typeof(RectTransform) in constructor avoids null from GetComponent
+        var titleGO = new GameObject("TitleText", typeof(RectTransform));
         titleGO.transform.SetParent(canvasGO.transform, false);
         var titleRT = titleGO.GetComponent<RectTransform>();
         titleRT.anchorMin = new Vector2(0.5f, 0.7f);
@@ -68,15 +68,12 @@ public static class MainMenuSceneBuilder
         var quitBtn = quitBtnGO.GetComponent<Button>();
         quitBtn.onClick.AddListener(new UnityAction(controller.OnQuitClicked));
 
-        // 9. Save scene
-        EditorSceneManager.SaveScene(scene, "Assets/Scenes/MainMenu.unity");
+        // 9. Save scene — GetActiveScene() because NewScene() return value becomes stale
+        EditorSceneManager.SaveScene(EditorSceneManager.GetActiveScene(), "Assets/Scenes/MainMenu.unity");
 
-        // 10. Update Build Settings
-        string mainMenuPath = "Assets/Scenes/MainMenu.unity";
-        string sampleScenePath = "Assets/Scenes/SampleScene.unity";
-
-        var mainMenuEntry = new EditorBuildSettingsScene(mainMenuPath, true);
-        var sampleSceneEntry = new EditorBuildSettingsScene(sampleScenePath, true);
+        // 10. Update Build Settings: MainMenu=0, SampleScene=1
+        var mainMenuEntry = new EditorBuildSettingsScene("Assets/Scenes/MainMenu.unity", true);
+        var sampleSceneEntry = new EditorBuildSettingsScene("Assets/Scenes/SampleScene.unity", true);
         EditorBuildSettings.scenes = new EditorBuildSettingsScene[] { mainMenuEntry, sampleSceneEntry };
 
         Debug.Log("[MainMenuSceneBuilder] MainMenu.unity created and Build Settings updated.");
@@ -84,7 +81,8 @@ public static class MainMenuSceneBuilder
 
     private static GameObject CreateButton(GameObject parent, string name, Vector2 anchoredPos, Vector2 anchor, string label)
     {
-        var btnGO = new GameObject(name);
+        // typeof(RectTransform) ensures RectTransform exists before GetComponent is called
+        var btnGO = new GameObject(name, typeof(RectTransform));
         btnGO.transform.SetParent(parent.transform, false);
         var rt = btnGO.GetComponent<RectTransform>();
         rt.anchorMin = anchor;
@@ -95,7 +93,7 @@ public static class MainMenuSceneBuilder
         img.color = Color.white;
         btnGO.AddComponent<Button>();
 
-        var textGO = new GameObject("Text");
+        var textGO = new GameObject("Text", typeof(RectTransform));
         textGO.transform.SetParent(btnGO.transform, false);
         var textRT = textGO.GetComponent<RectTransform>();
         textRT.anchorMin = Vector2.zero;
