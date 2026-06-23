@@ -1,6 +1,7 @@
 using UnityEngine;
 using UnityEditor;
 using UnityEditor.SceneManagement;
+using UnityEditor.Events;
 using UnityEngine.UI;
 using TMPro;
 using UnityEngine.Events;
@@ -60,13 +61,13 @@ public static class MainMenuSceneBuilder
         controllerGO.transform.SetParent(canvasGO.transform, false);
         var controller = controllerGO.AddComponent<MainMenuController>();
 
-        // Wire Start button
+        // Wire Start button — AddPersistentListener serialises the binding into the scene asset
         var startBtn = startBtnGO.GetComponent<Button>();
-        startBtn.onClick.AddListener(new UnityAction(controller.OnStartClicked));
+        UnityEventTools.AddPersistentListener(startBtn.onClick, controller.OnStartClicked);
 
         // Wire Quit button
         var quitBtn = quitBtnGO.GetComponent<Button>();
-        quitBtn.onClick.AddListener(new UnityAction(controller.OnQuitClicked));
+        UnityEventTools.AddPersistentListener(quitBtn.onClick, controller.OnQuitClicked);
 
         // 9. Save scene — GetActiveScene() because NewScene() return value becomes stale
         EditorSceneManager.SaveScene(EditorSceneManager.GetActiveScene(), "Assets/Scenes/MainMenu.unity");
