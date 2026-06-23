@@ -2,14 +2,14 @@
 gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: 게임 시작 플로우
-current_phase: ~
+current_phase: 6
 current_plan: ~
-status: defining-requirements
-stopped_at: "v2.0 milestone started — defining requirements"
+status: roadmap-ready
+stopped_at: "v2.0 roadmap created — Phase 6 pending planning"
 last_updated: "2026-06-23T00:00:00.000Z"
 last_activity: 2026-06-23
 progress:
-  total_phases: ~
+  total_phases: 2
   completed_phases: 0
   total_plans: ~
   completed_plans: 0
@@ -27,16 +27,16 @@ progress:
 
 **Prototype Goal:** Single combat test room. Validate the hold-to-aim / release-to-dash feel before building floors or progression.
 
-**Current Milestone:** v1 — Combat Test Room
+**Current Milestone:** v2.0 — 게임 시작 플로우
 
 ---
 
 ## Current Position
 
-Phase: Not started (defining requirements)
+Phase: 6 — MainMenu Scene & Death Return (not started)
 Plan: —
-Status: Defining requirements
-Last activity: 2026-06-23 — Milestone v2.0 started
+Status: Roadmap ready — awaiting /gsd:plan-phase 6
+Last activity: 2026-06-23 — v2.0 roadmap created (Phases 6-7)
 
 **Previous Milestone v1.0 (complete):** 5 phases, 15 plans — 플레이어 이동/전투/적/HUD/절차적 맵 전체 구현
 
@@ -47,8 +47,9 @@ Last activity: 2026-06-23 — Milestone v2.0 started
 | Metric | Target | Current |
 |--------|--------|---------|
 | v1 Requirements mapped | 13/13 | 13/13 |
-| Phases completed | 4 | 0 |
-| Plans completed | TBD | 2 |
+| v2.0 Requirements mapped | 7/7 | 7/7 |
+| v2.0 Phases completed | 2 | 0 |
+| Plans completed | TBD | 0 |
 
 ---
 | Phase 01-foundation-movement P01 | 4 | 2 tasks | 7 files |
@@ -83,6 +84,8 @@ Last activity: 2026-06-23 — Milestone v2.0 started
 | FloorManager as static class, not MonoBehaviour (04-01) | Data-only int needs no scene lifecycle; static field is sufficient and avoids scene coupling |
 | (AttackType)(-1) dirty-check sentinel (04-01) | Forces first-frame label update; -1 is never a valid AttackType so it always differs on first Update() |
 | SetText("{0}", int) over string interpolation (04-01) | TMP's int overload uses internal char buffer — zero allocation per frame vs. $"" allocating new string every frame |
+| v2.0 FLOW-01 in Phase 6 (not Phase 7) | FLOW-01 only requires MainMenu at Build index 0; that is Phase 6 scope. DeathScreenController.LoadScene(0) is already wired — Phase 6 verifies correctness. |
+| v2.0 attack type data passing: PlayerPrefs or static GameManager | Defer final decision to Phase 7 plan; both options are valid for prototype scope, no persistence needed across sessions |
 
 ### Technical Constraints to Enforce Every Phase
 
@@ -106,6 +109,7 @@ Last activity: 2026-06-23 — Milestone v2.0 started
 - [ ] Create SampleScene test layout (one flat floor with fall zones) before Phase 1 plan
 - [ ] Confirm Cinemachine package version before Phase 1 plan
 - [ ] Set up layer matrix (PlayerHurtbox, PlayerInvincible, Enemy, EnemyProjectile, Platform) before coding begins
+- [ ] Verify quick task 260623-t6i-deathscreen: confirm DeathScreenController RestartLabel text is "메인 메뉴" before Phase 6 plan
 
 ### Blockers
 
@@ -140,6 +144,8 @@ None.
 | 260617-0t2 | MeleeEnemy patrol→SwordWalk/chase→SwordRunAltGrip 분리, RangedEnemy patrol→GunWalk 추가, _animator 캐시 통일 | 2026-06-17 | 926bb8f, b5d2438 | [260617-0t2](./quick/260617-0t2-meleeenemy-swordwalk-swordrunaltgrip-ran/) |
 | 260617-jwe | Room 프리팹 폴더 구조 생성 (Assets/Prefabs/Rooms/ 아래 14개 Room 폴더) | 2026-06-17 | — | [260617-jwe](./quick/260617-jwe-room/) |
 | 260618-u8j | RoomPrefabBuilder 에디터 스크립트 — Fast/Build Room Prefabs 메뉴로 14개 Room 프리팹 생성 (Platform/KillZone/마커 계층) | 2026-06-18 | 98309c2 | [260618-u8j](./quick/260618-u8j-14-room-editor/) |
+| 260623-ntw | MainMenuController + MainMenuSceneBuilder — Start/Quit 버튼 로직 + EditorScript(Fast/Build MainMenu Scene 메뉴) | 2026-06-23 | ec13a46, ad54d11 | [260623-ntw](./quick/260623-ntw-mainmenu-fast-samplescene-application-qu/) |
+| 260623-t6i | DeathScreen RestartLabel 텍스트를 "메인 메뉴"로 변경 | 2026-06-23 | — | [260623-t6i](./quick/260623-t6i-deathscreen/) |
 
 ---
 
@@ -153,10 +159,10 @@ None.
 4. Check which phase plan exists in `.planning/` (e.g., `PLAN-phase-1.md`)
 5. Continue from Current Phase listed above
 
-**Last session:** 2026-06-19T05:37:57.715Z
-**Stopped at:** Completed 05-01-PLAN.md — checkpoint:human-verify at Task 3
-**Last activity:** 2026-06-19
+**Last session:** 2026-06-23T00:00:00.000Z
+**Stopped at:** v2.0 roadmap created — Phase 6 pending /gsd:plan-phase 6
+**Last activity:** 2026-06-23
 
 ---
 *State initialized: 2026-05-27*
-*Last updated: 2026-06-05 quick task dirs cleanup*
+*Last updated: 2026-06-23 — v2.0 roadmap created, current phase = 6*

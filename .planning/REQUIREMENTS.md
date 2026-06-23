@@ -51,7 +51,7 @@
 
 ### 사망 복귀 플로우 (Death Flow)
 
-- [ ] **FLOW-01**: 사망 화면의 버튼을 누르면 MainMenu(Build index 0)로 복귀한다
+- [ ] **FLOW-01**: 사망 화면의 버튼("다시 선택")을 누르면 AttackSelect 씬(Build index 1)으로 복귀한다
 
 ---
 
@@ -89,7 +89,7 @@
 
 ## Traceability
 
-*Updated: 2026-05-27 after roadmap creation*
+*Updated: 2026-06-23 after v2.0 roadmap creation*
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
@@ -106,12 +106,25 @@
 | ENMY-02 | Phase 3 | Complete |
 | UI-01 | Phase 4 | Pending |
 | UI-02 | Phase 4 | Pending |
+| FLOOR-01 | Phase 5 | Pending |
+| FLOOR-02 | Phase 5 | Pending |
+| FLOOR-03 | Phase 5 | Pending |
+| FLOOR-04 | Phase 5 | Pending |
+| MENU-01 | Phase 6 | Pending |
+| MENU-02 | Phase 6 | Pending |
+| MENU-03 | Phase 6 | Pending |
+| FLOW-01 | Phase 7 | Pending |
+| ATKS-01 | Phase 7 | Pending |
+| ATKS-02 | Phase 7 | Pending |
+| ATKS-03 | Phase 7 | Pending |
 
 **Coverage:**
 - v1 requirements: 13 total
 - Mapped to phases: 13/13
+- v2.0 requirements: 7 total
+- Mapped to phases: 7/7
 - Unmapped: 0
 
 ---
 *Requirements defined: 2026-05-27*
-*Last updated: 2026-06-23 — v2.0 requirements added*
+*Last updated: 2026-06-23 — v2.0 traceability added (Phases 6-7)*

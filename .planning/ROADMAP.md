@@ -176,5 +176,90 @@ Plans:
 *(비어 있음 — 모든 항목이 활성 Phase로 승격됨)*
 
 ---
-*Roadmap created: 2026-05-27*
-*Last updated: 2026-06-17 after Phase 5 planning*
+
+---
+
+# Roadmap: Fast (가칭) — v2.0
+
+**Milestone:** v2.0 — 게임 시작 플로우
+**Granularity:** Standard
+**Coverage:** 7/7 v2.0 requirements mapped
+
+---
+
+## v2.0 Phases
+
+- [ ] **Phase 6: MainMenu Scene** - 앱 실행 시 MainMenu가 첫 화면이 되고, Start/Quit 버튼이 동작한다
+- [ ] **Phase 7: AttackSelect Scene & Scene Flow** - AttackSelect 씬에서 공격 방식을 선택하면 SampleScene이 로드되고 선택값이 유지되며, 사망 후 AttackSelect로 복귀한다
+
+---
+
+## v2.0 Phase Details
+
+### Phase 6: MainMenu Scene
+**Goal**: 앱을 실행하면 MainMenu가 첫 화면으로 열리고, Start/Quit 버튼이 동작한다
+**Depends on**: Phase 5
+**Requirements**: MENU-01, MENU-02, MENU-03
+**Success Criteria** (what must be TRUE):
+  1. 앱(또는 에디터 Play)을 실행하면 MainMenu.unity가 첫 화면으로 열린다 — SampleScene이 먼저 뜨지 않는다
+  2. MainMenu의 Start 버튼을 누르면 AttackSelect 씬으로 전환된다
+  3. MainMenu의 Quit 버튼을 누르면 앱이 즉시 종료된다 (에디터에서는 PlayMode 종료)
+**Plans**: TBD
+**UI hint**: yes
+
+---
+
+### Phase 7: AttackSelect Scene & Scene Flow
+**Goal**: AttackSelect.unity 씬에서 Linear 또는 Fan을 선택하면 SampleScene이 로드되고, 선택한 공격 방식이 게임플레이에 즉시 반영되며, SampleScene 내 기존 오버레이가 제거되고, 사망 후 AttackSelect로 복귀한다
+**Depends on**: Phase 6
+**Requirements**: ATKS-01, ATKS-02, ATKS-03, FLOW-01
+**Success Criteria** (what must be TRUE):
+  1. AttackSelect 씬에서 Linear 버튼을 누르면 SampleScene이 로드되고, 범위 표시가 직선형으로 동작한다
+  2. AttackSelect 씬에서 Fan 버튼을 누르면 SampleScene이 로드되고, 범위 표시가 부채꼴형으로 동작한다
+  3. SampleScene 로드 후 기존 AttackTypeSelector 캔버스 오버레이가 화면에 보이지 않는다
+  4. 사망 화면의 "다시 선택" 버튼을 누르면 AttackSelect 씬으로 복귀한다 — SampleScene이 재로드되지 않는다
+  5. 완전한 플로우(앱 실행 → MainMenu → AttackSelect → SampleScene → 사망 → AttackSelect)를 개발자 개입 없이 연속 3회 수행할 수 있다
+**Plans**: TBD
+**UI hint**: yes
+
+---
+
+## v2.0 Progress Table
+
+| Phase | Plans Complete | Status | Completed |
+|-------|----------------|--------|-----------|
+| 6. MainMenu Scene | 0/? | Not started | - |
+| 7. AttackSelect Scene & Scene Flow | 0/? | Not started | - |
+
+---
+
+## v2.0 Coverage Map
+
+| Requirement | Phase | Description |
+|-------------|-------|-------------|
+| MENU-01 | Phase 6 | MainMenu.unity at Build index 0 (first screen) |
+| MENU-02 | Phase 6 | Start button navigates to AttackSelect |
+| MENU-03 | Phase 6 | Quit button exits app |
+| FLOW-01 | Phase 7 | Death screen "다시 선택" returns to AttackSelect (index 1) |
+| ATKS-01 | Phase 7 | AttackSelect scene loads SampleScene on selection |
+| ATKS-02 | Phase 7 | Selected attack type persists into SampleScene |
+| ATKS-03 | Phase 7 | Existing AttackTypeSelector overlay removed from SampleScene |
+
+**v2.0 Coverage: 7/7 requirements mapped. No orphans.**
+
+---
+
+## v2.0 Implementation Notes (for plan-phase reference)
+
+- MainMenuController.cs and MainMenuSceneBuilder.cs (EditorScript) already exist (committed: ec13a46, ad54d11)
+- MainMenuController.OnStartClicked() currently loads SampleScene — must change to load AttackSelect (index 1) in Phase 7
+- Phase 6 scope for OnStartClicked: wire to AttackSelect or use placeholder index until AttackSelect scene exists
+- Attack type data passing: use PlayerPrefs or a static GameManager singleton — decide in Phase 7 plan
+- Build Settings order must be: MainMenu (0), AttackSelect (1), SampleScene (2)
+- DeathScreenController.SceneManager.LoadScene() must target AttackSelect (index 1), not MainMenu (index 0) — change in Phase 7
+- Death screen button label: "다시 선택" (changed from "메인 메뉴") — quick task 260623-t6i-deathscreen set it to "메인 메뉴", Phase 7 updates to "다시 선택"
+- AttackTypeSelector in SampleScene is a Canvas overlay — remove GameObject from scene or disable in ATKS-03
+
+---
+*v2.0 Roadmap created: 2026-06-23*
+*Last updated: 2026-06-23 — v2.0 phases 6-7 added*
