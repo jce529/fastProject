@@ -35,7 +35,27 @@
 - [ ] **UI-01**: HUD에 현재 층 번호, 시간정지 게이지, 선택한 공격 타입이 표시된다
 - [ ] **UI-02**: 플레이어 사망 시 사망 화면과 재시작 버튼이 표시되며, 재시작 시 1층부터 시작한다
 
-## v2 Requirements
+## v2.0 Requirements (게임 시작 플로우)
+
+### 게임 시작 흐름 (Game Start Flow)
+
+- [ ] **MENU-01**: 앱 실행 시 MainMenu.unity가 첫 화면으로 열린다 (Build Settings index 0)
+- [ ] **MENU-02**: MainMenu에서 Start 버튼을 누르면 AttackSelect 씬으로 이동한다
+- [ ] **MENU-03**: MainMenu에서 Quit 버튼을 누르면 앱이 종료된다
+
+### 공격 방식 선택 씬 (Attack Selection Scene)
+
+- [ ] **ATKS-01**: AttackSelect 씬에서 Linear / Fan 중 하나를 선택하면 SampleScene이 로드된다
+- [ ] **ATKS-02**: 선택한 공격 방식이 SampleScene에서 즉시 적용된다 (씬 전환 후에도 유지)
+- [ ] **ATKS-03**: SampleScene 내 기존 AttackTypeSelector 오버레이가 제거된다
+
+### 사망 복귀 플로우 (Death Flow)
+
+- [ ] **FLOW-01**: 사망 화면의 버튼을 누르면 MainMenu(Build index 0)로 복귀한다
+
+---
+
+## (이전 계획) v2 Requirements
 
 ### 층 시스템 (Floor System)
 
@@ -94,4 +114,4 @@
 
 ---
 *Requirements defined: 2026-05-27*
-*Last updated: 2026-05-27 after roadmap creation*
+*Last updated: 2026-06-23 — v2.0 requirements added*
