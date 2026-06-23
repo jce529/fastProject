@@ -2,9 +2,9 @@
 gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: Phases
-status: completed
-stopped_at: Phase 7 context gathered
-last_updated: "2026-06-23T13:36:01.156Z"
+status: in_progress
+stopped_at: Completed 07-01-PLAN.md
+last_updated: "2026-06-23T13:52:39.847Z"
 last_activity: 2026-06-23
 progress:
   total_phases: 7
@@ -31,10 +31,10 @@ progress:
 
 ## Current Position
 
-Phase: 7 — AttackSelect Scene & Scene Flow (not started)
-Plan: —
-Status: Phase 6 complete — awaiting /gsd:plan-phase 7
-Last activity: 2026-06-23 — Phase 6 complete (MainMenu Scene)
+Phase: 7 — AttackSelect Scene & Scene Flow (IN PROGRESS)
+Plan: 1 of 2 complete (07-01 done, 07-02 pending checkpoint)
+Status: Wave 1 complete — 07-02 requires Unity Editor manual scene authoring
+Last activity: 2026-06-23 — AttackSelectController.cs + DeathScreen scene target updated
 
 **Previous Milestone v1.0 (complete):** 5 phases, 15 plans — 플레이어 이동/전투/적/HUD/절차적 맵 전체 구현
 
@@ -59,6 +59,7 @@ Last activity: 2026-06-23 — Phase 6 complete (MainMenu Scene)
 | Phase 03-enemy-system P03-04 | ~8min | 2 tasks | 2 files |
 | Phase 04-hud-game-loop P04-01 | ~5min | 2 tasks (T3 pending human) | 2 files |
 | Phase 05 P01 | 15 | 2 tasks | 5 files |
+| Phase 07 P01 | 5 | 2 tasks | 2 files |
 
 ## Accumulated Context
 
@@ -84,6 +85,8 @@ Last activity: 2026-06-23 — Phase 6 complete (MainMenu Scene)
 | SetText("{0}", int) over string interpolation (04-01) | TMP's int overload uses internal char buffer — zero allocation per frame vs. $"" allocating new string every frame |
 | v2.0 FLOW-01 in Phase 6 (not Phase 7) | FLOW-01 only requires MainMenu at Build index 0; that is Phase 6 scope. DeathScreenController.LoadScene(0) is already wired — Phase 6 verifies correctness. |
 | v2.0 attack type data passing: PlayerPrefs or static GameManager | Defer final decision to Phase 7 plan; both options are valid for prototype scope, no persistence needed across sessions |
+| AttackSelectController uses AttackTypeSelector.SetType + SceneManager.LoadScene("SampleScene") | Follows exact same pattern as MainMenuController.cs — minimal new surface area |
+| DeathScreenController.RestartGame() loads "AttackSelect" not index 0 | Death → AttackSelect → SampleScene flow; scene name is more resilient than index against Build Settings reorder |
 
 ### Technical Constraints to Enforce Every Phase
 
@@ -157,10 +160,10 @@ None.
 4. Check which phase plan exists in `.planning/` (e.g., `PLAN-phase-1.md`)
 5. Continue from Current Phase listed above
 
-**Last session:** 2026-06-23T13:36:01.150Z
-**Stopped at:** Phase 7 context gathered
+**Last session:** 2026-06-23T13:52:39.847Z
+**Stopped at:** Completed 07-01-PLAN.md
 **Last activity:** 2026-06-23
 
 ---
 *State initialized: 2026-05-27*
-*Last updated: 2026-06-23 — v2.0 roadmap created, current phase = 6*
+*Last updated: 2026-06-23 — Phase 7 Wave 1 complete (AttackSelectController + DeathScreen)*
