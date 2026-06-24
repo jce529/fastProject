@@ -19,6 +19,7 @@ public class RangedEnemy : MonoBehaviour, IEnemy
     [SerializeField] private float patrolHalfRange = 3f;
     [SerializeField] private GameObject projectilePrefab;     // Assign Projectile prefab in Inspector
     [SerializeField] private Transform  firePoint;            // Assign child FirePoint transform in Inspector
+    [SerializeField] private float attackWindupDelay = 0.1f; // 발사 애니메이션 트리거 이후 실제 발사까지 대기 (Inspector 조정)
 
     // -- Layer constants ------------------------------------------------------------
     private const int LayerPlayerHurtbox    = 7;
@@ -218,6 +219,14 @@ public class RangedEnemy : MonoBehaviour, IEnemy
         if (_aimLine != null) _aimLine.enabled = false;
 
         _animator?.SetTrigger("isAttacking");
+
+        // Wait for animation windup before firing — timeScale-immune (ROADMAP Stack Constraint)
+        if (attackWindupDelay > 0f)
+            yield return new WaitForSecondsRealtime(attackWindupDelay);
+
+        // Guard: player may have killed enemy during windup
+        if (!IsAlive) yield break;
+
         FireProjectile(aimDir, origin);
 
         _state = EnemyState.Idle;
