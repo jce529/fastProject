@@ -16,6 +16,7 @@ public class MeleeEnemy : MonoBehaviour, IEnemy
     [SerializeField] private float patrolSpeed          = 2f;    // Idle patrol speed
     [SerializeField] private float patrolHalfRange      = 3f;    // Half-width of patrol walk
     [SerializeField] private float hitboxActiveDuration = 0.15f; // Seconds hitbox stays active
+    [SerializeField] private float attackWindupDelay = 0.1f;     // 애니메이션 windup 이후 히트박스 활성화까지 대기 (Inspector 조정)
     [SerializeField] private SpriteRenderer _exclamationIcon;    // Child SpriteRenderer with "!" sprite — assign in Inspector
     [SerializeField] private Collider2D     _meleeHitbox;        // Child Trigger Collider2D — assign in Inspector
 
@@ -180,6 +181,13 @@ public class MeleeEnemy : MonoBehaviour, IEnemy
         if (_exclamationIcon != null) _exclamationIcon.enabled = false;
         _state = EnemyState.Attack;
         _animator?.SetTrigger("isAttacking");
+
+        // Wait for animation windup before activating hitbox — timeScale-immune (ROADMAP Stack Constraint)
+        if (attackWindupDelay > 0f)
+            yield return new WaitForSecondsRealtime(attackWindupDelay);
+
+        // Guard: player may have killed enemy during windup
+        if (!IsAlive) yield break;
 
         // Activate melee hitbox briefly (D-07, D-08)
         if (_meleeHitbox != null)
