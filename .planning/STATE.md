@@ -156,6 +156,7 @@ None.
 | 260624-e5y | GameBootstrapper — 어느 씬에서 Play해도 항상 MainMenu로 리디렉션 (BeforeSceneLoad) | 2026-06-24 | 90f9e2c | [260624-e5y](./quick/260624-e5y-mainmenu/) |
 | 260624-lre | FloorSpawner Step 2 텔레포트를 고정 Y 공식에서 nextRoom의 RoomEntry 위치로 변경 | 2026-06-24 | — | [260624-lre](./quick/260624-lre-floorspawner-step-2-y-nextroom-roomentry/) |
 | 260624-mcv | FloorSpawner SpawnRoom() 적 Instantiate에 room.transform parent 추가 — Room 파괴 시 적 자동 정리 (FLOOR-04) | 2026-06-24 | ada935e | [260624-mcv](./quick/260624-mcv-floorspawner-cs-157-instantiate-room-tra/) |
+| 260624-ml3 | RoomClearCondition 버그 2개 수정 — enemies 없을 때 즉시 활성화 + GetComponentsInChildren 동적 탐색 | 2026-06-24 | 8181b9f | [260624-ml3](./quick/260624-ml3-roomclearcondition-cs-2-1-enemies-target/) |
 
 ---
 
