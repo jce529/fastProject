@@ -153,8 +153,8 @@ public class FloorSpawner : MonoBehaviour
 
             if (enemyPrefab == null) { spawnIndex++; continue; }
 
-            // Pitfall 4: Instantiate(prefab, position, rotation) — Awake가 올바른 위치로 실행됨
-            GameObject enemy = Instantiate(enemyPrefab, child.position, Quaternion.identity);
+            // Pitfall 4: Instantiate(prefab, position, rotation, parent) — Awake가 올바른 위치로 실행됨. room.transform을 parent로 전달해 Room 파괴 시 적도 함께 정리됨 (FLOOR-04).
+            GameObject enemy = Instantiate(enemyPrefab, child.position, Quaternion.identity, room.transform);
             enemy.SetActive(false); // FLOOR-03: 전환 4단계까지 비활성
             spawnIndex++;
         }
