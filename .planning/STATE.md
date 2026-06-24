@@ -5,9 +5,9 @@ milestone_name: Phases
 current_phase: 07
 current_plan: 1
 status: unknown
-stopped_at: Completed quick/260624-lre-floorspawner-step-2-y-nextroom-roomentry
-last_updated: "2026-06-24T06:55:00.000Z"
-last_activity: "2026-06-24 - Completed quick task 260624-lre: FloorSpawner Step 2 RoomEntry 기반 텔레포트"
+stopped_at: Completed quick/260624-t4e-windup-delay
+last_updated: "2026-06-24T12:14:10Z"
+last_activity: "2026-06-24 - Completed quick task 260624-t4e: MeleeEnemy/RangedEnemy attackWindupDelay 추가"
 progress:
   total_phases: 7
   completed_phases: 5
@@ -157,6 +157,7 @@ None.
 | 260624-lre | FloorSpawner Step 2 텔레포트를 고정 Y 공식에서 nextRoom의 RoomEntry 위치로 변경 | 2026-06-24 | — | [260624-lre](./quick/260624-lre-floorspawner-step-2-y-nextroom-roomentry/) |
 | 260624-mcv | FloorSpawner SpawnRoom() 적 Instantiate에 room.transform parent 추가 — Room 파괴 시 적 자동 정리 (FLOOR-04) | 2026-06-24 | ada935e | [260624-mcv](./quick/260624-mcv-floorspawner-cs-157-instantiate-room-tra/) |
 | 260624-ml3 | RoomClearCondition 버그 2개 수정 — enemies 없을 때 즉시 활성화 + GetComponentsInChildren 동적 탐색 | 2026-06-24 | 8181b9f | [260624-ml3](./quick/260624-ml3-roomclearcondition-cs-2-1-enemies-target/) |
+| 260624-t4e | MeleeEnemy/RangedEnemy attackWindupDelay 추가 — 공격 애니메이션 트리거 후 0.1s 지연 + windup 중 처치 시 IsAlive 재체크 | 2026-06-24 | f06cda7, 454405e | [260624-t4e](./quick/260624-t4e-windup-delay/) |
 
 ---
 
