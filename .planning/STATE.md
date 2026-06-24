@@ -1,16 +1,18 @@
 ---
 gsd_state_version: 1.0
-milestone: v2.0
-milestone_name: Phases
-status: in_progress
-stopped_at: Completed 07-01-PLAN.md
-last_updated: "2026-06-23T13:52:39.847Z"
-last_activity: 2026-06-23
+milestone: v1.0
+milestone_name: milestone
+current_phase: 04
+current_plan: 1
+status: unknown
+stopped_at: Phase 5 context gathered
+last_updated: "2026-06-17T06:35:00.419Z"
+last_activity: "2026-06-17 - Completed quick task 260617-jwe: Room 프리팹 폴더 구조 생성 (Assets/Prefabs/Rooms/ 14개 폴더)"
 progress:
-  total_phases: 7
-  completed_phases: 5
-  total_plans: 16
-  completed_plans: 15
+  total_phases: 5
+  completed_phases: 3
+  total_plans: 13
+  completed_plans: 12
 ---
 
 # Project State: Fast (가칭)
@@ -25,18 +27,30 @@ progress:
 
 **Prototype Goal:** Single combat test room. Validate the hold-to-aim / release-to-dash feel before building floors or progression.
 
-**Current Milestone:** v2.0 — 게임 시작 플로우
+**Current Milestone:** v1 — Combat Test Room
 
 ---
 
 ## Current Position
 
-Phase: 7 — AttackSelect Scene & Scene Flow (IN PROGRESS)
-Plan: 1 of 2 complete (07-01 done, 07-02 pending checkpoint)
-Status: Wave 1 complete — 07-02 requires Unity Editor manual scene authoring
-Last activity: 2026-06-23 — AttackSelectController.cs + DeathScreen scene target updated
+Phase: 04 (hud-game-loop) — IN PROGRESS
+Plan: 1 of 2
+**Current Phase:** 04
+**Current Plan:** 1
+**Phase Status:** Checkpoint at T3 — T1/T2 code complete, T3 requires Unity Editor GUI
 
-**Previous Milestone v1.0 (complete):** 5 phases, 15 plans — 플레이어 이동/전투/적/HUD/절차적 맵 전체 구현
+```
+Progress: [X] Phase 1  [ ] Phase 2  [ ] Phase 3  [ ] Phase 4
+           |___________|___________|___________|___________|
+                 25%                                    100%
+```
+
+**Phase Goals:**
+
+- Phase 1: Player moves responsively, falls recover to last platform
+- Phase 2: Hold-aim / release-dash loop + gauge + roll + hit-freeze fully playable
+- Phase 3: Melee and ranged enemies with telegraph, FSM, one-shot-kill both ways
+- Phase 4: HUD always visible, death screen, restart in under 3 seconds
 
 ---
 
@@ -45,9 +59,8 @@ Last activity: 2026-06-23 — AttackSelectController.cs + DeathScreen scene targ
 | Metric | Target | Current |
 |--------|--------|---------|
 | v1 Requirements mapped | 13/13 | 13/13 |
-| v2.0 Requirements mapped | 7/7 | 7/7 |
-| v2.0 Phases completed | 2 | 0 |
-| Plans completed | TBD | 0 |
+| Phases completed | 4 | 0 |
+| Plans completed | TBD | 2 |
 
 ---
 | Phase 01-foundation-movement P01 | 4 | 2 tasks | 7 files |
@@ -58,8 +71,6 @@ Last activity: 2026-06-23 — AttackSelectController.cs + DeathScreen scene targ
 | Phase 02-combat-core P02-03 | 15 | 2 tasks | 8 files |
 | Phase 03-enemy-system P03-04 | ~8min | 2 tasks | 2 files |
 | Phase 04-hud-game-loop P04-01 | ~5min | 2 tasks (T3 pending human) | 2 files |
-| Phase 05 P01 | 15 | 2 tasks | 5 files |
-| Phase 07 P01 | 5 | 2 tasks | 2 files |
 
 ## Accumulated Context
 
@@ -83,10 +94,6 @@ Last activity: 2026-06-23 — AttackSelectController.cs + DeathScreen scene targ
 | FloorManager as static class, not MonoBehaviour (04-01) | Data-only int needs no scene lifecycle; static field is sufficient and avoids scene coupling |
 | (AttackType)(-1) dirty-check sentinel (04-01) | Forces first-frame label update; -1 is never a valid AttackType so it always differs on first Update() |
 | SetText("{0}", int) over string interpolation (04-01) | TMP's int overload uses internal char buffer — zero allocation per frame vs. $"" allocating new string every frame |
-| v2.0 FLOW-01 in Phase 6 (not Phase 7) | FLOW-01 only requires MainMenu at Build index 0; that is Phase 6 scope. DeathScreenController.LoadScene(0) is already wired — Phase 6 verifies correctness. |
-| v2.0 attack type data passing: PlayerPrefs or static GameManager | Defer final decision to Phase 7 plan; both options are valid for prototype scope, no persistence needed across sessions |
-| AttackSelectController uses AttackTypeSelector.SetType + SceneManager.LoadScene("SampleScene") | Follows exact same pattern as MainMenuController.cs — minimal new surface area |
-| DeathScreenController.RestartGame() loads "AttackSelect" not index 0 | Death → AttackSelect → SampleScene flow; scene name is more resilient than index against Build Settings reorder |
 
 ### Technical Constraints to Enforce Every Phase
 
@@ -110,7 +117,6 @@ Last activity: 2026-06-23 — AttackSelectController.cs + DeathScreen scene targ
 - [ ] Create SampleScene test layout (one flat floor with fall zones) before Phase 1 plan
 - [ ] Confirm Cinemachine package version before Phase 1 plan
 - [ ] Set up layer matrix (PlayerHurtbox, PlayerInvincible, Enemy, EnemyProjectile, Platform) before coding begins
-- [ ] Verify quick task 260623-t6i-deathscreen: confirm DeathScreenController RestartLabel text is "메인 메뉴" before Phase 6 plan
 
 ### Blockers
 
@@ -147,6 +153,7 @@ None.
 | 260618-u8j | RoomPrefabBuilder 에디터 스크립트 — Fast/Build Room Prefabs 메뉴로 14개 Room 프리팹 생성 (Platform/KillZone/마커 계층) | 2026-06-18 | 98309c2 | [260618-u8j](./quick/260618-u8j-14-room-editor/) |
 | 260623-ntw | MainMenuController + MainMenuSceneBuilder — Start/Quit 버튼 로직 + EditorScript(Fast/Build MainMenu Scene 메뉴) | 2026-06-23 | ec13a46, ad54d11 | [260623-ntw](./quick/260623-ntw-mainmenu-fast-samplescene-application-qu/) |
 | 260623-t6i | DeathScreen RestartLabel 텍스트를 "메인 메뉴"로 변경 | 2026-06-23 | — | [260623-t6i](./quick/260623-t6i-deathscreen/) |
+| 260624-e5y | GameBootstrapper — 어느 씬에서 Play해도 항상 MainMenu로 리디렉션 (BeforeSceneLoad) | 2026-06-24 | 90f9e2c | [260624-e5y](./quick/260624-e5y-mainmenu/) |
 
 ---
 
@@ -160,10 +167,10 @@ None.
 4. Check which phase plan exists in `.planning/` (e.g., `PLAN-phase-1.md`)
 5. Continue from Current Phase listed above
 
-**Last session:** 2026-06-23T13:52:39.847Z
-**Stopped at:** Completed 07-01-PLAN.md
-**Last activity:** 2026-06-23
+**Last session:** 2026-06-24T00:00:00Z
+**Stopped at:** Completed quick/260624-e5y-mainmenu
+**Last activity:** 2026-06-24 - Completed quick task 260624-e5y: GameBootstrapper BeforeSceneLoad redirect to MainMenu
 
 ---
 *State initialized: 2026-05-27*
-*Last updated: 2026-06-23 — Phase 7 Wave 1 complete (AttackSelectController + DeathScreen)*
+*Last updated: 2026-06-24 — quick task 260624-e5y GameBootstrapper*
