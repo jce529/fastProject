@@ -1,18 +1,18 @@
 ---
 gsd_state_version: 1.0
-milestone: v1.0
-milestone_name: milestone
-current_phase: 04
+milestone: v2.0
+milestone_name: Phases
+current_phase: 07
 current_plan: 1
 status: unknown
-stopped_at: Phase 5 context gathered
-last_updated: "2026-06-17T06:35:00.419Z"
-last_activity: "2026-06-17 - Completed quick task 260617-jwe: Room 프리팹 폴더 구조 생성 (Assets/Prefabs/Rooms/ 14개 폴더)"
+stopped_at: Completed quick/260624-lre-floorspawner-step-2-y-nextroom-roomentry
+last_updated: "2026-06-24T06:55:00.000Z"
+last_activity: "2026-06-24 - Completed quick task 260624-lre: FloorSpawner Step 2 RoomEntry 기반 텔레포트"
 progress:
-  total_phases: 5
-  completed_phases: 3
-  total_plans: 13
-  completed_plans: 12
+  total_phases: 7
+  completed_phases: 5
+  total_plans: 18
+  completed_plans: 16
 ---
 
 # Project State: Fast (가칭)
@@ -33,9 +33,9 @@ progress:
 
 ## Current Position
 
-Phase: 04 (hud-game-loop) — IN PROGRESS
+Phase: 07 (attackselect-scene-scene-flow) — EXECUTING
 Plan: 1 of 2
-**Current Phase:** 04
+**Current Phase:** 07
 **Current Plan:** 1
 **Phase Status:** Checkpoint at T3 — T1/T2 code complete, T3 requires Unity Editor GUI
 
@@ -154,6 +154,7 @@ None.
 | 260623-ntw | MainMenuController + MainMenuSceneBuilder — Start/Quit 버튼 로직 + EditorScript(Fast/Build MainMenu Scene 메뉴) | 2026-06-23 | ec13a46, ad54d11 | [260623-ntw](./quick/260623-ntw-mainmenu-fast-samplescene-application-qu/) |
 | 260623-t6i | DeathScreen RestartLabel 텍스트를 "메인 메뉴"로 변경 | 2026-06-23 | — | [260623-t6i](./quick/260623-t6i-deathscreen/) |
 | 260624-e5y | GameBootstrapper — 어느 씬에서 Play해도 항상 MainMenu로 리디렉션 (BeforeSceneLoad) | 2026-06-24 | 90f9e2c | [260624-e5y](./quick/260624-e5y-mainmenu/) |
+| 260624-lre | FloorSpawner Step 2 텔레포트를 고정 Y 공식에서 nextRoom의 RoomEntry 위치로 변경 | 2026-06-24 | — | [260624-lre](./quick/260624-lre-floorspawner-step-2-y-nextroom-roomentry/) |
 
 ---
 
@@ -169,7 +170,7 @@ None.
 
 **Last session:** 2026-06-24T00:00:00Z
 **Stopped at:** Completed quick/260624-e5y-mainmenu
-**Last activity:** 2026-06-24 - Completed quick task 260624-e5y: GameBootstrapper BeforeSceneLoad redirect to MainMenu
+**Last activity:** 2026-06-24
 
 ---
 *State initialized: 2026-05-27*

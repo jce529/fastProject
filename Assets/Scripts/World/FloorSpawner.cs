@@ -43,8 +43,8 @@ public class FloorSpawner : MonoBehaviour
     private void Awake()
     {
         Instance = this;
-        // D-05: 1층은 항상 고정 Room 스폰 (적 없음 — GetEnemyCount(1) returns (0,0))
         _currentRoom = SpawnRoom(_floor1RoomPrefab, 1);
+        ActivateEnemies(_currentRoom);
     }
 
     // -- Public API (RoomExit.OnTriggerEnter2D가 호출) -------------------------
@@ -75,16 +75,22 @@ public class FloorSpawner : MonoBehaviour
         FloorManager.CurrentFloor++;
         GameObject nextRoom = SpawnRoom(SelectNextRoom(), FloorManager.CurrentFloor);
 
-        // [Step 2] 순간이동 — 플레이어를 새 층 바닥 위 2유닛으로 즉시 이동
-        // Pitfall 4: 위치는 Instantiate 시 이미 설정됨 — Enemy Awake가 정확한 위치로 실행됨
-        float newY = (FloorManager.CurrentFloor - 1) * _roomHeight + 2f;
+        // [Step 2] 순간이동 — nextRoom의 RoomEntry(ENT 마커) 위치로 이동
+        // RoomEntry가 없으면 고정 공식으로 폴백 (마커 미배치 룸 호환성)
+        RoomEntry entry = nextRoom.GetComponentInChildren<RoomEntry>(true);
+        Vector3 teleportPos;
+        if (entry != null)
+        {
+            teleportPos = entry.transform.position;
+        }
+        else
+        {
+            float fallbackY = (FloorManager.CurrentFloor - 1) * _roomHeight + 2f;
+            teleportPos = new Vector3(_playerTransform.position.x, fallbackY, 0f);
+        }
         var rb = _playerTransform.GetComponent<Rigidbody2D>();
         if (rb != null) rb.linearVelocity = Vector2.zero;
-        _playerTransform.position = new Vector3(
-            _playerTransform.position.x,
-            newY,
-            0f
-        );
+        _playerTransform.position = teleportPos;
 
         // [Step 3] 카메라 Y스냅 — CameraFollow.LateUpdate가 target.position을 매 프레임 추적.
         // 플레이어 순간이동으로 자동 완성됨. 한 프레임 양보해 LateUpdate 실행 허용.
@@ -177,7 +183,6 @@ public class FloorSpawner : MonoBehaviour
     /// </summary>
     private (int melee, int ranged) GetEnemyCount(int floor)
     {
-        if (floor == 1)   return (0, 0);
         if (floor <= 5)   return (Random.Range(2, 4), Random.Range(0, 2));
         if (floor <= 10)  return (2, Random.Range(1, 3));
         return (2, Random.Range(2, 4));
