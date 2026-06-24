@@ -150,6 +150,10 @@ None.
 | 260617-0el | RangedEnemy detectionRadius(감지)/aimLineLength(공격 트리거) 분리 — Chase 중 aimLineLength 진입 시에만 텔레그래프 시작 | 2026-06-17 | bd63875 | [260617-0el](./quick/260617-0el-rangedenemy-detectionradius-aimlinelengt/) |
 | 260617-0t2 | MeleeEnemy patrol→SwordWalk/chase→SwordRunAltGrip 분리, RangedEnemy patrol→GunWalk 추가, _animator 캐시 통일 | 2026-06-17 | 926bb8f, b5d2438 | [260617-0t2](./quick/260617-0t2-meleeenemy-swordwalk-swordrunaltgrip-ran/) |
 | 260617-jwe | Room 프리팹 폴더 구조 생성 (Assets/Prefabs/Rooms/ 아래 14개 Room 폴더) | 2026-06-17 | — | [260617-jwe](./quick/260617-jwe-room/) |
+| 260618-u8j | RoomPrefabBuilder 에디터 스크립트 — Fast/Build Room Prefabs 메뉴로 14개 Room 프리팹 생성 (Platform/KillZone/마커 계층) | 2026-06-18 | 98309c2 | [260618-u8j](./quick/260618-u8j-14-room-editor/) |
+| 260623-ntw | MainMenuController + MainMenuSceneBuilder — Start/Quit 버튼 로직 + EditorScript(Fast/Build MainMenu Scene 메뉴) | 2026-06-23 | ec13a46, ad54d11 | [260623-ntw](./quick/260623-ntw-mainmenu-fast-samplescene-application-qu/) |
+| 260623-t6i | DeathScreen RestartLabel 텍스트를 "메인 메뉴"로 변경 | 2026-06-23 | — | [260623-t6i](./quick/260623-t6i-deathscreen/) |
+| 260624-e5y | GameBootstrapper — 어느 씬에서 Play해도 항상 MainMenu로 리디렉션 (BeforeSceneLoad) | 2026-06-24 | 90f9e2c | [260624-e5y](./quick/260624-e5y-mainmenu/) |
 
 ---
 
@@ -163,10 +167,10 @@ None.
 4. Check which phase plan exists in `.planning/` (e.g., `PLAN-phase-1.md`)
 5. Continue from Current Phase listed above
 
-**Last session:** 2026-06-17T06:35:00.413Z
-**Stopped at:** Phase 5 context gathered
-**Last activity:** 2026-06-17 - Completed quick task 260617-jwe: Room 프리팹 폴더 구조 생성 (Assets/Prefabs/Rooms/ 14개 폴더)
+**Last session:** 2026-06-24T00:00:00Z
+**Stopped at:** Completed quick/260624-e5y-mainmenu
+**Last activity:** 2026-06-24 - Completed quick task 260624-e5y: GameBootstrapper BeforeSceneLoad redirect to MainMenu
 
 ---
 *State initialized: 2026-05-27*
-*Last updated: 2026-06-05 quick task dirs cleanup*
+*Last updated: 2026-06-24 — quick task 260624-e5y GameBootstrapper*
