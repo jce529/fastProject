@@ -5,9 +5,9 @@ milestone_name: Phases
 current_phase: 07
 current_plan: 1
 status: unknown
-stopped_at: Completed quick/260624-t4e-windup-delay
+stopped_at: Completed quick/260624-u3w-getenemycount
 last_updated: "2026-06-24T12:14:10Z"
-last_activity: "2026-06-24 - Completed quick task 260624-t4e: MeleeEnemy/RangedEnemy attackWindupDelay 추가"
+last_activity: "2026-06-24 - Completed quick task 260624-u3w: FloorSpawner GetEnemyCount Mathf.Clamp 공식 교체"
 progress:
   total_phases: 7
   completed_phases: 5
@@ -159,7 +159,8 @@ None.
 | 260624-ml3 | RoomClearCondition 버그 2개 수정 — enemies 없을 때 즉시 활성화 + GetComponentsInChildren 동적 탐색 | 2026-06-24 | 8181b9f | [260624-ml3](./quick/260624-ml3-roomclearcondition-cs-2-1-enemies-target/) |
 | 260624-oh2 | ROOM_NOTES.md 기반 프리팹 수정: Room_Gap 적 스폰포인트 삭제, Room_Combat 적 5개 추가 | 2026-06-24 | — | [260624-oh2](./quick/260624-oh2-room-notes-md-5-room-gap-room-combat-5/) |
 | 260624-q65 | MeleeEnemy MovePosition→linearVelocity.x 전환 + 앞 장애물/바닥 끊김 시 점프 로직 추가 | 2026-06-24 | f5b4349 | [260624-q65](./quick/260624-q65-meleeenemy-moveposition-velocity-x/) |
-| 260624-t4e | MeleeEnemy/RangedEnemy attackWindupDelay 추가 — 공격 애니메이션 트리거 후 0.1s 지연 + windup 중 처치 시 IsAlive 재체크 | 2026-06-24 | f06cda7, 454405e | [260624-t4e](./quick/260624-t4e-windup-delay/) |
+| 260624-t4e | MeleeEnemy/RangedEnemy attackWindupDelay 추가 — 공격 애니메이션 트리거 후 0.1s 지연 + windup 중 처치 시 IsAlive 재체크 | 2026-06-24 | f06cda7, 454405e | [260624-t4e](./quick/260624-t4e-windup-delay/) | 
+| 260624-u3w | FloorSpawner GetEnemyCount 3단계 if-else → Mathf.Clamp 공식 교체 (FLOOR-03) | 2026-06-24 | 2d0f44c | [260624-u3w](./quick/260624-u3w-getenemycount/) |
 
 ---
 
