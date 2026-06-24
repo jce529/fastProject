@@ -18,6 +18,9 @@ public class MeleeEnemy : MonoBehaviour, IEnemy
     [SerializeField] private float hitboxActiveDuration = 0.15f; // Seconds hitbox stays active
     [SerializeField] private SpriteRenderer _exclamationIcon;    // Child SpriteRenderer with "!" sprite — assign in Inspector
     [SerializeField] private Collider2D     _meleeHitbox;        // Child Trigger Collider2D — assign in Inspector
+    [SerializeField] private float jumpForce     = 8f;    // 점프 초속 (Inspector 조정)
+    [SerializeField] private float wallCheckDist = 0.4f;  // 앞 벽 감지 거리
+    [SerializeField] private float gapCheckDist  = 0.6f;  // 바닥 끊김 감지 거리 (발 앞으로)
 
     // -- Layer constants (hardcoded — matches TagManager.asset, established pattern) --
     private const int LayerPlayerHurtbox    = 7;
@@ -34,6 +37,7 @@ public class MeleeEnemy : MonoBehaviour, IEnemy
     // -- Runtime refs ---------------------------------------------------------------
     private Rigidbody2D _rb;
     private Animator     _animator;
+    private SpriteRenderer _sr;
     private Transform   _playerTransform;
     private Vector3     _spawnPosition;
     private float       _patrolDir = 1f;
@@ -48,6 +52,7 @@ public class MeleeEnemy : MonoBehaviour, IEnemy
     {
         _rb            = GetComponent<Rigidbody2D>();
         _animator      = GetComponent<Animator>();
+        _sr            = GetComponent<SpriteRenderer>();
         _spawnPosition = transform.position;
 
         // Cache filter once — avoids LayerMask.GetMask() string lookup in Update (ROADMAP constraint)
@@ -125,10 +130,10 @@ public class MeleeEnemy : MonoBehaviour, IEnemy
     private void UpdateIdle()
     {
         // Patrol: left/right bounce around spawn position
-        float newX = transform.position.x + _patrolDir * patrolSpeed * Time.deltaTime;
-        if (Mathf.Abs(newX - _spawnPosition.x) >= patrolHalfRange)
+        if (Mathf.Abs(transform.position.x - _spawnPosition.x) >= patrolHalfRange)
             _patrolDir *= -1f;
-        _rb.MovePosition(new Vector2(newX, _rb.position.y));
+        _rb.linearVelocity = new Vector2(_patrolDir * patrolSpeed, _rb.linearVelocity.y);
+        FlipSprite(_patrolDir);
         _animator?.SetBool("isMoving", true);
         _animator?.SetBool("isChasing", false);
 
@@ -154,9 +159,11 @@ public class MeleeEnemy : MonoBehaviour, IEnemy
             return;
         }
 
-        // Move toward player
-        Vector2 dir = ((Vector2)_playerTransform.position - _rb.position).normalized;
-        _rb.MovePosition(_rb.position + dir * chaseSpeed * Time.deltaTime);
+        // Move toward player (x only — Y left to Unity 2D physics)
+        float dirX = Mathf.Sign(_playerTransform.position.x - transform.position.x);
+        _rb.linearVelocity = new Vector2(dirX * chaseSpeed, _rb.linearVelocity.y);
+        FlipSprite(dirX);
+        TryJump(dirX);
         _animator?.SetBool("isMoving", true);
         _animator?.SetBool("isChasing", true);
     }
@@ -235,5 +242,49 @@ public class MeleeEnemy : MonoBehaviour, IEnemy
             _detectionBuffer);
         if (count > 0 && _detectionBuffer[0] != null)
             _playerTransform = _detectionBuffer[0].transform;
+    }
+
+    /// <summary>땅에 있을 때만 점프. 앞에 벽 또는 바닥 끊김 감지 시 발동.</summary>
+    private void TryJump(float moveDir)
+    {
+        if (!IsGrounded()) return;
+        if (WallAhead(moveDir) || GapAhead(moveDir))
+            _rb.linearVelocity = new Vector2(_rb.linearVelocity.x, jumpForce);
+    }
+
+    /// <summary>발 아래 짧은 Raycast — 땅 위에 있으면 true.</summary>
+    private bool IsGrounded()
+    {
+        // 발 위치: 콜라이더 하단 기준 (0.1f 여유)
+        Vector2 origin = (Vector2)transform.position + Vector2.down * 0.55f;
+        RaycastHit2D hit = Physics2D.Raycast(origin, Vector2.down, 0.15f,
+            LayerMask.GetMask("Default", "Ground", "Platform"));
+        return hit.collider != null;
+    }
+
+    /// <summary>이동 방향 앞 벽 Raycast — 충돌체 있으면 true.</summary>
+    private bool WallAhead(float moveDir)
+    {
+        Vector2 origin = (Vector2)transform.position;
+        RaycastHit2D hit = Physics2D.Raycast(origin, new Vector2(moveDir, 0f), wallCheckDist,
+            LayerMask.GetMask("Default", "Ground", "Platform"));
+        return hit.collider != null;
+    }
+
+    /// <summary>이동 방향 발 앞 아래 Raycast — 바닥 없으면 gap → true.</summary>
+    private bool GapAhead(float moveDir)
+    {
+        // 발 앞 수평으로 gapCheckDist 이동한 지점에서 아래로 Ray
+        Vector2 origin = (Vector2)transform.position + new Vector2(moveDir * gapCheckDist, -0.5f);
+        RaycastHit2D hit = Physics2D.Raycast(origin, Vector2.down, 0.5f,
+            LayerMask.GetMask("Default", "Ground", "Platform"));
+        return hit.collider == null;
+    }
+
+    /// <summary>이동 방향에 따라 스프라이트 좌우 반전.</summary>
+    private void FlipSprite(float dirX)
+    {
+        if (dirX == 0f) return;
+        if (_sr != null) _sr.flipX = dirX < 0f;
     }
 }
