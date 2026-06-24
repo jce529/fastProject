@@ -26,21 +26,11 @@ public class ChronoGaugeController : MonoBehaviour
     /// <summary>Called by CombatController after a successful kill. Adds kill bonus to gauge.</summary>
     public void AddKillBonus() => Value = Mathf.Min(1f, Value + killBonus);
 
-    private float _debugLogTimer;
-
     private void Update()
     {
         if (_isDraining)
             Value = Mathf.Max(0f, Value - drainPerSecond * Time.unscaledDeltaTime);
         else
             Value = Mathf.Min(1f, Value + regenPerSecond * Time.unscaledDeltaTime);
-
-        // [DEBUG] 0.5초마다 상태 출력 — 확인 후 제거
-        _debugLogTimer += Time.unscaledDeltaTime;
-        if (_debugLogTimer >= 0.5f)
-        {
-            _debugLogTimer = 0f;
-            Debug.Log($"[ChronoGauge] isDraining={_isDraining}, Value={Value:F3}");
-        }
     }
 }

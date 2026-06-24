@@ -18,6 +18,7 @@ public class PlayerController : MonoBehaviour
     // -- Movement constants ------------------------------------------------------
     [SerializeField] private float moveSpeed = 8f;
     [SerializeField] private float jumpForce = 14f;
+    [SerializeField] private int maxJumps = 2;
 
     /// <summary>
     /// On jump-button release while ascending: multiply upward velocity by this.
@@ -40,6 +41,8 @@ public class PlayerController : MonoBehaviour
     private bool _isGrounded;
     private bool _jumpHeld;
     private bool _inputLocked;
+    private bool _onLadder;
+    private int _jumpsRemaining;
 
     // -- Phase 3: Player death notification (D-13) ----------------------------
     /// <summary>
@@ -88,8 +91,18 @@ public class PlayerController : MonoBehaviour
 
     private void OnJumpPerformed(InputAction.CallbackContext ctx)
     {
-        if (_inputLocked || !_isGrounded) return;
+        if (_inputLocked) return;
+        if (_onLadder)
+        {
+            // 사다리에서 점프: LadderController에 이탈 신호 후 위로 도약
+            GetComponent<LadderController>()?.ExitLadder();
+            _rb.linearVelocity = new Vector2(_rb.linearVelocity.x, jumpForce);
+            _jumpHeld = true;
+            return;
+        }
+        if (_jumpsRemaining <= 0) return;
         _rb.linearVelocity = new Vector2(_rb.linearVelocity.x, jumpForce);
+        _jumpsRemaining--;
         _jumpHeld = true;
     }
 
@@ -111,7 +124,7 @@ public class PlayerController : MonoBehaviour
     private void FixedUpdate()
     {
         CheckGround();
-        if (!_inputLocked) ApplyMovement();
+        if (!_inputLocked && !_onLadder) ApplyMovement();
     }
 
     private void CheckGround()
@@ -119,6 +132,8 @@ public class PlayerController : MonoBehaviour
         // Overlap circle slightly below the player's feet pivot.
         Vector2 origin = (Vector2)_transform.position + Vector2.down * 0.05f;
         _isGrounded = Physics2D.OverlapCircle(origin, groundCheckRadius, groundLayer);
+        if (_isGrounded)
+            _jumpsRemaining = maxJumps;
     }
 
     private void ApplyMovement()
@@ -153,4 +168,10 @@ public class PlayerController : MonoBehaviour
 
     /// <summary>층 전환 시퀀스 6단계 — 입력 잠금 해제.</summary>
     public void UnlockInput() => _inputLocked = false;
+
+    /// <summary>
+    /// LadderController가 사다리 등반 진입/이탈 시 호출.
+    /// true: 수평 이동 차단. false: 일반 이동 복구.
+    /// </summary>
+    public void SetLadderMode(bool active) => _onLadder = active;
 }
