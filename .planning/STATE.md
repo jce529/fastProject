@@ -124,10 +124,11 @@ None.
 
 ### Quick Tasks Completed
 
-39개 Quick 태스크 완료 (2026-06-01 ~ 2026-06-26) — 전체 목록은 `git log` 참조.
+40개 Quick 태스크 완료 (2026-06-01 ~ 2026-06-26) — 전체 목록은 `git log` 참조.
 
 | # | Description | Date | Directory |
 |---|-------------|------|-----------|
+| 260626-v4s | DebugRoomTeleporter 진단 로그 3곳 추가 (트리거/키입력/상태 Console 출력) | 2026-06-26 | [260626-v4s](./quick/260626-v4s-debugroomteleporter/) |
 | 260626-ox2 | DebugRoomTeleporter 버그 2개 수정: 카메라 스냅 미호출 + 텔레포터 인스턴스별 방 관리 문제 | 2026-06-26 | [260626-ox2](./quick/260626-ox2-debugroomteleporter-2/) |
 | 260626-msa | 아래 + 점프 드롭스루: PlayerController PlatformEffector2D 충돌 0.15초 무시 | 2026-06-26 | [260626-msa](./quick/260626-msa-playercontroller-platformeffector2d-0-15/) |
 | 260626-kz4 | 적 처치 점수 + 방 클리어 속도 보너스 점수 시스템 구현 (HUD 표시 포함) | 2026-06-26 | [260626-kz4-hud](./quick/260626-kz4-hud/) |
@@ -152,8 +153,8 @@ None.
 5. Continue from Current Phase listed above
 
 **Last session:** 2026-06-26T00:00:00Z
-**Stopped at:** Quick 정리 완료 — ROADMAP Phase 3/5 반영, quick 디렉토리 삭제
-**Last activity:** 2026-06-26 - Completed quick task 260626-kz4: 적 처치 점수 + 방 클리어 속도 보너스 점수 시스템 구현
+**Stopped at:** Completed quick task 260626-v4s: DebugRoomTeleporter 진단 로그 추가
+**Last activity:** 2026-06-26 - Completed quick task 260626-v4s: DebugRoomTeleporter 진단 로그 3곳 추가 (OnTriggerEnter/Exit2D + Update)
 
 ---
 *State initialized: 2026-05-27*
