@@ -181,6 +181,17 @@ public class CombatController : MonoBehaviour
     }
 
     /// <summary>
+    /// FloorSpawner가 층 전환 시작 전에 호출한다.
+    /// slow-motion + attack-pending 상태를 강제 종료하고 timeScale을 1로 복구.
+    /// LockInput() 이전에 호출해야 CombatController.Update() 차단 전에 정리됨.
+    /// </summary>
+    public void ForceExitCombatState()
+    {
+        ExitSlowMotion();
+        ExitAttackPending();
+    }
+
+    /// <summary>
     /// Exit slow-motion. ALWAYS restores both timeScale AND fixedDeltaTime.
     /// Called BEFORE dash yields so MovePosition moves at full speed.
     /// Does NOT hide range display — ExitAttackPending() owns that.
