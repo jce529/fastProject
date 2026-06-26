@@ -35,21 +35,36 @@ public class DebugRoomTeleporter : MonoBehaviour
 
     private void OnTriggerEnter2D(Collider2D other)
     {
+        Debug.Log($"[DebugTeleport] TriggerEnter: {other.name} (tag={other.tag})");
         if (other.GetComponentInParent<PlayerController>() != null)
+        {
             _playerInZone = true;
+            Debug.Log("[DebugTeleport] _playerInZone = true");
+        }
     }
 
     private void OnTriggerExit2D(Collider2D other)
     {
+        Debug.Log($"[DebugTeleport] TriggerExit: {other.name} (tag={other.tag})");
         if (other.GetComponentInParent<PlayerController>() != null)
+        {
             _playerInZone = false;
+            Debug.Log("[DebugTeleport] _playerInZone = false");
+        }
     }
 
     private void Update()
     {
+        if (Keyboard.current == null) return;
+
+        if (Keyboard.current.upArrowKey.wasPressedThisFrame)
+        {
+            Debug.Log($"[DebugTeleport] UpArrow pressed | _playerInZone={_playerInZone} | Keyboard.current={Keyboard.current != null}");
+        }
+
         if (!_playerInZone || Keyboard.current == null) return;
 
-        if (Keyboard.current.enterKey.wasPressedThisFrame)
+        if (Keyboard.current.upArrowKey.wasPressedThisFrame)
         {
             TeleportToRoom();
         }
