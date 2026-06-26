@@ -73,8 +73,8 @@ Plans:
 Plans:
 - [x] 03-01-PLAN.md — IEnemy interface + DummyEnemy implements IEnemy + CombatController DummyEnemy→IEnemy migration (ENMY-01, ENMY-02)
 - [x] 03-02-PLAN.md — PlayerDeath event + PlayerDeathHandler + FallDetector rewrite (D-17) + EnemyProjectile layer + Physics2D matrix (ENMY-01, ENMY-02)
-- [ ] 03-03-PLAN.md — MeleeEnemy FSM: patrol, chase, 0.8s telegraph, hitbox attack (ENMY-01)
-- [ ] 03-04-PLAN.md — RangedEnemy FSM + ProjectileController: aim line, projectile fire (ENMY-02)
+- [x] 03-03-PLAN.md — MeleeEnemy FSM: patrol, chase, windup telegraph, hitbox attack (ENMY-01) *[Quick: 260624-q65, 260624-t4e, 260617-0t2]*
+- [x] 03-04-PLAN.md — RangedEnemy FSM: detection/aim separation, telegraph, projectile fire (ENMY-02) *[Quick: 260617-0el, 260617-02t, 260617-0t2]*
 
 ---
 
@@ -97,10 +97,10 @@ Plans:
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Foundation & Movement | 3/3 | Complete   | 2026-05-28 |
-| 2. Combat Core | 0/4 | Planned | - |
-| 3. Enemy System | 2/4 | In Progress|  |
+| 2. Combat Core | 3/4 | In Progress | - |
+| 3. Enemy System | 4/4 | Complete | 2026-06-24 |
 | 4. HUD & Game Loop | 0/? | Not started | - |
-| 5. 절차적 맵 생성 | 0/2 | Planned    |  |
+| 5. 절차적 맵 생성 | 2/2 | Complete | 2026-06-26 |
 
 ---
 
@@ -124,8 +124,8 @@ Plans:
 - HUD 층 카운터(UI-01)와 연동 — FloorManager.CurrentFloor 증가로 자동 갱신
 
 Plans:
-- [ ] 05-01-PLAN.md — FloorSpawner.cs + RoomExit.cs 신규 생성 + PlayerController 입력 잠금 + CombatController 가드 (FLOOR-02, FLOOR-03, FLOOR-04)
-- [ ] 05-02-PLAN.md — Room 프리팹 4개 제작(Unity Editor) + FloorSpawner 씬 배치 및 Inspector 연결 (FLOOR-01, FLOOR-02, FLOOR-03)
+- [x] 05-01-PLAN.md — FloorSpawner.cs + RoomExit.cs + RoomClearCondition + CameraFollow/CameraBound 전환 시퀀스 (FLOOR-02, FLOOR-03, FLOOR-04) *[Quick: 260624-lre, 260624-mcv, 260624-ml3, 260624-u3w, 260626-il8, 260626-j9b, 260626-jpm]*
+- [x] 05-02-PLAN.md — Room 프리팹 7종 (Prefabs/Rooms/) + RoomPrefabBuilder 에디터 스크립트 + FloorSpawner 씬 배치 (FLOOR-01, FLOOR-02, FLOOR-03) *[Quick: 260617-jwe, 260618-u8j, 260624-oh2]*
 
 ---
 
