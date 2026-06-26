@@ -35,7 +35,7 @@ public class PlayerController : MonoBehaviour
     /// <summary>LayerMask for ground check -- assign "Platform" layer in Inspector.</summary>
     [SerializeField] private LayerMask groundLayer;
 
-    [SerializeField] private float dropThroughDuration = 0.15f;
+    [SerializeField] private float dropThroughDuration = 0.3f;
 
     // -- Internal state ----------------------------------------------------------
     private Rigidbody2D _rb;
