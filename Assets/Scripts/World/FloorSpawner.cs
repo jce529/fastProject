@@ -174,6 +174,7 @@ public class FloorSpawner : MonoBehaviour
             if (mb is IEnemy)
                 mb.gameObject.SetActive(true);
         }
+        ScoreManager.StartRoomTimer();
     }
 
     /// <summary>
