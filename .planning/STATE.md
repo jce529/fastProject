@@ -5,9 +5,9 @@ milestone_name: Phases
 current_phase: 07
 current_plan: 1
 status: unknown
-stopped_at: Completed quick/260624-u3w-getenemycount
-last_updated: "2026-06-24T12:14:10Z"
-last_activity: "2026-06-24 - Completed quick task 260624-u3w: FloorSpawner GetEnemyCount Mathf.Clamp 공식 교체"
+stopped_at: Completed quick/260626-il8-camerafollow-snaptoroom-floorspawner
+last_updated: "2026-06-26T04:23:04Z"
+last_activity: "2026-06-26 - Completed quick task 260626-il8: CameraFollow SnapToRoom + FloorSpawner 룸 중심 카메라 고정"
 progress:
   total_phases: 7
   completed_phases: 5
@@ -161,6 +161,7 @@ None.
 | 260624-q65 | MeleeEnemy MovePosition→linearVelocity.x 전환 + 앞 장애물/바닥 끊김 시 점프 로직 추가 | 2026-06-24 | f5b4349 | [260624-q65](./quick/260624-q65-meleeenemy-moveposition-velocity-x/) |
 | 260624-t4e | MeleeEnemy/RangedEnemy attackWindupDelay 추가 — 공격 애니메이션 트리거 후 0.1s 지연 + windup 중 처치 시 IsAlive 재체크 | 2026-06-24 | f06cda7, 454405e | [260624-t4e](./quick/260624-t4e-windup-delay/) | 
 | 260624-u3w | FloorSpawner GetEnemyCount 3단계 if-else → Mathf.Clamp 공식 교체 (FLOOR-03) | 2026-06-24 | 2d0f44c | [260624-u3w](./quick/260624-u3w-getenemycount/) |
+| 260626-il8 | CameraFollow SnapToRoom 모드 추가 + FloorSpawner 룸 스폰/전환 시 카메라 룸 중심 고정 | 2026-06-26 | f37a748, 3b6e6aa | [260626-il8](./quick/260626-il8-camerafollow-snaptoroom-floorspawner/) |
 
 ---
 
@@ -174,10 +175,10 @@ None.
 4. Check which phase plan exists in `.planning/` (e.g., `PLAN-phase-1.md`)
 5. Continue from Current Phase listed above
 
-**Last session:** 2026-06-24T00:00:00Z
-**Stopped at:** Completed quick/260624-e5y-mainmenu
-**Last activity:** 2026-06-24
+**Last session:** 2026-06-26T00:00:00Z
+**Stopped at:** Completed quick/260626-il8-camerafollow-snaptoroom-floorspawner
+**Last activity:** 2026-06-26
 
 ---
 *State initialized: 2026-05-27*
-*Last updated: 2026-06-24 — quick task 260624-e5y GameBootstrapper*
+*Last updated: 2026-06-26 — quick task 260626-il8 CameraFollow SnapToRoom + FloorSpawner 카메라 고정*

@@ -19,6 +19,8 @@ using UnityEngine;
 ///   _meleeEnemyPrefab — MeleeEnemy 프리팹
 ///   _rangedEnemyPrefab— RangedEnemy 프리팹
 ///   _roomHeight       — 18 (Claude's discretion — 실제 Room 높이 측정 후 조정)
+///   _cameraFollow     — Main Camera에 부착된 CameraFollow 컴포넌트
+///   _roomCameraOffsetY— 룸 원점에서 카메라 중심까지 Y 오프셋 (기본 6)
 /// </summary>
 public class FloorSpawner : MonoBehaviour
 {
@@ -30,6 +32,8 @@ public class FloorSpawner : MonoBehaviour
     [SerializeField] private GameObject       _meleeEnemyPrefab;
     [SerializeField] private GameObject       _rangedEnemyPrefab;
     [SerializeField] private float            _roomHeight = 18f;    // Claude's discretion
+    [SerializeField] private CameraFollow     _cameraFollow;        // Main Camera에 부착된 CameraFollow
+    [SerializeField] private float            _roomCameraOffsetY = 6f; // 룸 원점에서 카메라 중심까지 Y 오프셋
 
     // -- Runtime state ----------------------------------------------------------
     private GameObject _currentRoom;
@@ -45,6 +49,8 @@ public class FloorSpawner : MonoBehaviour
         Instance = this;
         _currentRoom = SpawnRoom(_floor1RoomPrefab, 1);
         ActivateEnemies(_currentRoom);
+        // 1층 스폰 직후 카메라를 룸 중심으로 고정
+        _cameraFollow?.SnapToRoom(new Vector3(0f, _roomCameraOffsetY, 0f));
     }
 
     // -- Public API (RoomExit.OnTriggerEnter2D가 호출) -------------------------
@@ -92,8 +98,11 @@ public class FloorSpawner : MonoBehaviour
         if (rb != null) rb.linearVelocity = Vector2.zero;
         _playerTransform.position = teleportPos;
 
-        // [Step 3] 카메라 Y스냅 — CameraFollow.LateUpdate가 target.position을 매 프레임 추적.
-        // 플레이어 순간이동으로 자동 완성됨. 한 프레임 양보해 LateUpdate 실행 허용.
+        // 카메라를 새 룸 중심으로 즉시 스냅 (Step 3 yield return null 전)
+        float newRoomBaseY = (FloorManager.CurrentFloor - 1) * _roomHeight;
+        _cameraFollow?.SnapToRoom(new Vector3(0f, newRoomBaseY + _roomCameraOffsetY, 0f));
+
+        // [Step 3] 카메라 스냅 완료 — LateUpdate가 실행되도록 한 프레임 양보
         yield return null;
 
         // [Step 4] 가림막 해제 — 새 층의 비활성 적들 활성화 (FLOOR-03)
