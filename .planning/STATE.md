@@ -124,7 +124,11 @@ None.
 
 ### Quick Tasks Completed
 
-38개 Quick 태스크 완료 (2026-06-01 ~ 2026-06-26) — 전체 목록은 `git log` 참조.
+39개 Quick 태스크 완료 (2026-06-01 ~ 2026-06-26) — 전체 목록은 `git log` 참조.
+
+| # | Description | Date | Directory |
+|---|-------------|------|-----------|
+| 260626-ktq | LadderController 버그 2개 수정: 재진입 방지 + jumpsRemaining 리셋 | 2026-06-26 | [260626-ktq](./quick/260626-ktq-laddercontroller-2-jumpsremaining/) |
 
 **Phase별 주요 Quick 기여:**
 - **Phase 1/2** (코드 수정·개선): 260601-mrm, 260605-rhs, 260605-sj2, 260605-tss, 260607-19i, 260607-ku4, 260607-vot, 260608-lb9, 260608-09z, 260616-qlg, 260616-s3m
@@ -146,7 +150,7 @@ None.
 
 **Last session:** 2026-06-26T00:00:00Z
 **Stopped at:** Quick 정리 완료 — ROADMAP Phase 3/5 반영, quick 디렉토리 삭제
-**Last activity:** 2026-06-26
+**Last activity:** 2026-06-26 - Completed quick task 260626-ktq: LadderController 버그 2개 수정
 
 ---
 *State initialized: 2026-05-27*

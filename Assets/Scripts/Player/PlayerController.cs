@@ -95,8 +95,10 @@ public class PlayerController : MonoBehaviour
         if (_onLadder)
         {
             // 사다리에서 점프: LadderController에 이탈 신호 후 위로 도약
-            GetComponent<LadderController>()?.ExitLadder();
+            GetComponent<LadderController>()?.ExitLadder(fromJump: true);
             _rb.linearVelocity = new Vector2(_rb.linearVelocity.x, jumpForce);
+            // 사다리 진입 전 점프를 소진했어도 공중점프 1회 보장
+            _jumpsRemaining = maxJumps - 1;
             _jumpHeld = true;
             return;
         }

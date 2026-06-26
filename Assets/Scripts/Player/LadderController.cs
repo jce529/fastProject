@@ -22,6 +22,8 @@ public class LadderController : MonoBehaviour
     private float            _originalGravityScale;
     private int              _ladderOverlapCount;
     private bool             _isClimbing;
+    // 점프로 이탈한 뒤 트리거를 완전히 벗어나기 전까지 재진입 차단
+    private bool             _jumpExited;
 
     private void Awake()
     {
@@ -39,7 +41,11 @@ public class LadderController : MonoBehaviour
     {
         if (!other.CompareTag("Ladder")) return;
         _ladderOverlapCount = Mathf.Max(0, _ladderOverlapCount - 1);
-        if (_ladderOverlapCount == 0) ExitLadder();
+        if (_ladderOverlapCount == 0)
+        {
+            _jumpExited = false;
+            ExitLadder();
+        }
     }
 
     private void FixedUpdate()
@@ -49,7 +55,8 @@ public class LadderController : MonoBehaviour
         float vertical = InputManager.Instance.MoveInput.y;
 
         // 사다리 영역 안에서 수직 입력이 있을 때 처음으로 등반 시작
-        if (!_isClimbing && Mathf.Abs(vertical) > 0.1f)
+        // _jumpExited: 점프로 이탈 직후 트리거 안에 머물러도 재진입 차단
+        if (!_isClimbing && !_jumpExited && Mathf.Abs(vertical) > 0.1f)
             EnterLadder();
 
         if (_isClimbing)
@@ -69,11 +76,13 @@ public class LadderController : MonoBehaviour
 
     /// <summary>
     /// 사다리 이탈 시 중력 복구. PlayerController.OnJumpPerformed에서도 호출.
+    /// fromJump=true이면 트리거 이탈 전까지 재진입 차단(_jumpExited).
     /// </summary>
-    public void ExitLadder()
+    public void ExitLadder(bool fromJump = false)
     {
         if (!_isClimbing) return;
         _isClimbing = false;
+        if (fromJump) _jumpExited = true;
         _rb.gravityScale = _originalGravityScale;
         _player.SetLadderMode(false);
     }
