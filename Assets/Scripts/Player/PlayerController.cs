@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -34,15 +35,20 @@ public class PlayerController : MonoBehaviour
     /// <summary>LayerMask for ground check -- assign "Platform" layer in Inspector.</summary>
     [SerializeField] private LayerMask groundLayer;
 
+    [SerializeField] private float dropThroughDuration = 0.15f;
+
     // -- Internal state ----------------------------------------------------------
     private Rigidbody2D _rb;
+    private Collider2D _playerCollider;
     private InputAction _moveAction;
     private InputAction _jumpAction;
     private bool _isGrounded;
     private bool _jumpHeld;
     private bool _inputLocked;
     private bool _onLadder;
+    private bool _isDropping;
     private int _jumpsRemaining;
+    private readonly Collider2D[] _dropBuffer = new Collider2D[8];
 
     // -- Phase 3: Player death notification (D-13) ----------------------------
     /// <summary>
@@ -60,6 +66,7 @@ public class PlayerController : MonoBehaviour
     private void Awake()
     {
         _rb = GetComponent<Rigidbody2D>();
+        _playerCollider = GetComponent<Collider2D>();
         _transform = transform;
 
         // Enforce required physics settings programmatically as a safety net.
@@ -102,10 +109,45 @@ public class PlayerController : MonoBehaviour
             _jumpHeld = true;
             return;
         }
+        // 아래 + 점프: one-way 플랫폼 통과
+        if (_moveAction.ReadValue<Vector2>().y < -0.5f && _isGrounded && !_isDropping)
+        {
+            StartCoroutine(DropThrough());
+            return;
+        }
+
         if (_jumpsRemaining <= 0) return;
         _rb.linearVelocity = new Vector2(_rb.linearVelocity.x, jumpForce);
         _jumpsRemaining--;
         _jumpHeld = true;
+    }
+
+    private IEnumerator DropThrough()
+    {
+        _isDropping = true;
+
+        Vector2 origin = (Vector2)_transform.position + Vector2.down * 0.05f;
+        int count = Physics2D.OverlapCircleNonAlloc(origin, groundCheckRadius + 0.05f, _dropBuffer, groundLayer);
+
+        for (int i = 0; i < count; i++)
+        {
+            if (_dropBuffer[i].GetComponent<PlatformEffector2D>() != null)
+                Physics2D.IgnoreCollision(_playerCollider, _dropBuffer[i], true);
+            else
+                _dropBuffer[i] = null;
+        }
+
+        _rb.linearVelocity = new Vector2(_rb.linearVelocity.x, -2f);
+
+        yield return new WaitForSecondsRealtime(dropThroughDuration);
+
+        for (int i = 0; i < count; i++)
+        {
+            if (_dropBuffer[i] != null)
+                Physics2D.IgnoreCollision(_playerCollider, _dropBuffer[i], false);
+        }
+
+        _isDropping = false;
     }
 
     private void OnJumpCanceled(InputAction.CallbackContext ctx)
