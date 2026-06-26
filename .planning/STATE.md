@@ -159,10 +159,11 @@ None.
 | 260624-ml3 | RoomClearCondition 버그 2개 수정 — enemies 없을 때 즉시 활성화 + GetComponentsInChildren 동적 탐색 | 2026-06-24 | 8181b9f | [260624-ml3](./quick/260624-ml3-roomclearcondition-cs-2-1-enemies-target/) |
 | 260624-oh2 | ROOM_NOTES.md 기반 프리팹 수정: Room_Gap 적 스폰포인트 삭제, Room_Combat 적 5개 추가 | 2026-06-24 | — | [260624-oh2](./quick/260624-oh2-room-notes-md-5-room-gap-room-combat-5/) |
 | 260624-q65 | MeleeEnemy MovePosition→linearVelocity.x 전환 + 앞 장애물/바닥 끊김 시 점프 로직 추가 | 2026-06-24 | f5b4349 | [260624-q65](./quick/260624-q65-meleeenemy-moveposition-velocity-x/) |
-| 260624-t4e | MeleeEnemy/RangedEnemy attackWindupDelay 추가 — 공격 애니메이션 트리거 후 0.1s 지연 + windup 중 처치 시 IsAlive 재체크 | 2026-06-24 | f06cda7, 454405e | [260624-t4e](./quick/260624-t4e-windup-delay/) | 
+| 260624-t4e | MeleeEnemy/RangedEnemy attackWindupDelay 추가 — 공격 애니메이션 트리거 후 0.1s 지연 + windup 중 처치 시 IsAlive 재체크 | 2026-06-24 | f06cda7, 454405e | [260624-t4e](./quick/260624-t4e-windup-delay/) |
 | 260624-u3w | FloorSpawner GetEnemyCount 3단계 if-else → Mathf.Clamp 공식 교체 (FLOOR-03) | 2026-06-24 | 2d0f44c | [260624-u3w](./quick/260624-u3w-getenemycount/) |
 | 260626-il8 | CameraFollow SnapToRoom 모드 추가 + FloorSpawner 룸 스폰/전환 시 카메라 룸 중심 고정 | 2026-06-26 | f37a748, 3b6e6aa | [260626-il8](./quick/260626-il8-camerafollow-snaptoroom-floorspawner/) |
 | 260626-j9b | CameraBound 신규 생성 + CameraFollow SnapToRoom(Bounds) 오버로드 + FloorSpawner SnapCameraToRoom 헬퍼 | 2026-06-26 | 9169004, 225383a | [260626-j9b](./quick/260626-j9b-camerabound-camerafollow-floorspawner-ro/) |
+| 260626-jpm | CameraFollow 바운드 클램프 추적 리팩터 — _roomMode 제거, SnapToRoom(Bounds) ortho 고정, LateUpdate 클램프 | 2026-06-26 | 3c65bd8 | [260626-jpm](./quick/260626-jpm-camerafollow-snaptoroom-bounds-ortho-roo/) |
 
 ---
 
@@ -177,9 +178,9 @@ None.
 5. Continue from Current Phase listed above
 
 **Last session:** 2026-06-26T00:00:00Z
-**Stopped at:** Completed quick/260626-j9b-camerabound-camerafollow-floorspawner-ro
+**Stopped at:** Completed quick/260626-jpm-camerafollow-snaptoroom-bounds-ortho-roo
 **Last activity:** 2026-06-26
 
 ---
 *State initialized: 2026-05-27*
-*Last updated: 2026-06-26 — quick task 260626-j9b CameraBound + SnapToRoom(Bounds) + FloorSpawner SnapCameraToRoom*
+*Last updated: 2026-06-26 — quick task 260626-jpm CameraFollow 바운드 클램프 추적 리팩터*
