@@ -31,6 +31,7 @@ public class DeathScreenController : MonoBehaviour
         Time.timeScale         = 1f;
         Time.fixedDeltaTime    = 0.02f;
         FloorManager.CurrentFloor = 1;
+        ScoreManager.Reset();
         SceneManager.LoadScene("AttackSelect");
     }
 }

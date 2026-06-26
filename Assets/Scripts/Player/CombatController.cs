@@ -302,6 +302,7 @@ public class CombatController : MonoBehaviour
 
         // 6. Kill and effects
         target.OnDashHit();
+        ScoreManager.AddKillScore();
         yield return StartCoroutine(HitFreeze(hitFreezeDuration));
 
         _attackCooldown = postKillLockout;
