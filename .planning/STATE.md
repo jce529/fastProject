@@ -5,9 +5,9 @@ milestone_name: Phases
 current_phase: 07
 current_plan: 1
 status: unknown
-stopped_at: Completed quick/260624-lre-floorspawner-step-2-y-nextroom-roomentry
-last_updated: "2026-06-24T06:55:00.000Z"
-last_activity: "2026-06-24 - Completed quick task 260624-lre: FloorSpawner Step 2 RoomEntry 기반 텔레포트"
+stopped_at: Completed quick/260626-il8-camerafollow-snaptoroom-floorspawner
+last_updated: "2026-06-26T00:00:00Z"
+last_activity: "2026-06-26 - Completed quick task 260626-il8: CameraFollow SnapToRoom + FloorSpawner 룸 중심 카메라 고정"
 progress:
   total_phases: 7
   completed_phases: 5
@@ -157,6 +157,7 @@ None.
 | 260624-lre | FloorSpawner Step 2 텔레포트를 고정 Y 공식에서 nextRoom의 RoomEntry 위치로 변경 | 2026-06-24 | — | [260624-lre](./quick/260624-lre-floorspawner-step-2-y-nextroom-roomentry/) |
 | 260624-mcv | FloorSpawner SpawnRoom() 적 Instantiate에 room.transform parent 추가 — Room 파괴 시 적 자동 정리 (FLOOR-04) | 2026-06-24 | ada935e | [260624-mcv](./quick/260624-mcv-floorspawner-cs-157-instantiate-room-tra/) |
 | 260624-ml3 | RoomClearCondition 버그 2개 수정 — enemies 없을 때 즉시 활성화 + GetComponentsInChildren 동적 탐색 | 2026-06-24 | 8181b9f | [260624-ml3](./quick/260624-ml3-roomclearcondition-cs-2-1-enemies-target/) |
+| 260626-il8 | CameraFollow SnapToRoom 모드 추가 + FloorSpawner 룸 스폰/전환 시 카메라 룸 중심 고정 (FLOOR-02) | 2026-06-26 | f37a748, 3b6e6aa | [260626-il8](./quick/260626-il8-camerafollow-snaptoroom-floorspawner/) |
 
 ---
 
@@ -170,10 +171,10 @@ None.
 4. Check which phase plan exists in `.planning/` (e.g., `PLAN-phase-1.md`)
 5. Continue from Current Phase listed above
 
-**Last session:** 2026-06-24T00:00:00Z
-**Stopped at:** Completed quick/260624-e5y-mainmenu
-**Last activity:** 2026-06-24
+**Last session:** 2026-06-26T00:00:00Z
+**Stopped at:** Completed quick/260626-il8-camerafollow-snaptoroom-floorspawner
+**Last activity:** 2026-06-26
 
 ---
 *State initialized: 2026-05-27*
-*Last updated: 2026-06-24 — quick task 260624-e5y GameBootstrapper*
+*Last updated: 2026-06-26 — quick task 260626-il8 CameraFollow SnapToRoom + FloorSpawner 카메라 고정*
