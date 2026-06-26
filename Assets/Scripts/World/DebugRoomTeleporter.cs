@@ -3,24 +3,28 @@ using UnityEngine.InputSystem;
 
 /// <summary>
 /// 디버그용 룸 순간이동 장치.
-/// isTrigger Collider2D 안에 플레이어가 있는 상태에서 Up(↑ / W) 입력 시
-/// targetRoomPrefab을 spawnY에 생성하고 플레이어를 ENT로 이동시킨다.
+/// isTrigger Collider2D 안에 플레이어가 있는 상태에서 Enter 입력 시
+/// targetRoomPrefab을 이전 스폰 위치 기준 +offsetX/+offsetY 위치에 생성하고 플레이어를 ENT로 이동시킨다.
 /// </summary>
 public class DebugRoomTeleporter : MonoBehaviour
 {
     [Header("Target Room")]
     [SerializeField] private GameObject targetRoomPrefab;
-    [SerializeField] private float      spawnY          = 18f;
+    [SerializeField] private float      offsetX         = 30f;
+    [SerializeField] private float      offsetY         = 30f;
     [SerializeField] private bool       activateEnemies = false;
 
     [Header("Enemy Prefabs")]
     [SerializeField] private GameObject _meleePrefab;
     [SerializeField] private GameObject _rangedPrefab;
 
+    // 모든 인스턴스가 공유하는 static 상태 — 다른 텔레포터로 전환 시 이전 방 정리 보장
+    private static GameObject s_lastDebugRoom;
+    private static Vector3    s_nextSpawnPos = Vector3.zero;
+
     // 플레이어 참조는 Awake에서 자동 탐색 — 프리팹 직렬화 불필요
     private PlayerController _player;
     private Transform        _playerTransform;
-    private GameObject       _debugRoom;
     private bool             _playerInZone;
 
     private void Awake()
@@ -45,8 +49,7 @@ public class DebugRoomTeleporter : MonoBehaviour
     {
         if (!_playerInZone || Keyboard.current == null) return;
 
-        if (Keyboard.current.upArrowKey.wasPressedThisFrame ||
-            Keyboard.current.wKey.wasPressedThisFrame)
+        if (Keyboard.current.enterKey.wasPressedThisFrame)
         {
             TeleportToRoom();
         }
@@ -60,26 +63,37 @@ public class DebugRoomTeleporter : MonoBehaviour
             return;
         }
 
-        if (_debugRoom != null) Destroy(_debugRoom);
+        if (s_lastDebugRoom != null) Destroy(s_lastDebugRoom);
 
-        _debugRoom = Instantiate(targetRoomPrefab, new Vector3(0f, spawnY, 0f), Quaternion.identity);
+        s_nextSpawnPos += new Vector3(offsetX, offsetY, 0f);
+        s_lastDebugRoom = Instantiate(targetRoomPrefab, s_nextSpawnPos, Quaternion.identity);
 
-        foreach (EnemySpawner spawner in _debugRoom.GetComponentsInChildren<EnemySpawner>(true))
+        foreach (EnemySpawner spawner in s_lastDebugRoom.GetComponentsInChildren<EnemySpawner>(true))
         {
             spawner.Spawn(_meleePrefab, _rangedPrefab);
             if (activateEnemies) spawner.Activate();
         }
 
-        RoomEntry entry = _debugRoom.GetComponentInChildren<RoomEntry>(true);
+        RoomEntry entry = s_lastDebugRoom.GetComponentInChildren<RoomEntry>(true);
         Vector3 entryPos = entry != null
             ? entry.transform.position
-            : _debugRoom.transform.position + Vector3.up * 2f;
+            : s_lastDebugRoom.transform.position + Vector3.up * 2f;
 
         _player.LockInput();
         var rb = _playerTransform.GetComponent<Rigidbody2D>();
         if (rb != null) rb.linearVelocity = Vector2.zero;
         _playerTransform.position = entryPos;
         _player.UnlockInput();
+
+        CameraFollow cam = Camera.main != null ? Camera.main.GetComponent<CameraFollow>() : null;
+        if (cam != null)
+        {
+            CameraBound cb = s_lastDebugRoom.GetComponentInChildren<CameraBound>();
+            if (cb != null)
+                cam.SnapToRoom(cb.GetWorldBounds());
+            else
+                cam.SnapToRoom(entryPos);
+        }
 
         Debug.Log($"[DebugTeleport] → {targetRoomPrefab.name} | ENT: {entryPos}");
     }

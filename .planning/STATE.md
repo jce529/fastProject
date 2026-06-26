@@ -7,7 +7,7 @@ current_plan: 1
 status: unknown
 stopped_at: Quick 정리 완료 — ROADMAP Phase 3/5 반영, quick 디렉토리 삭제
 last_updated: "2026-06-26T06:00:00Z"
-last_activity: "2026-06-26 - Completed quick task 260626-msa: 아래 + 점프 드롭스루 구현"
+last_activity: "2026-06-26 - Completed quick task 260626-ox2: DebugRoomTeleporter 버그 2개 수정"
 progress:
   total_phases: 7
   completed_phases: 5
@@ -128,6 +128,7 @@ None.
 
 | # | Description | Date | Directory |
 |---|-------------|------|-----------|
+| 260626-ox2 | DebugRoomTeleporter 버그 2개 수정: 카메라 스냅 미호출 + 텔레포터 인스턴스별 방 관리 문제 | 2026-06-26 | [260626-ox2](./quick/260626-ox2-debugroomteleporter-2/) |
 | 260626-msa | 아래 + 점프 드롭스루: PlayerController PlatformEffector2D 충돌 0.15초 무시 | 2026-06-26 | [260626-msa](./quick/260626-msa-playercontroller-platformeffector2d-0-15/) |
 | 260626-kz4 | 적 처치 점수 + 방 클리어 속도 보너스 점수 시스템 구현 (HUD 표시 포함) | 2026-06-26 | [260626-kz4-hud](./quick/260626-kz4-hud/) |
 | 260626-ktq | LadderController 버그 2개 수정: 재진입 방지 + jumpsRemaining 리셋 | 2026-06-26 | [260626-ktq](./quick/260626-ktq-laddercontroller-2-jumpsremaining/) |
