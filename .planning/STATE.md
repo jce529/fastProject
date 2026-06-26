@@ -128,6 +128,7 @@ None.
 
 | # | Description | Date | Directory |
 |---|-------------|------|-----------|
+| 260626-kz4 | 적 처치 점수 + 방 클리어 속도 보너스 점수 시스템 구현 (HUD 표시 포함) | 2026-06-26 | [260626-kz4-hud](./quick/260626-kz4-hud/) |
 | 260626-ktq | LadderController 버그 2개 수정: 재진입 방지 + jumpsRemaining 리셋 | 2026-06-26 | [260626-ktq](./quick/260626-ktq-laddercontroller-2-jumpsremaining/) |
 
 **Phase별 주요 Quick 기여:**
@@ -150,7 +151,7 @@ None.
 
 **Last session:** 2026-06-26T00:00:00Z
 **Stopped at:** Quick 정리 완료 — ROADMAP Phase 3/5 반영, quick 디렉토리 삭제
-**Last activity:** 2026-06-26 - Completed quick task 260626-ktq: LadderController 버그 2개 수정
+**Last activity:** 2026-06-26 - Completed quick task 260626-kz4: 적 처치 점수 + 방 클리어 속도 보너스 점수 시스템 구현
 
 ---
 *State initialized: 2026-05-27*
