@@ -162,6 +162,7 @@ None.
 | 260624-t4e | MeleeEnemy/RangedEnemy attackWindupDelay 추가 — 공격 애니메이션 트리거 후 0.1s 지연 + windup 중 처치 시 IsAlive 재체크 | 2026-06-24 | f06cda7, 454405e | [260624-t4e](./quick/260624-t4e-windup-delay/) | 
 | 260624-u3w | FloorSpawner GetEnemyCount 3단계 if-else → Mathf.Clamp 공식 교체 (FLOOR-03) | 2026-06-24 | 2d0f44c | [260624-u3w](./quick/260624-u3w-getenemycount/) |
 | 260626-il8 | CameraFollow SnapToRoom 모드 추가 + FloorSpawner 룸 스폰/전환 시 카메라 룸 중심 고정 | 2026-06-26 | f37a748, 3b6e6aa | [260626-il8](./quick/260626-il8-camerafollow-snaptoroom-floorspawner/) |
+| 260626-j9b | CameraBound 신규 생성 + CameraFollow SnapToRoom(Bounds) 오버로드 + FloorSpawner SnapCameraToRoom 헬퍼 | 2026-06-26 | 9169004, 225383a | [260626-j9b](./quick/260626-j9b-camerabound-camerafollow-floorspawner-ro/) |
 
 ---
 
@@ -176,9 +177,9 @@ None.
 5. Continue from Current Phase listed above
 
 **Last session:** 2026-06-26T00:00:00Z
-**Stopped at:** Completed quick/260626-il8-camerafollow-snaptoroom-floorspawner
+**Stopped at:** Completed quick/260626-j9b-camerabound-camerafollow-floorspawner-ro
 **Last activity:** 2026-06-26
 
 ---
 *State initialized: 2026-05-27*
-*Last updated: 2026-06-26 — quick task 260626-il8 CameraFollow SnapToRoom + FloorSpawner 카메라 고정*
+*Last updated: 2026-06-26 — quick task 260626-j9b CameraBound + SnapToRoom(Bounds) + FloorSpawner SnapCameraToRoom*

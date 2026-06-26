@@ -31,6 +31,20 @@ public class CameraFollow : MonoBehaviour
         if (_camera != null) _camera.orthographicSize = roomOrthoSize;
     }
 
+    /// <summary>
+    /// 카메라를 worldBounds에 맞게 고정한다. orthographicSize를 Bounds에서 자동 계산한다.
+    /// CameraBound.GetWorldBounds() 결과를 전달받는다.
+    /// </summary>
+    public void SnapToRoom(Bounds worldBounds)
+    {
+        _roomMode = true;
+        transform.position = new Vector3(worldBounds.center.x, worldBounds.center.y, offset.z);
+        float aspect = (_camera != null) ? _camera.aspect : (16f / 9f);
+        float orthoH = worldBounds.size.y / 2f;
+        float orthoW = worldBounds.size.x / (2f * aspect);
+        if (_camera != null) _camera.orthographicSize = Mathf.Max(orthoH, orthoW);
+    }
+
     private void LateUpdate()
     {
         if (_roomMode) return;          // 룸 고정 중 — 플레이어 추적 건너뜀

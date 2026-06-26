@@ -16,6 +16,7 @@ using UnityEngine;
 ///   _roomPool         — 2층 이후 랜덤 선택 Room 프리팹 배열 (D-03: 4~5개)
 ///   _playerTransform  — Player GameObject의 Transform
 ///   _player           — PlayerController 컴포넌트
+///   _combatController — CombatController 컴포넌트 (slow-motion 강제 종료용)
 ///   _meleeEnemyPrefab — MeleeEnemy 프리팹
 ///   _rangedEnemyPrefab— RangedEnemy 프리팹
 ///   _roomHeight       — 18 (Claude's discretion — 실제 Room 높이 측정 후 조정)
@@ -29,6 +30,7 @@ public class FloorSpawner : MonoBehaviour
     [SerializeField] private GameObject[]     _roomPool;            // D-03: 2층+ 랜덤 풀 (4~5개)
     [SerializeField] private Transform        _playerTransform;
     [SerializeField] private PlayerController _player;             // Pitfall 7: Inspector 연결, static 아님
+    [SerializeField] private CombatController _combatController;   // Fix: slow-motion 강제 종료용
     [SerializeField] private GameObject       _meleeEnemyPrefab;
     [SerializeField] private GameObject       _rangedEnemyPrefab;
     [SerializeField] private float            _roomHeight = 18f;    // Claude's discretion
@@ -50,7 +52,7 @@ public class FloorSpawner : MonoBehaviour
         _currentRoom = SpawnRoom(_floor1RoomPrefab, 1);
         ActivateEnemies(_currentRoom);
         // 1층 스폰 직후 카메라를 룸 중심으로 고정
-        _cameraFollow?.SnapToRoom(new Vector3(0f, _roomCameraOffsetY, 0f));
+        SnapCameraToRoom(_currentRoom, new Vector3(0f, _roomCameraOffsetY, 0f));
     }
 
     // -- Public API (RoomExit.OnTriggerEnter2D가 호출) -------------------------
@@ -75,6 +77,8 @@ public class FloorSpawner : MonoBehaviour
         _transitioning = true;
 
         // [Step 1] 조작 불가 — 이동·점프·공격 입력 차단
+        // LockInput 전에 combat 상태 정리: slow-motion(timeScale≠1)이 EXIT 진입 시 잔류하는 버그 방지 (exit-freeze-no-next-map)
+        _combatController?.ForceExitCombatState();
         _player.LockInput();
 
         // FloorManager 증가 및 다음 층 스폰 (적은 SetActive(false) 상태 — FLOOR-03)
@@ -100,7 +104,7 @@ public class FloorSpawner : MonoBehaviour
 
         // 카메라를 새 룸 중심으로 즉시 스냅 (Step 3 yield return null 전)
         float newRoomBaseY = (FloorManager.CurrentFloor - 1) * _roomHeight;
-        _cameraFollow?.SnapToRoom(new Vector3(0f, newRoomBaseY + _roomCameraOffsetY, 0f));
+        SnapCameraToRoom(nextRoom, new Vector3(0f, newRoomBaseY + _roomCameraOffsetY, 0f));
 
         // [Step 3] 카메라 스냅 완료 — LateUpdate가 실행되도록 한 프레임 양보
         yield return null;
@@ -123,6 +127,20 @@ public class FloorSpawner : MonoBehaviour
     }
 
     // -- 내부 헬퍼 --------------------------------------------------------------
+
+    /// <summary>
+    /// Room에 CameraBound가 있으면 Bounds 기반 SnapToRoom, 없으면 fallbackCenter 기반으로 고정한다.
+    /// Awake()와 FloorTransitionSequence() 두 곳에서 공유한다.
+    /// </summary>
+    private void SnapCameraToRoom(GameObject room, Vector3 fallbackCenter)
+    {
+        if (_cameraFollow == null) return;
+        CameraBound cb = room.GetComponentInChildren<CameraBound>();
+        if (cb != null)
+            _cameraFollow.SnapToRoom(cb.GetWorldBounds());
+        else
+            _cameraFollow.SnapToRoom(fallbackCenter);
+    }
 
     /// <summary>
     /// 2층 이상에서 랜덤 Room 프리팹을 선택한다.
