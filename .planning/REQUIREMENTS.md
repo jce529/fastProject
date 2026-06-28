@@ -1,130 +1,74 @@
-# Requirements: Fast (가칭)
+# Requirements: Fast (가칭) — v3.0 무한 복도 층 시스템
 
-**Defined:** 2026-05-27
+**Defined:** 2026-06-28
 **Core Value:** 공격 버튼을 누르면 시간이 느려지고, 손을 떼면 적에게 돌진해 한 방에 처치하는 손맛 — 이것이 재미있어야 게임이 살아난다.
 
-## v1 Requirements
+## v3.0 Requirements
 
-전투 핵심 루프 검증 우선. 단일 테스트 씬에서 이동/전투/적/UI를 완성 후, 층 시스템은 v2에서 추가한다.
+### 룸-길 아키텍처 (ARCH)
 
-### 이동 (Movement)
+- [ ] **ARCH-01**: Room 프리팹에 END_Left/END_Right 마커가 있어 좌우 방향으로 Corridor와 연결될 수 있다
+- [ ] **ARCH-02**: Corridor 프리팹 3종(상승/직진/하강)이 존재하며 각각 적+장애물이 있는 전투 구간이다
+- [ ] **ARCH-03**: Corridor 시작점(ENT)에서 플레이어가 진입하고 끝점(END)에서 다음 Room이 연결된다
 
-- [x] **MOVE-01**: 플레이어가 빠른 속도로 좌우 이동 및 점프할 수 있다 (가속감 있음, 조작 즉각 반응, 공중 방향 제어 가능)
-- [x] **MOVE-02**: 낙사 시 사망하지 않고 마지막으로 밟은 플랫폼 위치로 복귀하며, 복귀 직후 짧은 무적이 부여된다
-- [x] **MOVE-03**: 별도 버튼으로 구르기가 발동된다 — 구르기 중 무적 판정, 쿨타임 있음, 슬로우 모션 중에도 사용 가능
+### 무한 생성 & 정리 (GEN)
 
-### 전투 (Combat)
+- [ ] **GEN-01**: 플레이어 이동 방향 기준 앞 2개의 Room+Corridor가 자동으로 미리 생성된다
+- [ ] **GEN-02**: 플레이어가 지나간 지점 기준 2개 초과 뒤의 Room+Corridor가 자동으로 Destroy된다
+- [ ] **GEN-03**: Room은 룸 풀에서, Corridor는 3종 중 랜덤 선택된다
 
-- [x] **ATCK-01**: 게임 시작 전 직선형 / 부채꼴형 공격 타입을 선택할 수 있다 (단순 버튼 2개)
-- [x] **ATCK-02**: 공격 버튼을 누르고 있으면 슬로우 모션이 발동되고 공격 범위가 표시된다 (시간정지 게이지 소모)
-- [x] **ATCK-03**: 공격 버튼을 떼면 공격 범위 내 가장 가까운 적에게 돌진하여 원샷 처치한다 (돌진 중 무적, 처치 후 짧은 딜레이)
-- [x] **ATCK-04**: 공격 범위 내 적이 없으면 헛베기 애니메이션 재생 후 더 긴 페널티 딜레이가 발생한다
-- [x] **ATCK-05**: 시간정지 게이지는 시간이 지나면 자동 회복되고, 적 처치 시에도 일부 회복된다
+### EXIT 포탈 (EXIT)
 
-### 타격감 (Game Feel)
+- [ ] **EXIT-01**: 각 Room 스폰 시 정해진 스폰 포인트 중 하나에 낮은 확률(기본 15%)로 EXIT 포탈이 생성된다
+- [ ] **EXIT-02**: 포탈 스폰 확률과 최대 동시 활성 개수를 FloorSpawner 인스펙터에서 조절할 수 있다
+- [ ] **EXIT-03**: 플레이어가 EXIT 포탈에 진입하면 다음 층으로 전환되고 WorldGenerator가 초기화된다
 
-- [x] **FEEL-01**: 적 처치 시 히트프리즈 발생 (50-100ms `Time.timeScale = 0`) — 킬의 타격감 핵심
+### 타이머 & 게임오버 (TIMER)
 
-### 적 (Enemies)
+- [ ] **TIMER-01**: 층 진입 시 HUD에 남은 제한 시간이 카운트다운으로 표시된다
+- [ ] **TIMER-02**: 제한 시간 초과 시 게임오버가 발생한다
 
-- [x] **ENMY-01**: 근접형 적이 플레이어를 감지하면 접근하고, 공격 전 예고 모션 후 근접 공격한다 (원샷원킬 양방향)
-- [x] **ENMY-02**: 원거리형 적이 플레이어를 감지하면 조준선을 표시 후 투사체를 발사한다 (원샷원킬 양방향)
+### 난이도 스케일링 (DIFF)
 
-### UI
+- [ ] **DIFF-01**: 층 번호가 올라갈수록 스포너에서 생성되는 몬스터 수가 증가한다
 
-- [ ] **UI-01**: HUD에 현재 층 번호, 시간정지 게이지, 선택한 공격 타입이 표시된다
-- [ ] **UI-02**: 플레이어 사망 시 사망 화면과 재시작 버튼이 표시되며, 재시작 시 1층부터 시작한다
+## Future Requirements
 
-## v2.0 Requirements (게임 시작 플로우)
-
-### 게임 시작 흐름 (Game Start Flow)
-
-- [ ] **MENU-01**: 앱 실행 시 MainMenu.unity가 첫 화면으로 열린다 (Build Settings index 0)
-- [ ] **MENU-02**: MainMenu에서 Start 버튼을 누르면 AttackSelect 씬으로 이동한다
-- [ ] **MENU-03**: MainMenu에서 Quit 버튼을 누르면 앱이 종료된다
-
-### 공격 방식 선택 씬 (Attack Selection Scene)
-
-- [ ] **ATKS-01**: AttackSelect 씬에서 Linear / Fan 중 하나를 선택하면 SampleScene이 로드된다
-- [ ] **ATKS-02**: 선택한 공격 방식이 SampleScene에서 즉시 적용된다 (씬 전환 후에도 유지)
-- [ ] **ATKS-03**: SampleScene 내 기존 AttackTypeSelector 오버레이가 제거된다
-
-### 사망 복귀 플로우 (Death Flow)
-
-- [ ] **FLOW-01**: 사망 화면의 버튼("다시 선택")을 누르면 AttackSelect 씬(Build index 1)으로 복귀한다
-
----
-
-## (이전 계획) v2 Requirements
-
-### 층 시스템 (Floor System)
-
-- **FLOOR-01**: 프리셋 기반 층 생성 (3~5개 프리셋 — 플랫폼/사다리/계단/낙사/혼합)
-- **FLOOR-02**: 위쪽 출구 도달 시 층 전환 시퀀스 발동 (조작 불가 → 순간이동 → 카메라 상승 → 가림막 해제 → 적 인식 활성화 → 조작 재개)
-- **FLOOR-03**: 층 전환 중 적 비활성화 — 카메라 전환 완료 후에만 플레이어 인식 시작
-- **FLOOR-04**: 이전 층 제거/비활성화 (모바일 성능 — 현재+다음 층만 유지)
-
-### 모바일 컨트롤 (Mobile Controls)
-
-- **MOBI-01**: 온스크린 조이스틱(좌측) + 점프/공격/구르기 버튼(우측) 표시 및 동작
-- **MOBI-02**: SafeArea 적용 (노치/펀치홀 대응)
-
-### 난이도 진행 (Difficulty Progression)
-
-- **DIFF-01**: 층이 높아질수록 적 수 증가, 원거리 적 비율 증가, 낙사 구역 증가
+*(현재 없음 — 프로토타입 검증 완료 후 결정)*
 
 ## Out of Scope
 
 | Feature | Reason |
 |---------|--------|
-| 별도 대시 버튼 (이동용) | 돌진은 공격 귀속 — 이동 대시는 전투 긴장감 희석 |
-| 이단 점프 / 벽점프 / 벽타기 | 기본 점프만으로 검증, 추후 업데이트 후보 |
-| 복잡한 성장 시스템 (레벨업, 영구 강화, 상점) | 프로토타입은 핵심 전투 검증 목적 |
-| 보스전 | 프로토타입 범위 초과 |
-| 랭킹, 광고, 과금 | 프로토타입 단계 외 |
-| 콤보 시스템, 패링, 무기 강화 | 핵심 검증과 무관 |
-| HP/체력 바 (플레이어·적 모두) | 원샷원킬 구조 — 체력 시스템 없음 |
-| 스토리, 컷씬 | 검증 목적 프로토타입에 불필요 |
-| Visual Scripting (Bolt) | IL2CPP 빌드 시 스트리핑 문제 위험 |
+| 보스 룸 / 특수 룸 이벤트 | 핵심 구조 검증 이후 추가 고려 |
+| EXIT 포탈 연출 (이펙트/사운드) | 프로토타입 범위 초과; 기능 검증이 우선 |
+| 층별 고정 레이아웃 (큐레이션 맵) | 랜덤 생성으로 리플레이어빌리티 검증이 목적 |
+| 멀티플레이어 | 프로토타입 단계 외 |
 
 ## Traceability
 
-*Updated: 2026-06-23 after v2.0 roadmap creation*
+*(로드맵 생성 후 채워짐)*
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| MOVE-01 | Phase 1 | Complete |
-| MOVE-02 | Phase 1 | Complete |
-| MOVE-03 | Phase 2 | Complete |
-| ATCK-01 | Phase 2 | Complete |
-| ATCK-02 | Phase 2 | Complete |
-| ATCK-03 | Phase 2 | Complete |
-| ATCK-04 | Phase 2 | Complete |
-| ATCK-05 | Phase 2 | Complete |
-| FEEL-01 | Phase 2 | Complete |
-| ENMY-01 | Phase 3 | Complete |
-| ENMY-02 | Phase 3 | Complete |
-| UI-01 | Phase 4 | Pending |
-| UI-02 | Phase 4 | Pending |
-| FLOOR-01 | Phase 5 | Pending |
-| FLOOR-02 | Phase 5 | Pending |
-| FLOOR-03 | Phase 5 | Pending |
-| FLOOR-04 | Phase 5 | Pending |
-| MENU-01 | Phase 6 | Pending |
-| MENU-02 | Phase 6 | Pending |
-| MENU-03 | Phase 6 | Pending |
-| FLOW-01 | Phase 7 | Pending |
-| ATKS-01 | Phase 7 | Pending |
-| ATKS-02 | Phase 7 | Pending |
-| ATKS-03 | Phase 7 | Pending |
+| ARCH-01 | — | Pending |
+| ARCH-02 | — | Pending |
+| ARCH-03 | — | Pending |
+| GEN-01 | — | Pending |
+| GEN-02 | — | Pending |
+| GEN-03 | — | Pending |
+| EXIT-01 | — | Pending |
+| EXIT-02 | — | Pending |
+| EXIT-03 | — | Pending |
+| TIMER-01 | — | Pending |
+| TIMER-02 | — | Pending |
+| DIFF-01 | — | Pending |
 
 **Coverage:**
-- v1 requirements: 13 total
-- Mapped to phases: 13/13
-- v2.0 requirements: 7 total
-- Mapped to phases: 7/7
-- Unmapped: 0
+- v3.0 requirements: 12 total
+- Mapped to phases: 0 (roadmap pending)
+- Unmapped: 12 ⚠️
 
 ---
-*Requirements defined: 2026-05-27*
-*Last updated: 2026-06-23 — v2.0 traceability added (Phases 6-7)*
+*Requirements defined: 2026-06-28*
+*Last updated: 2026-06-28 after initial definition*
