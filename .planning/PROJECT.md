@@ -8,16 +8,16 @@
 
 **공격 버튼을 누르면 시간이 느려지고, 손을 떼면 적에게 돌진해 한 방에 처치하는 손맛 — 이것이 재미있어야 게임이 살아난다.**
 
-## Current Milestone: v2.0 게임 시작 플로우
+## Current Milestone: v3.0 무한 복도 층 시스템
 
-**Goal:** 개발자 도움 없이 앱 실행 → 공격 방식 선택 → 게임 진입까지 완전한 시작 흐름을 갖춘 플레이테스트 빌드
+**Goal:** 층을 룸+길 수평 체인으로 재설계 — 양방향 무한 생성, 전투 Corridor, 확률적 EXIT 포탈, 제한 시간으로 "빠른 탈출" 긴장감을 검증한다.
 
 **Target features:**
-- MainMenu.unity — 타이틀 + Start / Quit 버튼
-- AttackSelect.unity — Linear / Fan 선택 후 게임 진입
-- 씬 플로우: MainMenu → AttackSelect → SampleScene
-- 선택한 공격 방식이 SampleScene에서 유지 (씬 간 데이터 전달)
-- 사망 후 MainMenu로 복귀
+- 룸-길 아키텍처: Room에 END_Left/END_Right 마커, Corridor 3종 (상승/직진/하강, 모두 전투 구간)
+- 무한 양방향 생성 & 정리: 플레이어 기준 앞 2개 룸+길 미리 생성, 2개 초과 Destroy
+- EXIT 포탈: 룸 내 정해진 스폰 포인트에 확률적 스폰 (FloorSpawner 인스펙터로 확률/최대 개수 조절)
+- 타이머 & 게임오버: 층별 제한 시간 카운트다운 HUD, 초과 시 게임오버
+- 난이도 스케일링: 층 번호에 따라 스포너 몬스터 수 증가
 
 ## Requirements
 
@@ -117,4 +117,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-06-23 — Phase 6 complete (MainMenu Scene: MENU-01/02/03 validated)*
+*Last updated: 2026-06-28 — Milestone v3.0 started (무한 복도 층 시스템)*
