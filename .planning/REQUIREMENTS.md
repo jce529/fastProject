@@ -8,7 +8,7 @@
 ### 룸-길 아키텍처 (ARCH)
 
 - [x] **ARCH-01**: Room 프리팹에 END_Left/END_Right 마커가 있어 좌우 방향으로 Corridor와 연결될 수 있다
-- [ ] **ARCH-02**: Corridor 프리팹 3종(상승/직진/하강)이 존재하며 각각 적+장애물이 있는 전투 구간이다
+- [x] **ARCH-02**: Corridor 프리팹 3종(상승/직진/하강)이 존재하며 각각 적+장애물이 있는 전투 구간이다
 - [x] **ARCH-03**: Corridor 시작점(ENT)에서 플레이어가 진입하고 끝점(END)에서 다음 Room이 연결된다
 
 ### 무한 생성 & 정리 (GEN)
@@ -55,7 +55,7 @@
 | Requirement | Phase | Status |
 |-------------|-------|--------|
 | ARCH-01 | Phase 8 | Complete |
-| ARCH-02 | Phase 8 | Pending |
+| ARCH-02 | Phase 8 | Complete |
 | ARCH-03 | Phase 8 | Complete |
 | GEN-01 | Phase 9 | Pending |
 | GEN-02 | Phase 9 | Pending |
