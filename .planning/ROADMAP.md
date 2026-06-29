@@ -299,7 +299,7 @@ Plans:
 **Plans**: 3 plans
 
 Plans:
-- [ ] 08-01-PLAN.md — RoomConnector.cs + RoomMarkerTool.cs (에디터 도구) — ARCH-01, ARCH-03
+- [x] 08-01-PLAN.md — RoomConnector.cs + RoomMarkerTool.cs (에디터 도구) — ARCH-01, ARCH-03
 - [ ] 08-02-PLAN.md — CorridorBuilder.cs (Corridor 3종 프리팹 생성) — ARCH-02
 - [ ] 08-03-PLAN.md — 에디터 도구 실행 + SampleScene 배치 플레이테스트 검증 — ARCH-01, ARCH-02, ARCH-03
 
@@ -347,7 +347,7 @@ Plans:
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 8. 룸-길 아키텍처 | 0/3 | In Progress | - |
+| 8. 룸-길 아키텍처 | 1/3 | In Progress|  |
 | 9. 무한 양방향 생성 & 정리 | 0/? | Not started | - |
 | 10. EXIT 포탈 & 층 전환 | 0/? | Not started | - |
 | 11. 타이머 & 난이도 | 0/? | Not started | - |
