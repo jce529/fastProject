@@ -32,6 +32,11 @@
 
 - [ ] **DIFF-01**: 층 번호가 올라갈수록 스포너에서 생성되는 몬스터 수가 증가한다
 
+### 점수 시스템 (SCORE)
+
+- [ ] **SCORE-01**: 플레이어가 EXIT 포탈로 다음 층에 도달하면 남은 제한 시간(초)에 비례한 점수가 누적된다 (빠를수록 높은 점수)
+- [ ] **SCORE-02**: HUD에 현재 누적 점수가 실시간으로 표시된다
+
 ## Future Requirements
 
 *(현재 없음 — 프로토타입 검증 완료 후 결정)*
@@ -47,28 +52,28 @@
 
 ## Traceability
 
-*(로드맵 생성 후 채워짐)*
-
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| ARCH-01 | — | Pending |
-| ARCH-02 | — | Pending |
-| ARCH-03 | — | Pending |
-| GEN-01 | — | Pending |
-| GEN-02 | — | Pending |
-| GEN-03 | — | Pending |
-| EXIT-01 | — | Pending |
-| EXIT-02 | — | Pending |
-| EXIT-03 | — | Pending |
-| TIMER-01 | — | Pending |
-| TIMER-02 | — | Pending |
-| DIFF-01 | — | Pending |
+| ARCH-01 | Phase 8 | Pending |
+| ARCH-02 | Phase 8 | Pending |
+| ARCH-03 | Phase 8 | Pending |
+| GEN-01 | Phase 9 | Pending |
+| GEN-02 | Phase 9 | Pending |
+| GEN-03 | Phase 9 | Pending |
+| EXIT-01 | Phase 10 | Pending |
+| EXIT-02 | Phase 10 | Pending |
+| EXIT-03 | Phase 10 | Pending |
+| TIMER-01 | Phase 11 | Pending |
+| TIMER-02 | Phase 11 | Pending |
+| DIFF-01 | Phase 11 | Pending |
+| SCORE-01 | — | Pending |
+| SCORE-02 | — | Pending |
 
 **Coverage:**
-- v3.0 requirements: 12 total
-- Mapped to phases: 0 (roadmap pending)
-- Unmapped: 12 ⚠️
+- v3.0 requirements: 14 total
+- Mapped to phases: 12
+- Unmapped: 2 ⚠️
 
 ---
 *Requirements defined: 2026-06-28*
-*Last updated: 2026-06-28 after initial definition*
+*Last updated: 2026-06-28 after SCORE requirements added*
