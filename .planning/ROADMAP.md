@@ -263,3 +263,129 @@ Plans:
 ---
 *v2.0 Roadmap created: 2026-06-23*
 *Last updated: 2026-06-23 — v2.0 phases 6-7 added*
+
+---
+
+---
+
+# Roadmap: Fast (가칭) — v3.0
+
+**Milestone:** v3.0 — 무한 복도 층 시스템
+**Granularity:** Standard
+**Coverage:** 12/12 v3.0 requirements mapped
+
+---
+
+## v3.0 Phases
+
+- [ ] **Phase 8: 룸-길 아키텍처** - Room과 Corridor 프리팹이 마커 기반으로 체인 연결될 수 있는 아키텍처가 갖춰진다
+- [ ] **Phase 9: 무한 양방향 생성 & 정리** - 플레이어 이동 방향 앞 2개 Room+Corridor가 자동 생성되고, 뒤로 2개 초과 시 자동 Destroy된다
+- [ ] **Phase 10: EXIT 포탈 & 층 전환** - Room 스폰 시 확률적으로 EXIT 포탈이 생성되고, 진입 시 층 번호가 올라가며 WorldGenerator가 초기화된다
+- [ ] **Phase 11: 타이머 & 난이도** - 층 진입마다 HUD에 카운트다운이 표시되고 시간 초과 시 게임오버, 층이 높아질수록 몬스터 수가 증가한다
+
+---
+
+## v3.0 Phase Details
+
+### Phase 8: 룸-길 아키텍처
+**Goal**: Room과 Corridor 프리팹이 마커 기반으로 체인 연결될 수 있는 아키텍처가 갖춰진다
+**Depends on**: Phase 7
+**Requirements**: ARCH-01, ARCH-02, ARCH-03
+**Success Criteria** (what must be TRUE):
+  1. Room 프리팹의 END_Left/END_Right Transform 마커가 씬 뷰에서 확인되고, 에디터 Gizmo로 위치가 표시된다
+  2. Corridor 3종(상승/직진/하강) 프리팹이 각각 전투 구간(적 스폰 포인트 + 장애물)을 포함하여 에셋 폴더에 존재한다
+  3. Corridor의 ENT 마커를 Room의 END 마커에 정렬하면 플레이어가 Room→Corridor→Room 순서로 물리적으로 막힘 없이 통과한다
+  4. RoomConnector 컴포넌트가 인스펙터에서 연결 방향(Left/Right)과 연결된 오브젝트를 직렬화한다
+**Plans**: 3 plans
+
+Plans:
+- [ ] 08-01-PLAN.md — RoomConnector.cs + RoomMarkerTool.cs (에디터 도구) — ARCH-01, ARCH-03
+- [ ] 08-02-PLAN.md — CorridorBuilder.cs (Corridor 3종 프리팹 생성) — ARCH-02
+- [ ] 08-03-PLAN.md — 에디터 도구 실행 + SampleScene 배치 플레이테스트 검증 — ARCH-01, ARCH-02, ARCH-03
+
+---
+
+### Phase 9: 무한 양방향 생성 & 정리
+**Goal**: 플레이어가 이동하는 방향으로 Room+Corridor가 자동 생성되고, 뒤에 남겨진 구간은 자동으로 Destroy된다
+**Depends on**: Phase 8
+**Requirements**: GEN-01, GEN-02, GEN-03
+**Success Criteria** (what must be TRUE):
+  1. 플레이어가 오른쪽으로 이동 시 진행 방향 앞 2개의 Room+Corridor 쌍이 이미 생성되어 허공이 없다
+  2. 플레이어 기준 뒤 2개를 초과하는 Room+Corridor GameObject가 씬 Hierarchy에서 사라진다
+  3. 5회 Play 반복 시 새 Room 스폰마다 상승/직진/하강 Corridor 중 랜덤 선택이 동작하여 단일 타입만 반복되지 않는다
+**Plans**: TBD
+
+---
+
+### Phase 10: EXIT 포탈 & 층 전환
+**Goal**: Room 스폰 시 확률적으로 EXIT 포탈이 생성되고, 진입 시 층 번호가 올라가며 WorldGenerator가 초기화된다
+**Depends on**: Phase 9
+**Requirements**: EXIT-01, EXIT-02, EXIT-03
+**Success Criteria** (what must be TRUE):
+  1. _exitSpawnChance를 1.0f로 설정하면 모든 Room 스폰 시 포탈이 생성되고, 0.0f이면 생성되지 않는다
+  2. _maxExitsActive를 1로 설정했을 때 씬에 활성 EXIT 포탈이 동시에 2개 이상 존재하지 않는다
+  3. 플레이어가 EXIT 포탈 Collider에 진입하면 FloorNumber가 +1 증가하고 WorldGenerator가 리셋되어 새 Room+Corridor 체인이 시작된다
+**Plans**: TBD
+**UI hint**: yes
+
+---
+
+### Phase 11: 타이머 & 난이도
+**Goal**: 층마다 HUD에 카운트다운이 표시되고 시간 초과 시 게임오버가 발생하며, 층이 올라갈수록 몬스터 수가 증가한다
+**Depends on**: Phase 10
+**Requirements**: TIMER-01, TIMER-02, DIFF-01
+**Success Criteria** (what must be TRUE):
+  1. 층에 진입하면 HUD 타이머가 즉시 카운트다운을 시작하고, 슬로우모션(Time.timeScale ≈ 0.2) 중에도 실시간으로 감소한다
+  2. 타이머가 0에 도달하는 순간 기존 PlayerDeathHandler가 호출되어 사망 화면이 표시된다
+  3. 3층에서 스폰되는 총 몬스터 수가 1층보다 눈에 띄게 많다 (EnemySpawner가 층 번호에 비례한 카운트를 반환한다)
+**Plans**: TBD
+**UI hint**: yes
+
+---
+
+## v3.0 Progress Table
+
+| Phase | Plans Complete | Status | Completed |
+|-------|----------------|--------|-----------|
+| 8. 룸-길 아키텍처 | 0/3 | In Progress | - |
+| 9. 무한 양방향 생성 & 정리 | 0/? | Not started | - |
+| 10. EXIT 포탈 & 층 전환 | 0/? | Not started | - |
+| 11. 타이머 & 난이도 | 0/? | Not started | - |
+
+---
+
+## v3.0 Coverage Map
+
+| Requirement | Phase | Description |
+|-------------|-------|-------------|
+| ARCH-01 | Phase 8 | Room 프리팹 END_Left/END_Right 마커 |
+| ARCH-02 | Phase 8 | Corridor 3종 프리팹 (상승/직진/하강, 전투 구간) |
+| ARCH-03 | Phase 8 | RoomConnector: ENT→END 체인 연결 |
+| GEN-01 | Phase 9 | 앞 2개 Room+Corridor 미리 생성 |
+| GEN-02 | Phase 9 | 뒤 2개 초과 Room+Corridor 자동 Destroy |
+| GEN-03 | Phase 9 | Corridor 3종 랜덤 선택 |
+| EXIT-01 | Phase 10 | Room 스폰 시 확률적 EXIT 포탈 생성 (기본 15%) |
+| EXIT-02 | Phase 10 | 포탈 확률/최대 개수 FloorSpawner 인스펙터 노출 |
+| EXIT-03 | Phase 10 | 포탈 진입 시 층 전환 + WorldGenerator 초기화 |
+| TIMER-01 | Phase 11 | HUD 카운트다운 (Time.unscaledDeltaTime) |
+| TIMER-02 | Phase 11 | 시간 초과 시 PlayerDeathHandler 호출 |
+| DIFF-01 | Phase 11 | 층 번호 비례 EnemySpawner 카운트 증가 |
+
+**v3.0 Coverage: 12/12 requirements mapped. No orphans.**
+
+---
+
+## v3.0 Implementation Notes (for plan-phase reference)
+
+- FloorSpawner.cs 기존 수직 층 전환 로직 → WorldGenerator로 대체 (Phase 9)
+- RoomExit.cs 기존 출구 트리거 → ExitPortal 컴포넌트로 교체 (Phase 10)
+- ScoreManager.cs 기존 타이머 로직 → FloorTimer 정적 클래스로 이관 (Phase 11)
+- PlayerDeathHandler.cs 기존 게임오버 핸들러 → TIMER-02에서 직접 재사용
+- HUDController.cs 기존 HUD → Phase 11에서 카운트다운 UI 슬롯 추가
+- EnemySpawner.GetEnemyCount() 기존 난이도 테이블 → DIFF-01에서 층 번호 파라미터 확장
+- 타이머는 반드시 Time.unscaledDeltaTime 사용 — 슬로우모션(Time.timeScale ≈ 0.2) 면역 필수
+- WaitForSecondsRealtime 코루틴: 층 전환 시퀀스 전 구간에 걸쳐 타임스케일 면역 보장
+
+---
+*v3.0 Roadmap created: 2026-06-28*
+*Last updated: 2026-06-29 — Phase 8 plans created (08-01, 08-02, 08-03)*
