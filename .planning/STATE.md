@@ -1,18 +1,16 @@
 ---
 gsd_state_version: 1.0
-milestone: v3.0
-milestone_name: 무한 복도 층 시스템
-current_phase: 08
-current_plan: —
-status: defining requirements
-stopped_at: Milestone v3.0 started — defining requirements
-last_updated: "2026-06-28T00:00:00Z"
-last_activity: "2026-06-28 - Milestone v3.0 무한 복도 층 시스템 시작"
+milestone: v2.0
+milestone_name: Phases
+status: "Roadmap defined, ready for /gsd:plan-phase 8"
+stopped_at: Phase 8 context gathered
+last_updated: "2026-06-29T02:30:53.277Z"
+last_activity: 2026-06-28 — v3.0 roadmap created
 progress:
-  total_phases: 0
-  completed_phases: 0
-  total_plans: 0
-  completed_plans: 0
+  total_phases: 11
+  completed_phases: 5
+  total_plans: 18
+  completed_plans: 16
 ---
 
 # Project State: Fast (가칭)
@@ -33,10 +31,14 @@ progress:
 
 ## Current Position
 
-Phase: Not started (defining requirements)
+Phase: 8 — 룸-길 아키텍처 (not started)
 Plan: —
-Status: Defining requirements
-Last activity: 2026-06-28 — Milestone v3.0 started
+Status: Roadmap defined, ready for /gsd:plan-phase 8
+Last activity: 2026-06-28 — v3.0 roadmap created
+
+```
+Progress: [░░░░░░░░░░░░░░░░░░░░] 0/4 phases complete
+```
 
 ---
 
@@ -70,6 +72,8 @@ Last activity: 2026-06-28 — Milestone v3.0 started
 | Corridor = 전투 구간 | 단순 통로가 아닌 적+장애물 있는 구간 — 이동 자체가 위험한 느낌 유지 |
 | Corridor 3타입 (상승/직진/하강) | 수직 변화로 탐색 경로에 다양성 제공, 플랫포머 감각 유지 |
 | 뒤 2개 룸+길 유지 후 Destroy | 모바일 메모리 관리; 플레이어가 뒤로 돌아갈 수 있는 범위 제한 |
+| WorldGenerator = 신규 MonoBehaviour (FloorSpawner 대체) | 수평 양방향 체인 생성은 기존 수직 FloorSpawner 로직과 구조가 달라 대체가 가장 깔끔 |
+| FloorTimer = 정적 클래스 | ScoreManager 패턴 답습 — 씬 수명 불필요, 데이터 전용 |
 
 ### Technical Constraints to Enforce Every Phase
 
@@ -80,6 +84,7 @@ Last activity: 2026-06-28 — Milestone v3.0 started
 - Dash: `MovePosition()` over 2-3 frames, never a velocity spike
 - Invincibility: layer swap (PlayerHurtbox / PlayerInvincible), never IgnoreLayerCollision
 - Floor transition: `WaitForSecondsRealtime` only — `Time.timeScale` may be 0 at transition start
+- Timer: `Time.unscaledDeltaTime` only — timer must be immune to slow-motion timeScale
 
 ### Quick Tasks Completed (v1.0/v2.0)
 
@@ -96,9 +101,9 @@ Last activity: 2026-06-28 — Milestone v3.0 started
 3. Read `.planning/REQUIREMENTS.md` — requirement details and traceability
 4. Continue from Current Phase listed above
 
-**Last session:** 2026-06-28
-**Stopped at:** Milestone v3.0 started — defining requirements
+**Last session:** 2026-06-29T02:30:53.272Z
+**Stopped at:** Phase 8 context gathered
 
 ---
 *State initialized: 2026-05-27*
-*Last updated: 2026-06-28 — Milestone v3.0 무한 복도 층 시스템 시작*
+*Last updated: 2026-06-28 — v3.0 roadmap created, Phases 8-11 defined*
