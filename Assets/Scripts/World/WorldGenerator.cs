@@ -148,4 +148,36 @@ public class WorldGenerator : MonoBehaviour
     {
         Debug.Log("[WorldGenerator] SpawnNextFloorStandbyRoom — stub (Phase 10에서 구현)");
     }
+
+    private void Update()
+    {
+        if (_playerTransform == null || _chain.Count == 0) return;
+        UpdatePlayerIndex();
+
+        // GEN-01: 플레이어 앞 _lookaheadCount개 Room+Corridor 보장
+        while (_chain.Count - 1 - _playerCurrentIndex < _lookaheadCount)
+            SpawnNextPair();
+
+        // GEN-02: 플레이어 뒤 _lookbehindCount개 초과 시 tail 정리
+        // Pitfall 4: RemoveTail 후 _playerCurrentIndex-- 반드시 쌍으로 실행
+        while (_playerCurrentIndex > _lookbehindCount)
+        {
+            RemoveTail();
+            _playerCurrentIndex--;
+        }
+    }
+
+    private void UpdatePlayerIndex()
+    {
+        // 플레이어 X > 현재 룸의 Door/EXIT X → 다음 룸 인덱스로 진행
+        for (int i = _playerCurrentIndex; i < _chain.Count - 1; i++)
+        {
+            var exitConnector = FindConnector(_chain[i].room, RoomConnector.Direction.Right);
+            if (exitConnector == null) break;
+            if (_playerTransform.position.x > exitConnector.transform.position.x)
+                _playerCurrentIndex = i + 1;
+            else
+                break;
+        }
+    }
 }
