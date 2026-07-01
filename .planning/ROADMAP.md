@@ -313,7 +313,12 @@ Plans:
   1. 플레이어가 오른쪽으로 이동 시 진행 방향 앞 2개의 Room+Corridor 쌍이 이미 생성되어 허공이 없다
   2. 플레이어 기준 뒤 2개를 초과하는 Room+Corridor GameObject가 씬 Hierarchy에서 사라진다
   3. 5회 Play 반복 시 새 Room 스폰마다 상승/직진/하강 Corridor 중 랜덤 선택이 동작하여 단일 타입만 반복되지 않는다
-**Plans**: TBD
+**Plans**: 3 plans
+
+Plans:
+- [ ] 09-01-PLAN.md — RoomMarkerTool.cs 업데이트: 전체 14개 룸 Door/ENT(Left)+Door/EXIT(Right) RoomConnector 부착
+- [ ] 09-02-PLAN.md — WorldGenerator.cs 신규 구현: 무한 체인 Start/Update/SpawnNextPair/SelectCorridor/RemoveTail
+- [ ] 09-03-PLAN.md — Unity Editor 실행(RoomMarkerTool) + SampleScene 배치 + 5회 플레이테스트 검증
 
 ---
 
