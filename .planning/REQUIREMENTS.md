@@ -13,9 +13,9 @@
 
 ### 무한 생성 & 정리 (GEN)
 
-- [ ] **GEN-01**: 플레이어 이동 방향 기준 앞 2개의 Room+Corridor가 자동으로 미리 생성된다
-- [ ] **GEN-02**: 플레이어가 지나간 지점 기준 2개 초과 뒤의 Room+Corridor가 자동으로 Destroy된다
-- [ ] **GEN-03**: Room은 룸 풀에서, Corridor는 3종 중 랜덤 선택된다
+- [x] **GEN-01**: 플레이어 이동 방향 기준 앞 2개의 Room+Corridor가 자동으로 미리 생성된다
+- [x] **GEN-02**: 플레이어가 지나간 지점 기준 2개 초과 뒤의 Room+Corridor가 자동으로 Destroy된다
+- [x] **GEN-03**: Room은 룸 풀에서, Corridor는 3종 중 랜덤 선택된다
 
 ### EXIT 포탈 (EXIT)
 
@@ -57,9 +57,9 @@
 | ARCH-01 | Phase 8 | Complete |
 | ARCH-02 | Phase 8 | Complete |
 | ARCH-03 | Phase 8 | Complete |
-| GEN-01 | Phase 9 | Pending |
-| GEN-02 | Phase 9 | Pending |
-| GEN-03 | Phase 9 | Pending |
+| GEN-01 | Phase 9 | Complete |
+| GEN-02 | Phase 9 | Complete |
+| GEN-03 | Phase 9 | Complete |
 | EXIT-01 | Phase 10 | Pending |
 | EXIT-02 | Phase 10 | Pending |
 | EXIT-03 | Phase 10 | Pending |
