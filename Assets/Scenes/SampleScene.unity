@@ -2349,30 +2349,14 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1344439149}
-  - component: {fileID: 1344439148}
+  - component: {fileID: 1344439150}
   m_Layer: 0
-  m_Name: TestSpawner
+  m_Name: WorldGenerator
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &1344439148
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1344439147}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: daef694ac78bbc74ab335152fd964b50, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::TestWorldGenerator
-  _roomPrefabs:
-  - {fileID: 7594450855101943106, guid: ffaff0d543d80d24fa1b51ce86ae3d1c, type: 3}
-  _corridorPrefabs:
-  - {fileID: 7929981261526435951, guid: 82e0bd01acaf0ed419cad079aad166e6, type: 3}
 --- !u!4 &1344439149
 Transform:
   m_ObjectHideFlags: 0
@@ -2388,6 +2372,35 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1344439150
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1344439147}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ff99ef5fa91740b4da2e1583b4e0daeb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::WorldGenerator
+  _roomPrefabs:
+  - {fileID: 2564265763709976335, guid: c0f6fea8d7a78ce43ac944ec03d891dc, type: 3}
+  - {fileID: 7737809153690431726, guid: ed2d93b531268124382b9403fce5ec7b, type: 3}
+  - {fileID: 3114153540849030163, guid: 89dc91aa481422a498c78a73e7f6a4d2, type: 3}
+  - {fileID: 6386340677169604563, guid: 844b014bfac621a44b5ab3524880a63a, type: 3}
+  - {fileID: 8226199497095424007, guid: 0aa738cd2b8fc6a45be52c4403bc2e80, type: 3}
+  - {fileID: 4532260002168211988, guid: b6ff0323bb78a7b4ba8eaebdaa67a684, type: 3}
+  _corridorFlat: {fileID: 2973888692984583640, guid: 82e0bd01acaf0ed419cad079aad166e6, type: 3}
+  _corridorUp: {fileID: 4677372654122580058, guid: bdaa4082ad892154a8fb3452837ccb9e, type: 3}
+  _corridorDown: {fileID: 8972725871021759812, guid: 9e99a56e9aa0dc94e80bec4ae753973a, type: 3}
+  _playerTransform: {fileID: 1394403462}
+  _cameraFollow: {fileID: 519420033}
+  _lookaheadCount: 2
+  _lookbehindCount: 2
+  _minYDrift: -12
+  _maxYDrift: 12
+  _floorHeight: 40
 --- !u!1 &1365058120
 GameObject:
   m_ObjectHideFlags: 0
