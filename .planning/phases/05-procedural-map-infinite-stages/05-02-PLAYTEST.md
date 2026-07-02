@@ -17,7 +17,7 @@
 
 **PASS 기준:** Room_Combat 스폰 확인, 적 없음
 
-- [ ] PASS
+- [x] PASS
 - [ ] FAIL — 메모:
 
 ---
@@ -37,7 +37,7 @@
 **PASS 기준:** 위 6단계가 순서대로 발동
 
 - [ ] PASS
-- [ ] FAIL — 메모:
+- [x] FAIL — 메모: 
 
 ---
 
@@ -50,7 +50,7 @@
 
 **PASS 기준:** Hierarchy에 Room 인스턴스 1개만 존재
 
-- [ ] PASS
+- [x] PASS
 - [ ] FAIL — 메모:
 
 ---
