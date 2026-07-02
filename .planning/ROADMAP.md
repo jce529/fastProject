@@ -301,7 +301,8 @@ Plans:
 Plans:
 - [x] 08-01-PLAN.md — RoomConnector.cs + RoomMarkerTool.cs (에디터 도구) — ARCH-01, ARCH-03
 - [x] 08-02-PLAN.md — CorridorBuilder.cs (Corridor 3종 프리팹 생성) — ARCH-02
-- [ ] 08-03-PLAN.md — 에디터 도구 실행 + SampleScene 배치 플레이테스트 검증 — ARCH-01, ARCH-02, ARCH-03
+- [x] 08-03-PLAN.md — 에디터 도구 실행 + SampleScene 배치 플레이테스트 검증 — ARCH-01, ARCH-02, ARCH-03
+- [x] (사용자 수동 진행, ARCH-04) — 14개 Room 프리팹 SpriteRenderer+BoxCollider2D → Tilemap 방식 전환
 
 ---
 
@@ -316,9 +317,9 @@ Plans:
 **Plans**: 3 plans
 
 Plans:
-- [ ] 09-01-PLAN.md — RoomMarkerTool.cs 업데이트: 전체 14개 룸 Door/ENT(Left)+Door/EXIT(Right) RoomConnector 부착
-- [ ] 09-02-PLAN.md — WorldGenerator.cs 신규 구현: 무한 체인 Start/Update/SpawnNextPair/SelectCorridor/RemoveTail
-- [ ] 09-03-PLAN.md — Unity Editor 실행(RoomMarkerTool) + SampleScene 배치 + 5회 플레이테스트 검증
+- [x] 09-01-PLAN.md — RoomMarkerTool.cs 업데이트: 전체 14개 룸 Door/ENT(Left)+Door/EXIT(Right) RoomConnector 부착
+- [x] 09-02-PLAN.md — WorldGenerator.cs 신규 구현: 무한 체인 Start/Update/SpawnNextPair/SelectCorridor/RemoveTail
+- [x] 09-03-PLAN.md — Unity Editor 실행(RoomMarkerTool) + SampleScene 배치 + 5회 플레이테스트 검증
 
 ---
 
@@ -352,8 +353,8 @@ Plans:
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 8. 룸-길 아키텍처 | 2/3 | In Progress|  |
-| 9. 무한 양방향 생성 & 정리 | 0/? | Not started | - |
+| 8. 룸-길 아키텍처 | 3/3 | Complete | 2026-07-01 |
+| 9. 무한 양방향 생성 & 정리 | 3/3 | Complete | 2026-07-01 |
 | 10. EXIT 포탈 & 층 전환 | 0/? | Not started | - |
 | 11. 타이머 & 난이도 | 0/? | Not started | - |
 

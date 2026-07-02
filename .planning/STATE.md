@@ -1,16 +1,16 @@
 ---
 gsd_state_version: 1.0
-milestone: v2.0
+milestone: v3.0
 milestone_name: Phases
 status: executing
-stopped_at: Completed 09-02-PLAN.md — WorldGenerator.cs infinite chain complete
-last_updated: "2026-07-01T07:00:52.816Z"
+stopped_at: Completed 09-03-PLAN.md — Phase 9 (무한 양방향 생성 & 정리) 완료, GEN-01/02/03 검증 통과
+last_updated: "2026-07-01T15:30:00.000Z"
 last_activity: 2026-07-01
 progress:
-  total_phases: 7
-  completed_phases: 5
-  total_plans: 18
-  completed_plans: 16
+  total_phases: 11
+  completed_phases: 9
+  total_plans: 21
+  completed_plans: 19
 ---
 
 # Project State: Fast (가칭)
@@ -31,13 +31,13 @@ progress:
 
 ## Current Position
 
-Phase: 09 (infinite-gen-cleanup) — EXECUTING
-Plan: 2 of 3
-Status: Ready to execute
+Phase: 09 (infinite-gen-cleanup) — COMPLETE
+Next: Phase 10 (EXIT 포탈 & 층 전환)
+Status: Ready to plan Phase 10
 Last activity: 2026-07-01
 
 ```
-Progress: [░░░░░░░░░░░░░░░░░░░░] 0/4 phases complete
+Progress: [██████████████████░░] 9/11 phases complete (v3.0: Phase 8, 9 complete)
 ```
 
 ---
@@ -74,6 +74,9 @@ Progress: [░░░░░░░░░░░░░░░░░░░░] 0/4 pha
 | 뒤 2개 룸+길 유지 후 Destroy | 모바일 메모리 관리; 플레이어가 뒤로 돌아갈 수 있는 범위 제한 |
 | WorldGenerator = 신규 MonoBehaviour (FloorSpawner 대체) | 수평 양방향 체인 생성은 기존 수직 FloorSpawner 로직과 구조가 달라 대체가 가장 깔끔 |
 | FloorTimer = 정적 클래스 | ScoreManager 패턴 답습 — 씬 수명 불필요, 데이터 전용 |
+| Room 14종 → Tilemap 방식 전환 (08-04, ARCH-04) | Corridor가 이미 TilemapCollider2D 방식으로 전환됨(quick-260701-k1e) — Room도 통일해 WorldGenerator가 타일 좌표(정수)로 크기/연결점을 계산 가능하게 함. 사용자가 Unity Editor에서 직접 실행 |
+| WorldGenerator._roomPrefabs = Complex_Room 6종 (AllInOne/EdgeRun/GaugeOutpost/LastStand/RiskCrossing/Vertical_Gauntlet) | 09-03-PLAN 원안의 기본 Room_* 13종 대신 다방향 연결 지원하는 신규 Complex_Room 풀로 교체 — 사용자 확정 결정 |
+| Corridor/Complex_Room 프리팹 fileID는 반드시 Int64.MaxValue(9223372036854775807) 이하로 생성 | quick-260701-sc7에서 19자리 무작위 fileID가 오버플로우해 CameraBound 컴포넌트가 3개 프리팹에서 깨짐 — 향후 유사 작업 시 문자열 비교로 검증 필수 |
 
 ### Technical Constraints to Enforce Every Phase
 
@@ -95,6 +98,8 @@ Progress: [░░░░░░░░░░░░░░░░░░░░] 0/4 pha
 | # | Description | Date | Commit | Directory |
 |---|-------------|------|--------|-----------|
 | 260701-k1e | CorridorBuilder.cs를 BoxCollider2D 오브젝트 방식에서 TilemapCollider2D 타일맵 방식으로 전환 | 2026-07-01 | 9b97b23 | [260701-k1e-corridorbuilder-cs-boxcollider2d-tilemap](./quick/260701-k1e-corridorbuilder-cs-boxcollider2d-tilemap/) |
+| 260701-j76 | RoomCreator.cs 3-way patch — SpawnMarker, EnsureLadderTile, ladder single-col | 2026-07-01 | ee94cce | [260701-j76-roomcreator-cs-3-spawnmarker-ensureladde](./quick/260701-j76-roomcreator-cs-3-spawnmarker-ensureladde/) |
+| 260701-sc7 | Corridor 3종 + Complex_Room 6종에 CameraBound 추가, fileID 오버플로우 버그 수정 | 2026-07-01 | (uncommitted) | [260701-sc7-corridor-complex-room](./quick/260701-sc7-corridor-complex-room/) |
 
 ---
 
@@ -107,9 +112,9 @@ Progress: [░░░░░░░░░░░░░░░░░░░░] 0/4 pha
 3. Read `.planning/REQUIREMENTS.md` — requirement details and traceability
 4. Continue from Current Phase listed above
 
-**Last session:** 2026-07-01T07:00:52.810Z
-**Stopped at:** Completed 09-02-PLAN.md — WorldGenerator.cs infinite chain complete
+**Last session:** 2026-07-01T15:30:00.000Z
+**Stopped at:** Phase 9 완료 (GEN-01/02/03 검증 통과). Phase 8 ARCH-04(Room Tilemap 변환) 사용자가 직접 완료. 다음: Phase 10 (EXIT 포탈 & 층 전환) 계획 시작 — `/gsd:plan-phase 10`
 
 ---
 *State initialized: 2026-05-27*
-*Last updated: 2026-06-28 — v3.0 roadmap created, Phases 8-11 defined*
+*Last updated: 2026-07-01 — Phase 9 complete, Phase 8 ARCH-04 (Room tilemap) done manually, quick-sc7 CameraBound fix*
