@@ -1,3 +1,6 @@
+<details>
+<summary>✅ v1.0 — Combat Test Room (완료, 접힘)</summary>
+
 # Roadmap: Fast (가칭)
 
 **Project:** Mobile 2D Platformer — Slow-Motion Dash-Attack Prototype
@@ -179,6 +182,11 @@ Plans:
 
 ---
 
+</details>
+
+<details>
+<summary>✅ v2.0 — 게임 시작 플로우 (완료, 접힘)</summary>
+
 # Roadmap: Fast (가칭) — v2.0
 
 **Milestone:** v2.0 — 게임 시작 플로우
@@ -267,6 +275,8 @@ Plans:
 ---
 
 ---
+
+</details>
 
 # Roadmap: Fast (가칭) — v3.0
 
