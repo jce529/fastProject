@@ -101,6 +101,7 @@ GameObject:
   m_Component:
   - component: {fileID: 755386232621476335}
   - component: {fileID: 4510745023367935465}
+  - component: {fileID: 8330639790211785928}
   m_Layer: 0
   m_Name: ENT
   m_TagString: Untagged
@@ -135,6 +136,20 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 21dc5c5afb8449c7b8a94abc1474324f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::RoomEntry
+--- !u!114 &8330639790211785928
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1972739520420315595}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9e9b49dbd437a5f40994f7a3ddf6d0db, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::RoomConnector
+  direction: 0
+  connectedObject: {fileID: 0}
 --- !u!1 &2360391483313200902
 GameObject:
   m_ObjectHideFlags: 0
@@ -145,6 +160,7 @@ GameObject:
   m_Component:
   - component: {fileID: 202428801947085451}
   - component: {fileID: 8513318454177109816}
+  - component: {fileID: 7652725163789304341}
   m_Layer: 0
   m_Name: EXIT
   m_TagString: Untagged
@@ -226,6 +242,20 @@ SpriteRenderer:
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
   m_SpriteSortPoint: 0
+--- !u!114 &7652725163789304341
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2360391483313200902}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9e9b49dbd437a5f40994f7a3ddf6d0db, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::RoomConnector
+  direction: 1
+  connectedObject: {fileID: 0}
 --- !u!1 &3362861821812571079
 GameObject:
   m_ObjectHideFlags: 0

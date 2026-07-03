@@ -57,6 +57,7 @@ GameObject:
   - component: {fileID: 2372567341008664568}
   - component: {fileID: 1071922880539275494}
   - component: {fileID: 7528811892456462530}
+  - component: {fileID: 8373251857691598900}
   m_Layer: 0
   m_Name: EXIT
   m_TagString: Untagged
@@ -196,6 +197,20 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2b1c71fb0becacc4a817162ecb14e97f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::RoomExit
+--- !u!114 &8373251857691598900
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1617543090230229424}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9e9b49dbd437a5f40994f7a3ddf6d0db, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::RoomConnector
+  direction: 1
+  connectedObject: {fileID: 0}
 --- !u!1 &1720067753914064068
 GameObject:
   m_ObjectHideFlags: 0
@@ -1387,6 +1402,7 @@ GameObject:
   m_Component:
   - component: {fileID: 6432308775324698219}
   - component: {fileID: 3612251823782196777}
+  - component: {fileID: 1777555073944349816}
   m_Layer: 0
   m_Name: ENT
   m_TagString: Untagged
@@ -1421,3 +1437,17 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 21dc5c5afb8449c7b8a94abc1474324f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::RoomEntry
+--- !u!114 &1777555073944349816
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8383037159935777884}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9e9b49dbd437a5f40994f7a3ddf6d0db, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::RoomConnector
+  direction: 0
+  connectedObject: {fileID: 0}

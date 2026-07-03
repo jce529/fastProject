@@ -262,7 +262,7 @@ Tilemap:
   m_AnimationFrameRate: 1
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_Origin: {x: -47, y: -26, z: 0}
-  m_Size: {x: 47, y: 26, z: 1}
+  m_Size: {x: 14, y: 1, z: 1}
   m_TileAnchor: {x: 0.5, y: 0.5, z: 0}
   m_TileOrientation: 0
   m_TileOrientationMatrix:
@@ -680,6 +680,7 @@ GameObject:
   m_Component:
   - component: {fileID: 2388100875762239732}
   - component: {fileID: 4299436323284188407}
+  - component: {fileID: 2372354816310864699}
   m_Layer: 0
   m_Name: ENT
   m_TagString: Untagged
@@ -714,6 +715,20 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 21dc5c5afb8449c7b8a94abc1474324f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::RoomEntry
+--- !u!114 &2372354816310864699
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4751731368791004408}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9e9b49dbd437a5f40994f7a3ddf6d0db, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::RoomConnector
+  direction: 0
+  connectedObject: {fileID: 0}
 --- !u!1 &4882239778887803644
 GameObject:
   m_ObjectHideFlags: 0
@@ -1540,6 +1555,7 @@ GameObject:
   - component: {fileID: 3216818487454834198}
   - component: {fileID: 4227917347086906005}
   - component: {fileID: 1847392856473829100}
+  - component: {fileID: 1483244742106814073}
   m_Layer: 0
   m_Name: EXIT
   m_TagString: Untagged
@@ -1667,6 +1683,20 @@ BoxCollider2D:
   m_AutoTiling: 0
   m_Size: {x: 1, y: 1}
   m_EdgeRadius: 0
+--- !u!114 &1483244742106814073
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5653054941651553062}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9e9b49dbd437a5f40994f7a3ddf6d0db, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::RoomConnector
+  direction: 1
+  connectedObject: {fileID: 0}
 --- !u!1 &6420251435941609599
 GameObject:
   m_ObjectHideFlags: 0
