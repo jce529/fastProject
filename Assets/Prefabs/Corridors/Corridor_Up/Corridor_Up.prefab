@@ -26,7 +26,7 @@ Transform:
   m_GameObject: {fileID: 1568339428740396131}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 1, y: 2.5, z: 0}
+  m_LocalPosition: {x: 1, y: 4.98, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -44,7 +44,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 92cc0ea8bb2cbe647b29caefc1f21af5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::CameraBound
-  _size: {x: 14, y: 5}
+  _size: {x: 14, y: 10}
 --- !u!1 &4398478675334107355
 GameObject:
   m_ObjectHideFlags: 0
