@@ -101,6 +101,12 @@ Progress: [██████████████████░░] 9/11 ph
 | 260701-j76 | RoomCreator.cs 3-way patch — SpawnMarker, EnsureLadderTile, ladder single-col | 2026-07-01 | ee94cce | [260701-j76-roomcreator-cs-3-spawnmarker-ensureladde](./quick/260701-j76-roomcreator-cs-3-spawnmarker-ensureladde/) |
 | 260701-sc7 | Corridor 3종 + Complex_Room 6종에 CameraBound 추가, fileID 오버플로우 버그 수정 | 2026-07-01 | (uncommitted) | [260701-sc7-corridor-complex-room](./quick/260701-sc7-corridor-complex-room/) |
 
+### Pending Todos
+
+| Date | Title | Area | File |
+|------|-------|------|------|
+| 2026-07-03 | Complex_Room ENT 기반 세로 스폰 순간이동 | planning | [2026-07-03-complex-room-ent](./todos/pending/2026-07-03-complex-room-ent.md) |
+
 ---
 
 ## Session Continuity
