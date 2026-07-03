@@ -20,7 +20,7 @@
 ### EXIT 포탈 (EXIT)
 
 - [x] **EXIT-01**: 각 Room 스폰 시 정해진 스폰 포인트 중 하나에 낮은 확률(기본 15%)로 EXIT 포탈이 생성된다
-- [ ] **EXIT-02**: 포탈 스폰 확률과 최대 동시 활성 개수를 FloorSpawner 인스펙터에서 조절할 수 있다
+- [x] **EXIT-02**: 포탈 스폰 확률과 최대 동시 활성 개수를 FloorSpawner 인스펙터에서 조절할 수 있다
 - [x] **EXIT-03**: 플레이어가 EXIT 포탈에 진입하면 다음 층으로 전환되고 WorldGenerator가 초기화된다
 
 ### 타이머 & 게임오버 (TIMER)
@@ -61,7 +61,7 @@
 | GEN-02 | Phase 9 | Complete |
 | GEN-03 | Phase 9 | Complete |
 | EXIT-01 | Phase 10 | Complete |
-| EXIT-02 | Phase 10 | Pending |
+| EXIT-02 | Phase 10 | Complete |
 | EXIT-03 | Phase 10 | Complete |
 | TIMER-01 | Phase 11 | Pending |
 | TIMER-02 | Phase 11 | Pending |
