@@ -341,7 +341,13 @@ Plans:
   1. _exitSpawnChance를 1.0f로 설정하면 모든 Room 스폰 시 포탈이 생성되고, 0.0f이면 생성되지 않는다
   2. _maxExitsActive를 1로 설정했을 때 씬에 활성 EXIT 포탈이 동시에 2개 이상 존재하지 않는다
   3. 플레이어가 EXIT 포탈 Collider에 진입하면 FloorNumber가 +1 증가하고 WorldGenerator가 리셋되어 새 Room+Corridor 체인이 시작된다
-**Plans**: TBD
+**Plans**: 4 plans
+
+Plans:
+- [ ] 10-01-PLAN.md — ExitSpawnPoint.cs + ExitPortal.cs + ExitPortalBuilder.cs (마커/트리거 컴포넌트 계약) (EXIT-01, EXIT-03)
+- [ ] 10-02-PLAN.md — WorldGenerator.cs: TrySpawnExitPortal + EnterPortal + FloorTransitionSequence 6단계 코루틴 (EXIT-01, EXIT-02, EXIT-03)
+- [ ] 10-03-PLAN.md — Unity Editor 수동 작업: ExitPortal 프리팹 빌드 실행 + Complex_Room 6종 ExitSpawnPoint/RoomEntry 마커 배치 (EXIT-01, EXIT-03)
+- [ ] 10-04-PLAN.md — SampleScene Inspector 연결 + EXIT-01/02/03 플레이테스트 검증 (EXIT-01, EXIT-02, EXIT-03)
 **UI hint**: yes
 
 ---
@@ -365,7 +371,7 @@ Plans:
 |-------|----------------|--------|-----------|
 | 8. 룸-길 아키텍처 | 3/3 | Complete | 2026-07-01 |
 | 9. 무한 양방향 생성 & 정리 | 3/3 | Complete | 2026-07-01 |
-| 10. EXIT 포탈 & 층 전환 | 0/? | Not started | - |
+| 10. EXIT 포탈 & 층 전환 | 0/4 | Not started | - |
 | 11. 타이머 & 난이도 | 0/? | Not started | - |
 
 ---
