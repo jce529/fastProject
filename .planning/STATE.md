@@ -101,6 +101,7 @@ Progress: [██████████████████░░] 9/11 ph
 | 260701-k1e | CorridorBuilder.cs를 BoxCollider2D 오브젝트 방식에서 TilemapCollider2D 타일맵 방식으로 전환 | 2026-07-01 | 9b97b23 | [260701-k1e-corridorbuilder-cs-boxcollider2d-tilemap](./quick/260701-k1e-corridorbuilder-cs-boxcollider2d-tilemap/) |
 | 260701-j76 | RoomCreator.cs 3-way patch — SpawnMarker, EnsureLadderTile, ladder single-col | 2026-07-01 | ee94cce | [260701-j76-roomcreator-cs-3-spawnmarker-ensureladde](./quick/260701-j76-roomcreator-cs-3-spawnmarker-ensureladde/) |
 | 260701-sc7 | Corridor 3종 + Complex_Room 6종에 CameraBound 추가, fileID 오버플로우 버그 수정 | 2026-07-01 | (uncommitted) | [260701-sc7-corridor-complex-room](./quick/260701-sc7-corridor-complex-room/) |
+| 260703-fast1 | ExitPortal.cs OnDrawGizmos() 제거 — 스프라이트 렌더러로 시각화 전환 예정이라 에디터 전용 Gizmo 불필요 | 2026-07-03 | a9afe8a | (fast — no directory) |
 
 ### Pending Todos
 
