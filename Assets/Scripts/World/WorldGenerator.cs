@@ -32,13 +32,29 @@ public class WorldGenerator : MonoBehaviour
     [Header("Next Floor Standby (Phase 10 연동)")]
     [SerializeField] private float _floorHeight = 40f;   // D-04: nextFloorBaseY 계산용
 
+    [Header("Exit Portal (Phase 10)")]
+    [SerializeField] private GameObject _exitPortalPrefab;
+    [SerializeField, Range(0f, 1f)] private float _exitSpawnChance = 0.15f;  // EXIT-01: 기본 15%
+    [SerializeField] private int _maxExitsActive = 1;                        // EXIT-02: 최대 동시 활성 개수
+
+    [Header("References (Phase 10 추가)")]
+    [SerializeField] private PlayerController _player;           // LockInput/UnlockInput 호출용
+    [SerializeField] private CombatController _combatController; // ForceExitCombatState 호출용
+
     // Runtime state
     private List<(GameObject room, GameObject corridor)> _chain
         = new List<(GameObject, GameObject)>();
     private float _currentYDrift;         // D-01: 누적 Y 변위
     private Vector3 _chainHeadExitPos;    // 다음 Corridor ENT 스폰 기준점
     private int _playerCurrentIndex;      // 플레이어가 현재 위치한 체인 인덱스
-    private GameObject _nextFloorRoom;    // D-05: 다음 층 대기룸 (체인 외부 참조)
+    private int _activeExitCount;         // D-08: 현재 활성 포탈 수
+
+    public static WorldGenerator Instance { get; private set; }
+
+    private void Awake()
+    {
+        Instance = this;
+    }
 
     private void Start()
     {
@@ -52,6 +68,7 @@ public class WorldGenerator : MonoBehaviour
         var startRoomPrefab = _roomPrefabs[Random.Range(0, _roomPrefabs.Length)];
         var startRoom = Instantiate(startRoomPrefab, Vector3.zero, Quaternion.identity);
         _chain.Add((startRoom, null)); // D-09: 첫 룸은 왼쪽 Corridor 없음
+        TrySpawnExitPortal(startRoom); // EXIT-01: 시작 룸도 포탈 스폰 대상 (예외 없음)
 
         // 시작 룸 EXIT 위치 → 첫 Corridor 스폰 기준점
         var startExit = FindConnector(startRoom, RoomConnector.Direction.Right);
@@ -81,6 +98,7 @@ public class WorldGenerator : MonoBehaviour
         var roomPrefab = _roomPrefabs[Random.Range(0, _roomPrefabs.Length)];
         var room = Instantiate(roomPrefab, Vector3.zero, Quaternion.identity);
         AlignByEntry(room, roomEntryPos);
+        TrySpawnExitPortal(room);
 
         // 다음 스폰 기준점 업데이트 (Room EXIT 위치)
         var roomExit = FindConnector(room, RoomConnector.Direction.Right);
@@ -93,6 +111,16 @@ public class WorldGenerator : MonoBehaviour
     private void RemoveTail()
     {
         var (room, corridor) = _chain[0];
+
+        // D-08: 이 room이 보유한 포탈의 대기룸을 함께 정리 — 대기룸 메모리 누수 방지 + 포탈 스폰 기회 복원
+        ExitPortal portal = room.GetComponentInChildren<ExitPortal>(true);
+        if (portal != null && portal.StandbyRoom != null)
+        {
+            Destroy(portal.StandbyRoom);
+            _activeExitCount--;
+            Debug.Log($"[WorldGenerator] _activeExitCount = {_activeExitCount}");
+        }
+
         if (corridor != null) Destroy(corridor);
         Destroy(room);
         _chain.RemoveAt(0);
@@ -140,13 +168,39 @@ public class WorldGenerator : MonoBehaviour
     }
 
     /// <summary>
-    /// Phase 10에서 ExitPortal.OnTriggerEnter2D()가 호출한다.
-    /// D-04: _chainHeadExitPos.y + _floorHeight 위치에 룸을 비활성(SetActive false) 스폰.
-    /// D-06: Phase 9에서는 스텁만 구현. 실제 로직은 Phase 10 범위.
+    /// EXIT-01/EXIT-02: Room 스폰 직후 호출된다. 확률 롤을 통과하고 활성 포탈 수가
+    /// _maxExitsActive 미만이면, room의 ExitSpawnPoint 후보 중 하나에 포탈을 생성하고
+    /// 다음 층 대기룸을 즉시(비활성 상태로) 함께 스폰해 D-08 정리 대상으로 연결한다.
     /// </summary>
-    public void SpawnNextFloorStandbyRoom()
+    private void TrySpawnExitPortal(GameObject room)
     {
-        Debug.Log("[WorldGenerator] SpawnNextFloorStandbyRoom — stub (Phase 10에서 구현)");
+        if (_activeExitCount >= _maxExitsActive) return;
+        if (Random.value > _exitSpawnChance) return;
+
+        if (_exitPortalPrefab == null)
+        {
+            Debug.LogWarning("[WorldGenerator] _exitPortalPrefab is empty — Inspector에서 할당 필요");
+            return;
+        }
+
+        var points = room.GetComponentsInChildren<ExitSpawnPoint>(true);
+        if (points.Length == 0) return; // ExitSpawnPoint 마커 미배치 (D-03 수동 배치 대기)
+
+        var point = points[Random.Range(0, points.Length)];
+        var portalGO = Instantiate(_exitPortalPrefab, point.transform.position, Quaternion.identity, room.transform);
+        var portal = portalGO.GetComponent<ExitPortal>();
+
+        // D-04: 다음 층 대기룸을 지금 미리 스폰 — Vector3.zero 기준 Instantiate 후 X=0 고정 배치
+        // (AlignByEntry는 적용 불가 — D-07이 옛 체인을 전부 파괴하므로 수평 연속성 요구가 없다)
+        var standbyPrefab = _roomPrefabs[Random.Range(0, _roomPrefabs.Length)];
+        var standbyPos = new Vector3(0f, _chainHeadExitPos.y + _floorHeight, 0f);
+        var standbyRoom = Instantiate(standbyPrefab, standbyPos, Quaternion.identity);
+        standbyRoom.SetActive(false);
+        portal.StandbyRoom = standbyRoom;
+
+        _activeExitCount++;
+        Debug.Log($"[WorldGenerator] Portal spawned in {room.name}");
+        Debug.Log($"[WorldGenerator] _activeExitCount = {_activeExitCount}");
     }
 
     private void Update()
