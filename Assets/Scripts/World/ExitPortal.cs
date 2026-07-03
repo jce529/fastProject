@@ -28,14 +28,4 @@ public class ExitPortal : MonoBehaviour
         _triggered = true;
         WorldGenerator.Instance.EnterPortal(this);
     }
-
-    private void OnDrawGizmos()
-    {
-        Gizmos.color = new Color(1f, 0.5f, 0f, 0.6f);
-        var col = GetComponent<BoxCollider2D>();
-        if (col != null)
-            Gizmos.DrawWireCube(transform.position + (Vector3)col.offset, col.size);
-        else
-            Gizmos.DrawWireSphere(transform.position, 0.6f);
-    }
 }
