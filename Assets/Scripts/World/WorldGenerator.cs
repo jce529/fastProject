@@ -1,3 +1,4 @@
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -233,5 +234,77 @@ public class WorldGenerator : MonoBehaviour
             else
                 break;
         }
+    }
+
+    /// <summary>
+    /// EXIT-03: ExitPortal.OnTriggerEnter2D()가 호출한다. 전환 코루틴은 반드시 WorldGenerator(this)에서
+    /// 실행되어야 한다 — 시퀀스 도중 옛 체인(포탈이 속한 room 포함)을 Destroy하기 때문에,
+    /// ExitPortal 자신에게서 StartCoroutine을 호출하면 Destroy 시점에 코루틴이 즉시 중단된다 (Pitfall 1).
+    /// </summary>
+    public void EnterPortal(ExitPortal portal)
+    {
+        StartCoroutine(FloorTransitionSequence(portal));
+    }
+
+    private IEnumerator FloorTransitionSequence(ExitPortal portal)
+    {
+        Debug.Log($"[WorldGenerator] EnterPortal → Floor {FloorManager.CurrentFloor}");
+
+        // Step 1 — 입력 잠금 (D-04 6단계 중 1단계). ForceExitCombatState는 LockInput 이전에 호출해야 한다.
+        _combatController?.ForceExitCombatState();
+        _player.LockInput();
+
+        FloorManager.CurrentFloor++;
+
+        // D-07 — 기존 체인(현재 room+corridor 전부) 즉시 Destroy
+        // 리뷰 수정: 입장한 portal 외 다른 미사용 포탈의 대기룸도 함께 Destroy
+        // (RemoveTail()의 D-08 정리 패턴과 동일 — _maxExitsActive > 1일 때 고아 GameObject 누수 방지)
+        foreach (var (chainRoom, chainCorridor) in _chain)
+        {
+            var orphanPortal = chainRoom.GetComponentInChildren<ExitPortal>(true);
+            if (orphanPortal != null && orphanPortal != portal && orphanPortal.StandbyRoom != null)
+            {
+                Destroy(orphanPortal.StandbyRoom);
+            }
+
+            if (chainCorridor != null) Destroy(chainCorridor);
+            Destroy(chainRoom);
+        }
+        _chain.Clear();
+        _activeExitCount = 0; // 옛 체인에 있던 모든 포탈(입장한 포탈 + 정리된 미사용 포탈)이 함께 사라짐
+        Debug.Log($"[WorldGenerator] _activeExitCount = {_activeExitCount}");
+
+        GameObject newRoom = portal.StandbyRoom;
+        newRoom.SetActive(true);
+        _chain.Add((newRoom, null));
+        _playerCurrentIndex = 0;
+        _currentYDrift = 0f; // 새 층은 드리프트 예산 초기화
+
+        var exit = FindConnector(newRoom, RoomConnector.Direction.Right);
+        _chainHeadExitPos = exit != null ? exit.transform.position : newRoom.transform.position;
+
+        // Step 2 — ENT 텔레포트 (D-06: Complex_Room 6종 전부 RoomEntry 보유 — Plan 03에서 배치 완료 필요)
+        RoomEntry entry = newRoom.GetComponentInChildren<RoomEntry>(true);
+        Vector3 teleportPos = entry != null ? entry.transform.position : newRoom.transform.position;
+        var rb = _playerTransform.GetComponent<Rigidbody2D>();
+        if (rb != null) rb.linearVelocity = Vector2.zero;
+        _playerTransform.position = teleportPos;
+
+        // Step 3 — 카메라 스냅
+        CameraBound cb = newRoom.GetComponentInChildren<CameraBound>(true);
+        if (_cameraFollow != null)
+        {
+            if (cb != null) _cameraFollow.SnapToRoom(cb.GetWorldBounds());
+            else _cameraFollow.SnapToRoom(teleportPos);
+        }
+
+        yield return null; // Step 3.5 — LateUpdate가 카메라 위치를 반영하도록 한 프레임 양보
+
+        // Step 4 — 적 활성화: WorldGenerator는 현재 EnemySpawner.Spawn()을 호출하지 않으므로 의도적 no-op
+        // (Pitfall 5 — 적 스폰 배선은 EXIT-01/02/03 범위 밖. 이 단계는 구조적 자리만 유지한다.)
+
+        yield return new WaitForSecondsRealtime(0.05f); // Step 5
+
+        _player.UnlockInput(); // Step 6
     }
 }
