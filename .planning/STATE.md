@@ -4,8 +4,8 @@ milestone: v3.0
 milestone_name: Phases
 status: executing
 stopped_at: Completed 10-02-PLAN.md
-last_updated: "2026-07-03T11:34:38.438Z"
-last_activity: 2026-07-03
+last_updated: "2026-07-04T00:00:00.000Z"
+last_activity: 2026-07-04
 progress:
   total_phases: 4
   completed_phases: 2
@@ -82,7 +82,7 @@ Progress: [██████████████████░░] 9/11 ph
 ### Technical Constraints to Enforce Every Phase
 
 - `Time.unscaledDeltaTime` for ALL i-frame timers, cooldowns, coroutines
-- `Physics2D.OverlapCircleNonAlloc()` — never `FindObjectsOfType` or LINQ in Update
+- `Physics2D.OverlapCircle(ContactFilter2D, results[])` — never `FindObjectsOfType` or LINQ in Update; OverlapCircleNonAlloc is deprecated (CS0619)
 - Animator Transition Duration = 0 for all action-state transitions
 - `Rigidbody2D`: Continuous collision detection + Interpolate mode
 - Dash: `MovePosition()` over 2-3 frames, never a velocity spike
@@ -102,6 +102,7 @@ Progress: [██████████████████░░] 9/11 ph
 | 260701-j76 | RoomCreator.cs 3-way patch — SpawnMarker, EnsureLadderTile, ladder single-col | 2026-07-01 | ee94cce | [260701-j76-roomcreator-cs-3-spawnmarker-ensureladde](./quick/260701-j76-roomcreator-cs-3-spawnmarker-ensureladde/) |
 | 260701-sc7 | Corridor 3종 + Complex_Room 6종에 CameraBound 추가, fileID 오버플로우 버그 수정 | 2026-07-01 | 7caa718 | [260701-sc7-corridor-complex-room](./quick/260701-sc7-corridor-complex-room/) |
 | 260703-fast1 | ExitPortal.cs OnDrawGizmos() 제거 — 스프라이트 렌더러로 시각화 전환 예정이라 에디터 전용 Gizmo 불필요 | 2026-07-03 | a9afe8a | (fast — no directory) |
+| 260704-jyb | PlayerController.cs 컴파일러 경고 2개 수정 — _jumpHeld 미사용 필드 제거(CS0414), OverlapCircleNonAlloc→OverlapCircle+ContactFilter2D 전환(CS0619) | 2026-07-04 | dd59e5a | [260704-jyb-fix-two-compiler-warnings-in-playercontr](./quick/260704-jyb-fix-two-compiler-warnings-in-playercontr/) |
 
 ### Pending Todos
 
