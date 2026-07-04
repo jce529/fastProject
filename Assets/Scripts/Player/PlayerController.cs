@@ -43,7 +43,6 @@ public class PlayerController : MonoBehaviour
     private InputAction _moveAction;
     private InputAction _jumpAction;
     private bool _isGrounded;
-    private bool _jumpHeld;
     private bool _inputLocked;
     private bool _onLadder;
     private bool _isDropping;
@@ -106,7 +105,6 @@ public class PlayerController : MonoBehaviour
             _rb.linearVelocity = new Vector2(_rb.linearVelocity.x, jumpForce);
             // 사다리 진입 전 점프를 소진했어도 공중점프 1회 보장
             _jumpsRemaining = maxJumps - 1;
-            _jumpHeld = true;
             return;
         }
         // 아래 + 점프: one-way 플랫폼 통과
@@ -119,7 +117,6 @@ public class PlayerController : MonoBehaviour
         if (_jumpsRemaining <= 0) return;
         _rb.linearVelocity = new Vector2(_rb.linearVelocity.x, jumpForce);
         _jumpsRemaining--;
-        _jumpHeld = true;
     }
 
     private IEnumerator DropThrough()
@@ -127,7 +124,10 @@ public class PlayerController : MonoBehaviour
         _isDropping = true;
 
         Vector2 origin = (Vector2)_transform.position + Vector2.down * 0.05f;
-        int count = Physics2D.OverlapCircleNonAlloc(origin, groundCheckRadius + 0.05f, _dropBuffer, groundLayer);
+        var dropFilter = new ContactFilter2D();
+        dropFilter.SetLayerMask(groundLayer);
+        dropFilter.useTriggers = false;
+        int count = Physics2D.OverlapCircle(origin, groundCheckRadius + 0.05f, dropFilter, _dropBuffer);
 
         for (int i = 0; i < count; i++)
         {
@@ -160,7 +160,6 @@ public class PlayerController : MonoBehaviour
                 _rb.linearVelocity.y * jumpCutMultiplier
             );
         }
-        _jumpHeld = false;
     }
 
     // -- Physics update ----------------------------------------------------------
