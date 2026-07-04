@@ -1,17 +1,16 @@
 ---
 gsd_state_version: 1.0
-milestone: v1.0
-milestone_name: milestone
-current_phase: 03
-current_plan: Not started
-status: unknown
-stopped_at: "Phase 3 context gathered + quick task 260608-09z: Fan 공격방식 마우스 방향 기준으로 변경"
-last_updated: "2026-06-15T06:02:54.064Z"
+milestone: v3.0
+milestone_name: Phases
+status: executing
+stopped_at: Completed 10-02-PLAN.md
+last_updated: "2026-07-03T11:34:38.438Z"
+last_activity: 2026-07-03
 progress:
-  total_phases: 5
+  total_phases: 4
   completed_phases: 2
-  total_plans: 11
-  completed_plans: 7
+  total_plans: 10
+  completed_plans: 8
 ---
 
 # Project State: Fast (가칭)
@@ -24,68 +23,61 @@ progress:
 
 **Core Value:** 공격 버튼을 누르면 시간이 느려지고, 손을 떼면 적에게 돌진해 한 방에 처치하는 손맛 — 이것이 재미있어야 게임이 살아난다.
 
-**Prototype Goal:** Single combat test room. Validate the hold-to-aim / release-to-dash feel before building floors or progression.
+**Prototype Goal:** 층을 룸+길 수평 체인으로 재설계 — 양방향 무한 생성, 전투 Corridor, 확률적 EXIT 포탈, 제한 시간으로 "빠른 탈출" 긴장감 검증.
 
-**Current Milestone:** v1 — Combat Test Room
+**Current Milestone:** v3.0 — 무한 복도 층 시스템
 
 ---
 
 ## Current Position
 
-Phase: 02 (combat-core) — EXECUTING
-Plan: 2 of 4
-**Current Phase:** 03
-**Current Plan:** Not started
-**Phase Status:** Complete (3 of 3 plans done)
+Phase: 10 (exit-portal-floor-transition) — EXECUTING
+Plan: 3 of 4
+Next: Phase 10 (EXIT 포탈 & 층 전환)
+Status: Ready to execute
+Last activity: 2026-07-03
 
 ```
-Progress: [X] Phase 1  [ ] Phase 2  [ ] Phase 3  [ ] Phase 4
-           |___________|___________|___________|___________|
-                 25%                                    100%
+Progress: [██████████████████░░] 9/11 phases complete (v3.0: Phase 8, 9 complete)
 ```
 
-**Phase Goals:**
-
-- Phase 1: Player moves responsively, falls recover to last platform
-- Phase 2: Hold-aim / release-dash loop + gauge + roll + hit-freeze fully playable
-- Phase 3: Melee and ranged enemies with telegraph, FSM, one-shot-kill both ways
-- Phase 4: HUD always visible, death screen, restart in under 3 seconds
-
 ---
-
-## Performance Metrics
-
-| Metric | Target | Current |
-|--------|--------|---------|
-| v1 Requirements mapped | 13/13 | 13/13 |
-| Phases completed | 4 | 0 |
-| Plans completed | TBD | 2 |
-
----
-| Phase 01-foundation-movement P01 | 4 | 2 tasks | 7 files |
-| Phase 01-foundation-movement P02 | ~3min | 2 tasks | 4 files |
-| Phase 01-foundation-movement P03 | 8 | 2 tasks | 4 files |
-| Phase 02-combat-core P02-01 | 25 | 2 tasks | 7 files |
-| Phase 02-combat-core P02-02 | 3 | 2 tasks | 3 files |
-| Phase 02-combat-core P02-03 | 15 | 2 tasks | 8 files |
 
 ## Accumulated Context
 
-### Key Decisions Locked
+### Key Decisions Locked (from v1.0/v2.0)
 
 | Decision | Rationale |
 |----------|-----------|
 | Infrastructure merged into Phase 1 | No v1 requirements map to pure infrastructure; merging keeps phase count honest for prototype scope |
 | MOVE-03 (roll) in Phase 2 not Phase 1 | Roll is a combat tool (slow-mo usable, i-frames), not a movement primitive — belongs with the combat system it interacts with |
 | FEEL-01 (hit-freeze) in Phase 2 | Must ship with the attack system — hit-freeze is the punctuation of the kill, cannot be validated separately |
-| Floor system deferred to v2 | User decision: validate combat feel in a single test room first |
-| Phase 5 polish not created | No v1 requirements are polish-only; tuning lives inside Phase 2-3 success criteria |
 | jumpCutMultiplier = 0.4 (D-02) | Drops ascending velocity to 40% on button release — clear tap-vs-hold arc difference |
 | Time.timeScale compensation in Phase 1 | 1f / Time.timeScale in ApplyMovement baked in now — Phase 2 slow-mo requires no PlayerController rewrite |
 | PlayerInput notification = SendMessages (0) | PlayerController reads actions directly via playerInput.actions[], behavior mode is irrelevant |
 | WaitForSecondsRealtime for i-frames (01-03) | Phase 2 sets timeScale ~0.2; WaitForSeconds would extend 1s to 5s. WaitForSecondsRealtime is timeScale-immune. |
 | Vector3 _lastSafePosition value type (01-03) | Storing Transform reference would become stale null ref when floor objects recycled in v2. Vector3 copy is immune (Pitfall 14). |
 | Layer constants hardcoded 7/8 (01-03) | Matches TagManager.asset from Plan 01. Avoids LayerMask.NameToLayer() string lookup overhead each call. |
+| RangedEnemy moveSpeed=0f default (03-04) | Stationary at start per D-10 — Chase state immediately telegraphs (Risk 6 mitigation: no distance-check needed). Inspector-adjustable post-playtest. |
+| TelegraphAndFire uses yield return null + unscaledDeltaTime (03-04) | Frame-by-frame alpha accumulation matches RangeDisplay pattern, fully timeScale-immune for slow-mo compatibility. |
+| FloorManager as static class, not MonoBehaviour (04-01) | Data-only int needs no scene lifecycle; static field is sufficient and avoids scene coupling |
+| (AttackType)(-1) dirty-check sentinel (04-01) | Forces first-frame label update; -1 is never a valid AttackType so it always differs on first Update() |
+| SetText("{0}", int) over string interpolation (04-01) | TMP's int overload uses internal char buffer — zero allocation per frame vs. $"" allocating new string every frame |
+
+### Key Decisions for v3.0
+
+| Decision | Rationale |
+|----------|-----------|
+| EXIT 포탈 기본 확률 0.15f (15%) | "낮음" 기준값 — 인스펙터에서 조절 가능. 너무 낮으면 플레이어 답답, 너무 높으면 긴장감 소멸 |
+| EXIT 최대 동시 활성 1개 | 한 층에 포탈이 여러 개면 탐색 동기가 분산됨; 1개가 명확한 목표를 제공 |
+| Corridor = 전투 구간 | 단순 통로가 아닌 적+장애물 있는 구간 — 이동 자체가 위험한 느낌 유지 |
+| Corridor 3타입 (상승/직진/하강) | 수직 변화로 탐색 경로에 다양성 제공, 플랫포머 감각 유지 |
+| 뒤 2개 룸+길 유지 후 Destroy | 모바일 메모리 관리; 플레이어가 뒤로 돌아갈 수 있는 범위 제한 |
+| WorldGenerator = 신규 MonoBehaviour (FloorSpawner 대체) | 수평 양방향 체인 생성은 기존 수직 FloorSpawner 로직과 구조가 달라 대체가 가장 깔끔 |
+| FloorTimer = 정적 클래스 | ScoreManager 패턴 답습 — 씬 수명 불필요, 데이터 전용 |
+| Room 14종 → Tilemap 방식 전환 (08-04, ARCH-04) | Corridor가 이미 TilemapCollider2D 방식으로 전환됨(quick-260701-k1e) — Room도 통일해 WorldGenerator가 타일 좌표(정수)로 크기/연결점을 계산 가능하게 함. 사용자가 Unity Editor에서 직접 실행 |
+| WorldGenerator._roomPrefabs = Complex_Room 6종 (AllInOne/EdgeRun/GaugeOutpost/LastStand/RiskCrossing/Vertical_Gauntlet) | 09-03-PLAN 원안의 기본 Room_* 13종 대신 다방향 연결 지원하는 신규 Complex_Room 풀로 교체 — 사용자 확정 결정 |
+| Corridor/Complex_Room 프리팹 fileID는 반드시 Int64.MaxValue(9223372036854775807) 이하로 생성 | quick-260701-sc7에서 19자리 무작위 fileID가 오버플로우해 CameraBound 컴포넌트가 3개 프리팹에서 깨짐 — 향후 유사 작업 시 문자열 비교로 검증 필수 |
 
 ### Technical Constraints to Enforce Every Phase
 
@@ -95,44 +87,27 @@ Progress: [X] Phase 1  [ ] Phase 2  [ ] Phase 3  [ ] Phase 4
 - `Rigidbody2D`: Continuous collision detection + Interpolate mode
 - Dash: `MovePosition()` over 2-3 frames, never a velocity spike
 - Invincibility: layer swap (PlayerHurtbox / PlayerInvincible), never IgnoreLayerCollision
+- Floor transition: `WaitForSecondsRealtime` only — `Time.timeScale` may be 0 at transition start
+- Timer: `Time.unscaledDeltaTime` only — timer must be immune to slow-motion timeScale
 
-### Open Empirical Questions (resolve during playtest)
+### Quick Tasks Completed (v1.0/v2.0)
 
-- Optimal slow-motion timeScale value (research suggests 0.15-0.25x)
-- Gauge drain rate vs. auto-regen balance
-- Linear vs. fan attack shape — which feels better on mobile
-- One-hit-kill fairness perception on mobile
-- Cinemachine 3.x API status — if uncertain, use manual LateUpdate camera
-
-### Todos
-
-- [ ] Create SampleScene test layout (one flat floor with fall zones) before Phase 1 plan
-- [ ] Confirm Cinemachine package version before Phase 1 plan
-- [ ] Set up layer matrix (PlayerHurtbox, PlayerInvincible, Enemy, EnemyProjectile, Platform) before coding begins
-
-### Blockers
-
-None.
+40개+ Quick 태스크 완료 (2026-06-01 ~ 2026-06-26) — 전체 목록은 `git log` 참조.
 
 ### Quick Tasks Completed
 
 | # | Description | Date | Commit | Directory |
 |---|-------------|------|--------|-----------|
-| 260601-lzr | InputManager 생성 — WASD 이동, Shift 구르기, 마우스 클릭 공격 (Unity New Input System) | 2026-06-01 | — | [260601-lzr](./quick/260601-lzr-inputmanager-wasd-shift-unity-new-input-/) |
-| 260601-mrm | 이동 가속도 기반 변경, Sprint가 기본 달리기, Idle→Sprint 전환 중 Walk 애니메이션 | 2026-06-01 | ca4a70e | [260601-mrm](./quick/260601-mrm-sprint-idle-sprint-walk/) |
-| 260604-sou | 적(DummyEnemy) 크기를 키우고 콜라이더를 크기에 맞게 조정 | 2026-06-04 | — | [260604-sou](./quick/260604-sou-dummyenemy/) |
-| 260604-vst | Phase 2-4 테스트러너 제거 에디터 직접 플레이테스트로 전환 | 2026-06-04 | — | [260604-vst](./quick/260604-vst-phase-2-4/) |
-| 260605-l0c | Phase 2 에디터 플레이테스트 가이드 재작성 (코드 기준 수치 반영) | 2026-06-05 | 1b20012 | [260605-l0c](./quick/260605-l0c-phase-2/) |
-| 260605-r61 | enemy 프리팹 콜라이더(0.16→0.8x1.2) + Rigidbody2D Kinematic 교정 | 2026-06-05 | 2056400 | [260605-r61-enemy](./quick/260605-r61-enemy/) |
-| 260605-rhs | RangeDisplay lineWidth + 마우스 단일 빔 + 닫힌 부채꼴 Fan | 2026-06-05 | 1a04a21 | [260605-rhs](./quick/260605-rhs-rangedisplay-3-1-linewidth-2-linear-3-fa/) |
-| 260605-sj2 | CheckGround offset 0.51f→0.05f — CapsuleCollider2D pivot 기준 수정 | 2026-06-05 | 0e42dba | [260605-sj2](./quick/260605-sj2-groundcheck-offset-fix-capsulecollider2d/) |
-| 260605-tss | CombatController 슬로우모션 하이라이트 버그 2종 수정 — Update() 매 프레임 갱신 + ExitSlowMotion 이중 호출 제거 | 2026-06-05 | ac19ef4 | [260605-tss](./quick/260605-tss-combatcontroller-1-update-findnearestene/) |
-| 260607-19i | FastPlayerAnimator에 IsDashing Bool 파라미터 + Dash 스테이트 + AnyState→Dash / Dash→Idle 트랜지션 추가 | 2026-06-07 | e23f2cf | [260607-19i](./quick/260607-19i-fastplayeranimator-controller-isdashing-/) |
-| 260607-kif | AttackType 디버그 오버레이 생성 — OnGUI 기반 Linear/Fan 실시간 표시 + Player 자동 부착 에디터 스크립트 | 2026-06-07 | aff97da | [260607-kif](./quick/260607-kif-debug-attack-type-tracker/) |
-| 260607-ku4 | AttackTypeSelector.SetType null-instance 가드 제거 — Selected 무조건 갱신, RefreshHighlights null-conditional | 2026-06-07 | fb1e0b6 | [260607-ku4](./quick/260607-ku4-attacktypeselector-settype-instance-null/) |
-| 260607-vot | 카메라가 플레이어를 따라가도록 구현 — CameraFollow 컴포넌트를 Main Camera에 부착, Player Transform 연결 | 2026-06-07 | a2557fc | [260607-vot](./quick/260607-vot-camera-follow-player/) |
-| 260608-lb9 | CombatController 공개 프로퍼티 3개 추가 + RangeDisplay 중복 SerializeField 제거 — 단일 진실 소스 연결 | 2026-06-08 | 3af0077 | [260608-lb9](./quick/260608-lb9-combatcontroller-fanradius-fanhalfangled/) |
-| 260608-09z | Fan 공격방식 마우스 방향 기준으로 변경 — RangeDisplay 표시 + CombatController 판정 모두 교체 | 2026-06-08 | 3713b57 | [260608-09z](./quick/260608-09z-fan/) |
+| 260701-k1e | CorridorBuilder.cs를 BoxCollider2D 오브젝트 방식에서 TilemapCollider2D 타일맵 방식으로 전환 | 2026-07-01 | 9b97b23 | [260701-k1e-corridorbuilder-cs-boxcollider2d-tilemap](./quick/260701-k1e-corridorbuilder-cs-boxcollider2d-tilemap/) |
+| 260701-j76 | RoomCreator.cs 3-way patch — SpawnMarker, EnsureLadderTile, ladder single-col | 2026-07-01 | ee94cce | [260701-j76-roomcreator-cs-3-spawnmarker-ensureladde](./quick/260701-j76-roomcreator-cs-3-spawnmarker-ensureladde/) |
+| 260701-sc7 | Corridor 3종 + Complex_Room 6종에 CameraBound 추가, fileID 오버플로우 버그 수정 | 2026-07-01 | 7caa718 | [260701-sc7-corridor-complex-room](./quick/260701-sc7-corridor-complex-room/) |
+| 260703-fast1 | ExitPortal.cs OnDrawGizmos() 제거 — 스프라이트 렌더러로 시각화 전환 예정이라 에디터 전용 Gizmo 불필요 | 2026-07-03 | a9afe8a | (fast — no directory) |
+
+### Pending Todos
+
+| Date | Title | Area | File |
+|------|-------|------|------|
+| 2026-07-03 | Complex_Room ENT 기반 세로 스폰 순간이동 | planning | [2026-07-03-complex-room-ent](./todos/pending/2026-07-03-complex-room-ent.md) |
 
 ---
 
@@ -143,12 +118,11 @@ None.
 1. Read `.planning/STATE.md` (this file) — current position and decisions
 2. Read `.planning/ROADMAP.md` — phase goals and success criteria
 3. Read `.planning/REQUIREMENTS.md` — requirement details and traceability
-4. Check which phase plan exists in `.planning/` (e.g., `PLAN-phase-1.md`)
-5. Continue from Current Phase listed above
+4. Continue from Current Phase listed above
 
-**Last session:** 2026-06-08
-**Stopped at:** Phase 3 context gathered + quick task 260608-09z: Fan 공격방식 마우스 방향 기준으로 변경
+**Last session:** 2026-07-03T11:34:38.432Z
+**Stopped at:** Completed 10-02-PLAN.md
 
 ---
 *State initialized: 2026-05-27*
-*Last updated: 2026-06-05 quick task dirs cleanup*
+*Last updated: 2026-07-01 — Phase 9 complete, Phase 8 ARCH-04 (Room tilemap) done manually, quick-sc7 CameraBound fix*

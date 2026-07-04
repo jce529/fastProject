@@ -8,7 +8,7 @@ using UnityEngine;
 /// dash to nearest enemy (MovePosition over 3 FixedUpdate frames), whiff branch,
 /// hit-freeze sequence, and _isBusy lockout to prevent re-entrance.
 ///
-/// Does NOT own the gauge — GaugeController handles drain/regen.
+/// Does NOT own the gauge — ChronoGaugeController handles drain/regen.
 /// Does NOT own range display — RangeDisplay (Plan 02-03) handles visual feedback.
 ///
 /// Review fixes applied:
@@ -19,7 +19,7 @@ using UnityEngine;
 /// </summary>
 [RequireComponent(typeof(Rigidbody2D))]
 [RequireComponent(typeof(InvincibilityHandler))]
-[RequireComponent(typeof(GaugeController))]
+[RequireComponent(typeof(ChronoGaugeController))]
 public class CombatController : MonoBehaviour
 {
     // -- Tunable values (expose for playtest tuning) --------------------------------
@@ -41,9 +41,10 @@ public class CombatController : MonoBehaviour
     [SerializeField] private float maxSlowMoDuration  = 5f;
 
     // -- Component references -------------------------------------------------------
+    [SerializeField] private PlayerController _player;
     private Rigidbody2D          _rb;
     private InvincibilityHandler _invincibilityHandler;
-    private GaugeController      _gauge;
+    private ChronoGaugeController _gauge;
     private SpriteRenderer       _spriteRenderer;
     private TrailRenderer        _trailRenderer;
     private Camera               _mainCamera;
@@ -56,9 +57,8 @@ public class CombatController : MonoBehaviour
     private bool  _isBusy;    // Prevents re-entrance during dash/whiff/lockout coroutines
     private bool  _isSlowMo;
     private float _slowMoStartTime; // [MEDIUM — Gemini] unscaled timestamp when slow-mo began
-    private bool  _slowMoCancelledByRoll; // true: 이번 슬로우모션이 Roll로 취소됨
+    private bool  _isAttackPending; // true: attack 버튼이 눌린 채 대시 대기 중
     private float _attackCooldown;        // 처치 후 공격 재사용 대기 (unscaledDeltaTime)
-
     // -- Range display accessors (RangeDisplay reads these — single source of truth) ----
     public float FanRadius       => fanRadius;
     public float FanHalfAngleDeg => fanHalfAngleDeg;
@@ -72,13 +72,13 @@ public class CombatController : MonoBehaviour
     private int _obstacleMask;
 
     // -- Enemy highlight tracking ---------------------------------------------------
-    private DummyEnemy _lastHighlighted;
+    private IEnemy _lastHighlighted;
 
     private void Awake()
     {
         _rb                   = GetComponent<Rigidbody2D>();
         _invincibilityHandler = GetComponent<InvincibilityHandler>();
-        _gauge                = GetComponent<GaugeController>();
+        _gauge                = GetComponent<ChronoGaugeController>();
         _spriteRenderer       = GetComponent<SpriteRenderer>();
         _trailRenderer        = GetComponentInChildren<TrailRenderer>();
         _mainCamera           = Camera.main;
@@ -100,6 +100,7 @@ public class CombatController : MonoBehaviour
 
     private void Update()
     {
+        if (_player != null && _player.InputLocked) return;
         // _isBusy lockout: all attack state transitions blocked during dash/whiff/lockout
         if (_isBusy) return;
 
@@ -110,18 +111,19 @@ public class CombatController : MonoBehaviour
             _attackCooldown -= Time.unscaledDeltaTime;
 
         // Roll 입력이 있으면 슬로우모션 취소 (대시는 발동하지 않음)
-        if (_isSlowMo && input.RollPressed)
+        if (_isAttackPending && input.RollPressed)
         {
             ExitSlowMotion();
-            _slowMoCancelledByRoll = true;
+            ExitAttackPending();
             return;
         }
 
         // Gauge drains every frame Attack is held (uses unscaledDeltaTime internally)
-        _gauge.SetDraining(input.IsAttackDown && _attackCooldown <= 0f);
+        bool drainCond = input.IsAttackDown && _isAttackPending && _attackCooldown <= 0f;
+        _gauge.SetDraining(drainCond);
 
         // Enter slow-motion on the frame Attack button is first pressed
-        if (input.AttackHeld && !_isSlowMo && _attackCooldown <= 0f)
+        if (input.AttackHeld && !_isSlowMo && !_isAttackPending && _attackCooldown <= 0f)
             EnterSlowMotion();
 
         // [MEDIUM — Gemini] Safety timeout: force-exit slow-mo if it has lasted longer
@@ -130,8 +132,8 @@ public class CombatController : MonoBehaviour
         if (_isSlowMo && Time.unscaledTime > _slowMoStartTime + maxSlowMoDuration)
             ExitSlowMotion();
 
-        // 슬로우모션 유지 중 — 가장 가까운 적 하이라이트 갱신 (D-04)
-        if (_isSlowMo && !_isBusy)
+        // 공격 대기 중 — 가장 가까운 적 하이라이트 갱신 (D-04)
+        if (_isAttackPending && !_isBusy)
             UpdateHighlight(FindNearestEnemyInRange());
 
         // Gauge-empty auto-exit: slow-mo ends but player can still release to dash
@@ -139,24 +141,20 @@ public class CombatController : MonoBehaviour
             ExitSlowMotion();
 
         // Exit slow-motion if no longer holding (e.g. quick tap without release event)
-        if (_isSlowMo && !input.IsAttackDown && !input.AttackReleased)
+        if (_isAttackPending && !input.IsAttackDown && !input.AttackReleased)
+        {
             ExitSlowMotion();
+            ExitAttackPending();
+        }
 
         // Release event: start dash or whiff
-        if (input.AttackReleased)
+        if (input.AttackReleased && _isAttackPending)
         {
             Debug.Log("[Combat] Attack released. Checking dash condition.");
-            // ExitSlowMotion이 _lastHighlighted를 지우기 전에 캐시
-            DummyEnemy cachedTarget = _lastHighlighted;
+            IEnemy cachedTarget = _lastHighlighted;
             if (_isSlowMo)
                 ExitSlowMotion();
-            // Roll로 슬로우모션이 취소된 경우 대시/whiff 발동 안 함
-            if (_slowMoCancelledByRoll)
-            {
-                Debug.Log("[Combat] Attack released but slowMo was cancelled by roll. Ignored.");
-                _slowMoCancelledByRoll = false;
-                return;
-            }
+            ExitAttackPending();
             StartCoroutine(DashOrWhiff(cachedTarget));
         }
     }
@@ -170,6 +168,7 @@ public class CombatController : MonoBehaviour
     private void EnterSlowMotion()
     {
         if (_isSlowMo) return; // Prevent double entry
+        _isAttackPending    = true;
         Time.timeScale      = slowTimeScale;
         Time.fixedDeltaTime = 0.02f * Time.timeScale; // always paired
         _isSlowMo           = true;
@@ -178,8 +177,20 @@ public class CombatController : MonoBehaviour
     }
 
     /// <summary>
+    /// FloorSpawner가 층 전환 시작 전에 호출한다.
+    /// slow-motion + attack-pending 상태를 강제 종료하고 timeScale을 1로 복구.
+    /// LockInput() 이전에 호출해야 CombatController.Update() 차단 전에 정리됨.
+    /// </summary>
+    public void ForceExitCombatState()
+    {
+        ExitSlowMotion();
+        ExitAttackPending();
+    }
+
+    /// <summary>
     /// Exit slow-motion. ALWAYS restores both timeScale AND fixedDeltaTime.
     /// Called BEFORE dash yields so MovePosition moves at full speed.
+    /// Does NOT hide range display — ExitAttackPending() owns that.
     /// </summary>
     private void ExitSlowMotion()
     {
@@ -187,11 +198,18 @@ public class CombatController : MonoBehaviour
         Time.timeScale      = 1f;
         Time.fixedDeltaTime = 0.02f; // restore standard fixed step
         _isSlowMo           = false;
-        
-        if (_rangeDisplay != null)
-            _rangeDisplay.Hide();
+    }
 
-        // Clear enemy highlight on exit
+    /// <summary>
+    /// End the attack waiting state: hide range display and clear enemy highlight.
+    /// Separated from ExitSlowMotion so gauge-empty only exits slow-mo while
+    /// keeping range display and dash-on-release alive.
+    /// </summary>
+    private void ExitAttackPending()
+    {
+        if (!_isAttackPending) return;
+        _isAttackPending = false;
+        _rangeDisplay?.Hide();
         if (_lastHighlighted != null)
         {
             _lastHighlighted.ClearHighlight();
@@ -201,7 +219,7 @@ public class CombatController : MonoBehaviour
 
     // -- Combat coroutine chain ----------------------------------------------------
 
-    private IEnumerator DashOrWhiff(DummyEnemy cachedTarget = null)
+    private IEnumerator DashOrWhiff(IEnemy cachedTarget = null)
     {
         Debug.Log("[Combat] Coroutine: DashOrWhiff started.");
         _isBusy = true;
@@ -213,7 +231,7 @@ public class CombatController : MonoBehaviour
             : FindNearestEnemyInRange();
         if (target != null)
         {
-            Debug.Log($"[Combat] DashOrWhiff: Target '{target.name}' confirmed. Jumping to ExecuteDash.");
+            Debug.Log($"[Combat] DashOrWhiff: Target '{((MonoBehaviour)target).name}' confirmed. Jumping to ExecuteDash.");
             yield return ExecuteDash(target);
             Debug.Log("[Combat] DashOrWhiff: ExecuteDash yield returned.");
         }
@@ -228,11 +246,12 @@ public class CombatController : MonoBehaviour
         _isBusy = false;
     }
 
-    private IEnumerator ExecuteDash(DummyEnemy target)
+    private IEnumerator ExecuteDash(IEnemy target)
     {
         Debug.Log("[Combat] ExecuteDash: ENTRANCE - Coroutine effectively started.");
-        
-        if (target == null) {
+
+        if (target == null)
+        {
             Debug.LogError("[Combat] ExecuteDash: TARGET IS NULL at start! Aborting.");
             yield break;
         }
@@ -243,7 +262,7 @@ public class CombatController : MonoBehaviour
         Debug.Log("[Combat] ExecuteDash: ExitSlowMotion finished.");
 
         Vector2 startPos    = _rb.position;
-        Vector2 destination = (Vector2)target.transform.position;
+        Vector2 destination = (Vector2)((MonoBehaviour)target).transform.position;
         Vector2 dirToTarget = (destination - startPos).normalized;
 
         Debug.Log($"[Combat] ExecuteDash: StartPos={startPos}, Dest={destination}, Dir={dirToTarget}");
@@ -279,6 +298,7 @@ public class CombatController : MonoBehaviour
 
         // 6. Kill and effects
         target.OnDashHit();
+        ScoreManager.AddKillScore();
         yield return StartCoroutine(HitFreeze(hitFreezeDuration));
 
         _attackCooldown = postKillLockout;
@@ -309,7 +329,7 @@ public class CombatController : MonoBehaviour
 
     // -- Enemy detection -----------------------------------------------------------
 
-    private DummyEnemy FindNearestEnemyInRange()
+    private IEnemy FindNearestEnemyInRange()
     {
         Vector2 origin = (Vector2)transform.position;
         Vector2 attackDir = Vector2.right;
@@ -339,14 +359,14 @@ public class CombatController : MonoBehaviour
         // Pre-allocated buffer — no GC (ROADMAP Stack Constraint)
         int count = Physics2D.OverlapCircle(origin, searchRadius, _enemyFilter, _hitBuffer);
 
-        DummyEnemy nearest   = null;
-        float      bestSqDist = float.MaxValue;
+        IEnemy nearest    = null;
+        float  bestSqDist = float.MaxValue;
 
         for (int i = 0; i < count; i++)
         {
-            var dummy = _hitBuffer[i].GetComponent<DummyEnemy>();
+            var enemy = _hitBuffer[i].GetComponent<IEnemy>();
             // Skip dead enemies — physics broadphase may lag behind collider.enabled=false (Pitfall 6)
-            if (dummy == null || !dummy.IsAlive) continue;
+            if (enemy == null || !enemy.IsAlive) continue;
 
             Vector2 targetPos = (Vector2)_hitBuffer[i].transform.position;
             Vector2 toTarget = targetPos - origin;
@@ -360,7 +380,7 @@ public class CombatController : MonoBehaviour
             if (sqDist < bestSqDist)
             {
                 bestSqDist = sqDist;
-                nearest    = dummy;
+                nearest    = enemy;
             }
         }
 
@@ -369,16 +389,15 @@ public class CombatController : MonoBehaviour
 
     /// <summary>
     /// Update enemy highlight (D-04): red on nearest, clear previous.
-    /// Called only from Update() while _isSlowMo is true — ensures highlight
-    /// persists until ExitSlowMotion() clears it, preventing one-frame flash.
+    /// Called while _isAttackPending — persists through slow-mo exit on gauge empty.
     /// </summary>
-    private void UpdateHighlight(DummyEnemy nearest)
+    private void UpdateHighlight(IEnemy nearest)
     {
         if (nearest == _lastHighlighted) return;
         if (_lastHighlighted != null) _lastHighlighted.ClearHighlight();
         if (nearest != null)
         {
-            var sr = nearest.GetComponent<SpriteRenderer>();
+            var sr = (nearest as MonoBehaviour)?.GetComponent<SpriteRenderer>();
             if (sr != null) sr.color = Color.red;
         }
         _lastHighlighted = nearest;
@@ -396,7 +415,7 @@ public class CombatController : MonoBehaviour
         float dot = Vector2.Dot(attackDir, normalizedToTarget);
         float thresholdAngle = (AttackTypeSelector.Selected == AttackType.Linear) ? linearHalfAngleDeg : fanHalfAngleDeg;
         float cosHalf = Mathf.Cos(thresholdAngle * Mathf.Deg2Rad);
-        
+
         return dot >= cosHalf;
     }
 }

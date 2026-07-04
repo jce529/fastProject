@@ -15,6 +15,7 @@ public class RangeDisplay : MonoBehaviour
 {
     // -- Linear beam settings (D-01, D-05) -----------------------------------------
     [SerializeField] private float lineWidth = 0.12f;  // beam thickness
+    [SerializeField] private Vector2 chestOffset = new Vector2(0f, 0.3f);
 
     // -- Fan arc settings (D-02, D-05) -----------------------------------------------
     [SerializeField] private int   arcSegments     = 24;   // 24 points — smooth at 1080p
@@ -91,7 +92,7 @@ public class RangeDisplay : MonoBehaviour
     {
         if (_leftBeam == null) return;
 
-        Vector2 origin = transform.position;
+        Vector2 origin = (Vector2)transform.position + chestOffset;
 
         // Mouse direction in world space (new Input System)
         Vector2 mouseScreen = Mouse.current != null
@@ -117,7 +118,7 @@ public class RangeDisplay : MonoBehaviour
     {
         if (_arcLine == null) return;
 
-        Vector2 origin = transform.position;
+        Vector2 origin = (Vector2)transform.position + chestOffset;
 
         Vector2 mouseScreen = Mouse.current != null
             ? Mouse.current.position.ReadValue()
@@ -149,7 +150,7 @@ public class RangeDisplay : MonoBehaviour
         if (_rangeCircle == null) return;
 
         float radius = AttackTypeSelector.Selected == AttackType.Linear ? _combat.SearchRadius : _combat.FanRadius;
-        Vector2 origin = transform.position;
+        Vector2 origin = (Vector2)transform.position + chestOffset;
 
         _rangeCircle.loop = true;
         _rangeCircle.positionCount = circleSegments;

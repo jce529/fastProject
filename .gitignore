@@ -112,3 +112,10 @@ InitTestScene*.unity*
 
 # Auto-generated cache in Assets folder
 /[Aa]ssets/[Ss]ceneDependencyCache*
+.claude/worktrees/
+
+# Unity Version Control (Plastic SCM) local workspace metadata
+.plastic/
+
+# Unity Editor auto-save / crash-recovery scene snapshots
+/[Aa]ssets/_Recovery/

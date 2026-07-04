@@ -8,23 +8,40 @@
 
 **공격 버튼을 누르면 시간이 느려지고, 손을 떼면 적에게 돌진해 한 방에 처치하는 손맛 — 이것이 재미있어야 게임이 살아난다.**
 
+## Current Milestone: v3.0 무한 복도 층 시스템
+
+**Goal:** 층을 룸+길 수평 체인으로 재설계 — 양방향 무한 생성, 전투 Corridor, 확률적 EXIT 포탈, 제한 시간으로 "빠른 탈출" 긴장감을 검증한다.
+
+**Target features:**
+- 룸-길 아키텍처: Room에 END_Left/END_Right 마커, Corridor 3종 (상승/직진/하강, 모두 전투 구간)
+- 무한 양방향 생성 & 정리: 플레이어 기준 앞 2개 룸+길 미리 생성, 2개 초과 Destroy
+- EXIT 포탈: 룸 내 정해진 스폰 포인트에 확률적 스폰 (FloorSpawner 인스펙터로 확률/최대 개수 조절)
+- 타이머 & 게임오버: 층별 제한 시간 카운트다운 HUD, 초과 시 게임오버
+- 난이도 스케일링: 층 번호에 따라 스포너 몬스터 수 증가
+
 ## Requirements
 
 ### Validated
 
-**Validated in Phase 2: Combat Core**
-- [x] 공격 버튼 누름 시 슬로우 모션 발동, 공격 범위 표시, 손을 떼면 돌진 공격 (ATCK-02/03, FEEL-01 hit-freeze)
-- [x] 별도 버튼으로 구르기 발동 — 무적 판정 + 쿨타임, 슬로우 중에도 사용 가능 (MOVE-03)
-- [x] 직선형 / 부채꼴형 두 가지 공격 타입 — AttackTypeZone 기반 인게임 전환으로 구현 (사전 버튼 선택 → 존 진입 전환으로 설계 변경, ATCK-01)
-- [x] 공격 범위 안 가장 가까운 적 자동 선택 후 돌진 — 돌진 중 무적 (ATCK-03)
-- [x] 범위 안 적 없으면 헛베기 — 검 휘두르기 + 이동불가 (적 처치 성공보다 긴 딜레이) (ATCK-04)
-- [x] 시간정지 게이지: 자동 회복 + 적 처치 시 회복 (ATCK-05)
+**게임 시작 플로우 — MainMenu (Validated in Phase 6: MainMenu Scene)**
+- [x] MainMenu.unity가 Build index 0으로 등록되어 앱 실행 시 첫 화면이 된다 (MENU-01)
+- [x] Start 버튼 onClick → SceneManager.LoadScene("AttackSelect") 영구 직렬화 (MENU-02)
+- [x] Quit 버튼 onClick → 에디터 PlayMode 종료 / 빌드에서 Application.Quit() (MENU-03)
+- [x] EventSystem에 InputSystemUIInputModule 사용 (New Input System 전용 프로젝트 요건 확인)
 
 ### Active
 
 **플레이어 조작**
 - [ ] 플레이어가 빠르게 좌우 이동 및 점프할 수 있다
+- [ ] 공격 버튼 누름 시 슬로우 모션 발동, 공격 범위 표시, 손을 떼면 돌진 공격
+- [ ] 별도 버튼으로 구르기 발동 — 무적 판정 + 쿨타임, 슬로우 중에도 사용 가능
 - [ ] 낙사 시 사망하지 않고 마지막 플랫폼으로 복귀 + 짧은 무적
+
+**공격 시스템**
+- [ ] 직선형 / 부채꼴형 두 가지 공격 타입 중 게임 시작 전 선택 (단순 버튼 2개)
+- [ ] 공격 범위 안 가장 가까운 적 자동 선택 후 돌진 — 돌진 중 무적
+- [ ] 범위 안 적 없으면 헛베기 (적 처치 성공보다 긴 딜레이)
+- [ ] 시간정지 게이지: 자동 회복 + 적 처치 시 회복, 게이지 소진 시 슬로우 해제되나 공격 입력은 유지
 
 **적**
 - [ ] 근접형 적: 접근 후 공격 예고 모션 → 근접 공격 (원샷원킬 양방향)
@@ -62,7 +79,7 @@
 5. 적을 모두 죽이지 않아도 되는 등반 플레이가 재미있는가?
 6. 낙사 복귀 방식이 액션감을 해치지 않는가?
 
-**코드베이스 현황:** Phase 1 (이동/낙사복구) + Phase 2 (전투 코어: 슬로우모션 대시처치, 게이지, 구르기, 히트프리즈) 완료. AttackTypeZone 기반 인게임 타입 전환, RangeDisplay, RollController, CombatController, GaugeController 구현됨.
+**코드베이스 현황:** Unity 기본 씬(SampleScene) 외 게임 로직 없음. 패키지는 모두 설치된 상태.
 
 ## Constraints
 
@@ -100,4 +117,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-06-15 after Phase 2 completion*
+*Last updated: 2026-06-28 — Milestone v3.0 started (무한 복도 층 시스템)*
