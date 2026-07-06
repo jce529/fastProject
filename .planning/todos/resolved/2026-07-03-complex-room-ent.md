@@ -1,5 +1,6 @@
 ---
 created: 2026-07-03T09:45:28.749Z
+resolved: 2026-07-06T16:36:00+09:00
 title: Complex_Room ENT 기반 세로 스폰 순간이동
 area: planning
 files:
@@ -7,7 +8,15 @@ files:
   - Assets/Scripts/World/RoomEntry.cs
   - Assets/Scripts/World/RoomConnector.cs
   - Assets/Scripts/World/FloorSpawner.cs
+resolved-by: 10-exit-portal-floor-transition/10-03-PLAN.md
 ---
+
+## Resolved
+
+10-TRANSITION-DESIGN.md에서 RoomEntry 대신 ExitSpawnPoint를 재사용하는 방향으로 결정, Phase 10 Plan 03에서
+`WorldGenerator.FloorTransitionSequence()` Step 2를 ExitSpawnPoint 랜덤 선택으로 교체하고 Complex_Room 6종
+전부에 ExitSpawnPoint 마커를 배치 완료했다. RoomEntry를 4개 룸에 별도로 추가할 필요가 없어졌다 — 허공 스폰
+버그의 근본 원인이 해소됨.
 
 ## Problem
 
