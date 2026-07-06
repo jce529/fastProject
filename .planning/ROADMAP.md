@@ -353,13 +353,14 @@ Plans:
 ---
 
 ### Phase 11: 타이머 & 난이도
-**Goal**: 층마다 HUD에 카운트다운이 표시되고 시간 초과 시 게임오버가 발생하며, 층이 올라갈수록 몬스터 수가 증가한다
+**Goal**: 층마다 HUD에 카운트다운이 표시되고 시간 초과 시 게임오버가 발생하며, 층이 올라갈수록 몬스터 수가 증가하고, 남은 시간에 비례한 점수가 누적된다
 **Depends on**: Phase 10
-**Requirements**: TIMER-01, TIMER-02, DIFF-01
+**Requirements**: TIMER-01, TIMER-02, DIFF-01, SCORE-01, SCORE-02 (SCORE-01/02는 2026-07-07 discuss-phase에서 Phase 11로 편입 확정)
 **Success Criteria** (what must be TRUE):
-  1. 층에 진입하면 HUD 타이머가 즉시 카운트다운을 시작하고, 슬로우모션(Time.timeScale ≈ 0.2) 중에도 실시간으로 감소한다
-  2. 타이머가 0에 도달하는 순간 기존 PlayerDeathHandler가 호출되어 사망 화면이 표시된다
-  3. 3층에서 스폰되는 총 몬스터 수가 1층보다 눈에 띄게 많다 (EnemySpawner가 층 번호에 비례한 카운트를 반환한다)
+  1. 층에 진입하면 HUD 타이머가 60초에서 즉시 카운트다운을 시작하고, 슬로우모션(Time.timeScale ≈ 0.2) 중에도 실시간으로 감소한다
+  2. 타이머가 0에 도달하는 순간 PlayerController.OnPlayerDeath가 발동해 기존 PlayerDeathHandler/DeathScreenController 사망 화면이 표시된다
+  3. 3층에서 스폰되는 총 몬스터 수가 1층보다 눈에 띄게 많다 (기존 FloorSpawner.GetEnemyCount() 계단식 테이블 재사용)
+  4. EXIT 포탈 진입 시 남은 시간(초) × 10점이 ScoreManager.Score에 누적되고 HUD에 실시간 반영된다
 **Plans**: TBD
 **UI hint**: yes
 
@@ -392,8 +393,10 @@ Plans:
 | TIMER-01 | Phase 11 | HUD 카운트다운 (Time.unscaledDeltaTime) |
 | TIMER-02 | Phase 11 | 시간 초과 시 PlayerDeathHandler 호출 |
 | DIFF-01 | Phase 11 | 층 번호 비례 EnemySpawner 카운트 증가 |
+| SCORE-01 | Phase 11 | 남은 시간(초) × 10점 EXIT 진입 시 누적 |
+| SCORE-02 | Phase 11 | HUD 실시간 점수 표시 (기존 _scoreLabel 재사용) |
 
-**v3.0 Coverage: 12/12 requirements mapped. No orphans.**
+**v3.0 Coverage: 14/14 requirements mapped. No orphans.**
 
 ---
 

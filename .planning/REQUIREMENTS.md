@@ -66,14 +66,14 @@
 | TIMER-01 | Phase 11 | Pending |
 | TIMER-02 | Phase 11 | Pending |
 | DIFF-01 | Phase 11 | Pending |
-| SCORE-01 | — | Pending |
-| SCORE-02 | — | Pending |
+| SCORE-01 | Phase 11 | Pending |
+| SCORE-02 | Phase 11 | Pending |
 
 **Coverage:**
 - v3.0 requirements: 14 total
-- Mapped to phases: 12
-- Unmapped: 2 ⚠️
+- Mapped to phases: 14
+- Unmapped: 0
 
 ---
 *Requirements defined: 2026-06-28*
-*Last updated: 2026-06-28 after SCORE requirements added*
+*Last updated: 2026-07-07 — SCORE-01/02 folded into Phase 11 (discuss-phase decision)*
