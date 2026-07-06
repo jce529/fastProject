@@ -283,9 +283,11 @@ public class WorldGenerator : MonoBehaviour
         var exit = FindConnector(newRoom, RoomConnector.Direction.Right);
         _chainHeadExitPos = exit != null ? exit.transform.position : newRoom.transform.position;
 
-        // Step 2 — ENT 텔레포트 (D-06: Complex_Room 6종 전부 RoomEntry 보유 — Plan 03에서 배치 완료 필요)
-        RoomEntry entry = newRoom.GetComponentInChildren<RoomEntry>(true);
-        Vector3 teleportPos = entry != null ? entry.transform.position : newRoom.transform.position;
+        // Step 2 — ExitSpawnPoint 텔레포트 (RoomEntry 대체 — 포탈 스폰과 동일 마커 재사용, 10-TRANSITION-DESIGN.md)
+        var spawnPoints = newRoom.GetComponentsInChildren<ExitSpawnPoint>(true);
+        Vector3 teleportPos = spawnPoints.Length > 0
+            ? spawnPoints[Random.Range(0, spawnPoints.Length)].transform.position
+            : newRoom.transform.position;
         var rb = _playerTransform.GetComponent<Rigidbody2D>();
         if (rb != null) rb.linearVelocity = Vector2.zero;
         _playerTransform.position = teleportPos;
