@@ -388,23 +388,25 @@ public class WorldGenerator : MonoBehaviour
 
     private void UpdatePlayerIndex()
     {
-        // 플레이어 X > 현재 룸의 Door/EXIT X → 다음 룸 인덱스로 진행
+        // 플레이어 X > 다음 룸의 ENT X → 다음 룸에 실제로 들어간 시점에만 인덱스 진행.
+        // (기존 룸의 EXIT 기준이면 복도 중간에서 되돌아가도 인덱스가 이미 넘어가 생성/삭제가
+        // 먼저 발생함 — 생성(GEN-01 등)과 동일하게 "다음 룸 진입" 시점으로 통일)
         for (int i = _playerCurrentIndex; i < _chain.Count - 1; i++)
         {
-            var exitConnector = FindConnector(_chain[i].room, RoomConnector.Direction.Right);
-            if (exitConnector == null) break;
-            if (_playerTransform.position.x > exitConnector.transform.position.x)
+            var nextEntryConnector = FindConnector(_chain[i + 1].room, RoomConnector.Direction.Left);
+            if (nextEntryConnector == null) break;
+            if (_playerTransform.position.x > nextEntryConnector.transform.position.x)
                 _playerCurrentIndex = i + 1;
             else
                 break;
         }
 
-        // 플레이어 X < 현재 룸의 ENT X → 이전 룸 인덱스로 후퇴 (오른쪽 진행의 좌우 대칭)
+        // 플레이어 X < 이전 룸의 EXIT X → 이전 룸에 실제로 들어간 시점에만 인덱스 후퇴 (좌우 대칭)
         for (int i = _playerCurrentIndex; i > 0; i--)
         {
-            var entryConnector = FindConnector(_chain[i].room, RoomConnector.Direction.Left);
-            if (entryConnector == null) break;
-            if (_playerTransform.position.x < entryConnector.transform.position.x)
+            var prevExitConnector = FindConnector(_chain[i - 1].room, RoomConnector.Direction.Right);
+            if (prevExitConnector == null) break;
+            if (_playerTransform.position.x < prevExitConnector.transform.position.x)
                 _playerCurrentIndex = i - 1;
             else
                 break;
