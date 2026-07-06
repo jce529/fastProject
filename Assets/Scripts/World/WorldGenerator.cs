@@ -47,6 +47,7 @@ public class WorldGenerator : MonoBehaviour
         = new List<(GameObject, GameObject)>();
     private float _currentYDrift;         // D-01: 누적 Y 변위
     private Vector3 _chainHeadExitPos;    // 다음 Corridor ENT 스폰 기준점
+    private Vector3 _chainTailEntryPos;   // GEN-04: 다음 leftward Corridor EXIT 스폰 기준점 (신규)
     private int _playerCurrentIndex;      // 플레이어가 현재 위치한 체인 인덱스
     private int _activeExitCount;         // D-08: 현재 활성 포탈 수
 
@@ -90,9 +91,23 @@ public class WorldGenerator : MonoBehaviour
         var startExit = FindConnector(startRoom, RoomConnector.Direction.Right);
         _chainHeadExitPos = startExit != null ? startExit.transform.position : Vector3.zero;
 
-        // 2. 초기 lookahead 스폰 (GEN-01: 시작 시 앞 2쌍 미리 생성)
+        // 시작 룸 ENT 위치 → 첫 leftward Corridor 스폰 기준점 (GEN-04)
+        var startEntry = FindConnector(startRoom, RoomConnector.Direction.Left);
+        _chainTailEntryPos = startEntry != null ? startEntry.transform.position : Vector3.zero;
+
+        // 2. 초기 lookahead 스폰 (GEN-01: 시작 시 앞 _lookaheadCount쌍 미리 생성 — 오른쪽)
         for (int i = 0; i < _lookaheadCount; i++)
             SpawnNextPair();
+
+        // 2.5 초기 lookbehind 스폰 (GEN-04: 시작 시 뒤 _lookbehindCount쌍 미리 생성 — 왼쪽).
+        // 플레이어가 월드의 "시작 지점 왼쪽 끝"에 서 있는 느낌을 없애기 위함.
+        // _lookbehindCount를 재사용하는 이유: Update()의 GEN-02 트리밍이 이미 "플레이어 뒤로
+        // _lookbehindCount쌍을 유지"라는 불변식을 강제하므로, 그 불변식을 시작 시점부터
+        // 성립시키는 것이 자연스럽다 (별도 필드를 두면 두 값이 어긋날 때 트리밍이 시작 직후
+        // 방금 생성한 pair를 도로 지우는 모순이 생길 수 있음).
+        for (int i = 0; i < _lookbehindCount; i++)
+            SpawnPrevPair();
+        _playerCurrentIndex = _lookbehindCount; // 앞에 삽입된 쌍 개수만큼 시작 룸의 인덱스가 밀림
 
         // 3. CameraFollow bounds 초기화 (Pitfall 7: FloorSpawner가 설정한 _hasBounds 잔류 방지)
         // 사용자 발견 버그: Vector3.zero로 고정 스냅하면 플레이어가 ExitSpawnPoint로 텔레포트된 뒤
@@ -128,6 +143,42 @@ public class WorldGenerator : MonoBehaviour
 
         // D-09: corridor = 이 room의 왼쪽 길로 체인 등록
         _chain.Add((room, corridor));
+    }
+
+    /// <summary>
+    /// GEN-04: 시작 시점 좌측(lookbehind) 초기 생성 전용. SpawnNextPair()의 좌우 대칭 버전 —
+    /// Corridor+Room을 생성해 _chain의 맨 앞(index 0)에 삽입한다.
+    /// D-09 체인 표현("corridor = 해당 room의 왼쪽 길") 유지를 위해, 기존에 _chain[0]에 있던
+    /// (구) 좌측 끝 room의 corridor 필드(null)를 새로 생성한 corridor로 교체한 뒤, 새 room을
+    /// corridor=null 상태로 맨 앞에 삽입한다.
+    /// </summary>
+    private void SpawnPrevPair()
+    {
+        // Corridor 선택 및 스폰 — 이 Corridor의 오른쪽(EXIT) 커넥터가 기존 체인 좌측 끝 ENT와 맞물려야 함
+        var corridorPrefab = SelectCorridor();
+        var corridor = Instantiate(corridorPrefab, Vector3.zero, Quaternion.identity);
+        AlignByExit(corridor, _chainTailEntryPos);
+
+        // Corridor ENT(왼쪽) → 새 Room의 EXIT(오른쪽) 스폰 기준점
+        var corridorEntry = FindConnector(corridor, RoomConnector.Direction.Left);
+        var roomExitPos = corridorEntry != null ? corridorEntry.transform.position : _chainTailEntryPos;
+
+        // Room 스폰 (GEN-03: 룸 풀 랜덤 선택 — SpawnNextPair()와 동일 정책)
+        var roomPrefab = _roomPrefabs[Random.Range(0, _roomPrefabs.Length)];
+        var room = Instantiate(roomPrefab, Vector3.zero, Quaternion.identity);
+        AlignByExit(room, roomExitPos);
+        TrySpawnExitPortal(room);
+
+        // 다음 leftward 스폰 기준점 업데이트 (새 Room의 ENT 위치)
+        var roomEntry = FindConnector(room, RoomConnector.Direction.Left);
+        _chainTailEntryPos = roomEntry != null ? roomEntry.transform.position : roomExitPos;
+
+        // D-09: 기존 체인 맨 앞 room이 갖고 있던 corridor(null)를 새로 만든 corridor로 교체
+        var (oldFrontRoom, _) = _chain[0];
+        _chain[0] = (oldFrontRoom, corridor);
+
+        // 새 room을 맨 앞에 삽입 — 왼쪽 Corridor 없음(다음 SpawnPrevPair 호출 시 교체될 수 있음)
+        _chain.Insert(0, (room, null));
     }
 
     private void RemoveTail()
@@ -178,6 +229,21 @@ public class WorldGenerator : MonoBehaviour
         }
         // entry.transform.position == 루트 원점 기준 로컬 오프셋 (root가 Vector3.zero이므로)
         go.transform.position = targetWorldPos - entry.transform.position;
+    }
+
+    private void AlignByExit(GameObject go, Vector3 targetWorldPos)
+    {
+        // AlignByEntry()의 좌우 대칭 버전 — go의 Right(EXIT) 커넥터가 targetWorldPos에 오도록 배치한다.
+        // SpawnPrevPair()가 체인을 왼쪽으로 확장할 때 사용한다.
+        // CRITICAL: Instantiate(prefab, Vector3.zero, Quaternion.identity) 직후에만 호출해야 함 (Pitfall 2와 동일 이유)
+        RoomConnector exit = FindConnector(go, RoomConnector.Direction.Right);
+        if (exit == null)
+        {
+            Debug.LogWarning($"[WorldGenerator] {go.name} has no Right RoomConnector — placed at {targetWorldPos}");
+            go.transform.position = targetWorldPos;
+            return;
+        }
+        go.transform.position = targetWorldPos - exit.transform.position;
     }
 
     private RoomConnector FindConnector(GameObject go, RoomConnector.Direction direction)
