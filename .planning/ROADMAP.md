@@ -290,7 +290,7 @@ Plans:
 
 - [ ] **Phase 8: 룸-길 아키텍처** - Room과 Corridor 프리팹이 마커 기반으로 체인 연결될 수 있는 아키텍처가 갖춰진다
 - [ ] **Phase 9: 무한 양방향 생성 & 정리** - 플레이어 이동 방향 앞 2개 Room+Corridor가 자동 생성되고, 뒤로 2개 초과 시 자동 Destroy된다
-- [ ] **Phase 10: EXIT 포탈 & 층 전환** - Room 스폰 시 확률적으로 EXIT 포탈이 생성되고, 진입 시 층 번호가 올라가며 WorldGenerator가 초기화된다
+- [x] **Phase 10: EXIT 포탈 & 층 전환** - Room 스폰 시 확률적으로 EXIT 포탈이 생성되고, 진입 시 층 번호가 올라가며 WorldGenerator가 초기화된다 (completed 2026-07-06)
 - [ ] **Phase 11: 타이머 & 난이도** - 층 진입마다 HUD에 카운트다운이 표시되고 시간 초과 시 게임오버, 층이 높아질수록 몬스터 수가 증가한다
 
 ---
@@ -347,7 +347,7 @@ Plans:
 - [x] 10-01-PLAN.md — ExitSpawnPoint.cs + ExitPortal.cs + ExitPortalBuilder.cs (마커/트리거 컴포넌트 계약) (EXIT-01, EXIT-03)
 - [x] 10-02-PLAN.md — WorldGenerator.cs: TrySpawnExitPortal + EnterPortal + FloorTransitionSequence 6단계 코루틴 (EXIT-01, EXIT-02, EXIT-03)
 - [x] 10-03-PLAN.md — Unity Editor 수동 작업: ExitPortal 프리팹 빌드 실행 + Complex_Room 6종 ExitSpawnPoint/RoomEntry 마커 배치 (EXIT-01, EXIT-03)
-- [ ] 10-04-PLAN.md — SampleScene Inspector 연결 + EXIT-01/02/03 플레이테스트 검증 (EXIT-01, EXIT-02, EXIT-03)
+- [x] 10-04-PLAN.md — SampleScene Inspector 연결 + EXIT-01/02/03 플레이테스트 검증 (EXIT-01, EXIT-02, EXIT-03)
 **UI hint**: yes
 
 ---
@@ -371,7 +371,7 @@ Plans:
 |-------|----------------|--------|-----------|
 | 8. 룸-길 아키텍처 | 3/3 | Complete | 2026-07-01 |
 | 9. 무한 양방향 생성 & 정리 | 3/3 | Complete | 2026-07-01 |
-| 10. EXIT 포탈 & 층 전환 | 3/4 | In Progress|  |
+| 10. EXIT 포탈 & 층 전환 | 4/4 | Complete    | 2026-07-06 |
 | 11. 타이머 & 난이도 | 0/? | Not started | - |
 
 ---
