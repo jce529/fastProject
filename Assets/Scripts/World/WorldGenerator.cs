@@ -72,10 +72,11 @@ public class WorldGenerator : MonoBehaviour
 
         // 1.5 — 시작 룸 ExitSpawnPoint 텔레포트 (FloorTransitionSequence Step 2와 동일 패턴)
         // 랜덤 startRoomPrefab의 바닥 높이가 플레이어 씬 배치 위치와 다를 수 있어 허공 스폰 위험 존재
+        Vector3 startTeleportPos = Vector3.zero;
         if (_playerTransform != null)
         {
             var startSpawnPoints = startRoom.GetComponentsInChildren<ExitSpawnPoint>(true);
-            Vector3 startTeleportPos = startSpawnPoints.Length > 0
+            startTeleportPos = startSpawnPoints.Length > 0
                 ? startSpawnPoints[Random.Range(0, startSpawnPoints.Length)].transform.position
                 : Vector3.zero;
             var startRb = _playerTransform.GetComponent<Rigidbody2D>();
@@ -94,8 +95,14 @@ public class WorldGenerator : MonoBehaviour
             SpawnNextPair();
 
         // 3. CameraFollow bounds 초기화 (Pitfall 7: FloorSpawner가 설정한 _hasBounds 잔류 방지)
+        // 사용자 발견 버그: Vector3.zero로 고정 스냅하면 플레이어가 ExitSpawnPoint로 텔레포트된 뒤
+        // 카메라가 룸 원점만 비춰 플레이어가 화면 밖에 있는 것처럼 보임 (FloorTransitionSequence Step 3과 동일 패턴으로 교체)
         if (_cameraFollow != null)
-            _cameraFollow.SnapToRoom(Vector3.zero);
+        {
+            CameraBound startCb = startRoom.GetComponentInChildren<CameraBound>(true);
+            if (startCb != null) _cameraFollow.SnapToRoom(startCb.GetWorldBounds());
+            else _cameraFollow.SnapToRoom(startTeleportPos);
+        }
     }
 
     private void SpawnNextPair()
