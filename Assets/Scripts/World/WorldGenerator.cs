@@ -192,6 +192,15 @@ public class WorldGenerator : MonoBehaviour
         if (corridor != null) Destroy(corridor);
         Destroy(room);
         _chain.RemoveAt(0);
+
+        // 왼쪽 끝이 바뀌었으므로 _chainTailEntryPos를 새 왼쪽 끝 room 기준으로 갱신한다.
+        // 갱신하지 않으면 이후 플레이어가 되돌아와 SpawnPrevPair()를 다시 호출할 때 이미 파괴된
+        // 방의 위치를 기준점으로 써서 새 방이 끊긴 채(간격을 두고) 생성된다.
+        if (_chain.Count > 0)
+        {
+            var newTailEntry = FindConnector(_chain[0].room, RoomConnector.Direction.Left);
+            _chainTailEntryPos = newTailEntry != null ? newTailEntry.transform.position : _chain[0].room.transform.position;
+        }
     }
 
     /// <summary>
@@ -216,6 +225,16 @@ public class WorldGenerator : MonoBehaviour
         if (corridor != null) Destroy(corridor);
         Destroy(room);
         _chain.RemoveAt(lastIndex);
+
+        // 오른쪽 끝이 바뀌었으므로 _chainHeadExitPos를 새 오른쪽 끝 room 기준으로 갱신한다.
+        // RemoveTail()의 대칭 처리와 동일한 이유 — 갱신하지 않으면 플레이어가 되돌아와
+        // SpawnNextPair()를 다시 호출할 때 이미 파괴된 방의 위치를 기준점으로 써서 간격이 생긴다.
+        if (_chain.Count > 0)
+        {
+            var newLast = _chain[_chain.Count - 1].room;
+            var newHeadExit = FindConnector(newLast, RoomConnector.Direction.Right);
+            _chainHeadExitPos = newHeadExit != null ? newHeadExit.transform.position : newLast.transform.position;
+        }
     }
 
     private GameObject SelectCorridor()
