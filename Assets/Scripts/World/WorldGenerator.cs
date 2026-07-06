@@ -109,15 +109,10 @@ public class WorldGenerator : MonoBehaviour
             SpawnPrevPair();
         _playerCurrentIndex = _lookbehindCount; // 앞에 삽입된 쌍 개수만큼 시작 룸의 인덱스가 밀림
 
-        // 3. CameraFollow bounds 초기화 (Pitfall 7: FloorSpawner가 설정한 _hasBounds 잔류 방지)
-        // 사용자 발견 버그: Vector3.zero로 고정 스냅하면 플레이어가 ExitSpawnPoint로 텔레포트된 뒤
-        // 카메라가 룸 원점만 비춰 플레이어가 화면 밖에 있는 것처럼 보임 (FloorTransitionSequence Step 3과 동일 패턴으로 교체)
-        if (_cameraFollow != null)
-        {
-            CameraBound startCb = startRoom.GetComponentInChildren<CameraBound>(true);
-            if (startCb != null) _cameraFollow.SnapToRoom(startCb.GetWorldBounds());
-            else _cameraFollow.SnapToRoom(startTeleportPos);
-        }
+        // 3. CameraFollow bounds 초기화 — 전체 체인(양방향 lookahead+lookbehind) 병합 Bounds 사용
+        // (Pitfall 7: FloorSpawner가 설정한 _hasBounds 잔류 방지. 단일 룸 스냅 대신 병합 Bounds로
+        // 교체해 Corridor 통과 중에도 카메라가 멈추지 않도록 한다.)
+        RecomputeCameraBounds();
     }
 
     private void SpawnNextPair()
@@ -256,6 +251,39 @@ public class WorldGenerator : MonoBehaviour
     }
 
     /// <summary>
+    /// 현재 _chain 전체(Room + Corridor)의 CameraBound를 순회해 하나로 병합한 Bounds를 계산하고
+    /// CameraFollow에 전달한다. 코리도어를 지나거나 CameraBound가 좁은 Room에 있을 때도 카메라가
+    /// 멈추지 않고 계속 추적하도록, 체인이 바뀔 때마다(Start/SpawnNextPair/RemoveTail/
+    /// FloorTransitionSequence) 호출해야 한다.
+    /// </summary>
+    private void RecomputeCameraBounds()
+    {
+        if (_cameraFollow == null || _chain.Count == 0) return;
+
+        bool hasBounds = false;
+        Bounds merged = default;
+
+        foreach (var (room, corridor) in _chain)
+        {
+            foreach (CameraBound cb in room.GetComponentsInChildren<CameraBound>(true))
+            {
+                if (!hasBounds) { merged = cb.GetWorldBounds(); hasBounds = true; }
+                else merged.Encapsulate(cb.GetWorldBounds());
+            }
+
+            if (corridor == null) continue;
+            foreach (CameraBound cb in corridor.GetComponentsInChildren<CameraBound>(true))
+            {
+                if (!hasBounds) { merged = cb.GetWorldBounds(); hasBounds = true; }
+                else merged.Encapsulate(cb.GetWorldBounds());
+            }
+        }
+
+        if (hasBounds) _cameraFollow.SnapToRoom(merged);
+        else _cameraFollow.SnapToRoom(_playerTransform != null ? _playerTransform.position : Vector3.zero);
+    }
+
+    /// <summary>
     /// EXIT-01/EXIT-02: Room 스폰 직후 호출된다. 확률 롤을 통과하고 활성 포탈 수가
     /// _maxExitsActive 미만이면, room의 ExitSpawnPoint 후보 중 하나에 포탈을 생성하고
     /// 다음 층 대기룸을 즉시(비활성 상태로) 함께 스폰해 D-08 정리 대상으로 연결한다.
@@ -297,8 +325,12 @@ public class WorldGenerator : MonoBehaviour
         UpdatePlayerIndex();
 
         // GEN-01: 플레이어 앞 _lookaheadCount개 Room+Corridor 보장
+        bool chainChanged = false;
         while (_chain.Count - 1 - _playerCurrentIndex < _lookaheadCount)
+        {
             SpawnNextPair();
+            chainChanged = true;
+        }
 
         // GEN-02: 플레이어 뒤 _lookbehindCount개 초과 시 tail 정리
         // Pitfall 4: RemoveTail 후 _playerCurrentIndex-- 반드시 쌍으로 실행
@@ -306,7 +338,12 @@ public class WorldGenerator : MonoBehaviour
         {
             RemoveTail();
             _playerCurrentIndex--;
+            chainChanged = true;
         }
+
+        // 체인이 실제로 바뀐 프레임에만 재계산 — 매 프레임 GetComponentsInChildren 호출을 피해
+        // 모바일 GC 압박을 줄인다 (CLAUDE.md 모바일 메모리 관리 원칙)
+        if (chainChanged) RecomputeCameraBounds();
     }
 
     private void UpdatePlayerIndex()
@@ -379,13 +416,8 @@ public class WorldGenerator : MonoBehaviour
         if (rb != null) rb.linearVelocity = Vector2.zero;
         _playerTransform.position = teleportPos;
 
-        // Step 3 — 카메라 스냅
-        CameraBound cb = newRoom.GetComponentInChildren<CameraBound>(true);
-        if (_cameraFollow != null)
-        {
-            if (cb != null) _cameraFollow.SnapToRoom(cb.GetWorldBounds());
-            else _cameraFollow.SnapToRoom(teleportPos);
-        }
+        // Step 3 — 카메라 스냅 (체인이 새 room 하나로 리셋된 직후이므로 병합 Bounds = 이 room의 Bounds)
+        RecomputeCameraBounds();
 
         yield return null; // Step 3.5 — LateUpdate가 카메라 위치를 반영하도록 한 프레임 양보
 
