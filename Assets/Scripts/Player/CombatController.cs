@@ -88,8 +88,9 @@ public class CombatController : MonoBehaviour
         _enemyLayerMask = LayerMask.GetMask("Enemy");
         _enemyFilter.SetLayerMask(_enemyLayerMask);
         _enemyFilter.useTriggers = true;
-        // [HIGH — Gemini] Default layer contains platforms and walls for the obstacle linecast.
-        _obstacleMask   = LayerMask.GetMask("Default");
+        // [HIGH — Gemini] Default/Ground/Platform layers contain walls and floors for the obstacle linecast.
+        // Enemy layer is deliberately excluded — an enemy standing behind another enemy must not block targeting.
+        _obstacleMask   = LayerMask.GetMask("Default", "Ground", "Platform");
     }
 
     private void Start()
@@ -374,6 +375,11 @@ public class CombatController : MonoBehaviour
 
             // Shape and distance filter: checks specific arc/beam and radius
             if (!IsInAttackShape(toTarget / dist, dist, attackDir, currentMaxDist)) continue;
+
+            // Wall/platform block check — physics query, so runs last (most expensive filter).
+            // Blocked candidates are skipped; the loop keeps scanning remaining candidates so a
+            // farther-but-unobstructed enemy can still be selected as `nearest`.
+            if (Physics2D.Linecast(origin, targetPos, _obstacleMask)) continue;
 
             // SqrMagnitude avoids sqrt — sufficient for closest-enemy comparison
             float sqDist = dist * dist;
