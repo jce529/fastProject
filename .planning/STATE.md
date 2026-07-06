@@ -35,7 +35,7 @@ Phase: 10 (exit-portal-floor-transition) — EXECUTING
 Plan: 3 of 4
 Next: Phase 10 (EXIT 포탈 & 층 전환)
 Status: Ready to execute
-Last activity: 2026-07-04 - Completed quick task 260704-jyb: Fix compiler warnings in PlayerController.cs
+Last activity: 2026-07-06 - Completed quick task 260706-lj0: Wall-obstacle Linecast check for FindNearestEnemyInRange
 
 ```
 Progress: [██████████████████░░] 9/11 phases complete (v3.0: Phase 8, 9 complete)
@@ -103,6 +103,7 @@ Progress: [██████████████████░░] 9/11 ph
 | 260701-sc7 | Corridor 3종 + Complex_Room 6종에 CameraBound 추가, fileID 오버플로우 버그 수정 | 2026-07-01 | 7caa718 | [260701-sc7-corridor-complex-room](./quick/260701-sc7-corridor-complex-room/) |
 | 260703-fast1 | ExitPortal.cs OnDrawGizmos() 제거 — 스프라이트 렌더러로 시각화 전환 예정이라 에디터 전용 Gizmo 불필요 | 2026-07-03 | a9afe8a | (fast — no directory) |
 | 260704-jyb | PlayerController.cs 컴파일러 경고 2개 수정 — _jumpHeld 미사용 필드 제거(CS0414), OverlapCircleNonAlloc→OverlapCircle+ContactFilter2D 전환(CS0619) | 2026-07-04 | dd59e5a | [260704-jyb-fix-two-compiler-warnings-in-playercontr](./quick/260704-jyb-fix-two-compiler-warnings-in-playercontr/) |
+| 260706-lj0 | CombatController.cs FindNearestEnemyInRange()에 벽/플랫폼 Linecast 장애물 체크 추가 — _obstacleMask를 Default+Ground+Platform로 확장, 02-VERIFICATION.md 갭 해소 표기 | 2026-07-06 | b33f787, bdf062b | [260706-lj0-combatcontroller-findnearestenemyinrange](./quick/260706-lj0-combatcontroller-findnearestenemyinrange/) |
 
 ### Pending Todos
 
