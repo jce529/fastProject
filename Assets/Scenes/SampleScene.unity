@@ -2404,8 +2404,8 @@ MonoBehaviour:
   _exitPortalPrefab: {fileID: 6335312812468809316, guid: d4d6fab2a7975194bb76f748434452eb, type: 3}
   _exitSpawnChance: 0.15
   _maxExitsActive: 1
-  _player: {fileID: 0}
-  _combatController: {fileID: 0}
+  _player: {fileID: 1394403455}
+  _combatController: {fileID: 1394403464}
 --- !u!1 &1365058120
 GameObject:
   m_ObjectHideFlags: 0
