@@ -69,6 +69,20 @@ public class WorldGenerator : MonoBehaviour
         var startRoomPrefab = _roomPrefabs[Random.Range(0, _roomPrefabs.Length)];
         var startRoom = Instantiate(startRoomPrefab, Vector3.zero, Quaternion.identity);
         _chain.Add((startRoom, null)); // D-09: 첫 룸은 왼쪽 Corridor 없음
+
+        // 1.5 — 시작 룸 ExitSpawnPoint 텔레포트 (FloorTransitionSequence Step 2와 동일 패턴)
+        // 랜덤 startRoomPrefab의 바닥 높이가 플레이어 씬 배치 위치와 다를 수 있어 허공 스폰 위험 존재
+        if (_playerTransform != null)
+        {
+            var startSpawnPoints = startRoom.GetComponentsInChildren<ExitSpawnPoint>(true);
+            Vector3 startTeleportPos = startSpawnPoints.Length > 0
+                ? startSpawnPoints[Random.Range(0, startSpawnPoints.Length)].transform.position
+                : Vector3.zero;
+            var startRb = _playerTransform.GetComponent<Rigidbody2D>();
+            if (startRb != null) startRb.linearVelocity = Vector2.zero;
+            _playerTransform.position = startTeleportPos;
+        }
+
         TrySpawnExitPortal(startRoom); // EXIT-01: 시작 룸도 포탈 스폰 대상 (예외 없음)
 
         // 시작 룸 EXIT 위치 → 첫 Corridor 스폰 기준점
