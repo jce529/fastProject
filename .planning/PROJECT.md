@@ -117,4 +117,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-06-28 — Milestone v3.0 started (무한 복도 층 시스템)*
+*Last updated: 2026-07-06 — Phase 10 (EXIT 포탈 & 층 전환) 완료. Phase 11 (타이머 & 난이도)만 남음.*
