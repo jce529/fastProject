@@ -194,6 +194,30 @@ public class WorldGenerator : MonoBehaviour
         _chain.RemoveAt(0);
     }
 
+    /// <summary>
+    /// GEN-06: RemoveTail()의 좌우 대칭 버전. 플레이어가 왼쪽으로 물러날 때 오른쪽 끝(_chain 마지막
+    /// 엔트리)을 정리한다 — 모바일 메모리 관리(CLAUDE.md) 원칙상 한쪽으로만 계속 걸어도 반대편이
+    /// 무한히 쌓이면 안 되므로 RemoveTail()과 같은 트리밍이 오른쪽에도 필요하다.
+    /// </summary>
+    private void RemoveHead()
+    {
+        int lastIndex = _chain.Count - 1;
+        var (room, corridor) = _chain[lastIndex];
+
+        // D-08: 이 room이 보유한 포탈의 대기룸을 함께 정리 — RemoveTail()과 동일 패턴
+        ExitPortal portal = room.GetComponentInChildren<ExitPortal>(true);
+        if (portal != null && portal.StandbyRoom != null)
+        {
+            Destroy(portal.StandbyRoom);
+            _activeExitCount--;
+            Debug.Log($"[WorldGenerator] _activeExitCount = {_activeExitCount}");
+        }
+
+        if (corridor != null) Destroy(corridor);
+        Destroy(room);
+        _chain.RemoveAt(lastIndex);
+    }
+
     private GameObject SelectCorridor()
     {
         // D-01~D-03: 현재 Y drift 범위 내 유효 후보만 선택
@@ -341,6 +365,22 @@ public class WorldGenerator : MonoBehaviour
             chainChanged = true;
         }
 
+        // GEN-05: 플레이어 뒤(왼쪽) _lookbehindCount개 Room+Corridor 보장 — GEN-01의 좌우 대칭.
+        // SpawnPrevPair()는 _chain 맨 앞에 삽입하므로 플레이어의 실제 인덱스가 하나씩 밀린다.
+        while (_playerCurrentIndex < _lookbehindCount)
+        {
+            SpawnPrevPair();
+            _playerCurrentIndex++;
+            chainChanged = true;
+        }
+
+        // GEN-06: 플레이어 앞(오른쪽) _lookaheadCount개 초과 시 head 정리 — GEN-02의 좌우 대칭.
+        while (_chain.Count - 1 - _playerCurrentIndex > _lookaheadCount)
+        {
+            RemoveHead();
+            chainChanged = true;
+        }
+
         // 체인이 실제로 바뀐 프레임에만 재계산 — 매 프레임 GetComponentsInChildren 호출을 피해
         // 모바일 GC 압박을 줄인다 (CLAUDE.md 모바일 메모리 관리 원칙)
         if (chainChanged) RecomputeCameraBounds();
@@ -355,6 +395,17 @@ public class WorldGenerator : MonoBehaviour
             if (exitConnector == null) break;
             if (_playerTransform.position.x > exitConnector.transform.position.x)
                 _playerCurrentIndex = i + 1;
+            else
+                break;
+        }
+
+        // 플레이어 X < 현재 룸의 ENT X → 이전 룸 인덱스로 후퇴 (오른쪽 진행의 좌우 대칭)
+        for (int i = _playerCurrentIndex; i > 0; i--)
+        {
+            var entryConnector = FindConnector(_chain[i].room, RoomConnector.Direction.Left);
+            if (entryConnector == null) break;
+            if (_playerTransform.position.x < entryConnector.transform.position.x)
+                _playerCurrentIndex = i - 1;
             else
                 break;
         }
