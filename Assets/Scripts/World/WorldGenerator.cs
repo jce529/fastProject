@@ -283,7 +283,7 @@ public class WorldGenerator : MonoBehaviour
         var exit = FindConnector(newRoom, RoomConnector.Direction.Right);
         _chainHeadExitPos = exit != null ? exit.transform.position : newRoom.transform.position;
 
-        // Step 2 — ExitSpawnPoint 텔레포트 (RoomEntry 대체 — 포탈 스폰과 동일 마커 재사용, 10-TRANSITION-DESIGN.md)
+        // Step 2 — ExitSpawnPoint 텔레포트 (10-TRANSITION-DESIGN.md 결정 — 포탈 스폰과 동일 마커 재사용)
         var spawnPoints = newRoom.GetComponentsInChildren<ExitSpawnPoint>(true);
         Vector3 teleportPos = spawnPoints.Length > 0
             ? spawnPoints[Random.Range(0, spawnPoints.Length)].transform.position
