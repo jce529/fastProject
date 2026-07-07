@@ -14,6 +14,7 @@ public static class ScoreManager
     public const int   SlowClearBonus   = 50;
     public const float FastClearTime    = 10f; // 초 이내 클리어 시 FastClearBonus
     public const float NormalClearTime  = 25f; // 초 이내 클리어 시 NormalClearBonus
+    public const int   TimeBonusPerSecond = 10; // D-02(Phase 11): 남은 초 × 10점
 
     // -- 상태 -----------------------------------------------------------------------
     public static int Score { get; private set; }
@@ -32,6 +33,15 @@ public static class ScoreManager
     public static void AddKillScore()
     {
         Score += KillScore;
+    }
+
+    /// <summary>
+    /// SCORE-01(Phase 11): EXIT 포탈 진입 순간 남은 제한시간(초)에 비례한 점수를 더한다 (D-02).
+    /// WorldGenerator.FloorTransitionSequence() 시작 시점(D-02b)에서 FloorTimer.RemainingSeconds를 인자로 호출.
+    /// </summary>
+    public static void AddTimeBonus(float remainingSeconds)
+    {
+        Score += Mathf.RoundToInt(remainingSeconds) * TimeBonusPerSecond;
     }
 
     /// <summary>방 입장 타이머 시작. FloorSpawner.ActivateEnemies() 완료 직후 호출.</summary>
