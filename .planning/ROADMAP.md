@@ -361,7 +361,13 @@ Plans:
   2. 타이머가 0에 도달하는 순간 PlayerController.OnPlayerDeath가 발동해 기존 PlayerDeathHandler/DeathScreenController 사망 화면이 표시된다
   3. 3층에서 스폰되는 총 몬스터 수가 1층보다 눈에 띄게 많다 (기존 FloorSpawner.GetEnemyCount() 계단식 테이블 재사용)
   4. EXIT 포탈 진입 시 남은 시간(초) × 10점이 ScoreManager.Score에 누적되고 HUD에 실시간 반영된다
-**Plans**: TBD
+**Plans**: 4 plans
+
+Plans:
+- [ ] 11-01-PLAN.md — FloorTimer 정적 클래스 + ScoreManager.AddTimeBonus (TIMER-01, TIMER-02, SCORE-01)
+- [ ] 11-02-PLAN.md — WorldGenerator 통합: 난이도 적 스폰 + 타이머 리셋/틱 + 점수 가산 배선 (TIMER-01, TIMER-02, DIFF-01, SCORE-01)
+- [ ] 11-03-PLAN.md — HUDController: 타이머 표시 + 점멸 경고 (TIMER-01, SCORE-02)
+- [ ] 11-04-PLAN.md — 에디터 도구 + SampleScene Inspector 연결 + 플레이테스트 검증 (TIMER-01, TIMER-02, DIFF-01, SCORE-01, SCORE-02)
 **UI hint**: yes
 
 ---
@@ -373,7 +379,7 @@ Plans:
 | 8. 룸-길 아키텍처 | 3/3 | Complete | 2026-07-01 |
 | 9. 무한 양방향 생성 & 정리 | 3/3 | Complete | 2026-07-01 |
 | 10. EXIT 포탈 & 층 전환 | 4/4 | Complete    | 2026-07-06 |
-| 11. 타이머 & 난이도 | 0/? | Not started | - |
+| 11. 타이머 & 난이도 | 0/4 | Not started | - |
 
 ---
 
@@ -410,6 +416,16 @@ Plans:
 - EnemySpawner.GetEnemyCount() 기존 난이도 테이블 → DIFF-01에서 층 번호 파라미터 확장
 - 타이머는 반드시 Time.unscaledDeltaTime 사용 — 슬로우모션(Time.timeScale ≈ 0.2) 면역 필수
 - WaitForSecondsRealtime 코루틴: 층 전환 시퀀스 전 구간에 걸쳐 타임스케일 면역 보장
+
+### Phase 12: 포탈 진입/퇴장 애니메이션 구현 (10-TRANSITION-DESIGN.md 설계 반영) 및 공격 애니메이션 개선
+
+**Goal:** [To be planned]
+**Requirements**: TBD
+**Depends on:** Phase 11
+**Plans:** 0 plans
+
+Plans:
+- [ ] TBD (run /gsd:plan-phase 12 to break down)
 
 ---
 *v3.0 Roadmap created: 2026-06-28*
