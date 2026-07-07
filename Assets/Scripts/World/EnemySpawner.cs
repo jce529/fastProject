@@ -11,6 +11,7 @@ public class EnemySpawner : MonoBehaviour
     public enum EnemyType { Melee, Ranged }
 
     [SerializeField] private EnemyType _type = EnemyType.Melee;
+    public EnemyType Type => _type;
 
     private GameObject _spawned;
 

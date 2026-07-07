@@ -42,6 +42,10 @@ public class WorldGenerator : MonoBehaviour
     [SerializeField] private PlayerController _player;           // LockInput/UnlockInput 호출용
     [SerializeField] private CombatController _combatController; // ForceExitCombatState 호출용
 
+    [Header("Enemy Spawning (Phase 11)")]
+    [SerializeField] private GameObject _meleeEnemyPrefab;
+    [SerializeField] private GameObject _rangedEnemyPrefab;
+
     // Runtime state
     // D-10: List -> LinkedList로 전환. 양 끝(AddFirst/AddLast/RemoveFirst/RemoveLast)에서 O(1)로
     // 삽입/삭제하고, First/Last로 현재 체인 경계 room을 항상 "그때그때" 조회할 수 있어 GEN-04에서
@@ -91,6 +95,8 @@ public class WorldGenerator : MonoBehaviour
 
         TrySpawnExitPortal(startRoom); // EXIT-01: 시작 룸도 포탈 스폰 대상 (예외 없음)
 
+        TrySpawnEnemies(startRoom, FloorManager.CurrentFloor); // DIFF-01: 시작 룸 적 스폰
+
         // 2. 초기 lookahead 스폰 (GEN-01: 시작 시 앞 _lookaheadCount쌍 미리 생성 — 오른쪽)
         for (int i = 0; i < _lookaheadCount; i++)
             SpawnNextPair();
@@ -134,6 +140,7 @@ public class WorldGenerator : MonoBehaviour
         var room = Instantiate(roomPrefab, Vector3.zero, Quaternion.identity);
         AlignByEntry(room, roomEntryPos);
         TrySpawnExitPortal(room);
+        TrySpawnEnemies(room, FloorManager.CurrentFloor); // DIFF-01
 
         // D-09: corridor = 이 room의 왼쪽 길로 체인 등록
         _chain.AddLast((room, corridor));
@@ -168,6 +175,7 @@ public class WorldGenerator : MonoBehaviour
         var room = Instantiate(roomPrefab, Vector3.zero, Quaternion.identity);
         AlignByExit(room, roomExitPos);
         TrySpawnExitPortal(room);
+        TrySpawnEnemies(room, FloorManager.CurrentFloor); // DIFF-01
 
         // D-09: 기존 체인 맨 앞 room이 갖고 있던 corridor(null)를 새로 만든 corridor로 교체
         var oldFrontNode = _chain.First;
@@ -338,12 +346,54 @@ public class WorldGenerator : MonoBehaviour
         var standbyPrefab = _roomPrefabs[Random.Range(0, _roomPrefabs.Length)];
         var standbyPos = new Vector3(0f, room.transform.position.y + _floorHeight, 0f);
         var standbyRoom = Instantiate(standbyPrefab, standbyPos, Quaternion.identity);
+        TrySpawnEnemies(standbyRoom, FloorManager.CurrentFloor + 1); // DIFF-01: 대기룸은 활성화될 미래 층 기준 난이도
         standbyRoom.SetActive(false);
         portal.StandbyRoom = standbyRoom;
 
         _activeExitCount++;
         Debug.Log($"[WorldGenerator] Portal spawned in {room.name}");
         Debug.Log($"[WorldGenerator] _activeExitCount = {_activeExitCount}");
+    }
+
+    /// <summary>
+    /// D-03: FloorSpawner.GetEnemyCount(int floor) 원본 로직을 그대로 이식한 계단식 난이도 테이블.
+    /// 1~5층: 근접 Random.Range(2,4) + 원거리 Random.Range(0,2)
+    /// 6~10층: 근접 2 + 원거리 Random.Range(1,3)
+    /// 11층+: 근접 2 + 원거리 Random.Range(2,4)
+    /// </summary>
+    private (int melee, int ranged) GetEnemyCount(int floor)
+    {
+        if (floor <= 5)   return (Random.Range(2, 4), Random.Range(0, 2));
+        if (floor <= 10)  return (2, Random.Range(1, 3));
+        return (2, Random.Range(2, 4));
+    }
+
+    /// <summary>
+    /// D-04/D-04b: room이 Instantiate된 직후 즉시 호출한다. room의 EnemySpawner 마커를 타입별로
+    /// 필터링해 GetEnemyCount(floor) 카운트만큼 앞에서부터 Spawn()+Activate()한다.
+    /// 마커 수보다 카운트가 많으면 있는 만큼만 활성화한다(에러 없음, D-04b).
+    /// </summary>
+    private void TrySpawnEnemies(GameObject room, int floor)
+    {
+        (int meleeCount, int rangedCount) = GetEnemyCount(floor);
+        int meleeSpawned = 0;
+        int rangedSpawned = 0;
+
+        foreach (EnemySpawner spawner in room.GetComponentsInChildren<EnemySpawner>(true))
+        {
+            if (spawner.Type == EnemySpawner.EnemyType.Melee && meleeSpawned < meleeCount)
+            {
+                spawner.Spawn(_meleeEnemyPrefab, _rangedEnemyPrefab);
+                spawner.Activate();
+                meleeSpawned++;
+            }
+            else if (spawner.Type == EnemySpawner.EnemyType.Ranged && rangedSpawned < rangedCount)
+            {
+                spawner.Spawn(_meleeEnemyPrefab, _rangedEnemyPrefab);
+                spawner.Activate();
+                rangedSpawned++;
+            }
+        }
     }
 
     private void Update()
