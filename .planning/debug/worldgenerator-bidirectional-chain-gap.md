@@ -1,16 +1,16 @@
 ---
-status: investigating
+status: awaiting_human_verify
 trigger: "이제 시작되도 양쪽으로 생기게끔 바꿔줘 그리고 카메라는 Bound합치기로 가자"
 created: 2026-07-06T09:00:00Z
-updated: 2026-07-06T10:05:00Z
+updated: 2026-07-06T10:55:00Z
 ---
 
 ## Current Focus
 
-hypothesis: 462f558("RemoveTail/RemoveHead 직후 _chainTailEntryPos/_chainHeadExitPos를 새 경계 room 기준으로 갱신")이 간격(gap) 버그의 근본 원인 자체는 맞게 짚었으나, 매 Remove 호출마다 필드를 무조건 갱신하는 방식이 다른 실행 경로와 충돌해 "왼쪽 생성이 아예 안 됨"이라는 더 심각한 회귀를 만들었다. 정확한 충돌 지점은 아직 미확인.
-test: (다음 세션에서) Play Mode에서 _chainTailEntryPos/_chainHeadExitPos 값을 SpawnPrevPair/SpawnNextPair/RemoveTail/RemoveHead 호출마다 Debug.Log로 프레임 단위 추적 — 어느 시점에 값이 기대와 달라지는지 직접 확인 필요.
-expecting: 로그에서 "Remove 호출 직후 갱신된 앵커 값"과 "그 다음 Spawn 호출 시 실제로 읽히는 앵커 값"이 어긋나는 지점을 찾으면 근본 원인 특정 가능.
-next_action: 462f558의 아이디어(트림 후 앵커 재계산)를 필드 캐시 방식이 아니라 **매 SpawnPrevPair()/SpawnNextPair() 호출 시점에 현재 체인 경계 room에서 커넥터 위치를 즉시(realtime) 재조회**하는 방식으로 다시 구현하는 대안을 우선 검토할 것. 필드 캐시(`_chainTailEntryPos`/`_chainHeadExitPos`) 자체가 "갱신 시점을 하나라도 놓치면 즉시 stale해지는" 구조적 취약점을 안고 있어, 같은 종류의 버그가 반복 재발할 위험이 있음.
+hypothesis: (확정, 수정 완료) `_chainHeadExitPos`/`_chainTailEntryPos` 캐시 필드를 완전히 제거하고, SpawnNextPair()/SpawnPrevPair()가 매 호출 시점에 `_chain`의 실제 경계 room에서 커넥터 위치를 즉시 재조회하도록 재구현했다. 동시에 `_chain`을 `List`에서 `LinkedList`로 전환해 `Insert(0,...)`/`RemoveAt(0)` 패턴 자체를 제거했다.
+test: (1) grep으로 `_chainHeadExitPos`/`_chainTailEntryPos`/`_chain[`/`_chain.Insert`/`_chain.RemoveAt` 잔여 참조 없음 확인 — 완료, 클린. (2) 전체 파일 재독해로 모든 호출부(Start/SpawnNextPair/SpawnPrevPair/RemoveTail/RemoveHead/RecomputeCameraBounds/Update/UpdatePlayerIndex/FloorTransitionSequence)의 LinkedList API 사용이 일관되는지 정적 검증 — 완료. (3) Unity 배치모드 컴파일 시도 — 사용자가 에디터를 이미 열어둔 상태라 두 번째 인스턴스 실행 불가, 스킵.
+expecting: 사용자가 Unity 에디터 포커스 시 자동 재컴파일 → Console에 에러 없어야 함. Play Mode에서 좌/우 반복 이동 시 CameraBound gizmo 체인에 간격 없어야 함.
+next_action: 사용자에게 Play Mode 수동 테스트 요청(human-verify 체크포인트) — 결과 대기 중.
 
 ## Symptoms
 
@@ -68,17 +68,20 @@ started: 이번 세션 quick-260706-oxp(WorldGenerator 양방향 생성 + Camera
 ## Resolution
 
 root_cause: |
-  부분적으로만 확인됨. 확정된 원인 2건:
+  확정. 총 3건의 원인이 순차적으로 결합되어 있었다:
   1. Update()에 왼쪽 방향 연속 생성/트리밍 로직 자체가 없었음 (27289f7로 수정).
   2. UpdatePlayerIndex()가 "현재 room 이탈" 시점에 인덱스를 바꿔 복도 중간 방향전환 시 조기 트리밍/생성 발생 (9b259dc로 수정).
-  아직 미확정: 방향 전환 시 체인에 간격이 생기는 근본 원인 — RemoveTail()/RemoveHead()가 _chainTailEntryPos/_chainHeadExitPos를 갱신하지 않아 stale해진다는 가설은 유력하지만, 이를 "Remove 호출 시점마다 필드 갱신"으로 구현한 462f558이 왼쪽 생성을 완전히 막는 신규 회귀를 일으켜 revert됨 — 필드 캐시 갱신 타이밍 자체보다 더 근본적인 설계 문제(캐시 방식의 구조적 취약점)일 가능성을 다음 세션에서 검토 필요.
+  3. (최종 확정) _chainHeadExitPos/_chainTailEntryPos가 SpawnNextPair()/SpawnPrevPair() 호출 시에만 갱신되는 캐시였고, RemoveTail()/RemoveHead()는 이를 전혀 갱신하지 않았다. 트림 이후 방향을 전환하면 이미 Destroy된 room의 옛 커넥터 위치를 앵커로 삼아 새 room을 이어붙여 간격이 발생했다. 462f558은 이를 "Remove 시점마다 필드 갱신"으로 고치려 했으나 다른 경로와 충돌해 회귀를 일으켰다 — 근본 문제는 갱신 타이밍이 아니라 "여러 갱신 시점을 수동으로 동기화해야 하는 캐시" 패턴 자체였다.
 
 fix: |
-  1건 미해결. 현재 코드는 9b259dc 상태로 롤백되어 있음 (462f558 및 그 이전 커밋들은 유지, 462f558만 b4ef259로 revert됨):
-  - 8297aeb, d33c071, 27289f7, 9b259dc: 유지 (양방향 초기 생성, 카메라 Bounds 병합, 연속 생성/트리밍, 인덱스 타이밍 수정 — 모두 정상 동작 확인됨)
-  - 462f558: revert됨 (b4ef259) — "간격 버그"가 재발한 상태.
-  다음 세션 제안: _chainTailEntryPos/_chainHeadExitPos를 필드에 캐시하지 않고, SpawnPrevPair()/SpawnNextPair() 호출 시점에 `_chain[0]`/`_chain[^1]`의 실제 커넥터 위치를 그때그때 조회하는 방식으로 전환 검토.
+  캐시 필드 자체를 제거하고 라이브 조회 + 컨테이너 전환으로 재구현 (커밋 예정, WorldGenerator.cs):
+  1. `_chainHeadExitPos`/`_chainTailEntryPos` 필드 삭제. SpawnNextPair()는 `_chain.Last.Value.room`에서, SpawnPrevPair()는 `_chain.First.Value.room`에서 Right/Left 커넥터 위치를 매 호출 시점에 직접 재조회한다. RemoveTail()/RemoveHead()는 더 이상 어떤 앵커 필드도 건드릴 필요가 없다(캐시 자체가 없으므로 "갱신 누락" 버그 클래스가 구조적으로 사라짐).
+  2. TrySpawnExitPortal()의 대기룸 Y 오프셋도 `_chainHeadExitPos.y` 대신 `room.transform.position.y`(포탈이 속한 room 자신의 Y)를 사용하도록 변경 — 정렬용이 아닌 순수 Y 오프셋이라 문제 없음.
+  3. `_chain`을 `List<(GameObject,GameObject)>`에서 `LinkedList<(GameObject,GameObject)>`로 전환. `Insert(0,...)`/`RemoveAt(0)`/`RemoveAt(Count-1)`/`_chain[0]`/`_chain[^1]`을 `AddFirst`/`AddLast`/`RemoveFirst`/`RemoveLast`/`First`/`Last`로 교체.
+  4. UpdatePlayerIndex()의 인덱스 기반 임의접근(`_chain[i+1]`, `_chain[i-1]`)은 LinkedList에서 지원하지 않으므로, `_playerCurrentIndex`와 항상 함께 갱신되는 `_playerCurrentNode`(LinkedListNode 참조)를 신설해 `.Next`/`.Previous`로 O(1) 인접 노드 탐색으로 대체. Start()/SpawnPrevPair()/FloorTransitionSequence() 등 인덱스가 바뀌는 모든 지점에서 `_playerCurrentNode`를 동일하게 동기화.
 
-verification: 미해결 — 간격 버그 재현 확인 필요, 왼쪽 생성 회귀는 revert로 해소됨(재확인 필요).
+verification: |
+  정적 검증 완료 — grep으로 `_chainHeadExitPos`/`_chainTailEntryPos`/`_chain[`/`_chain.Insert`/`_chain.RemoveAt` 잔여 참조 없음 확인, 전체 파일 재독해로 모든 LinkedList API 호출 일관성 확인. Unity 배치모드 컴파일은 사용자가 에디터를 이미 열어둔 상태라 실행 불가(스킵) — 에디터 포커스 시 자동 재컴파일되며 Console에서 에러 유무 확인 필요.
+  Play Mode 동작 검증(간격 재현 여부, 왼쪽 생성 정상 여부)은 사용자 확인 대기 중.
 files_changed:
   - Assets/Scripts/World/WorldGenerator.cs

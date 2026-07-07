@@ -6,7 +6,7 @@ using UnityEngine;
 /// Phase 9: 플레이어 위치 기반 수평 Room+Corridor 무한 체인 생성/정리.
 /// SampleScene에서 FloorSpawner/TestWorldGenerator 대신 배치한다.
 /// D-08: FloorSpawner.cs는 Phase 9에서 수정하지 않는다.
-/// D-09: 체인 List에서 corridor = 해당 room의 왼쪽(ENT 방향) 길.
+/// D-09: 체인에서 corridor = 해당 room의 왼쪽(ENT 방향) 길.
 /// </summary>
 public class WorldGenerator : MonoBehaviour
 {
@@ -43,12 +43,16 @@ public class WorldGenerator : MonoBehaviour
     [SerializeField] private CombatController _combatController; // ForceExitCombatState 호출용
 
     // Runtime state
-    private List<(GameObject room, GameObject corridor)> _chain
-        = new List<(GameObject, GameObject)>();
+    // D-10: List -> LinkedList로 전환. 양 끝(AddFirst/AddLast/RemoveFirst/RemoveLast)에서 O(1)로
+    // 삽입/삭제하고, First/Last로 현재 체인 경계 room을 항상 "그때그때" 조회할 수 있어 GEN-04에서
+    // 문제였던 stale 캐시(_chainHeadExitPos/_chainTailEntryPos)를 구조적으로 제거한다.
+    private LinkedList<(GameObject room, GameObject corridor)> _chain
+        = new LinkedList<(GameObject, GameObject)>();
     private float _currentYDrift;         // D-01: 누적 Y 변위
-    private Vector3 _chainHeadExitPos;    // 다음 Corridor ENT 스폰 기준점
-    private Vector3 _chainTailEntryPos;   // GEN-04: 다음 leftward Corridor EXIT 스폰 기준점 (신규)
-    private int _playerCurrentIndex;      // 플레이어가 현재 위치한 체인 인덱스
+    private int _playerCurrentIndex;      // 플레이어가 현재 위치한 체인 인덱스(왼쪽 끝 기준)
+    private LinkedListNode<(GameObject room, GameObject corridor)> _playerCurrentNode;
+        // _playerCurrentIndex와 항상 함께 갱신되는 실제 노드 참조 — UpdatePlayerIndex()가 인접 노드를
+        // O(1)로 탐색하는 데 사용한다(LinkedList는 인덱스 임의접근을 지원하지 않음).
     private int _activeExitCount;         // D-08: 현재 활성 포탈 수
 
     public static WorldGenerator Instance { get; private set; }
@@ -69,7 +73,7 @@ public class WorldGenerator : MonoBehaviour
         // 1. 시작 룸 스폰 — 반드시 Vector3.zero 기준 (Pitfall 2: AlignByEntry 공식 성립 조건)
         var startRoomPrefab = _roomPrefabs[Random.Range(0, _roomPrefabs.Length)];
         var startRoom = Instantiate(startRoomPrefab, Vector3.zero, Quaternion.identity);
-        _chain.Add((startRoom, null)); // D-09: 첫 룸은 왼쪽 Corridor 없음
+        var startNode = _chain.AddLast((startRoom, null)); // D-09: 첫 룸은 왼쪽 Corridor 없음
 
         // 1.5 — 시작 룸 ExitSpawnPoint 텔레포트 (FloorTransitionSequence Step 2와 동일 패턴)
         // 랜덤 startRoomPrefab의 바닥 높이가 플레이어 씬 배치 위치와 다를 수 있어 허공 스폰 위험 존재
@@ -87,14 +91,6 @@ public class WorldGenerator : MonoBehaviour
 
         TrySpawnExitPortal(startRoom); // EXIT-01: 시작 룸도 포탈 스폰 대상 (예외 없음)
 
-        // 시작 룸 EXIT 위치 → 첫 Corridor 스폰 기준점
-        var startExit = FindConnector(startRoom, RoomConnector.Direction.Right);
-        _chainHeadExitPos = startExit != null ? startExit.transform.position : Vector3.zero;
-
-        // 시작 룸 ENT 위치 → 첫 leftward Corridor 스폰 기준점 (GEN-04)
-        var startEntry = FindConnector(startRoom, RoomConnector.Direction.Left);
-        _chainTailEntryPos = startEntry != null ? startEntry.transform.position : Vector3.zero;
-
         // 2. 초기 lookahead 스폰 (GEN-01: 시작 시 앞 _lookaheadCount쌍 미리 생성 — 오른쪽)
         for (int i = 0; i < _lookaheadCount; i++)
             SpawnNextPair();
@@ -108,6 +104,7 @@ public class WorldGenerator : MonoBehaviour
         for (int i = 0; i < _lookbehindCount; i++)
             SpawnPrevPair();
         _playerCurrentIndex = _lookbehindCount; // 앞에 삽입된 쌍 개수만큼 시작 룸의 인덱스가 밀림
+        _playerCurrentNode = startNode; // AddFirst는 기존 노드 참조를 바꾸지 않으므로 startNode가 계속 유효
 
         // 3. CameraFollow bounds 초기화 — 전체 체인(양방향 lookahead+lookbehind) 병합 Bounds 사용
         // (Pitfall 7: FloorSpawner가 설정한 _hasBounds 잔류 방지. 단일 룸 스냅 대신 병합 Bounds로
@@ -117,14 +114,20 @@ public class WorldGenerator : MonoBehaviour
 
     private void SpawnNextPair()
     {
+        // 현재 체인의 실제 우측 경계 room에서 EXIT 커넥터 위치를 그때그때 조회한다 — 캐시 필드를
+        // 두지 않으므로 RemoveTail/RemoveHead가 경계를 바꿔도 stale해질 여지가 없다.
+        var tailRoom = _chain.Last.Value.room;
+        var tailExit = FindConnector(tailRoom, RoomConnector.Direction.Right);
+        Vector3 headExitPos = tailExit != null ? tailExit.transform.position : tailRoom.transform.position;
+
         // Corridor 선택 및 스폰 (GEN-03: 3종 랜덤, D-01~D-03: Y drift 제약)
         var corridorPrefab = SelectCorridor();
         var corridor = Instantiate(corridorPrefab, Vector3.zero, Quaternion.identity);
-        AlignByEntry(corridor, _chainHeadExitPos);
+        AlignByEntry(corridor, headExitPos);
 
         // Corridor EXIT → Room ENT 스폰 기준점
         var corridorExit = FindConnector(corridor, RoomConnector.Direction.Right);
-        var roomEntryPos = corridorExit != null ? corridorExit.transform.position : _chainHeadExitPos;
+        var roomEntryPos = corridorExit != null ? corridorExit.transform.position : headExitPos;
 
         // Room 스폰 (GEN-03: 룸 풀 랜덤 선택)
         var roomPrefab = _roomPrefabs[Random.Range(0, _roomPrefabs.Length)];
@@ -132,31 +135,33 @@ public class WorldGenerator : MonoBehaviour
         AlignByEntry(room, roomEntryPos);
         TrySpawnExitPortal(room);
 
-        // 다음 스폰 기준점 업데이트 (Room EXIT 위치)
-        var roomExit = FindConnector(room, RoomConnector.Direction.Right);
-        _chainHeadExitPos = roomExit != null ? roomExit.transform.position : roomEntryPos;
-
         // D-09: corridor = 이 room의 왼쪽 길로 체인 등록
-        _chain.Add((room, corridor));
+        _chain.AddLast((room, corridor));
     }
 
     /// <summary>
     /// GEN-04: 시작 시점 좌측(lookbehind) 초기 생성 전용. SpawnNextPair()의 좌우 대칭 버전 —
-    /// Corridor+Room을 생성해 _chain의 맨 앞(index 0)에 삽입한다.
-    /// D-09 체인 표현("corridor = 해당 room의 왼쪽 길") 유지를 위해, 기존에 _chain[0]에 있던
+    /// Corridor+Room을 생성해 _chain의 맨 앞(First)에 삽입한다.
+    /// D-09 체인 표현("corridor = 해당 room의 왼쪽 길") 유지를 위해, 기존에 _chain.First에 있던
     /// (구) 좌측 끝 room의 corridor 필드(null)를 새로 생성한 corridor로 교체한 뒤, 새 room을
     /// corridor=null 상태로 맨 앞에 삽입한다.
     /// </summary>
     private void SpawnPrevPair()
     {
+        // 현재 체인의 실제 좌측 경계 room에서 ENT 커넥터 위치를 그때그때 조회한다 — SpawnNextPair()와
+        // 동일한 이유(캐시 필드 제거로 stale 방지).
+        var headRoom = _chain.First.Value.room;
+        var headEntry = FindConnector(headRoom, RoomConnector.Direction.Left);
+        Vector3 tailEntryPos = headEntry != null ? headEntry.transform.position : headRoom.transform.position;
+
         // Corridor 선택 및 스폰 — 이 Corridor의 오른쪽(EXIT) 커넥터가 기존 체인 좌측 끝 ENT와 맞물려야 함
         var corridorPrefab = SelectCorridor();
         var corridor = Instantiate(corridorPrefab, Vector3.zero, Quaternion.identity);
-        AlignByExit(corridor, _chainTailEntryPos);
+        AlignByExit(corridor, tailEntryPos);
 
         // Corridor ENT(왼쪽) → 새 Room의 EXIT(오른쪽) 스폰 기준점
         var corridorEntry = FindConnector(corridor, RoomConnector.Direction.Left);
-        var roomExitPos = corridorEntry != null ? corridorEntry.transform.position : _chainTailEntryPos;
+        var roomExitPos = corridorEntry != null ? corridorEntry.transform.position : tailEntryPos;
 
         // Room 스폰 (GEN-03: 룸 풀 랜덤 선택 — SpawnNextPair()와 동일 정책)
         var roomPrefab = _roomPrefabs[Random.Range(0, _roomPrefabs.Length)];
@@ -164,21 +169,18 @@ public class WorldGenerator : MonoBehaviour
         AlignByExit(room, roomExitPos);
         TrySpawnExitPortal(room);
 
-        // 다음 leftward 스폰 기준점 업데이트 (새 Room의 ENT 위치)
-        var roomEntry = FindConnector(room, RoomConnector.Direction.Left);
-        _chainTailEntryPos = roomEntry != null ? roomEntry.transform.position : roomExitPos;
-
         // D-09: 기존 체인 맨 앞 room이 갖고 있던 corridor(null)를 새로 만든 corridor로 교체
-        var (oldFrontRoom, _) = _chain[0];
-        _chain[0] = (oldFrontRoom, corridor);
+        var oldFrontNode = _chain.First;
+        var (oldFrontRoom, _) = oldFrontNode.Value;
+        oldFrontNode.Value = (oldFrontRoom, corridor);
 
         // 새 room을 맨 앞에 삽입 — 왼쪽 Corridor 없음(다음 SpawnPrevPair 호출 시 교체될 수 있음)
-        _chain.Insert(0, (room, null));
+        _chain.AddFirst((room, null));
     }
 
     private void RemoveTail()
     {
-        var (room, corridor) = _chain[0];
+        var (room, corridor) = _chain.First.Value;
 
         // D-08: 이 room이 보유한 포탈의 대기룸을 함께 정리 — 대기룸 메모리 누수 방지 + 포탈 스폰 기회 복원
         ExitPortal portal = room.GetComponentInChildren<ExitPortal>(true);
@@ -191,7 +193,7 @@ public class WorldGenerator : MonoBehaviour
 
         if (corridor != null) Destroy(corridor);
         Destroy(room);
-        _chain.RemoveAt(0);
+        _chain.RemoveFirst();
     }
 
     /// <summary>
@@ -201,8 +203,7 @@ public class WorldGenerator : MonoBehaviour
     /// </summary>
     private void RemoveHead()
     {
-        int lastIndex = _chain.Count - 1;
-        var (room, corridor) = _chain[lastIndex];
+        var (room, corridor) = _chain.Last.Value;
 
         // D-08: 이 room이 보유한 포탈의 대기룸을 함께 정리 — RemoveTail()과 동일 패턴
         ExitPortal portal = room.GetComponentInChildren<ExitPortal>(true);
@@ -215,7 +216,7 @@ public class WorldGenerator : MonoBehaviour
 
         if (corridor != null) Destroy(corridor);
         Destroy(room);
-        _chain.RemoveAt(lastIndex);
+        _chain.RemoveLast();
     }
 
     private GameObject SelectCorridor()
@@ -332,8 +333,10 @@ public class WorldGenerator : MonoBehaviour
 
         // D-04: 다음 층 대기룸을 지금 미리 스폰 — Vector3.zero 기준 Instantiate 후 X=0 고정 배치
         // (AlignByEntry는 적용 불가 — D-07이 옛 체인을 전부 파괴하므로 수평 연속성 요구가 없다)
+        // Y는 이 포탈이 속한 room 자신의 위치 기준 오프셋일 뿐 정렬에 쓰이지 않으므로,
+        // 체인 경계 캐시 대신 room.transform.position.y를 그대로 사용한다.
         var standbyPrefab = _roomPrefabs[Random.Range(0, _roomPrefabs.Length)];
-        var standbyPos = new Vector3(0f, _chainHeadExitPos.y + _floorHeight, 0f);
+        var standbyPos = new Vector3(0f, room.transform.position.y + _floorHeight, 0f);
         var standbyRoom = Instantiate(standbyPrefab, standbyPos, Quaternion.identity);
         standbyRoom.SetActive(false);
         portal.StandbyRoom = standbyRoom;
@@ -391,23 +394,30 @@ public class WorldGenerator : MonoBehaviour
         // 플레이어 X > 다음 룸의 ENT X → 다음 룸에 실제로 들어간 시점에만 인덱스 진행.
         // (기존 룸의 EXIT 기준이면 복도 중간에서 되돌아가도 인덱스가 이미 넘어가 생성/삭제가
         // 먼저 발생함 — 생성(GEN-01 등)과 동일하게 "다음 룸 진입" 시점으로 통일)
-        for (int i = _playerCurrentIndex; i < _chain.Count - 1; i++)
+        // LinkedList는 인덱스 임의접근이 없으므로 _playerCurrentNode를 인덱스와 함께 전진/후퇴시킨다.
+        while (_playerCurrentNode.Next != null)
         {
-            var nextEntryConnector = FindConnector(_chain[i + 1].room, RoomConnector.Direction.Left);
+            var nextEntryConnector = FindConnector(_playerCurrentNode.Next.Value.room, RoomConnector.Direction.Left);
             if (nextEntryConnector == null) break;
             if (_playerTransform.position.x > nextEntryConnector.transform.position.x)
-                _playerCurrentIndex = i + 1;
+            {
+                _playerCurrentNode = _playerCurrentNode.Next;
+                _playerCurrentIndex++;
+            }
             else
                 break;
         }
 
         // 플레이어 X < 이전 룸의 EXIT X → 이전 룸에 실제로 들어간 시점에만 인덱스 후퇴 (좌우 대칭)
-        for (int i = _playerCurrentIndex; i > 0; i--)
+        while (_playerCurrentNode.Previous != null)
         {
-            var prevExitConnector = FindConnector(_chain[i - 1].room, RoomConnector.Direction.Right);
+            var prevExitConnector = FindConnector(_playerCurrentNode.Previous.Value.room, RoomConnector.Direction.Right);
             if (prevExitConnector == null) break;
             if (_playerTransform.position.x < prevExitConnector.transform.position.x)
-                _playerCurrentIndex = i - 1;
+            {
+                _playerCurrentNode = _playerCurrentNode.Previous;
+                _playerCurrentIndex--;
+            }
             else
                 break;
         }
@@ -453,12 +463,10 @@ public class WorldGenerator : MonoBehaviour
 
         GameObject newRoom = portal.StandbyRoom;
         newRoom.SetActive(true);
-        _chain.Add((newRoom, null));
+        var newNode = _chain.AddLast((newRoom, null));
         _playerCurrentIndex = 0;
+        _playerCurrentNode = newNode;
         _currentYDrift = 0f; // 새 층은 드리프트 예산 초기화
-
-        var exit = FindConnector(newRoom, RoomConnector.Direction.Right);
-        _chainHeadExitPos = exit != null ? exit.transform.position : newRoom.transform.position;
 
         // Step 2 — ExitSpawnPoint 텔레포트 (10-TRANSITION-DESIGN.md 결정 — 포탈 스폰과 동일 마커 재사용)
         var spawnPoints = newRoom.GetComponentsInChildren<ExitSpawnPoint>(true);
