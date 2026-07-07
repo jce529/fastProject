@@ -30,7 +30,7 @@
 
 ### 난이도 스케일링 (DIFF)
 
-- [ ] **DIFF-01**: 층 번호가 올라갈수록 스포너에서 생성되는 몬스터 수가 증가한다
+- [x] **DIFF-01**: 층 번호가 올라갈수록 스포너에서 생성되는 몬스터 수가 증가한다
 
 ### 점수 시스템 (SCORE)
 
@@ -65,7 +65,7 @@
 | EXIT-03 | Phase 10 | Complete |
 | TIMER-01 | Phase 11 | Complete |
 | TIMER-02 | Phase 11 | Complete |
-| DIFF-01 | Phase 11 | Pending |
+| DIFF-01 | Phase 11 | Complete |
 | SCORE-01 | Phase 11 | Complete |
 | SCORE-02 | Phase 11 | Pending |
 

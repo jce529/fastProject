@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v3.0
 milestone_name: Phases
 status: executing
-stopped_at: Completed 11-01-PLAN.md
-last_updated: "2026-07-07T06:16:46.121Z"
+stopped_at: Completed 11-02-PLAN.md
+last_updated: "2026-07-07T06:24:29.366Z"
 last_activity: 2026-07-07
 progress:
   total_phases: 5
   completed_phases: 3
   total_plans: 14
-  completed_plans: 11
+  completed_plans: 12
 ---
 
 # Project State: Fast (가칭)
@@ -32,7 +32,7 @@ progress:
 ## Current Position
 
 Phase: 11
-Plan: 2 of 4
+Plan: 3 of 4
 Next: Phase 10 (EXIT 포탈 & 층 전환)
 Status: Ready to execute
 Last activity: 2026-07-07
@@ -80,6 +80,7 @@ Progress: [██████████████████░░] 9/11 ph
 | Corridor/Complex_Room 프리팹 fileID는 반드시 Int64.MaxValue(9223372036854775807) 이하로 생성 | quick-260701-sc7에서 19자리 무작위 fileID가 오버플로우해 CameraBound 컴포넌트가 3개 프리팹에서 깨짐 — 향후 유사 작업 시 문자열 비교로 검증 필수 |
 | RoomEntry 기반 ENT 텔레포트 → ExitSpawnPoint 기반 랜덤 텔레포트로 교체 (10-03) | 10-TRANSITION-DESIGN.md 결정 — ExitSpawnPoint가 이미 바닥 위 안전 위치이므로 재사용, RoomEntry 마커를 4개 룸에 중복 배치할 필요 없음. 허공 스폰 버그(2026-07-03-complex-room-ent todo) 근본 원인 해결 |
 | ExitPortal.prefab 콜라이더 형태는 CircleCollider2D 유지, BoxCollider2D로 되돌리지 않음 (10-03) | 사용자가 독립적으로 스프라이트+Animator 포함한 완성된 프리팹을 미리 제작 — 콜라이더 모양은 트리거 정확성에 영향 없음. Is Trigger=false 버그만 수정 |
+| 대기룸(StandbyRoom)의 적 난이도는 FloorManager.CurrentFloor + 1 기준으로 계산 (11-02) | 대기룸은 Instantiate 시점이 아니라 실제로 SetActive(true)되는 미래 층에서 플레이할 방이므로, 그 미래 층 번호로 난이도 테이블을 조회해야 정합성 유지 |
 
 ### Technical Constraints to Enforce Every Phase
 
@@ -128,8 +129,8 @@ Progress: [██████████████████░░] 9/11 ph
 3. Read `.planning/REQUIREMENTS.md` — requirement details and traceability
 4. Continue from Current Phase listed above
 
-**Last session:** 2026-07-07T06:16:46.115Z
-**Stopped at:** Completed 11-01-PLAN.md
+**Last session:** 2026-07-07T06:24:29.360Z
+**Stopped at:** Completed 11-02-PLAN.md
 
 ---
 *State initialized: 2026-05-27*
