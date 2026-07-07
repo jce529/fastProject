@@ -291,7 +291,7 @@ Plans:
 - [ ] **Phase 8: 룸-길 아키텍처** - Room과 Corridor 프리팹이 마커 기반으로 체인 연결될 수 있는 아키텍처가 갖춰진다
 - [ ] **Phase 9: 무한 양방향 생성 & 정리** - 플레이어 이동 방향 앞 2개 Room+Corridor가 자동 생성되고, 뒤로 2개 초과 시 자동 Destroy된다
 - [x] **Phase 10: EXIT 포탈 & 층 전환** - Room 스폰 시 확률적으로 EXIT 포탈이 생성되고, 진입 시 층 번호가 올라가며 WorldGenerator가 초기화된다 (completed 2026-07-06)
-- [ ] **Phase 11: 타이머 & 난이도** - 층 진입마다 HUD에 카운트다운이 표시되고 시간 초과 시 게임오버, 층이 높아질수록 몬스터 수가 증가한다
+- [x] **Phase 11: 타이머 & 난이도** - 층 진입마다 HUD에 카운트다운이 표시되고 시간 초과 시 게임오버, 층이 높아질수록 몬스터 수가 증가한다 (completed 2026-07-07)
 
 ---
 
@@ -367,7 +367,7 @@ Plans:
 - [x] 11-01-PLAN.md — FloorTimer 정적 클래스 + ScoreManager.AddTimeBonus (TIMER-01, TIMER-02, SCORE-01)
 - [x] 11-02-PLAN.md — WorldGenerator 통합: 난이도 적 스폰 + 타이머 리셋/틱 + 점수 가산 배선 (TIMER-01, TIMER-02, DIFF-01, SCORE-01)
 - [x] 11-03-PLAN.md — HUDController: 타이머 표시 + 점멸 경고 (TIMER-01, SCORE-02)
-- [ ] 11-04-PLAN.md — 에디터 도구 + SampleScene Inspector 연결 + 플레이테스트 검증 (TIMER-01, TIMER-02, DIFF-01, SCORE-01, SCORE-02)
+- [x] 11-04-PLAN.md — 에디터 도구 + SampleScene Inspector 연결 + 플레이테스트 검증 (TIMER-01, TIMER-02, DIFF-01, SCORE-01, SCORE-02)
 **UI hint**: yes
 
 ---
@@ -379,7 +379,7 @@ Plans:
 | 8. 룸-길 아키텍처 | 3/3 | Complete | 2026-07-01 |
 | 9. 무한 양방향 생성 & 정리 | 3/3 | Complete | 2026-07-01 |
 | 10. EXIT 포탈 & 층 전환 | 4/4 | Complete    | 2026-07-06 |
-| 11. 타이머 & 난이도 | 3/4 | In Progress|  |
+| 11. 타이머 & 난이도 | 4/4 | Complete   | 2026-07-07 |
 
 ---
 
@@ -422,7 +422,7 @@ Plans:
 **Goal:** [To be planned]
 **Requirements**: TBD
 **Depends on:** Phase 11
-**Plans:** 2/4 plans executed
+**Plans:** 4/4 plans complete
 
 Plans:
 - [ ] TBD (run /gsd:plan-phase 12 to break down)
