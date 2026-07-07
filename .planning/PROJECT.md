@@ -16,8 +16,8 @@
 - 룸-길 아키텍처: Room에 END_Left/END_Right 마커, Corridor 3종 (상승/직진/하강, 모두 전투 구간)
 - 무한 양방향 생성 & 정리: 플레이어 기준 앞 2개 룸+길 미리 생성, 2개 초과 Destroy
 - EXIT 포탈: 룸 내 정해진 스폰 포인트에 확률적 스폰 (FloorSpawner 인스펙터로 확률/최대 개수 조절)
-- 타이머 & 게임오버: 층별 제한 시간 카운트다운 HUD, 초과 시 게임오버
-- 난이도 스케일링: 층 번호에 따라 스포너 몬스터 수 증가
+- 타이머 & 게임오버: 층별 제한 시간 카운트다운 HUD, 초과 시 게임오버 (완료 — Phase 11)
+- 난이도 스케일링: 층 번호에 따라 스포너 몬스터 수 증가 (완료 — Phase 11)
 
 ## Requirements
 
@@ -117,4 +117,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-07-06 — Phase 10 (EXIT 포탈 & 층 전환) 완료. Phase 11 (타이머 & 난이도)만 남음.*
+*Last updated: 2026-07-07 — Phase 11 (타이머 & 난이도) 완료 및 검증(5/5 must-haves). 다음: Phase 12 (애니메이션 폴리시).*
