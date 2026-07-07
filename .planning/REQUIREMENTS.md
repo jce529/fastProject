@@ -25,8 +25,8 @@
 
 ### 타이머 & 게임오버 (TIMER)
 
-- [ ] **TIMER-01**: 층 진입 시 HUD에 남은 제한 시간이 카운트다운으로 표시된다
-- [ ] **TIMER-02**: 제한 시간 초과 시 게임오버가 발생한다
+- [x] **TIMER-01**: 층 진입 시 HUD에 남은 제한 시간이 카운트다운으로 표시된다
+- [x] **TIMER-02**: 제한 시간 초과 시 게임오버가 발생한다
 
 ### 난이도 스케일링 (DIFF)
 
@@ -34,7 +34,7 @@
 
 ### 점수 시스템 (SCORE)
 
-- [ ] **SCORE-01**: 플레이어가 EXIT 포탈로 다음 층에 도달하면 남은 제한 시간(초)에 비례한 점수가 누적된다 (빠를수록 높은 점수)
+- [x] **SCORE-01**: 플레이어가 EXIT 포탈로 다음 층에 도달하면 남은 제한 시간(초)에 비례한 점수가 누적된다 (빠를수록 높은 점수)
 - [ ] **SCORE-02**: HUD에 현재 누적 점수가 실시간으로 표시된다
 
 ## Future Requirements
@@ -63,10 +63,10 @@
 | EXIT-01 | Phase 10 | Complete |
 | EXIT-02 | Phase 10 | Complete |
 | EXIT-03 | Phase 10 | Complete |
-| TIMER-01 | Phase 11 | Pending |
-| TIMER-02 | Phase 11 | Pending |
+| TIMER-01 | Phase 11 | Complete |
+| TIMER-02 | Phase 11 | Complete |
 | DIFF-01 | Phase 11 | Pending |
-| SCORE-01 | Phase 11 | Pending |
+| SCORE-01 | Phase 11 | Complete |
 | SCORE-02 | Phase 11 | Pending |
 
 **Coverage:**

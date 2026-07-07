@@ -364,7 +364,7 @@ Plans:
 **Plans**: 4 plans
 
 Plans:
-- [ ] 11-01-PLAN.md — FloorTimer 정적 클래스 + ScoreManager.AddTimeBonus (TIMER-01, TIMER-02, SCORE-01)
+- [x] 11-01-PLAN.md — FloorTimer 정적 클래스 + ScoreManager.AddTimeBonus (TIMER-01, TIMER-02, SCORE-01)
 - [ ] 11-02-PLAN.md — WorldGenerator 통합: 난이도 적 스폰 + 타이머 리셋/틱 + 점수 가산 배선 (TIMER-01, TIMER-02, DIFF-01, SCORE-01)
 - [ ] 11-03-PLAN.md — HUDController: 타이머 표시 + 점멸 경고 (TIMER-01, SCORE-02)
 - [ ] 11-04-PLAN.md — 에디터 도구 + SampleScene Inspector 연결 + 플레이테스트 검증 (TIMER-01, TIMER-02, DIFF-01, SCORE-01, SCORE-02)
@@ -379,7 +379,7 @@ Plans:
 | 8. 룸-길 아키텍처 | 3/3 | Complete | 2026-07-01 |
 | 9. 무한 양방향 생성 & 정리 | 3/3 | Complete | 2026-07-01 |
 | 10. EXIT 포탈 & 층 전환 | 4/4 | Complete    | 2026-07-06 |
-| 11. 타이머 & 난이도 | 0/4 | Not started | - |
+| 11. 타이머 & 난이도 | 1/4 | In Progress|  |
 
 ---
 
@@ -422,7 +422,7 @@ Plans:
 **Goal:** [To be planned]
 **Requirements**: TBD
 **Depends on:** Phase 11
-**Plans:** 0 plans
+**Plans:** 1/4 plans executed
 
 Plans:
 - [ ] TBD (run /gsd:plan-phase 12 to break down)
