@@ -417,15 +417,30 @@ Plans:
 - 타이머는 반드시 Time.unscaledDeltaTime 사용 — 슬로우모션(Time.timeScale ≈ 0.2) 면역 필수
 - WaitForSecondsRealtime 코루틴: 층 전환 시퀀스 전 구간에 걸쳐 타임스케일 면역 보장
 
-### Phase 12: 포탈 진입/퇴장 애니메이션 구현 (10-TRANSITION-DESIGN.md 설계 반영) 및 공격 애니메이션 개선
+### Phase 12: 포탈 진입/퇴장 애니메이션 구현 (10-TRANSITION-DESIGN.md 설계 반영) 및 공격/히트 애니메이션 개선
 
-**Goal:** [To be planned]
-**Requirements**: TBD
+**Goal:** 포탈 전환 시 10-TRANSITION-DESIGN.md 원안의 SpriteMask 입장/퇴장 연출이 실제로 재생되고, Whiff/Roll 애니메이터 트리거 버그가 수정되며, 처치 순간 히트 스파크+카메라 쉐이크+강화된 돌진 잔상이 재생되고, 적 처치 시 파티클+SpriteMask 페이드 연출 후 GameObject가 정리된다.
+**Requirements**: TBD (REQUIREMENTS.md에 매핑된 v3.0 핵심 요구사항 없음 — discuss-phase로 범위가 확정된 비주얼 폴리싱 Phase. 12-CONTEXT.md의 D-01~D-11 결정사항을 실질적 요구사항으로 추적한다)
 **Depends on:** Phase 11
-**Plans:** 4/4 plans complete
+**Success Criteria** (what must be TRUE):
+  1. 포탈 진입 시 플레이어가 SpriteMask에 가려지며 점진적으로 사라지고, 새 층에서 포탈 이펙트가 성장한 뒤 플레이어가 걸어나오듯 점진적으로 나타난다 (D-01~D-04)
+  2. 헛베기 시 AirSlash 모션이, 구르기 시 Roll 모션이 실제로 재생된다 — 이전에는 컨트롤러에 파라미터가 없어 무효였다 (D-05, D-06)
+  3. 처치 순간 GuardImpact 히트 스파크와 카메라 쉐이크가 재생되고, 대시 중 강화된 그라데이션 TrailRenderer 잔상이 표시된다 (D-07, D-08, D-10)
+  4. 적 처치 시 Die 애니메이션 재생 후 파티클+SpriteMask 상승 페이드가 재생되고 GameObject가 실제로 Destroy된다 (D-09)
+  5. 적(MeleeEnemy/RangedEnemy)의 기존 공격 모션 자체는 변경되지 않는다 (D-11 범위 확인)
+**Plans**: 9 plans (3 waves)
 
 Plans:
-- [ ] TBD (run /gsd:plan-phase 12 to break down)
+- [ ] 12-01-PLAN.md — RuntimeMaskSprite.cs + FloorTransitionEffect.cs (D-01, D-03, D-04)
+- [ ] 12-02-PLAN.md — PortalEffectBuilder.cs + WorldGenerator.cs FloorTransitionSequence 재작성 (D-01, D-02, D-03, D-04)
+- [ ] 12-03-PLAN.md — 에디터 도구 실행 + Inspector 연결 + 포탈 전환 플레이테스트 (D-01~D-04)
+- [ ] 12-04-PLAN.md — PlayerAnimatorPatcher.cs (Whiff/Roll 트리거+상태 패치 도구) (D-05, D-06)
+- [ ] 12-05-PLAN.md — 에디터 도구 실행 + Whiff/Roll 애니메이션 플레이테스트 (D-05, D-06)
+- [ ] 12-06-PLAN.md — AutoDestroySelf/HitSparkBuilder/PlayerTrailBuilder + CameraFollow.Shake + CombatController 배선 (D-07, D-08, D-10)
+- [ ] 12-07-PLAN.md — 에디터 도구 실행 + Inspector 연결 + 히트 임팩트 플레이테스트 (D-07, D-08, D-10)
+- [ ] 12-08-PLAN.md — EnemyDeathEffect.cs + MeleeEnemy/RangedEnemy 사망 연출 배선 (D-09, D-11)
+- [ ] 12-09-PLAN.md — 적 사망 연출 플레이테스트 (D-09, D-11)
+
 
 ---
 *v3.0 Roadmap created: 2026-06-28*
