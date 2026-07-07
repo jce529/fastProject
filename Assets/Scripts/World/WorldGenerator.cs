@@ -74,6 +74,8 @@ public class WorldGenerator : MonoBehaviour
             return;
         }
 
+        FloorTimer.Reset(); // D-08(TIMER-01): 게임 시작 시 60초 타이머 시작
+
         // 1. 시작 룸 스폰 — 반드시 Vector3.zero 기준 (Pitfall 2: AlignByEntry 공식 성립 조건)
         var startRoomPrefab = _roomPrefabs[Random.Range(0, _roomPrefabs.Length)];
         var startRoom = Instantiate(startRoomPrefab, Vector3.zero, Quaternion.identity);
@@ -398,6 +400,8 @@ public class WorldGenerator : MonoBehaviour
 
     private void Update()
     {
+        FloorTimer.Tick(); // TIMER-02: 만료 시 1회 PlayerController.OnPlayerDeath 발동
+
         if (_playerTransform == null || _chain.Count == 0) return;
         UpdatePlayerIndex();
 
@@ -487,6 +491,8 @@ public class WorldGenerator : MonoBehaviour
     {
         Debug.Log($"[WorldGenerator] EnterPortal → Floor {FloorManager.CurrentFloor}");
 
+        ScoreManager.AddTimeBonus(FloorTimer.RemainingSeconds); // D-02b(SCORE-01): 진입 순간 남은 시간을 점수로 환산
+
         // Step 1 — 입력 잠금 (D-04 6단계 중 1단계). ForceExitCombatState는 LockInput 이전에 호출해야 한다.
         _combatController?.ForceExitCombatState();
         _player.LockInput();
@@ -517,6 +523,7 @@ public class WorldGenerator : MonoBehaviour
         _playerCurrentIndex = 0;
         _playerCurrentNode = newNode;
         _currentYDrift = 0f; // 새 층은 드리프트 예산 초기화
+        FloorTimer.Reset(); // D-08(TIMER-01): 새 층 60초 리셋
 
         // Step 2 — ExitSpawnPoint 텔레포트 (10-TRANSITION-DESIGN.md 결정 — 포탈 스폰과 동일 마커 재사용)
         var spawnPoints = newRoom.GetComponentsInChildren<ExitSpawnPoint>(true);
