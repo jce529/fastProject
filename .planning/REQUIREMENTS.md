@@ -35,7 +35,7 @@
 ### 점수 시스템 (SCORE)
 
 - [x] **SCORE-01**: 플레이어가 EXIT 포탈로 다음 층에 도달하면 남은 제한 시간(초)에 비례한 점수가 누적된다 (빠를수록 높은 점수)
-- [ ] **SCORE-02**: HUD에 현재 누적 점수가 실시간으로 표시된다
+- [x] **SCORE-02**: HUD에 현재 누적 점수가 실시간으로 표시된다
 
 ## Future Requirements
 
@@ -67,7 +67,7 @@
 | TIMER-02 | Phase 11 | Complete |
 | DIFF-01 | Phase 11 | Pending |
 | SCORE-01 | Phase 11 | Complete |
-| SCORE-02 | Phase 11 | Pending |
+| SCORE-02 | Phase 11 | Complete |
 
 **Coverage:**
 - v3.0 requirements: 14 total
