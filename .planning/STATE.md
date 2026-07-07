@@ -3,13 +3,13 @@ gsd_state_version: 1.0
 milestone: v3.0
 milestone_name: Phases
 status: executing
-stopped_at: Phase 11 context gathered
-last_updated: "2026-07-06T15:06:56.944Z"
+stopped_at: Phase 12 context gathered
+last_updated: "2026-07-07T05:54:20.731Z"
 last_activity: 2026-07-06
 progress:
-  total_phases: 4
+  total_phases: 5
   completed_phases: 3
-  total_plans: 10
+  total_plans: 14
   completed_plans: 10
 ---
 
@@ -92,6 +92,10 @@ Progress: [██████████████████░░] 9/11 ph
 - Floor transition: `WaitForSecondsRealtime` only — `Time.timeScale` may be 0 at transition start
 - Timer: `Time.unscaledDeltaTime` only — timer must be immune to slow-motion timeScale
 
+### Roadmap Evolution
+
+- Phase 12 added: 포탈 진입/퇴장 애니메이션 구현 (10-TRANSITION-DESIGN.md 설계 반영) 및 공격 애니메이션 개선 (디렉토리: `12-animation-polish`, 자동 생성된 슬러그 `12-10-transition-design-md`가 설명문 속 파일명을 잘못 추출해 수동으로 개명함)
+
 ### Quick Tasks Completed (v1.0/v2.0)
 
 40개+ Quick 태스크 완료 (2026-06-01 ~ 2026-06-26) — 전체 목록은 `git log` 참조.
@@ -124,8 +128,8 @@ Progress: [██████████████████░░] 9/11 ph
 3. Read `.planning/REQUIREMENTS.md` — requirement details and traceability
 4. Continue from Current Phase listed above
 
-**Last session:** 2026-07-06T15:06:56.938Z
-**Stopped at:** Phase 11 context gathered
+**Last session:** 2026-07-07T05:54:20.725Z
+**Stopped at:** Phase 12 context gathered
 
 ---
 *State initialized: 2026-05-27*
