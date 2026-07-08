@@ -97,6 +97,10 @@ public class RangedEnemy : MonoBehaviour, IEnemy
 
         foreach (var c in GetComponents<Collider2D>()) c.enabled = false;
         _animator?.SetBool("isDead", true);
+
+        var deathEffect = GetComponent<EnemyDeathEffect>();
+        if (deathEffect == null) deathEffect = gameObject.AddComponent<EnemyDeathEffect>();
+        StartCoroutine(deathEffect.PlayDeathSequence(_animator));
     }
 
     public void ClearHighlight()
