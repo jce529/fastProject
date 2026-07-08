@@ -69,30 +69,30 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| BOSS-01 | TBD | Pending |
-| BOSS-02 | TBD | Pending |
-| BOSS-03 | TBD | Pending |
-| BOSS-04 | TBD | Pending |
-| BOSS-05 | TBD | Pending |
-| BOSS-06 | TBD | Pending |
-| BOSS-07 | TBD | Pending |
-| BOSS-08 | TBD | Pending |
-| BOSS-09 | TBD | Pending |
-| BOSS-10 | TBD | Pending |
-| SPWN-01 | TBD | Pending |
-| SPWN-02 | TBD | Pending |
-| SFX-01 | TBD | Pending |
-| SFX-02 | TBD | Pending |
-| SFX-03 | TBD | Pending |
-| SFX-04 | TBD | Pending |
-| SFX-05 | TBD | Pending |
-| SFX-06 | TBD | Pending |
+| BOSS-01 | Phase 16 | Pending |
+| BOSS-02 | Phase 16 | Pending |
+| BOSS-03 | Phase 15 | Pending |
+| BOSS-04 | Phase 15 | Pending |
+| BOSS-05 | Phase 15 | Pending |
+| BOSS-06 | Phase 15 | Pending |
+| BOSS-07 | Phase 16 | Pending |
+| BOSS-08 | Phase 17 | Pending |
+| BOSS-09 | Phase 16 | Pending |
+| BOSS-10 | Phase 16 | Pending |
+| SPWN-01 | Phase 14 | Pending |
+| SPWN-02 | Phase 14 | Pending |
+| SFX-01 | Phase 13 | Pending |
+| SFX-02 | Phase 13 | Pending |
+| SFX-03 | Phase 13 | Pending |
+| SFX-04 | Phase 13 | Pending |
+| SFX-05 | Phase 16 | Pending |
+| SFX-06 | Phase 13 | Pending |
 
 **Coverage:**
 - v3.1 requirements: 18 total
-- Mapped to phases: 0 (roadmap not yet created)
-- Unmapped: 18 ⚠️ (resolved by roadmapper)
+- Mapped to phases: 18
+- Unmapped: 0
 
 ---
 *Requirements defined: 2026-07-08*
-*Last updated: 2026-07-08 after v3.1 requirements definition*
+*Last updated: 2026-07-08 — v3.1 roadmap created, all 18 requirements mapped to Phase 13-17*

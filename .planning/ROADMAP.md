@@ -293,8 +293,8 @@ Plans:
 
 - [ ] **Phase 8: 룸-길 아키텍처** - Room과 Corridor 프리팹이 마커 기반으로 체인 연결될 수 있는 아키텍처가 갖춰진다
 - [ ] **Phase 9: 무한 양방향 생성 & 정리** - 플레이어 이동 방향 앞 2개 Room+Corridor가 자동 생성되고, 뒤로 2개 초과 시 자동 Destroy된다
-- [x] **Phase 10: EXIT 포탈 & 층 전환** - Room 스폰 시 확률적으로 EXIT 포탈이 생성되고, 진입 시 층 번호가 올라가며 WorldGenerator가 초기화된다 (completed 2026-07-06)
-- [x] **Phase 11: 타이머 & 난이도** - 층 진입마다 HUD에 카운트다운이 표시되고 시간 초과 시 게임오버, 층이 높아질수록 몬스터 수가 증가한다 (completed 2026-07-07)
+- [x] **Phase 10: EXIT 포탈 & 층 전환** - Room 스폰 시 확률적으로 EXIT 포탈이 생성되고, 진입 시 층 번호가 올라가며 WorldGenerator가 초기화된다 (completed 2026-07-06)
+- [x] **Phase 11: 타이머 & 난이도** - 층 진입마다 HUD에 카운트다운이 표시되고 시간 초과 시 게임오버, 층이 높아질수록 몬스터 수가 증가한다 (completed 2026-07-07)
 
 ---
 
@@ -453,6 +453,149 @@ Plans:
 
 ---
 
-## Next Milestone
+## v3.1 — 보스 룸 & 연출 고도화 (in progress)
 
-*(미정 — `/gsd:new-milestone`으로 정의 예정)*
+# Roadmap: Fast (가칭) — v3.1
+
+**Milestone:** v3.1 — 보스 룸 & 연출 고도화
+**Granularity:** Standard
+**Coverage:** 18/18 v3.1 requirements mapped
+
+---
+
+## v3.1 Phases
+
+- [ ] **Phase 13: 오디오 기반 구축 & 연출 사운드 폴리싱** - AudioManager 신설, 포탈전환/히트임팩트/적사망 사운드 추가 및 기존 타이밍 어색함 개선
+- [ ] **Phase 14: 적 등장 스폰 연출** - 근접/원거리 적(추후 보스 포함)이 포탈을 타고 등장하는 스폰 VFX, 연출 중 감지/타겟팅 차단
+- [ ] **Phase 15: 보스 FSM & 빈틈 타겟팅** - 예고→빈틈 공격 패턴 루프, 빈틈에서만 피격 가능, 7회 피격 처치(진행률 비노출), 처치 점수 보너스
+- [ ] **Phase 16: 보스 룸 콘텐츠 & 생명주기 게이팅** - 확률적 보스 룸 스폰(솔로 전투 보장), 입장 카메라 연출+전용 스폰 사운드, 층 타이머 일시정지, 전투 중 정리(Destroy) 예외
+- [ ] **Phase 17: WorldGenerator 통합 & 보스 처치 후 층 진행** - 정상 플레이 경로에서 보스 룸이 실제로 등장하고, 처치 후에도 EXIT 포탈로만 층 전환되는 전체 플로우 통합
+
+---
+
+## v3.1 Phase Details
+
+### Phase 13: 오디오 기반 구축 & 연출 사운드 폴리싱
+**Goal**: 프로젝트에 오디오 재생 인프라가 신설되고, 포탈전환/히트임팩트/적사망 연출에 사운드가 추가되며, 기존 타이밍·피드백 어색함이 개선된다
+**Depends on**: Phase 12
+**Requirements**: SFX-01, SFX-02, SFX-03, SFX-04, SFX-06
+**Success Criteria** (what must be TRUE):
+  1. AudioManager 싱글턴이 3개 씬(MainMenu/AttackSelect/SampleScene) 전환 간에도 유지되며 PlaySfx() 호출로 사운드가 재생된다
+  2. 포탈 진입/퇴장 시 사운드가 재생된다
+  3. 대시 히트 임팩트 순간 사운드가 재생되고, 슬로우모션(Time.timeScale 저하) 중에도 피치/타이밍이 깨지지 않는다
+  4. 적 사망 시 사운드가 재생된다
+  5. 포탈전환/히트/사망 연출에서 v3.0 Phase 12까지 남아있던 타이밍·피드백 어색함(이펙트-사운드 싱크 어긋남, 지연 불일치 등)이 체감상 개선된다
+**Plans**: TBD
+
+---
+
+### Phase 14: 적 등장 스폰 연출
+**Goal**: 근접형/원거리형 적이 스폰될 때 플레이어처럼 포탈을 타고 등장하는 연출이 재생되고, 연출이 끝나기 전까지 감지/공격 대상이 되지 않는다
+**Depends on**: Phase 13
+**Requirements**: SPWN-01, SPWN-02
+**Success Criteria** (what must be TRUE):
+  1. 적이 EnemySpawner.Activate() 시점에 스폰 VFX(포탈 스타일)를 재생하며 등장한다 — 룸 미리 생성/대기 시점에는 재생되지 않는다
+  2. 스폰 연출 재생 중에는 해당 적이 CombatController.FindNearestEnemyInRange()의 타겟 후보에서 제외된다
+  3. 스폰 연출 재생 중에는 적이 플레이어를 감지/추격/공격하지 않는다
+  4. 연출 완료 즉시 적이 정상 FSM(감지/공격/피격)으로 전환된다
+  5. 이 스폰 연출 컴포넌트는 적 타입에 종속되지 않아, 이후 보스 룸 통합(Phase 16) 시 별도 구현 없이 재사용된다
+**Plans**: TBD
+
+---
+
+### Phase 15: 보스 FSM & 빈틈 타겟팅
+**Goal**: 보스가 예고→빈틈 공격 패턴을 반복하고, 빈틈 상태에서만 플레이어의 돌진 공격 대상이 되며, 7회 피격 시 처치되고(진행률은 비노출), 처치 시 점수 보너스가 지급된다
+**Depends on**: Phase 14
+**Requirements**: BOSS-03, BOSS-04, BOSS-05, BOSS-06
+**Success Criteria** (what must be TRUE):
+  1. 보스는 예고 → 빈틈 공격 패턴 루프를 반복하며, 빈틈 상태가 아닐 때는 플레이어의 돌진 공격 대상으로 선택되지 않는다
+  2. 빈틈 상태에서 플레이어가 돌진 공격을 성공시키면 보스가 즉시 피격 판정을 받고, 공격 패턴이 처음부터 다시 시작된다
+  3. 보스는 정확히 7회 피격 시 처치(사망 연출 재생 + Destroy)되며, 6회까지는 처치되지 않는다
+  4. 보스 처치 진행률(피격 횟수)을 나타내는 UI/텍스트 요소가 화면 어디에도 존재하지 않는다
+  5. 보스 처치 시 ScoreManager에 일반 적보다 큰 점수 보너스가 즉시 누적된다
+**Plans**: TBD
+
+---
+
+### Phase 16: 보스 룸 콘텐츠 & 생명주기 게이팅
+**Goal**: 보스 룸이 EXIT 포탈처럼 확률적으로 스폰되어 솔로 전투를 보장하고, 입장 시 카메라 연출과 전용 스폰 사운드가 재생되며, 층 타이머가 일시정지되고, 전투 중에는 WorldGenerator 정리 로직에서 예외 처리된다
+**Depends on**: Phase 14, Phase 15
+**Requirements**: BOSS-01, BOSS-02, BOSS-07, BOSS-09, BOSS-10, SFX-05
+**Success Criteria** (what must be TRUE):
+  1. 보스 룸은 EXIT 포탈과 마찬가지로 확률적으로 스폰되며, 동시에 활성 보스 룸이 1개를 초과하지 않는다
+  2. 보스 룸에는 EnemySpawner 마커가 없어 일반 적(근접/원거리)이 스폰되지 않는다 — 보스 단독 전투가 보장된다
+  3. 플레이어가 보스 룸에 입장하면 카메라 잠금/줄임 연출이 재생됨과 동시에 보스 전용 스폰 사운드가 재생된다
+  4. 보스 룸 입장과 동시에 층 타이머가 일시정지되고, 보스 룸을 벗어나면(처치 또는 EXIT 이용) 재개된다
+  5. 보스와의 전투가 진행 중인 동안에는 WorldGenerator의 앞뒤 2개 유지 정리(Destroy) 로직에서 보스 룸이 예외 처리되어 파괴되지 않는다
+**Plans**: TBD
+
+---
+
+### Phase 17: WorldGenerator 통합 & 보스 처치 후 층 진행
+**Goal**: 보스 룸이 실제 무한 생성 체인(WorldGenerator)을 통해 확률적으로 등장하고, 보스 처치 후에도 층 진입은 기존 EXIT 포탈을 통해서만 이루어져 보스 콘텐츠가 정상 플레이 경로로 완전히 통합된다
+**Depends on**: Phase 16
+**Requirements**: BOSS-08
+**Success Criteria** (what must be TRUE):
+  1. 별도 디버그 씬이 아닌 SampleScene의 정상 플레이 경로에서 WorldGenerator의 룸 체인 생성 로직을 통해 보스 룸이 실제로 스폰된다
+  2. 보스를 처치해도 층 번호가 자동으로 오르지 않으며, 플레이어는 여전히 EXIT 포탈을 찾아 진입해야 층이 전환된다
+  3. 보스 전투 종료(처치 또는 EXIT 진입) 후에는 보스 룸도 다시 WorldGenerator의 일반 앞뒤 2개 정리 대상에 포함된다
+  4. 보스 룸 전체 플로우(확률적 스폰 → 입장 연출+사운드 → 솔로 전투 → 7회 피격 처치 → 점수 보너스 → EXIT 포탈로 층 전환)를 개발자 개입 없이 처음부터 끝까지 플레이할 수 있다
+**Plans**: TBD
+
+---
+
+## v3.1 Progress Table
+
+| Phase | Plans Complete | Status | Completed |
+|-------|----------------|--------|-----------|
+| 13. 오디오 기반 구축 & 연출 사운드 폴리싱 | 0/? | Not started | - |
+| 14. 적 등장 스폰 연출 | 0/? | Not started | - |
+| 15. 보스 FSM & 빈틈 타겟팅 | 0/? | Not started | - |
+| 16. 보스 룸 콘텐츠 & 생명주기 게이팅 | 0/? | Not started | - |
+| 17. WorldGenerator 통합 & 보스 처치 후 층 진행 | 0/? | Not started | - |
+
+---
+
+## v3.1 Coverage Map
+
+| Requirement | Phase | Description |
+|-------------|-------|-------------|
+| SFX-01 | Phase 13 | AudioManager 인프라 신설 |
+| SFX-02 | Phase 13 | 포탈 전환 사운드 |
+| SFX-03 | Phase 13 | 히트 임팩트 사운드 |
+| SFX-04 | Phase 13 | 적 사망 사운드 |
+| SFX-06 | Phase 13 | 포탈/히트/사망 타이밍·피드백 어색함 개선 |
+| SPWN-01 | Phase 14 | 적 스폰 시 포탈 연출 재생 (보스 재사용 전제) |
+| SPWN-02 | Phase 14 | 스폰 연출 중 감지/타겟팅 차단 |
+| BOSS-03 | Phase 15 | 예고→빈틈 공격 패턴 루프 |
+| BOSS-04 | Phase 15 | 7회 피격 처치, 매 피격 후 패턴 리셋 |
+| BOSS-05 | Phase 15 | 처치 진행률 비노출 |
+| BOSS-06 | Phase 15 | 처치 시 점수 보너스 |
+| BOSS-01 | Phase 16 | 보스 룸 확률적 스폰 (동시 1개 제한) |
+| BOSS-02 | Phase 16 | 일반 적 미스폰 (솔로 전투) |
+| BOSS-07 | Phase 16 | 보스 룸 입장 시 층 타이머 일시정지/재개 |
+| BOSS-09 | Phase 16 | 입장 카메라 연출 |
+| BOSS-10 | Phase 16 | 전투 중 WorldGenerator 정리 예외 |
+| SFX-05 | Phase 16 | 보스 스폰 전용 사운드 |
+| BOSS-08 | Phase 17 | 보스 처치 후에도 EXIT 포탈로만 층 전환 |
+
+**v3.1 Coverage: 18/18 requirements mapped. No orphans.**
+
+---
+
+## v3.1 Implementation Notes (for plan-phase reference)
+
+- AudioManager는 MonoBehaviour 싱글턴 + 풀링된 AudioSource 배열로 구현 (ScoreManager/FloorTimer의 순수 static 패턴과 의도적으로 다름 — WorldGenerator와 동일한 이유)
+- 모든 신규 오디오 타이밍 코드는 Time.unscaledDeltaTime/WaitForSecondsRealtime 컨벤션 준수 (프로젝트 전역 슬로우모션 면역 규칙)
+- EnemySpawnEffect는 EnemySpawner.Activate()에서만 트리거 — Awake()/OnEnable()에서 트리거 시 오프스크린/중복 재생 버그 발생
+- BossEnemy : MonoBehaviour, IEnemy — IEnemy 3-member 계약 변경 없음, CombatController 변경 없이 대시킬 가능
+- 빈틈 타겟팅 게이팅은 CombatController.FindNearestEnemyInRange()의 기존 `!IsAlive` 스킵 체크를 재사용 (신규 인터페이스 불필요)
+- 보스 프리팹은 Complex_Room 복제로 만들되 EnemySpawner 마커를 반드시 제거하고, WorldGenerator._roomPrefabs 풀에는 절대 포함시키지 않음 (BOSS-02/Pitfall 1 방지)
+- 보스 룸은 ExitPortal과 동일한 "확률적 오버레이" 패턴으로 스폰 — `_bossSpawnChance`/`_maxBossRoomsActive`는 WorldGenerator에 EXIT 포탈과 별도 필드로 추가
+- FloorTimer × 보스 룸: 일시정지/재개 방식으로 확정 (BOSS-07) — 연장/면제 방식은 채택하지 않음
+- 보스는 플레이어를 원샷킬한다는 전제 유지 (일반 적과 동일한 왕복 원샷원킬 규칙) — 텔레그래프 타이밍만 보스 전용으로 더 길게 설계
+- 빌드 순서 권장(research): AudioManager → 사운드 폴리싱 → EnemySpawnEffect → BossEnemy FSM → 보스 룸 프리팹 → WorldGenerator 통합 (최고 위험도 변경은 마지막)
+
+---
+*v3.1 Roadmap created: 2026-07-08*
+*Last updated: 2026-07-08 — v3.1 roadmap created, Phase 13-17 defined*
