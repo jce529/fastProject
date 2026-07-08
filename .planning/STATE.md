@@ -1,10 +1,10 @@
 ---
 gsd_state_version: 1.0
 milestone: v3.0
-milestone_name: Phases
-status: executing
-stopped_at: Completed 11-02-PLAN.md and 11-03-PLAN.md (Wave 2)
-last_updated: "2026-07-08T05:23:11.844Z"
+milestone_name: 무한 복도 층 시스템
+status: milestone_complete
+stopped_at: v3.0 milestone shipped — archived to .planning/milestones/, awaiting /gsd:new-milestone
+last_updated: "2026-07-08T15:00:00.000Z"
 last_activity: 2026-07-08
 progress:
   total_phases: 5
@@ -25,20 +25,22 @@ progress:
 
 **Prototype Goal:** 층을 룸+길 수평 체인으로 재설계 — 양방향 무한 생성, 전투 Corridor, 확률적 EXIT 포탈, 제한 시간으로 "빠른 탈출" 긴장감 검증.
 
-**Current Milestone:** v3.0 — 무한 복도 층 시스템
+**Last Shipped Milestone:** v3.0 — 무한 복도 층 시스템 (2026-07-08)
+
+**Next Milestone:** TBD — run `/gsd:new-milestone`
 
 ---
 
 ## Current Position
 
-Phase: 12
-Plan: Not started
-Next: Wave 3 (12-03, 12-09 — final checkpoint playtests)
-Status: Executing Phase 12
+Phase: (none — v3.0 milestone complete)
+Plan: —
+Next: `/gsd:new-milestone` to define v3.1/v4.0 scope
+Status: Milestone complete, awaiting next milestone definition
 Last activity: 2026-07-08
 
 ```
-Progress: [██████████████████░░] 9/11 phases complete (v3.0: Phase 8, 9 complete)
+Progress: [████████████████████] v3.0 milestone: 5/5 phases complete (Phase 8-12)
 ```
 
 ---
@@ -125,13 +127,13 @@ Progress: [██████████████████░░] 9/11 ph
 **How to resume after /clear:**
 
 1. Read `.planning/STATE.md` (this file) — current position and decisions
-2. Read `.planning/ROADMAP.md` — phase goals and success criteria
-3. Read `.planning/REQUIREMENTS.md` — requirement details and traceability
-4. Continue from Current Phase listed above
+2. Read `.planning/ROADMAP.md` — v3.0 archived in collapsed `<details>`; next milestone TBD
+3. `.planning/REQUIREMENTS.md` deleted after v3.0 archive — fresh one created by `/gsd:new-milestone`
+4. See `.planning/milestones/v3.0-ROADMAP.md` and `.planning/milestones/v3.0-REQUIREMENTS.md` for full v3.0 history
 
-**Last session:** 2026-07-07T06:24:29.360Z
-**Stopped at:** Completed 11-02-PLAN.md and 11-03-PLAN.md (Wave 2)
+**Last session:** 2026-07-08T15:00:00.000Z
+**Stopped at:** v3.0 milestone complete — archived, PROJECT.md evolved, awaiting `/gsd:new-milestone`
 
 ---
 *State initialized: 2026-05-27*
-*Last updated: 2026-07-01 — Phase 9 complete, Phase 8 ARCH-04 (Room tilemap) done manually, quick-sc7 CameraBound fix*
+*Last updated: 2026-07-08 — v3.0 milestone shipped (Phase 8-12, 23/23 plans, 14/14 requirements)*

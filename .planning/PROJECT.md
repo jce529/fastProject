@@ -8,6 +8,25 @@
 
 **공격 버튼을 누르면 시간이 느려지고, 손을 떼면 적에게 돌진해 한 방에 처치하는 손맛 — 이것이 재미있어야 게임이 살아난다.**
 
+## Current State (v3.0 shipped 2026-07-08)
+
+층 구조가 수직 단일 룸에서 룸+복도 수평 체인으로 재설계되었다. 플레이어가 좌우로 진행하면 앞쪽 2개 Room+Corridor가 자동 생성되고 뒤쪽은 자동 정리되며, 룸 스폰 시 확률적으로 나타나는 EXIT 포탈로 진입하면 층 번호가 오르고 60초 카운트다운 타이머(슬로우모션 면역)와 층별 난이도 스케일링, 시간 비례 점수가 적용된다. 포탈 전환과 전투에는 SpriteMask 연출, 히트 스파크, 카메라 쉐이크, 대시 트레일, 적 사망 페이드 등 애니메이션 폴리싱이 적용된 상태. `MainMenu → AttackSelect → SampleScene` 전체 플로우가 개발자 개입 없이 반복 가능하다.
+
+전체 상세: `.planning/MILESTONES.md`, `.planning/milestones/v3.0-ROADMAP.md`
+
+## Next Milestone Goals
+
+*(미정 — `/gsd:new-milestone`으로 다음 마일스톤 정의 예정)*
+
+다음 후보 방향 (Out of Scope/미검증 항목에서):
+- 프리셋 기반 고정 층 레이아웃 대신 현재는 Complex_Room 6종 랜덤 풀 — 레이아웃 다양성 확장 여지
+- 보스 룸 / 특수 룸 이벤트
+- EXIT 포탈 연출(사운드) 고도화
+- 실제 플레이테스트로 6개 프로토타입 검증 목표(아래 Context 참고) 결과 수집
+
+<details>
+<summary>이전 Current Milestone 섹션 (v3.0 진행 중 스냅샷, 아카이브)</summary>
+
 ## Current Milestone: v3.0 무한 복도 층 시스템
 
 **Goal:** 층을 룸+길 수평 체인으로 재설계 — 양방향 무한 생성, 전투 Corridor, 확률적 EXIT 포탈, 제한 시간으로 "빠른 탈출" 긴장감을 검증한다.
@@ -19,44 +38,46 @@
 - 타이머 & 게임오버: 층별 제한 시간 카운트다운 HUD, 초과 시 게임오버 (완료 — Phase 11)
 - 난이도 스케일링: 층 번호에 따라 스포너 몬스터 수 증가 (완료 — Phase 11)
 
+</details>
+
 ## Requirements
 
 ### Validated
 
-**게임 시작 플로우 — MainMenu (Validated in Phase 6: MainMenu Scene)**
-- [x] MainMenu.unity가 Build index 0으로 등록되어 앱 실행 시 첫 화면이 된다 (MENU-01)
-- [x] Start 버튼 onClick → SceneManager.LoadScene("AttackSelect") 영구 직렬화 (MENU-02)
-- [x] Quit 버튼 onClick → 에디터 PlayMode 종료 / 빌드에서 Application.Quit() (MENU-03)
-- [x] EventSystem에 InputSystemUIInputModule 사용 (New Input System 전용 프로젝트 요건 확인)
+**플레이어 조작 (Validated in v1.0 Phase 1-2)**
+- [x] 플레이어가 빠르게 좌우 이동 및 점프할 수 있다 — v1.0 (MOVE-01)
+- [x] 공격 버튼 누름 시 슬로우 모션 발동, 공격 범위 표시, 손을 떼면 돌진 공격 — v1.0 (ATCK-02/03)
+- [x] 별도 버튼으로 구르기 발동 — 무적 판정 + 쿨타임, 슬로우 중에도 사용 가능 — v1.0 (MOVE-03)
+- [x] 낙사 시 사망하지 않고 마지막 플랫폼으로 복귀 + 짧은 무적 — v1.0 (MOVE-02)
+
+**공격 시스템 (Validated in v1.0 Phase 2)**
+- [x] 직선형 / 부채꼴형 두 가지 공격 타입 중 게임 시작 전 선택 — v1.0/v2.0 (ATCK-01, 이후 AttackSelect 씬으로 이전)
+- [x] 공격 범위 안 가장 가까운 적 자동 선택 후 돌진 — 돌진 중 무적 — v1.0 (ATCK-03)
+- [x] 범위 안 적 없으면 헛베기 (적 처치 성공보다 긴 딜레이) — v1.0 (ATCK-04)
+- [x] 시간정지 게이지: 자동 회복 + 적 처치 시 회복, 게이지 소진 시 슬로우 해제되나 공격 입력은 유지 — v1.0 (ATCK-05)
+
+**적 (Validated in v1.0 Phase 3)**
+- [x] 근접형 적: 접근 후 공격 예고 모션 → 근접 공격 (원샷원킬 양방향) — v1.0 (ENMY-01)
+- [x] 원거리형 적: 조준선 표시 후 투사체 발사 (원샷원킬 양방향) — v1.0 (ENMY-02)
+
+**층 구조 및 전환 (Validated in v1.0 Phase 5, 재설계 v3.0 Phase 8-12)**
+- [x] 출구 도달 시 층 전환 시퀀스 (조작 불가 → 이동 → 카메라 → 적 활성화 → 재개) — v1.0 (FLOOR-02), v3.0에서 EXIT 포탈 + SpriteMask 연출로 재구현 (EXIT-03, Phase 12)
+- [x] 이전 층 제거/비활성화 (모바일 성능) — v1.0 (FLOOR-04), v3.0에서 룸+길 단위로 재구현 (GEN-02)
+- [x] 룸-길 수평 체인 아키텍처 + 양방향 무한 생성/정리 — v3.0 (ARCH-01/02/03, GEN-01/02/03)
+- [x] EXIT 포탈 확률적 스폰 + 층 전환 — v3.0 (EXIT-01/02/03)
+- [x] 층별 제한 시간 카운트다운 + 시간 초과 게임오버 — v3.0 (TIMER-01/02)
+- [x] 층 번호 기반 난이도 스케일링 — v3.0 (DIFF-01)
+- [x] 시간 비례 점수 시스템 — v3.0 (SCORE-01/02)
+
+**UI / 피드백 (Validated in v1.0 Phase 4, v2.0 Phase 6-7, v3.0 Phase 11-12)**
+- [x] HUD: 현재 층 수, 시간정지 게이지, 공격 타입 표시, 타이머, 점수 — v1.0 (UI-01), v3.0 확장 (TIMER-01, SCORE-02)
+- [x] 사망 화면 + 재시작 버튼 — v1.0 (UI-02)
+- [x] MainMenu → AttackSelect → SampleScene 게임 시작 플로우, 사망 후 AttackSelect 복귀 — v2.0 (MENU-01/02/03, ATKS-01/02/03, FLOW-01)
+- [x] 포탈 전환/히트 임팩트/적 사망 애니메이션 폴리싱 — v3.0 (Phase 12)
 
 ### Active
 
-**플레이어 조작**
-- [ ] 플레이어가 빠르게 좌우 이동 및 점프할 수 있다
-- [ ] 공격 버튼 누름 시 슬로우 모션 발동, 공격 범위 표시, 손을 떼면 돌진 공격
-- [ ] 별도 버튼으로 구르기 발동 — 무적 판정 + 쿨타임, 슬로우 중에도 사용 가능
-- [ ] 낙사 시 사망하지 않고 마지막 플랫폼으로 복귀 + 짧은 무적
-
-**공격 시스템**
-- [ ] 직선형 / 부채꼴형 두 가지 공격 타입 중 게임 시작 전 선택 (단순 버튼 2개)
-- [ ] 공격 범위 안 가장 가까운 적 자동 선택 후 돌진 — 돌진 중 무적
-- [ ] 범위 안 적 없으면 헛베기 (적 처치 성공보다 긴 딜레이)
-- [ ] 시간정지 게이지: 자동 회복 + 적 처치 시 회복, 게이지 소진 시 슬로우 해제되나 공격 입력은 유지
-
-**적**
-- [ ] 근접형 적: 접근 후 공격 예고 모션 → 근접 공격 (원샷원킬 양방향)
-- [ ] 원거리형 적: 조준선 표시 후 투사체 발사 (원샷원킬 양방향)
-- [ ] 카메라 전환 완료 후에만 적 플레이어 인식 시작
-
-**층 구조 및 전환**
-- [ ] 프리셋 기반 층 생성 (3~5개 프리셋 — 플랫폼/사다리/계단/낙사/혼합)
-- [ ] 위쪽 출구 도달 시 즉시 층 전환: 조작 불가 → 순간이동 → 카메라 상승 → 가림막 해제 → 적 인식 활성화 → 조작 재개
-- [ ] 이전 층 제거/비활성화 (모바일 성능)
-
-**UI / 피드백**
-- [ ] HUD: 현재 층 수, 시간정지 게이지, 공격 타입 표시
-- [ ] 사망 화면 + 재시작 버튼 (1층부터 재시작)
-- [ ] 단순 실루엣 그래픽 스타일
+*(비어 있음 — `/gsd:new-milestone`으로 다음 마일스톤 요구사항 정의 예정)*
 
 ### Out of Scope
 
@@ -79,7 +100,9 @@
 5. 적을 모두 죽이지 않아도 되는 등반 플레이가 재미있는가?
 6. 낙사 복귀 방식이 액션감을 해치지 않는가?
 
-**코드베이스 현황:** Unity 기본 씬(SampleScene) 외 게임 로직 없음. 패키지는 모두 설치된 상태.
+*(위 6개 목표는 여전히 유효한 검증 기준 — v3.0까지는 기능 구현/플레이테스트 통과 위주로 진행되었고, 정식 사용자 플레이테스트 데이터 수집은 아직 진행 전)*
+
+**코드베이스 현황 (v3.0 shipped 기준):** MainMenu/AttackSelect/SampleScene 3씬 구성. PlayerController/CombatController/GaugeController/RollController(전투), MeleeEnemy/RangedEnemy FSM(적), WorldGenerator/RoomConnector/ExitPortal/FloorTimer/ScoreManager(룸-길 무한 생성 + 층 전환 + 타이머/점수), HUDController/DeathScreenController(UI), FloorTransitionEffect/PortalEffectBuilder/HitSparkBuilder 등 애니메이션 폴리싱 컴포넌트. Room 프리팹은 Tilemap 기반(Complex_Room 6종), Corridor 3종은 TilemapCollider2D 기반.
 
 ## Constraints
 
@@ -92,12 +115,18 @@
 
 | Decision | Rationale | Outcome |
 |----------|-----------|---------|
-| 구르기 추가 (별도 버튼, 무적, 쿨타임) | 공격 돌진(공격 귀속)과 달리 순수 회피기 — 공격 사이 생존 선택지 제공 | — Pending |
-| 대시 버튼 미포함 (구르기와 구분) | 돌진은 공격 시스템의 일부, 이동 목적 대시는 전투 긴장감 희석 | — Pending |
-| 슬로우 중 구르기 허용 | 공격 조준 취소 → 회피 선택 → 플레이어의 의사결정 깊이 증가 | — Pending |
-| 시간정지 게이지 회복: 자동 + 적 처치 | 단순 자동 회복(테스트 용이) + 처치 보상 감각(공격적 플레이 유도) 동시 충족 | — Pending |
-| 사망 후 1층부터 재시작 | 프로토타입 검증에 가장 단순, 테스트 중 피로도 높으면 현재 층 재시작으로 변경 가능 | — Pending |
-| 원샷원킬 (플레이어·적 모두) | 전투 긴장감 유지, 체력 시스템 없이 간결한 난이도 표현 | — Pending |
+| 구르기 추가 (별도 버튼, 무적, 쿨타임) | 공격 돌진(공격 귀속)과 달리 순수 회피기 — 공격 사이 생존 선택지 제공 | ✓ Good — v1.0 구현, i-frame은 WaitForSecondsRealtime으로 슬로우모션 면역 |
+| 대시 버튼 미포함 (구르기와 구분) | 돌진은 공격 시스템의 일부, 이동 목적 대시는 전투 긴장감 희석 | ✓ Good — v1.0 이후 재검토 없음 |
+| 슬로우 중 구르기 허용 | 공격 조준 취소 → 회피 선택 → 플레이어의 의사결정 깊이 증가 | ✓ Good — v1.0 구현 |
+| 시간정지 게이지 회복: 자동 + 적 처치 | 단순 자동 회복(테스트 용이) + 처치 보상 감각(공격적 플레이 유도) 동시 충족 | ✓ Good — v1.0 구현 |
+| 사망 후 재시작 지점 | 1층 재시작(v1.0) → AttackSelect 복귀(v2.0)로 조정 | ✓ Good — 씬 플로우 정착 후 변경 없음 |
+| 원샷원킬 (플레이어·적 모두) | 전투 긴장감 유지, 체력 시스템 없이 간결한 난이도 표현 | ✓ Good — v1.0~v3.0 전 구간 유지 |
+| Time.timeScale 보정을 Phase 1에 선반영 | 1f/Time.timeScale을 ApplyMovement에 미리 넣어 Phase 2 슬로우모션 도입 시 PlayerController 재작성 불필요 | ✓ Good |
+| WaitForSecondsRealtime로 i-frame/타이머/층전환 통일 | Time.timeScale이 슬로우모션·전환 중 0에 가까워질 수 있어 실시간 타이머만 안전 | ✓ Good — v1.0부터 v3.0까지 일관 적용된 핵심 제약 |
+| WorldGenerator 신규 MonoBehaviour로 FloorSpawner 대체 | 수평 양방향 체인 생성은 기존 수직 로직과 구조가 달라 대체가 가장 깔끔 | ✓ Good — v3.0 Phase 9 |
+| Room 14종 → Tilemap 방식 전환, Complex_Room 6종으로 축소 | Corridor가 이미 TilemapCollider2D 전환됨 — Room도 통일해 좌표 기반 연결 계산 가능하게 함 | ✓ Good — v3.0 Phase 8 |
+| ExitSpawnPoint 기반 랜덤 텔레포트로 교체 (RoomEntry 마커 폐기) | ExitSpawnPoint가 이미 안전 위치이므로 재사용 — 허공 스폰 버그 근본 해결 | ✓ Good — v3.0 Phase 10 |
+| 대기룸(StandbyRoom) 난이도는 FloorManager.CurrentFloor + 1 기준 계산 | 대기룸은 미래 층에서 플레이될 방이므로 그 미래 층 번호로 난이도 조회해야 정합성 유지 | ✓ Good — v3.0 Phase 11 |
 
 ## Evolution
 
@@ -117,4 +146,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-07-08 — Phase 12 (애니메이션 폴리시) 완료 및 검증(5/5 must-haves). 포탈 전환 연출, Whiff/Roll 애니메이션 수정, 히트 임팩트(스파크/쉐이크/트레일), 적 사망 연출 구현. v3.0 마일스톤의 마지막 Phase — 전체 9/9 Phase 완료.*
+*Last updated: 2026-07-08 after v3.0 milestone — 룸-길 무한 생성, EXIT 포탈 층 전환, 타이머/난이도/점수, 애니메이션 폴리싱 전체 검증 완료. 전체 요구사항(v1.0 13/13, v2.0 7/7, v3.0 14/14) 반영. Requirements Active 섹션 초기화, 다음 마일스톤 대기.*
