@@ -1,231 +1,160 @@
-# Feature Landscape
+# Feature Research
 
-**Domain:** Mobile 2D platformer action game — slow-motion dash-attack prototype
-**Project:** Fast (가칭)
-**Researched:** 2026-05-27
-**Confidence:** HIGH (core game feel patterns), MEDIUM (competitive differentiation), HIGH (anti-features for prototype)
+**Domain:** 2D action platformer / roguelite climber — boss encounter design + spawn VFX + audio polish
+**Researched:** 2026-07-08
+**Confidence:** MEDIUM (genre conventions well-documented via Dead Cells/Rogue Legacy/Downwell-style references; specifics verified only via WebSearch, not Context7/official docs — no official "boss design spec" exists for this genre)
 
----
+## Feature Landscape
 
-## Table Stakes
+### Table Stakes (Users Expect These)
 
-Features mobile 2D platformer action game players expect. Missing any of these and players disengage within the first session.
+Features players assume exist once a "boss room" is announced. Missing these makes the boss feel like a reskinned regular enemy, not a boss.
 
 | Feature | Why Expected | Complexity | Notes |
 |---------|--------------|------------|-------|
-| Responsive left/right movement | Every platformer. Sub-100ms input feel is the baseline bar. | Low | Coyote time (~80ms after platform edge) reduces frustration significantly |
-| Reliable jump with variable height | Single jump is fine. Must have hold-for-higher-jump or players feel cheated. | Low | Hold = higher; tap = short hop. Standard since NES era |
-| Clear player state (alive/dead) | Players must know immediately when they die and why | Low | One-hit-kill makes this simple; visual flash + death screen enough |
-| Attack input feedback | Button press must produce INSTANT visible/audible response | Low | No input lag or players think the button is broken |
-| Enemy telegraph before attack | Mobile players cannot read fine details; enemies must clearly signal attacks | Medium | Melee: wind-up animation, Ranged: aim indicator line. Already in spec |
-| Fall / out-of-bounds handling | "Where do I go when I fall?" — must be answered clearly | Low | Spec has fall-to-last-platform; this is above average, counts as table stakes |
-| Death + restart flow | Players must be able to retry within 3 seconds of seeing death screen | Low | Single tap restart. Delay = frustration = uninstall |
-| On-screen controls that do not obstruct | Buttons placed outside main action area, thumb-reachable | Medium | Landscape 1920x1080: place controls bottom-left (move/jump) and bottom-right (attack/roll) |
-| Visual clarity (player vs enemy vs background) | Silhouette style helps here. Player must be instantly distinguishable | Low | Spec's silhouette style is a good fit; HIGH confidence this works |
-| Camera following player | Camera must track without lag or players feel disoriented | Low | Simple follow with slight lead in movement direction is standard |
-| Progress indicator | "How high am I?" — the tower's floor number answers this; players need it | Low | HUD floor counter. Already in spec |
+| Telegraphed attacks (clear visual/audio cue before each attack lands) | Genre standard (Dead Cells: attacks show a red line/wind-up before executing) — players expect to react, not guess | LOW-MEDIUM | Fast already does this for regular enemies (melee wind-up animation, ranged aim line). Boss needs the same discipline, just with a more distinct/exaggerated tell since stakes are higher. |
+| Dedicated arena / solo fight (no regular enemies mixed in) | Already specified as a milestone requirement; also genre-standard — mixing trash mobs into a boss fight muddies readability | LOW-MEDIUM | Requires a boss-specific room prefab distinct from the 6 Complex_Room variants; must guarantee no other Spawner_* points activate in that room. |
+| Clear defeat feedback (visual + audio + score payoff) | Boss kill needs to feel more significant than a regular one-shot kill, or the "boss" label is meaningless | LOW | Reuse existing enemy death particle/fade pattern, extend with a bigger flourish (longer particle burst, camera shake, distinct SFX) + ScoreManager bonus. |
+| Readable "danger state" vs "opening state" | Players must be able to tell when the boss is attacking (avoid) vs vulnerable (attack) — core to any boss loop | MEDIUM | This is the load-bearing design decision for this milestone — see Dependency Notes below for how it interacts with the game's one-shot-kill rule. |
+| Boss doesn't ambush the player | Player needs at least a beat of warning before the fight starts (entering room != instant attack) | LOW | Satisfied by the spawn-in VFX itself if it has any wind-up (portal appears, then boss emerges) — see spawn VFX section. |
 
----
+### Differentiators (Competitive Advantage)
 
-## Differentiators
+Features that make the FIRST boss room memorable without adding disproportionate scope.
 
-Features that make this specific game stand out. Not expected, but high value when done well. Ordered from highest to lowest expected impact.
+| Feature | Value Proposition | Complexity | Notes |
+|---------|-------------------|------------|-------|
+| Invulnerable-except-during-opening pattern (boss attacks in a way that covers most of the arena, then exposes a brief one-shot-killable window) | Preserves the game's core one-shot-kill value (both directions) instead of bolting on an HP bar — makes the boss "hard to reach" rather than "hard to kill," which is a natural extension of the existing dash-kill mechanic | MEDIUM | Recommended approach — see Dependency Notes. Reuses the existing "closest enemy in range" dash-target logic; the opening is just a timing gate on when the boss becomes targetable. |
+| Boss intro beat (brief camera pan/zoom or pause on room entry before the fight starts) | Signals "this is different" without dialogue/cutscene overhead; matches existing polish level (camera shake, portal SpriteMask reveal already exist) | LOW-MEDIUM | Can piggyback on the existing FloorTransitionEffect/camera-lock pattern used for portal transitions — same toolkit, new trigger. |
+| Distinct boss spawn stinger (2-3 second audio+visual flourish, not full music) | Cheap way to make the boss feel like an "event" without a music system | LOW | A single one-shot SFX + the spawn VFX (see below) covers this; no adaptive music needed. |
+| Unique arena silhouette/layout (not just a reskinned Complex_Room) | Reinforces "this room is special" spatially, reduces reliance on UI/text to signal boss presence | MEDIUM-HIGH | Milestone already requires a dedicated arena; complexity is in tilemap/prefab authoring, not code. |
 
-### 1. Slow-Motion Attack Targeting (Core Mechanic — PRIMARY DIFFERENTIATOR)
+### Anti-Features (Commonly Requested, Often Problematic)
 
-**What it is:** Hold attack → time slows → attack range indicator appears → release → dash-kill to nearest enemy.
+Features that look like standard "boss fight" requirements but conflict with this project's scope or core value.
 
-**Why it differentiates:** Time manipulation as a player-controlled tool tied to offensive commitment is rare in mobile games. PC/console examples (Superhot, Katana Zero, Sifu's focus parry) exist but almost no mobile games do this well. The hold/release input maps naturally to touch.
-
-**What makes it feel good (based on game-feel research):**
-- Slow-motion must be genuinely slow: 0.05–0.15x time scale. Too close to 1.0 and it feels like nothing.
-- The transition into slow-mo needs a distinct audio cue (bass drop, heartbeat, muffled sound) + a brief (0.05–0.1s) camera push-in or chromatic aberration pulse.
-- The dash-kill must be FAST — near-instant traversal to enemy. Players entering slow-mo to attack should feel violently decisive on release.
-- Hit-freeze on kill: 3–6 frame freeze of all motion (Unity: `Time.timeScale = 0` for 50–100ms) is mandatory for satisfying hit feel.
-- Screen shake on kill: short, sharp (0.1–0.15s), translational (not rotational). Rotational shake causes nausea on mobile.
-
-**Complexity:** High (time-scale management with multiple interacting systems)
-
-**Dependencies:** Requires time-scale system, attack range visualization, target selection logic, dash-to-target movement
-
----
-
-### 2. Roll During Slow-Motion (Decision Depth)
-
-**What it differentiates:** Allowing roll (with invincibility) while time is slowed creates a genuine 3-way decision per attack cycle: commit to attack / dodge the incoming threat / miss (whiff penalty). Most mobile action games have no meaningful choice in this window.
-
-**Why it feels good:** The I-frames during roll give players a "cheat death" feeling. The cost is losing the attack opportunity + spending roll cooldown. This is the risk/reward loop that creates emergent skill expression.
-
-**Complexity:** Medium (roll input must be polled during slow-mo; cooldown tracking)
-
-**Dependencies:** Requires slow-motion system + roll system to be independent but co-aware
-
----
-
-### 3. One-Hit-Kill Both Ways (Tension Architecture)
-
-**What it differentiates:** Symmetrical lethality is uncommon. Most mobile action games give players several HP bars. One-hit-kill means every moment of play is high-stakes, which amplifies the value of slow-motion decision-making.
-
-**Why it works:** Without HP bars, the slow-motion "planning window" becomes genuinely necessary, not just stylish. Players who skip it feel the consequence immediately. This tightens the feedback loop that the prototype is trying to validate.
-
-**Risk:** One-hit-kill on mobile can feel unfair if enemy telegraphs are insufficient. Must pair with clear enemy telegraph timing. If playtesters say "I couldn't react," the problem is telegraph clarity, not the one-hit system.
-
-**Complexity:** Low (simpler than HP bars) — but requires well-tuned telegraph durations
-
-**Dependencies:** Enemy AI state machines (telegraph → attack), player death + fall-recovery system
-
----
-
-### 4. Whiff Penalty (No Target in Range)
-
-**What it differentiates:** If attack finds no target, the player enters a longer recovery animation (whiff). This rewards range selection and positioning. Very few mobile games punish missed attacks — they just do nothing.
-
-**Why it differentiates:** Creates incentive to use slow-motion "correctly" (position before releasing). Differentiates skilled play from button mashing.
-
-**Complexity:** Low (variant animation state + extended cooldown)
-
-**Dependencies:** Target selection logic must return null-target case
-
----
-
-### 5. Time-Stop Gauge (Metered Resource)
-
-**What it differentiates:** Having a depleting gauge that recovers on kills creates an "offensive momentum" loop: kill to maintain slow-mo capability → slow-mo to kill safely → repeat. This is the roguelite kill-chain concept applied to a time mechanic.
-
-**Why it works:** Players who play aggressively are rewarded with more slow-mo. Passive players are punished by gauge depletion. This biases the player toward the game's intended playstyle without hard-requiring it.
-
-**Complexity:** Medium (gauge UI, drain logic, kill-recovery hook, behavior when depleted)
-
-**Dependencies:** Slow-motion system, kill event system, HUD
-
----
-
-### 6. Attack Type Pre-Selection (Linear vs Fan)
-
-**What it differentiates:** Asking players to choose attack shape before a run creates a lightweight build-selection layer with zero complexity. This is the "pick your playstyle" that mobile players respond well to.
-
-**Linear:** Higher range, narrower — rewards precise positioning
-**Fan:** Wider arc — more forgiving, better vs groups, less range
-
-**Complexity:** Low (two attack shape configs, shared systems)
-
-**Dependencies:** Attack range visualization must support both shapes
-
----
-
-### 7. Fall Recovery to Last Platform (Not Death)
-
-**What it differentiates:** Replacing fall-death with fall-recovery-to-last-platform removes the most common frustration source in mobile platformers (accidental falls from imprecise touch). Players can take risks with positioning. This is player-friendly without removing consequence (brief stun + brief invincibility, costs time).
-
-**Complexity:** Low (track last-safe-platform position, teleport + brief stun)
-
-**Dependencies:** Platform contact tracking
-
----
-
-### 8. Camera-Gated Enemy Activation
-
-**What it differentiates:** Enemies only activate after the camera finishes rising to the new floor. This prevents the "surprise kill from off-screen" problem common in vertical climbers. Players always have a reaction window.
-
-**Complexity:** Low (activation flag triggered by camera transition completion)
-
-**Dependencies:** Floor transition system, camera animation
-
----
-
-## Anti-Features
-
-Features to deliberately NOT build in this prototype. Inclusion would waste build time, pollute the validation signal, or harm the core mechanic's feel.
-
-| Anti-Feature | Why Avoid | What to Do Instead |
-|--------------|-----------|-------------------|
-| HP / health bar | Removes tension architecture; the one-hit system IS the design | Keep one-hit-kill; if it feels unfair, fix telegraphs |
-| Combo counter / combo system | Adds score complexity that distracts from mechanic validation | Measure validation by "did the attack feel good," not score |
-| Permanent upgrades / progression | Introduces confounds — is the mechanic fun, or just the upgrades? | Validate core mechanic first; add later if prototype succeeds |
-| Weapon variety / multiple attack types mid-run | Too many variables obscure what's working | Pre-select attack type per run, keep it constant |
-| Boss encounters | Requires unique design that is out of scope for mechanic validation | Standard floor enemies are sufficient |
-| Double jump / wall jump / air dash | Additional movement tools change the positioning game entirely | Basic jump only; validate with minimum viable movement |
-| Separate movement dash button | Blurs the line between attack-dash and movement-dash; pollutes control schema | Attack-dash only; roll is the evasion tool |
-| Shop / currency system | Zero validation value; pure distraction | Omit entirely |
-| Leaderboard / social features | Prototype does not need retention hooks; needs signal, not social | Omit entirely |
-| Tutorial overlay / onboarding UI | This is a prototype for internal validation, not new-user onboarding | Direct playtest with verbal instruction is sufficient |
-| Parry / counter mechanic | Secondary defensive option competing with roll | Roll is the single defensive tool; keep it simple |
-| Enemy variety beyond 2 types | Diminishing validation return for additional enemy design work | Melee + ranged is sufficient to validate all 6 questions |
-| Persistent save state between sessions | Prototype is a per-session loop; no save needed | Restart from floor 1 on every launch |
-| Sound design beyond functional cues | Polish obscures whether the mechanic works bare | Placeholder SFX only (attack, hit, death, floor transition) |
-
----
+| Feature | Why Requested | Why Problematic | Alternative |
+|---------|---------------|------------------|-------------|
+| Multi-hit boss with HP bar | Nearly every action-game boss reference (Dead Cells, Rogue Legacy) uses HP bars and damage-over-time fights | Directly conflicts with the validated core rule "원샷원킬 (플레이어·적 모두)" — introducing a damage/health system for one enemy type means building a parallel combat model (HP tracking, damage numbers, hit-reduction UI) that doesn't exist anywhere else in the codebase, for a single fight. High cost, validates a different mechanic than the one this prototype exists to test. | Invulnerable-except-during-opening pattern (see Differentiators) — boss is still one-shot-killable, just gated by timing instead of HP. |
+| Multi-phase fights (attack set changes at HP thresholds) | Standard in Dead Cells/Rogue Legacy-style bosses to keep long fights fresh | Requires the HP system above as a prerequisite (phases are usually triggered by HP%), plus extra animation/attack authoring for a single fight in a prototype milestone explicitly scoped to "1 boss type" | Single continuous attack-pattern loop (e.g. cycle through 2-3 telegraphed attacks) is enough to validate the boss-room concept; save phase transitions for a future milestone once the base loop is proven fun. |
+| Adaptive/dynamic music system (intensity layers, boss theme swapping in/out) | "Games have boss music" is a strong genre expectation | No music system exists in the codebase at all today (confirmed: zero audio currently implemented) — building an adaptive music layer before even having basic SFX is solving a problem two steps ahead of where the project is | Short audio stinger on boss spawn + existing ambient (if any); defer full music to a dedicated audio milestone. |
+| Full boss roster / boss variety this milestone | "Why build a boss framework for just one boss?" | Milestone explicitly scopes to 1 boss type; over-building the framework (e.g. data-driven attack-pattern authoring tools) before a second boss exists to validate the abstraction risks guessing wrong about what needs to be generic | Build the one boss with a lightweight FSM (same pattern as existing MeleeEnemy/RangedEnemy), but keep boss-specific logic in its own script/prefab rather than forcing a generic "BossBase" abstraction prematurely — extract shared code only once a second boss is actually being built. |
+| Boss dialogue / voice lines / name-card cutscene | Common in narrative-driven boss intros | Adds VO/localization/UI scope with no connection to validating the core combat feel (the 6 prototype validation goals in PROJECT.md are all about combat feel, not narrative) | Visual-only intro beat (camera + spawn VFX + stinger SFX) carries the "this is a boss" signal without dialogue systems. |
+| Frame-perfect hit-stop/combo timing systems | Common "juice" advice for action games | This game has no combo system (one dash-kill per engagement, explicitly out of scope: "콤보 시스템... 핵심 검증과 무관") — a combo-oriented hit-stop economy is solving for a mechanic that doesn't exist here | Simple, fixed-duration hit-stop (a few frames) synced to a single hit-impact SFX on both regular hits and boss hits — already partially implied by existing HitSparkBuilder/camera shake, just needs an audio hook. |
 
 ## Feature Dependencies
 
 ```
-Slow-Motion System
-  ├── Attack Range Visualization (linear / fan)
-  │     └── Target Selection Logic
-  │           ├── Dash-to-Target Movement (+ on-kill hit-freeze)
-  │           └── Whiff Animation (no target found)
-  ├── Time-Stop Gauge (drain / kill-recovery / depleted behavior)
-  └── Roll Input (polled during slow-mo; shares cooldown state)
+Boss Room Feature
+    |--requires--> Boss arena room prefab (new, dedicated layout, no regular enemy spawn points)
+    |--requires--> Boss enemy behavior (FSM extending existing MeleeEnemy/RangedEnemy pattern)
+    |--requires--> Probabilistic room-type spawn logic (extends ExitPortal/WorldGenerator pattern: chance-based, max 1 concurrent)
+    |--requires--> Enemy spawn-in VFX (shared with regular enemy spawn-in, see below)
+    `--enhances--> ScoreManager (adds a one-off bonus-scoring hook on boss defeat)
 
-Enemy System
-  ├── Melee Enemy (approach → telegraph → attack → one-hit-kill both ways)
-  └── Ranged Enemy (aim indicator → projectile → one-hit-kill both ways)
+Invulnerable-except-during-opening pattern (boss combat design)
+    `--requires--> Existing dash-target/closest-enemy-in-range logic (CombatController) -- extends it with a
+                   targetable/untargetable flag driven by boss attack-state, not a new damage system
 
-Floor System
-  ├── Preset Floor Generation (3–5 presets)
-  ├── Floor Transition (teleport → camera rise → activation flag)
-  │     └── Camera-Gated Enemy Activation
-  └── Last-Platform Tracker → Fall Recovery
+Enemy Spawn-in VFX (regular + boss)
+    `--requires--> Generalizing the existing player-only portal entry effect (PortalEffectBuilder / SpriteMask
+                   reveal) into a reusable "spawn at point" component -- currently coupled to player-only usage
 
-HUD
-  ├── Floor Counter
-  ├── Time-Stop Gauge Display
-  └── Attack Type Indicator
+Audio Polish (portal / hit / death / boss spawn SFX)
+    |--requires--> New AudioManager / SFX-pooling infrastructure (currently zero audio in codebase -- foundational,
+    |              built from scratch, not an extension of an existing system)
+    `--enhances--> Portal transition, Hit impact, Enemy death, Boss spawn/intro (hooks into existing VFX trigger points)
 
-Death / Restart
-  ├── Player Death (flash → death screen)
-  └── Restart (floor 1 reset)
+Boss intro camera beat
+    `--enhances--> Boss Room Feature (uses existing FloorTransitionEffect/camera-lock toolkit, new trigger point)
 ```
 
+### Dependency Notes
+
+- **Boss Room requires probabilistic room-type spawn logic that extends the ExitPortal pattern:** ExitPortal already solves "spawn something with a probability, cap at 1 concurrent, inside a room" for floor transitions. The boss room should reuse this exact pattern (probability roll during room generation, max-1-concurrent guard) rather than invent a new spawn-gating mechanism. The dependency is on WorldGenerator's room-selection logic being extended to recognize a "boss room" room-type, separate from the existing Complex_Room random pool.
+- **Invulnerable-except-during-opening pattern requires the existing dash-target logic, not a new damage system:** This is the key design decision this milestone must make explicit. The project's validated core rule is one-shot-kill for both player and enemies, system-wide, across all of v1.0-v3.0. A genre-standard HP-bar boss would break that rule for exactly one enemy type. The lower-cost, value-consistent alternative is to keep the boss one-shot-killable but gate *when* it can be targeted/dashed-to (e.g., only during a telegraphed "opening" after an attack sequence, similar to how "적 없으면 헛베기" already gates on range/proximity). This should be surfaced to the user as an explicit decision before phase planning, not assumed silently.
+- **Enemy Spawn VFX enhances Boss Room:** the milestone asks for enemy spawn-in VFX as a general feature (applies to regular enemies too), and boss entrance is the highest-value place to use it dramatically (paired with the intro camera beat). Building it as a generic "spawn at point" component (rather than boss-only) means regular enemy spawning gets the same polish for near-zero extra cost.
+- **Audio Polish has no existing system to extend:** unlike VFX (which already has PortalEffectBuilder/HitSparkBuilder to build on), there is currently no AudioManager, no AudioSource pooling, and no SFX assets anywhere in the project. This work is foundational and should be scoped as its own early step before hooking sounds into portal/hit/death/boss-spawn trigger points -- not bundled in as an afterthought during boss VFX work.
+- **Boss intro camera beat enhances but does not block Boss Room:** the boss room MVP works without a camera flourish (arena + telegraph + defeat feedback are enough to validate the concept); the intro beat is additive polish using tooling that already exists (FloorTransitionEffect-style camera lock).
+
+## MVP Definition
+
+### Launch With (v1 -- this milestone, v3.1)
+
+Minimum viable product -- what's needed to validate "does a boss room work in this game."
+
+- [ ] Boss room: probabilistic spawn reusing the ExitPortal pattern (chance roll, max 1 concurrent, dedicated arena room) -- core ask of the milestone
+- [ ] One boss type with a small telegraphed attack-pattern loop (2-3 attacks cycling) and an invulnerable-except-during-opening targeting gate (preserves one-shot-kill core value) -- essential to make the fight readable and consistent with existing combat feel
+- [ ] Solo fight guarantee (no regular enemy spawns active in the boss room) -- required so the fight is legible as "the boss encounter," not a mob fight
+- [ ] Score bonus on boss defeat, hooked into existing ScoreManager -- required by milestone, low cost
+- [ ] Enemy spawn-in VFX for both regular enemies and the boss, generalized from the existing player portal-entry effect -- explicit milestone ask, and needed so the boss's arrival doesn't feel like it silently "was already there"
+- [ ] Basic AudioManager/SFX-pooling infrastructure -- prerequisite for any sound at all; currently zero audio exists
+- [ ] SFX for: portal transition, hit impact, enemy death, boss spawn (each with basic pitch/volume randomization to avoid repetition fatigue) -- explicit milestone ask, addresses "currently silent" gap
+
+### Add After Validation (v1.x -- future milestone, if boss room proves fun)
+
+Features to add once the core boss-room loop is confirmed engaging in playtesting.
+
+- [ ] Second and third boss types (validate the extensibility of the boss framework built this milestone) -- triggered by: v3.1 boss room testing well and roadmap wanting more content variety
+- [ ] Arena environmental hazards beyond the boss's own attacks (e.g. edge hazards, moving terrain) -- triggered by: base fight feeling "flat" without extra spatial pressure
+- [ ] Boss intro camera beat (pan/zoom/pause before fight starts) -- nice-to-have polish, defer if time-constrained since arena+telegraph+defeat feedback already validate the core concept
+
+### Future Consideration (v2+)
+
+Features to defer until the core combat/boss concept has more validation data.
+
+- [ ] Multi-phase boss fights (attack-set changes at thresholds) -- defer until/unless the invulnerable-except-during-opening pattern is validated as fun; phases assume an HP-based system this project doesn't have
+- [ ] Full music system (ambient + boss theme + adaptive layers) -- defer to a dedicated audio milestone; this milestone is scoped to SFX polish only
+- [ ] Boss dialogue/name-card intro -- defer indefinitely; no narrative validation goal in PROJECT.md
+- [ ] Data-driven boss-attack authoring tools (ScriptableObject-based pattern editor) -- defer until a second/third boss actually exists to prove the abstraction is worth building
+
+## Feature Prioritization Matrix
+
+| Feature | User Value | Implementation Cost | Priority |
+|---------|------------|----------------------|----------|
+| Boss room probabilistic spawn (reuse ExitPortal pattern) | HIGH | MEDIUM | P1 |
+| Boss telegraph + invulnerable-except-opening attack pattern | HIGH | MEDIUM | P1 |
+| Solo-fight guarantee (no mob mixing) | HIGH | LOW | P1 |
+| Score bonus on boss defeat | MEDIUM | LOW | P1 |
+| Enemy spawn-in VFX (regular + boss, generalized portal effect) | MEDIUM-HIGH | LOW-MEDIUM | P1 |
+| Basic AudioManager/SFX pooling infra | HIGH | LOW-MEDIUM | P1 |
+| Core SFX set (portal/hit/death/boss-spawn, pitch-varied) | HIGH | LOW | P1 |
+| Boss intro camera beat | MEDIUM | MEDIUM | P2 |
+| Arena environmental hazards | LOW-MEDIUM | HIGH | P3 |
+| Second/third boss types | MEDIUM | MEDIUM-HIGH | P3 (future milestone) |
+| Multi-phase boss fights | LOW (conflicts with core value) | HIGH | Anti-feature / P3+ |
+| Adaptive music system | LOW (no system exists yet) | HIGH | Anti-feature / P3+ |
+| Boss HP bar / multi-hit combat | LOW (conflicts with core value) | HIGH | Anti-feature |
+
+**Priority key:**
+- P1: Must have for this milestone (v3.1)
+- P2: Should have, add if time allows within v3.1
+- P3: Nice to have, explicitly deferred to a future milestone
+
+## Competitor Feature Analysis
+
+| Feature | Dead Cells | Rogue Legacy | Fast (v3.1 plan) |
+|---------|------------|---------------|-------------------|
+| Attack telegraphing | Red line/wind-up cues before every boss attack | Boss-specific tells (e.g. charge-up glow) before each attack | Reuse existing melee/ranged telegraph conventions, exaggerated for the boss |
+| Damage model | Multi-hit HP bar, damage numbers | Multi-hit HP bar, RNG-modified stats | One-shot-kill preserved via invulnerable-except-during-opening gating (no HP bar) -- deliberate divergence to stay consistent with core value |
+| Arena design | Boss-specific hazards (e.g. water, tentacles reshaping the fight) | Fixed arena per castle, boss interacts with room geometry | Dedicated arena room prefab, hazards deferred to future milestone (arena shape only, no dynamic terrain this pass) |
+| Fight structure | Multi-phase, escalating intensity | Single continuous fight with escalating patterns per difficulty | Single continuous attack-pattern loop (no HP-based phases) -- matches "1 boss type" milestone scope |
+| Music/audio on boss entry | Full boss theme track | Full boss theme track | Short SFX stinger only -- no music system exists yet, explicitly deferred |
+
+## Sources
+
+- [Boss Battles-How to Design One? (Medium)](https://medium.com/@foster_sawyer2/boss-battles-how-to-design-one-733c788e5494) -- MEDIUM confidence, general design essay
+- [Boss Design: How to Make an Unforgettable Boss Battle (GameDesignSkills)](https://gamedesignskills.com/game-design/game-boss-design/) -- MEDIUM confidence, cross-referenced with multiple other sources on telegraphing/arena design
+- [Boss Battle Design and Structure (Game Developer / Gamasutra)](https://www.gamedeveloper.com/design/boss-battle-design-and-structure) -- MEDIUM confidence, industry publication
+- [Dead Cells Wiki -- Conjunctivius](https://deadcells.fandom.com/wiki/Conjunctivius) -- MEDIUM confidence, specific boss mechanic reference (tentacle/eye pattern, telegraphed beams)
+- [Dead Cells -- Wikipedia](https://en.wikipedia.org/wiki/Dead_Cells) -- MEDIUM confidence, general game structure reference
+- [Mastering VFX in Unity: Spawning, Collision, and Explosions (Medium)](https://medium.com/@Brian_David/mastering-vfx-in-unity-spawning-collision-and-explosions-efc33791f2e0) -- LOW-MEDIUM confidence, general Unity VFX approach, not project-specific
+- [Using State Patterns for Dynamic AI in Unity (Medium)](https://medium.com/@Brian_David/using-state-patterns-for-dynamic-ai-1579e089931d) -- MEDIUM confidence, confirms FSM approach already used in this codebase (MeleeEnemy/RangedEnemy) generalizes to boss design
+- [State Machines and Boss Fights (Unibear Studio)](https://www.unibearstudio.com/tutorial/state-machines-and-boss-fights) -- MEDIUM confidence, IBossState pattern reference
+- [The 2026 Indie Dev's Roadmap to Game Audio (Tortuga Soundtracks)](https://tortugasoundtracks.com/blogs/the-ultimate-guide-to-game-audio-how-sound-shapes-player-experience/posts/7684069/the-2026-indie-dev-s-roadmap-to-game-audio-strategic-sound-design-for-high-conversion-titles) -- LOW-MEDIUM confidence, marketing-adjacent blog but consistent with general audio-design consensus (bake audio in early, avoid "audio debt")
+- [Feel (More Mountains) -- game feel/juice asset docs](https://feel.moremountains.com/) -- MEDIUM confidence, documents standard hit-stop/audio-sync/screenshake patterns used as a reference model (not necessarily to be adopted as a dependency)
+- Existing codebase inspection (PROJECT.md) for current state: PortalEffectBuilder, HitSparkBuilder, FloorTransitionEffect, WorldGenerator, ExitPortal, ScoreManager, MeleeEnemy/RangedEnemy FSM -- HIGH confidence (primary source, own repo)
+
 ---
-
-## MVP Recommendation
-
-For the prototype validation goal (6 questions), prioritize in this order:
-
-**Must ship first (validation-critical):**
-1. Slow-motion attack system with hold/release input — this is the entire point
-2. Dash-to-target with hit-freeze — "feel" lives here
-3. Attack range visualization (both shapes) — required for Q2
-4. Whiff penalty — required for whiff-vs-hit contrast
-5. Roll with I-frames (standard + during slow-mo) — required for Q1 tension
-6. One-hit-kill both ways — required for Q3
-7. Melee enemy + ranged enemy with telegraphs — required for Q3, Q5
-8. Fall-recovery to last platform — required for Q6
-9. Floor transition + camera-gate — required for Q4
-
-**Must ship but lower risk:**
-10. Time-stop gauge (auto-recover + kill-recovery)
-11. 3–5 floor presets
-12. HUD (floor counter, gauge, attack type)
-13. Death screen + restart
-
-**Defer entirely (out of prototype scope):**
-- Attack type pre-selection can initially hardcode one type and add the selector at the end once both shapes work
-- Screen shake and audio cues: placeholder is sufficient for Q1 validation; polish later
-
----
-
-## Sources and Confidence
-
-| Claim | Confidence | Basis |
-|-------|------------|-------|
-| Time-scale 0.05–0.15x for "genuine" slow-mo feel | HIGH | Documented in GDC talks (Brace Yourself Games, Vlambeer) and Unity game-feel literature |
-| Hit-freeze 3–6 frames / 50–100ms | HIGH | Vlambeer's "Game Feel" talk (GDC 2013); widely replicated in successful action games |
-| Screen shake: translational not rotational on mobile | HIGH | Motion sickness research; standard mobile game design practice |
-| Mobile touch: bottom-left move, bottom-right action | HIGH | iOS/Android HIG standards + every successful mobile action game (Dead Cells Mobile, Pascal's Wager, etc.) |
-| One-hit-kill tension architecture | MEDIUM | Extrapolated from PC titles (Katana Zero, Hotline Miami); mobile adaptation less documented |
-| Kill-chain resource loop (kill → reward → kill) | HIGH | Roguelite design canon; applies across platforms |
-| Whiff penalty creating skill differentiation | MEDIUM | Game design principle; less empirically validated for mobile specifically |
-| Camera-gated enemy activation preventing off-screen deaths | HIGH | Common practice in vertical mobile games; documented in multiple postmortems |
-| Anti-features list | HIGH | Directly follows from prototype validation goal; not building distractors is standard prototype discipline |
+*Feature research for: 2D action platformer boss room content + spawn VFX + audio polish (Fast v3.1)*
+*Researched: 2026-07-08*

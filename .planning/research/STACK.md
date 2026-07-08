@@ -1,358 +1,103 @@
-# Technology Stack
+# Stack Research
 
-**Project:** Fast (Unity 2D mobile platformer — slow-motion dash-attack prototype)
-**Researched:** 2026-05-27
-**Confidence:** MEDIUM-HIGH (Unity 6 LTS, knowledge through Aug 2025. Web verification unavailable; reasoning is from Unity 6 API knowledge + project file inspection.)
+**Domain:** Boss room content (extensible framework) + VFX/Audio polish — Unity 6 URP 2D mobile prototype (Fast, v3.1 milestone)
+**Researched:** 2026-07-08
+**Confidence:** HIGH (built on direct inspection of existing codebase + Unity 6 official manual + cross-checked WebSearch on 2026 mobile audio/FSM practice)
 
----
+## Scope note
 
-## Core Systems
+This milestone adds **no new capability categories** to the project — it reuses/extends built-in Unity systems that are already installed (see `Packages/manifest.json`, unchanged from v3.0). There are **zero new UPM packages to add**. The work is architectural (new C# scripts + Editor prefab-builder scripts following the project's established convention), not a dependency-adoption decision. This document therefore focuses on *which built-in Unity API/pattern to use* and *how it integrates with existing components* (`PortalEffectBuilder`, `HitSparkBuilder`, `EnemyDeathEffect`, `WorldGenerator`, `ExitPortal`, `MeleeEnemy`/`RangedEnemy`, `ScoreManager`, `RoomClearCondition`).
 
-### Engine and Renderer
+## Recommended Stack
 
-| Technology | Version | Why |
-|------------|---------|-----|
-| Unity 6000.3.11f1 LTS | Already installed | LTS = stable; no upgrade needed or warranted for a prototype |
-| URP 17.3.0 with 2D Renderer | Already configured | 2D Renderer is the only URP path that supports 2D Lights, Shadow Caster 2D, and the Pixel Perfect Camera — all relevant for silhouette art style |
-| Scripting Backend: Mono | Default (editor) | IL2CPP required for Android shipping build; switch only at build time, not during prototype development |
-| .NET Standard 2.1 / C# 9.0 | Locked by Unity 6 | No action needed |
+### Core Technologies
 
-**IL2CPP note (HIGH confidence):** Android builds must use IL2CPP + ARM64. The project already has `AndroidTargetArchitectures: 2` (ARM64) in ProjectSettings. Enable IL2CPP in Player Settings → Android → Scripting Backend before any device test build. Mono editor builds are fine for iteration.
+| Technology | Version | Purpose | Why Recommended |
+|------------|---------|---------|-----------------|
+| `UnityEngine.AudioSource` + `AudioClip` | Built into `com.unity.modules.audio` 1.0.0 (already in manifest, no version bump) | Play one-shot SFX: portal enter/exit, hit spark, enemy death, enemy/boss spawn-in | Zero new dependency, zero learning curve, sufficient for a prototype with a handful of one-shot cues and no adaptive music. Official Unity 6 guidance treats AudioSource + AudioMixer as the correct baseline before reaching for middleware. |
+| `UnityEngine.Audio.AudioMixer` | Built into `com.unity.modules.audio` (Editor asset, not a package) | Group SFX under a single `SFX` mixer group (and `Master`) so a future "SFX volume" slider is a one-line hookup, and so hit/death/portal sounds share consistent loudness/compression | This is the "structural core" every Unity audio guide recommends adding before wiring any `AudioSource` — retrofitting it later means re-touching every call site. Costs nothing to add now. |
+| C# abstract class `BossEnemyBase : MonoBehaviour, IEnemy` | N/A (project code, not a package) | Extensible boss framework: shared death/highlight/dash-kill wiring (same contract `CombatController` already dashes into), subclasses only implement attack-pattern methods | `IEnemy` (`IsAlive`, `OnDashHit()`, `ClearHighlight()`) is the *only* contract `CombatController`/`RoomClearCondition` care about — a boss that implements it drops into the existing one-shot-kill dash pipeline with no changes to `CombatController`. Inheritance (not a new data-driven system) matches the project's existing style (`MeleeEnemy`/`RangedEnemy` are both plain enum-FSM `MonoBehaviour`s) and is right-sized for "1 boss now, more later" — a full ScriptableObject attack-pattern engine (see Alternatives) is unjustified for a single boss. |
+| Coroutine + enum-based phase FSM (same idiom as `MeleeEnemy`/`RangedEnemy`) | N/A | Boss attack pattern sequencing (telegraph → windup → hitbox → recover, per phase) | Directly reuses the already-proven `TelegraphAndAttack()`-style coroutine idiom, including the `WaitForSecondsRealtime` timeScale-immunity rule the codebase already enforces everywhere (slow-mo/HitFreeze safety). No new pattern to learn or review. |
 
-### Slow-Motion System (Core Mechanic)
+### Supporting Libraries
 
-This is the most technically nuanced system. Get it wrong and every system in the game breaks subtly.
+| Library | Version | Purpose | When to Use |
+|---------|---------|---------|-------------|
+| `SpriteRenderer` + hand-rolled coroutine scale/mask animation (`RuntimeMaskSprite`, same pattern as `FloorTransitionEffect`/`PortalEffectBuilder`) | N/A (existing project code) | Enemy/boss spawn-in VFX (mirrors the player's portal-entry visual) | Add a new `EnemySpawnEffect` component that reuses `RuntimeMaskSprite.CreateMaskSprite()` + the existing `Portal_100x100px1.png` sprite (already reused twice via `PortalEffectBuilder`/`ExitPortalBuilder`) to grow a small portal ring behind a freshly-activated enemy, then mask-reveal the sprite — same math as `FloorTransitionEffect.PlayExit()`, just triggered from `EnemySpawner.Activate()` / `WorldGenerator.TrySpawnEnemies()` instead of `WorldGenerator.EnterPortal()`. |
+| `ParticleSystem` (Shuriken, built-in) | `com.unity.modules.particlesystem` 1.0.0 (already installed) | Any additional spawn/hit/death particle bursts | Already the established choice (`EnemyDeathEffect.SpawnDeathParticles()`, `HitSparkEffect`). Keep burst counts low (≤20-30) per the v3.0 stack research's Android compute/GC guidance — still valid, unchanged this milestone. |
+| `Animator` + `AnimatorController` created via Editor script (same convention as `HitSparkBuilder.cs` using `AnimatorController.CreateAnimatorControllerAtPath`) | `com.unity.modules.animation` 1.0.0 (already installed) | Boss sprite states (idle/telegraph/attack/hurt/death), and any new spawn-VFX animator if frame-based (not just tween) | Follow the exact `Assets/Editor/*Builder.cs` convention already used for `HitSparkController.controller` — build boss AnimatorController programmatically from existing/new clips rather than hand-wiring in the Editor, consistent with the rest of the codebase's reproducible-build-via-menu-item pattern. |
+| `AudioSource.PlayOneShot(clip)` on a **persistent** GameObject for portal SFX | N/A | Portal enter/exit sound | The portal-transition sequence destroys the old room chain mid-sequence (`WorldGenerator.FloorTransitionSequence`). Attach the portal `AudioSource` to the **Player** GameObject (persists across the transition, already hosts `FloorTransitionEffect`) or to `WorldGenerator` itself (persistent singleton) — not to the `ExitPortal`/room GameObjects, which are destroyed mid-sequence and would cut the sound off. |
+| `AudioSource.PlayOneShot(clip)` on the enemy/boss GameObject itself for hit/death SFocused | N/A | Hit spark + enemy/boss death sound | `EnemyDeathEffect.PlayDeathSequence()` already waits ~0.6s+ before `Destroy(gameObject)` — enough headroom for a short (<500ms) death SFX to finish before the owning GameObject dies. No pooling/persistent-source workaround needed here, unlike the portal case. |
+| `UnityEngine.Pool.ObjectPool<T>` | Built-in since 2021.2, stable in Unity 6 (no package) | Only if the boss's attack pattern fires many short-lived projectiles/VFX per second | Not needed for hit sparks/spawn VFX/enemy death at current scale (a handful of instances per room, `AutoDestroySelf`/`stopAction=Destroy` already handles cleanup). Only reach for this if the single boss's pattern turns out to be a bullet-hell-style barrage — add then, not preemptively (YAGNI, matches CLAUDE.md's anti-overengineering rule). |
 
-**Use `Time.timeScale` + paired `Time.fixedDeltaTime` adjustment. Confidence: HIGH.**
+### Development Tools
 
-The canonical pattern for Unity slow-motion:
+| Tool | Purpose | Notes |
+|------|---------|-------|
+| Editor menu-item prefab builders (`Assets/Editor/*Builder.cs`) | Reproducible, code-defined prefab construction (no manual prefab editing to lose) | This project's established convention (`PortalEffectBuilder`, `HitSparkBuilder`, `RoomPrefabBuilder`, `CorridorBuilder`, `ExitPortalBuilder`). Add `BossSpawnEffectBuilder.cs`, `BossRoomBuilder.cs`, and (if needed) an `AudioMixerBuilder`-style manual one-time setup for the SFX group. Keep following this pattern rather than hand-authoring new prefabs in the Editor — it's how every other v3.0 effect prefab was made and reviewed. |
+| Unity Audio Mixer window (`Window > Audio > Audio Mixer`) | Route all new `AudioSource`s to a shared `SFX` group | One-time manual setup (not scriptable via a builder in the same way — Editor asset, do by hand once). |
+| `RoomClearCondition.cs` (existing, currently orphaned/unused in the scene graph but present in the codebase) | Watches an `IEnemy[]` array and activates a target GameObject when all are dead | Directly reusable for "solo boss fight, no regular enemies, defeat triggers a reward/gate" — since `BossEnemyBase` implements `IEnemy`, dropping the boss into this component's `enemies` array (or letting its dynamic `GetComponentsInChildren<MonoBehaviour>()` scan find it) requires **zero changes** to `RoomClearCondition` itself. |
+| `ScoreManager` (existing static class) | Score bonus on boss defeat | Add `AddBossKillScore()` following the exact pattern of `AddKillScore()`/`AddTimeBonus()` — no new scoring system, just one more constant + method on the existing static class. |
 
-```csharp
-// Entering slow motion
-public void SetSlowMotion(float scale) // e.g., scale = 0.2f
-{
-    Time.timeScale = scale;
-    // CRITICAL: fixedDeltaTime must be scaled identically
-    // Default fixedDeltaTime is 0.02f (50Hz). Scale it proportionally.
-    Time.fixedDeltaTime = 0.02f * scale;
-}
+## Installation
 
-// Restoring normal time
-public void RestoreTime()
-{
-    Time.timeScale = 1f;
-    Time.fixedDeltaTime = 0.02f;
-}
-```
+No `npm`/UPM installation step is required — every API used above is already present in `Packages/manifest.json` (`com.unity.modules.audio`, `com.unity.modules.animation`, `com.unity.modules.particlesystem`, `com.unity.modules.physics2d`) at the versions already pinned for v3.0. This milestone is pure C#/Editor-script authoring on top of the existing package set.
 
-**Why fixedDeltaTime must be adjusted:** FixedUpdate runs on a fixed real-time cadence. If `timeScale = 0.2f` but `fixedDeltaTime` remains at `0.02f`, Physics2D will run at normal speed while visuals slow — creating physics stutter and incorrect collision detection on the player's dash. Adjusting it proportionally keeps physics consistent with visual time.
+If a project-wide SFX volume slider or ducking is desired beyond a flat `SFX` mixer group, no package addition is needed either — `AudioMixerGroup`/`AudioMixerSnapshot` are part of the same built-in `com.unity.modules.audio` module.
 
-**Recommended slow-motion scale:** `0.15f–0.25f`. Below `0.1f` you risk FixedUpdate calls dropping to near zero per frame on low-end Android, causing physics tunneling during the subsequent full-speed dash.
+## Alternatives Considered
 
-**UI/HUD exclusion from slow motion:** The time-stop gauge and on-screen buttons must update at real time. Use `Time.unscaledDeltaTime` in any HUD Update() loop. The Unity Input System 1.19.0 already runs on unscaled time by default — input callbacks fire at real-time cadence regardless of `timeScale`, so hold/release detection works correctly during slow motion.
+| Recommended | Alternative | When to Use Alternative |
+|-------------|-------------|-------------------------|
+| Plain `AudioSource` + one `AudioMixer` group | FMOD for Unity / Wwise | Only if the game later needs adaptive/interactive music, real-time DSP layering, or a large SFX library with non-programmer authoring (sound designer owns mixing outside Unity). For a prototype with ~5-8 one-shot cues, middleware is pure overhead — extra native plugin size on an ARM64 APK, an extra build step, and a learning curve for zero prototype-stage benefit. |
+| Inheritance-based `BossEnemyBase` (code-driven, matches `MeleeEnemy`/`RangedEnemy` style) | ScriptableObject-driven attack-pattern "Strategy pattern" (e.g. `AttackPatternSO` assets swapped per boss) | Reconsider if/when a **second or third boss type** is added and attack patterns need to be authored/tuned by a non-programmer without touching code, or patterns need to be mixed-and-matched across bosses at runtime. For "1 boss this milestone, framework extensible via subclassing," plain inheritance is simpler and reviewable in a single diff; introducing a full SO-based pattern engine now would be speculative generality the CLAUDE.md anti-overengineering rule explicitly warns against. |
+| Coroutine-driven spawn/portal VFX (existing hand-rolled `Lerp`/`SpriteMask` idiom) | `com.unity.timeline` (already installed, 1.8.11, currently unused in the whole codebase) | Timeline is worth adopting only if a boss needs a scripted multi-beat **cutscene** (camera moves + multiple animator/audio tracks choreographed together) — e.g. a boss "intro" sequence. For a spawn VFX that's structurally identical to `FloorTransitionEffect.PlayExit()`, adding Timeline authoring overhead (director asset, tracks, bindings) for a single effect is not worth the inconsistency with every other effect in the game being coroutine-driven. |
+| Built-in `ParticleSystem` (Shuriken) | `com.unity.vfx` (VFX Graph) | Never for this project on current scope — see What NOT to Use below. |
 
-**Audio pitch correction:** `AudioSource.pitch = Time.timeScale` gives the classic "slowed audio" feel. Set this on any SFX playing during slow motion.
+## What NOT to Use
 
-**Do NOT use:** Coroutines with `WaitForSeconds` for slow-motion timing — they scale with `timeScale`. Use `WaitForSecondsRealtime` or `Time.unscaledDeltaTime` counters instead for cooldown timers that should count real time.
+| Avoid | Why | Use Instead |
+|-------|-----|-------------|
+| FMOD / Wwise / any audio middleware | Adds a native plugin dependency, increases APK size, and requires an authoring workflow (FMOD Studio / Wwise Authoring) entirely outside Unity for a prototype that needs maybe 5-8 short SFX. CLAUDE.md scope rule: "프로토타입 외 기능 추가 금지." | `AudioSource` + `AudioMixer` (built-in, already installed) |
+| VFX Graph (`com.unity.visualeffectgraph`) | Requires Compute Shader support, which is not guaranteed across the Android minSdk 25 / ARM64 device range this project targets (hardware-dependent on lower-end GPUs) — same conclusion as the v3.0 STACK research, unchanged for this milestone. Also not installed in `manifest.json`; adding it is a new, heavier dependency for effects the built-in Shuriken system already produces adequately (hit spark, death particles, spawn burst). | `ParticleSystem` (Shuriken, already installed and used throughout) |
+| ScriptableObject-based data-driven boss/attack-pattern framework (up front) | Speculative generality for a milestone shipping exactly one boss. Adds an authoring layer (SO assets, editor tooling to keep them in sync with code) with no current payoff, contradicting CLAUDE.md's "요청되지 않은 유연성을 추가하지 마세요" rule. | `BossEnemyBase` abstract class + subclass per boss (add the SO layer later only if/when a second boss's authoring pain justifies it) |
+| `com.unity.timeline` for boss attack-pattern sequencing | Introduces a new authoring tool/asset type into a codebase where every other timed sequence (portal transition, hit freeze, death fade) is a hand-rolled coroutine — inconsistent with existing review-friendly pattern, and unnecessary for pattern logic that's just "telegraph → windup → hitbox → recover" (already the `MeleeEnemy`/`RangedEnemy` shape). | Coroutine + enum-phase FSM, same idiom as existing enemies |
+| New custom object-pooling system, or premature `ObjectPool<T>` adoption for spawn/hit/death VFX at current scale | The project already relies on cheap `Instantiate`/`Destroy` with `AutoDestroySelf` / `ParticleSystemStopAction.Destroy` for a handful of concurrent effects per room — adding pooling now is unmeasured optimization for a non-demonstrated problem. | Keep `Instantiate`/`Destroy`; revisit with `UnityEngine.Pool.ObjectPool<T>` only if profiling on-device shows GC spikes from the new boss/spawn VFX specifically |
+| Attaching the portal-transition `AudioSource` to the `ExitPortal`/room GameObject | `WorldGenerator.FloorTransitionSequence()` destroys the entire old room chain (including the portal) partway through the sequence (`D-07`) — a sound started on that GameObject would be cut off mid-playback when it's destroyed. | Attach to the Player GameObject (already hosts `FloorTransitionEffect`, persists across the transition) or to the `WorldGenerator` singleton |
 
-### Animation During Slow Motion
+## Stack Patterns by Variant
 
-**Use Animator's `updateMode = AnimatorUpdateMode.Normal` (default) for player and enemies.** This means animations automatically slow with `timeScale`, which is exactly correct — you want the enemy's attack-windup animation to slow down visibly. No special configuration needed.
+**If the boss needs multiple distinct attack patterns (phases):**
+- Use a `protected` enum extending the existing `Idle/Chase/Telegraph/Attack` shape with boss-specific phase names (e.g. `Phase1`, `Phase2`, `Enrage`), still coroutine-driven.
+- Because it's a one-line mental extension of the FSM shape already reviewed and proven in `MeleeEnemy.TelegraphAndAttack()` — no new architecture to learn.
 
-**Exception:** UI Animator components (if any) must be set to `AnimatorUpdateMode.UnscaledTime`.
+**If future milestones add a 2nd/3rd boss and pattern reuse across bosses becomes painful:**
+- Revisit the ScriptableObject "Strategy pattern" alternative (small `AttackPatternSO` assets executed by a shared `BossEnemyBase.RunPattern(AttackPatternSO)` coroutine driver) — a targeted refactor, not a v3.1 concern.
+- Because premature introduction now would be unused flexibility per CLAUDE.md scope discipline; the trigger condition (a second boss existing) hasn't happened yet.
 
----
+**If SFX asset sourcing becomes a blocker (no audio assets currently exist in the project):**
+- Use short, free/CC0 SFX (e.g. from Unity Asset Store free packs, Kenney.nl, or freesound.org CC0 filtered results) trimmed to <500ms per one-shot.
+- Set `AudioClip` import **Load Type = Decompress On Load** and **Compression Format = Vorbis (low quality, e.g. 40-70%)** for these short one-shots — standard Unity mobile guidance: short clips decompressed on load avoid per-frame CPU decompression cost, while Vorbis keeps APK size down versus PCM.
+- Because this is a mobile Android target (minSdk 25/ARM64) — audio memory and APK size both matter even for a prototype.
 
-## Input
+## Version Compatibility
 
-### System
+| Package A | Compatible With | Notes |
+|-----------|-----------------|-------|
+| `com.unity.modules.audio` 1.0.0 (unchanged) | Unity 6000.3.11f1 | No version change needed — audio module already declared in `manifest.json` from project creation; `AudioMixer`/`AudioSource`/`AudioClip` APIs used here are all stable since early Unity versions, unaffected by Unity 6 API renames (unlike `Rigidbody2D.velocity → linearVelocity` noted in the v3.0 STACK research). |
+| `com.unity.modules.particlesystem` 1.0.0 (unchanged) | Unity 6000.3.11f1 | Already used by `EnemyDeathEffect`/`HitSparkEffect`; no change. |
+| `com.unity.timeline` 1.8.11 (already installed, unused) | Unity 6000.3.11f1 | Present in manifest from project template default but intentionally not adopted this milestone (see What NOT to Use) — no action needed either way, it's a harmless unused dependency. |
+| N/A — no new packages added this milestone | — | This milestone's stack is 100% code + Editor scripts on top of the existing v3.0 package set. |
 
-**Use Unity Input System 1.19.0 exclusively. Do NOT use `Input.GetKey()` / `Input.GetAxis()` (legacy). Confidence: HIGH.**
+## Sources
 
-The action map `Assets/InputSystem_Actions.inputactions` already defines: Move (Vector2), Jump (Button), Attack (Button), Look (Vector2), Interact (Hold), Crouch. The Attack action is the direct hook for the slow-motion mechanic.
-
-**Binding approach for attack hold/release:**
-
-```csharp
-// In PlayerController.cs — use the generated C# wrapper or direct callbacks
-private InputAction _attackAction;
-
-void Awake()
-{
-    var inputActions = new InputSystem_Actions(); // generated wrapper
-    _attackAction = inputActions.Player.Attack;
-    _attackAction.started  += _ => OnAttackHeld();   // button pressed
-    _attackAction.canceled += _ => OnAttackReleased(); // button released
-    inputActions.Player.Enable();
-}
-```
-
-`started` fires on press. `canceled` fires on release. This is the correct pair for the hold-to-aim, release-to-dash pattern. Do NOT use `performed` for this mechanic — `performed` fires after an interaction completes (context-dependent) and creates race conditions with the slow-motion state.
-
-### Mobile On-Screen Controls
-
-**Use Unity Input System's built-in On-Screen Controls package (included in com.unity.inputsystem 1.19.0). Confidence: HIGH.**
-
-- `OnScreenButton` component: attach to a UI Canvas Button, set Control Path to `<Gamepad>/buttonSouth` or the action binding path. This synthesizes gamepad input that routes through the action map — no separate mobile code path needed.
-- `OnScreenStick` component: for the movement joystick. Use the Analog/Dynamic mode (the stick recenters to where the thumb touches, not a fixed screen position) for better mobile feel.
-
-**Why this approach over TouchInput API directly:** The Input System on-screen controls route through the existing action map. The same `_attackAction.started / canceled` callbacks work identically for physical buttons (editor testing) and on-screen touch (device). No platform-branching code.
-
-**Canvas setup:** Set Canvas Scaler to "Scale With Screen Size", Reference Resolution 1920x1080, Match = 0 (width). Place controls in the lower-left (movement) and lower-right (attack, roll) quadrants. Use anchors to pin them to screen corners so they stay correct at any aspect ratio.
-
-**Do NOT use:** Unity's legacy `Input.touches` API or rolling your own `ITouchable` system. The new Input System handles multi-touch correctly through on-screen controls.
-
-### Roll Action
-
-Add a Roll action (Button type) to the Player action map in the inputactions asset. Wire it exactly like Attack. A Crouch action already exists in the asset — repurpose it or add a distinct Roll action. Repurposing Crouch risks confusion; add a dedicated Roll binding.
+- Direct inspection of `D:\새 폴더\Fast\Packages\manifest.json` (confirms `com.unity.modules.audio`/`particlesystem`/`animation`/`timeline` already installed, no FMOD/Wwise/VFX Graph present) — HIGH confidence
+- Direct inspection of `Assets/Editor/PortalEffectBuilder.cs`, `Assets/Editor/HitSparkBuilder.cs`, `Assets/Scripts/Enemy/EnemyDeathEffect.cs`, `Assets/Scripts/World/{WorldGenerator,ExitPortal,ScoreManager,EnemySpawner}.cs`, `Assets/Scripts/Enemy/{MeleeEnemy,RangedEnemy,IEnemy}.cs`, `Assets/Scripts/Room/RoomClearCondition.cs`, `Assets/Scripts/World/FloorTransitionEffect.cs` — HIGH confidence (these define every integration point recommended above)
+- Grep confirmed zero existing `AudioSource`/`AudioClip`/`AudioMixer` usage anywhere in `Assets/Scripts` or `Assets/Editor` — HIGH confidence this milestone starts audio from zero
+- WebSearch: "Unity 6 2D mobile game audio best practice AudioSource AudioMixer vs FMOD prototype 2026" — MEDIUM confidence (multiple independent sources agree AudioMixer is the correct baseline before middleware; https://docs.unity3d.com/Manual/class-AudioSource.html official docs cross-checked)
+- WebSearch: "Unity ScriptableObject boss attack pattern FSM authoring pattern 2026" — MEDIUM confidence (confirms SO-based Strategy pattern is a recognized alternative but explicitly notes it's for reusable/designer-facing cases — reinforces the "not needed for 1 boss" recommendation here)
+- `.planning/research/STACK.md` (v3.0, prior milestone) — carried-forward HIGH confidence facts reused verbatim where still valid (VFX Graph compute-shader risk on Android, `UnityEngine.Pool.ObjectPool<T>` availability, `ObjectPool` vs custom pooling guidance)
 
 ---
-
-## Physics
-
-### Rigidbody2D Configuration
-
-**Use Rigidbody2D with `bodyType = Dynamic`, `collisionDetectionMode = CollisionDetectionMode2D.Continuous`. Confidence: HIGH.**
-
-Continuous collision detection is mandatory for the dash-to-enemy mechanic. The player teleports/moves at high velocity during a dash. With Discrete detection, the player can tunnel through thin platforms or miss the enemy trigger collider at high speed.
-
-```
-Rigidbody2D settings (set in Inspector or code):
-- Body Type: Dynamic
-- Collision Detection: Continuous
-- Interpolation: Interpolate  (smooths visual position between FixedUpdate steps)
-- Freeze Rotation Z: YES  (prevent unwanted rotation on wall clips)
-- Gravity Scale: 2.5–3.5  (fast-fall feel; default 1.0 is too floaty for action platformers)
-```
-
-**Gravity scale recommendation:** The default Physics2D gravity is -9.81. With `gravityScale = 3.0`, the player feels snappy. Tune `jumpForce` to compensate. This is a prototype — wire both to public fields and tune during play testing.
-
-### Ground Detection
-
-**Use a small CircleCast or OverlapCircle at the player's feet. Do NOT use OnCollisionStay2D. Confidence: HIGH.**
-
-```csharp
-bool IsGrounded()
-{
-    return Physics2D.OverlapCircle(
-        _groundCheck.position,   // empty child Transform at feet
-        0.1f,                    // radius
-        _groundLayer             // LayerMask: "Ground"
-    );
-}
-```
-
-Call this in `FixedUpdate`. OnCollisionStay2D is unreliable for jump detection because it does not re-fire every frame when the velocity is zero (sleeping rigidbody) and gives false negatives at the start of a frame.
-
-### Movement Implementation
-
-**Apply horizontal movement by setting `Rigidbody2D.linearVelocity` directly, not by AddForce. Confidence: HIGH.**
-
-```csharp
-void FixedUpdate()
-{
-    float targetVelocityX = _moveInput.x * _moveSpeed;
-    _rb.linearVelocity = new Vector2(targetVelocityX, _rb.linearVelocity.y);
-}
-```
-
-This gives immediate directional response with no acceleration curve — appropriate for a fast action platformer. AddForce with linear drag produces "slide" which fights the snappy feel the game requires. If you want a subtle acceleration curve later, lerp the targetVelocityX toward the current velocity, but start without it.
-
-**Note on `linearVelocity` vs `velocity`:** In Unity 6 (Physics2D API), the property is `Rigidbody2D.linearVelocity` (renamed from `velocity` to match Physics 3D naming conventions in Unity 6). Use `linearVelocity` — `velocity` still compiles but is marked obsolete.
-
-### Dash-to-Enemy (Attack Dash)
-
-**Use `Rigidbody2D.MovePosition()` for the dash movement, not teleporting transform.position. Confidence: MEDIUM.**
-
-```csharp
-IEnumerator DashToTarget(Vector2 targetPosition)
-{
-    float elapsed = 0f;
-    Vector2 startPos = _rb.position;
-    while (elapsed < _dashDuration)
-    {
-        elapsed += Time.unscaledDeltaTime; // dash runs at real speed even if time is restored during it
-        float t = elapsed / _dashDuration;
-        _rb.MovePosition(Vector2.Lerp(startPos, targetPosition, dashCurve.Evaluate(t)));
-        yield return new WaitForFixedUpdate();
-    }
-    _rb.MovePosition(targetPosition);
-}
-```
-
-`MovePosition` respects the physics simulation and triggers collision callbacks correctly — the player's invincibility frame logic via `Physics2D.IgnoreLayerCollision` will work. Direct `transform.position` assignment bypasses the physics engine and can cause missed collision events.
-
-**Use `Time.unscaledDeltaTime` here:** The dash should execute at full real-time speed (it follows the slow-motion aiming phase). Even if the caller restores `timeScale = 1f` before starting the coroutine, using `unscaledDeltaTime` is safer against race conditions in the state machine.
-
-### Collision Layer Matrix
-
-No layers are defined yet (TagManager shows only Default). Define these layers explicitly before writing any collision code. Confidence: HIGH (this is a structural decision, not a Unity API uncertainty).
-
-**Recommended layer setup:**
-
-| Layer | Index | Purpose |
-|-------|-------|---------|
-| Default | 0 | Unused gameplay objects |
-| Player | 8 | Player character body |
-| PlayerHurtbox | 9 | Receives enemy attacks |
-| PlayerInvincible | 10 | Active during dash and roll (swapped from PlayerHurtbox) |
-| Enemy | 11 | Enemy bodies |
-| EnemyProjectile | 12 | Ranged enemy bullets |
-| Ground | 13 | Platforms and floor |
-| AttackRange | 14 | Trigger collider showing attack detection area |
-| UI | 5 | (already exists) |
-
-**Collision matrix rules:**
-
-| | Player | PlayerHurtbox | PlayerInvincible | Enemy | EnemyProjectile | Ground | AttackRange |
-|---|---|---|---|---|---|---|---|
-| Player | OFF | — | — | OFF | OFF | ON | OFF |
-| PlayerHurtbox | — | — | — | ON (enemy melee) | ON | OFF | OFF |
-| PlayerInvincible | — | — | — | OFF | OFF | OFF | OFF |
-| Enemy | — | — | — | OFF | OFF | ON | — |
-| EnemyProjectile | — | — | — | OFF | OFF | ON | — |
-| Ground | ON | — | — | ON | ON | OFF | OFF |
-| AttackRange | — | — | — | ON (target detection) | OFF | OFF | OFF |
-
-**Invincibility frame implementation:** Swap the player's active collider layer between `PlayerHurtbox` (normal) and `PlayerInvincible` (during dash / roll). The collision matrix ensures `PlayerInvincible` collides with nothing harmful. This is cleaner than `Physics2D.IgnoreLayerCollision` calls at runtime, which modify global state.
-
-### Physics2D Settings to Adjust
-
-Current defaults from `ProjectSettings/Physics2DSettings.asset`:
-
-- `m_VelocityIterations: 8` — acceptable, leave as-is
-- `m_PositionIterations: 3` — increase to 6 for more accurate continuous collision during dash
-- `m_SimulationMode: 0` — this is `SimulationMode2D.FixedUpdate` (default). Leave as-is; do not switch to Update mode
-- `useMultithreading: 0` — leave off. Multithreaded physics in Unity 6's Box2D fork is stable but adds complexity; unnecessary for this scope
-- `m_AutoSyncTransforms: 0` — correct. Manual sync only. Never set to true for a physics-driven game
-
----
-
-## Performance
-
-### Object Pooling
-
-**Use Unity 6's built-in `ObjectPool<T>` (UnityEngine.Pool namespace). Do NOT implement a custom pool. Confidence: HIGH.**
-
-```csharp
-using UnityEngine.Pool;
-
-private ObjectPool<EnemyProjectile> _projectilePool;
-
-void Awake()
-{
-    _projectilePool = new ObjectPool<EnemyProjectile>(
-        createFunc:    () => Instantiate(_projectilePrefab),
-        actionOnGet:   p  => p.gameObject.SetActive(true),
-        actionOnRelease: p => p.gameObject.SetActive(false),
-        actionOnDestroy: p => Destroy(p.gameObject),
-        collectionCheck: true,  // set false in release builds
-        defaultCapacity: 10,
-        maxSize: 50
-    );
-}
-```
-
-Pool candidates in this game: enemy projectiles, hit-effect particles, enemy spawn instances. The floor/platform preset instances use a different pattern (see Level Architecture below).
-
-### Level Streaming (Floor Management)
-
-The game keeps current floor + next floor only. Implement this with `GameObject.SetActive(false)` on the departing floor rather than `Destroy` + `Instantiate`. Rationale: instantiation of a complex floor (with colliders, tilemaps, enemies) causes a frame spike. SetActive(false) costs almost nothing and the memory stays allocated. Since only 2 floors are ever active, the fixed memory overhead is acceptable and eliminates GC pressure.
-
-Destroy the floor two levels behind after the transition completes (not immediately) so there is always a safety buffer during the camera animation.
-
-### Draw Call Budget
-
-URP 2D Renderer with silhouette graphics means all objects share similar materials. Enable **Sprite Atlas** grouping: pack all silhouette sprites into a single Sprite Atlas asset. This reduces draw calls from N (one per unique sprite) to 1 per atlas page. On Android mid-range (2024), target 30 draw calls maximum per frame.
-
-**Dynamic batching is not available for URP 2D SpriteRenderer** (it requires a mesh with compatible vertex format). GPU Instancing does not apply to 2D sprites. The only effective batching mechanism is the Sprite Atlas + same material/sort layer grouping that the SRP Batcher handles automatically.
-
-### Particle VFX Constraint
-
-Use the built-in Particle System (Shuriken) for hit effects and attack range indicators. Do NOT use VFX Graph — it requires Compute Shader support which is not guaranteed on Android minSdk 25 (Vulkan/Compute is available on Android 7.0+ in theory but not universally reliable below ARM Mali G52). Keep particle counts below 50 per burst on mid-range devices.
-
-### Target Frame Rate
-
-```csharp
-// In a GameManager or Application initializer
-Application.targetFrameRate = 60;
-// Do NOT set QualitySettings.vSyncCount for mobile — it has no effect on Android/iOS
-// (vSync is controlled by the OS display compositor)
-```
-
-The QualitySettings.asset shows `vSyncCount: 0` for Android's "Medium" quality level — that is correct. `Application.targetFrameRate = 60` is the correct mobile cap.
-
-### Memory: Scripting Backend
-
-Android build must use **IL2CPP** (not Mono). IL2CPP strips unused managed code and compiles to native ARM64. This is mandatory for performance and App Store acceptance. Mono on Android is deprecated by Unity and produces larger, slower builds.
-
-Enable: Player Settings → Android → Other Settings → Scripting Backend → IL2CPP.
-Enable Managed Stripping Level → Medium (High risks stripping reflection-used types).
-
----
-
-## What to Avoid
-
-### Do NOT use Coroutines for game-state logic driven by slow-motion
-
-Coroutines with `yield return null` advance on frame cadence, which scales with `timeScale`. The slow-motion state machine (entered on Attack press, exited on release or gauge empty) must be driven by callbacks and state fields, not by coroutines waiting a fixed number of frames. Use coroutines only for fire-and-forget animations (e.g., the dash movement path above), not for state ownership.
-
-### Do NOT use the Legacy Input Manager for anything
-
-`Input.GetButtonDown("Attack")` is gone. The project already uses Input System 1.19.0. Mixing the two systems causes undefined behavior (they compete for the same device state). `ProjectSettings/ProjectSettings.asset` should have `activeInputHandler: 2` (Input System only) — verify this. If it shows `1` (Both), switch to `2`.
-
-### Do NOT use Physics2D.gravity scaling for slow motion
-
-Some tutorials suggest reducing gravity as a complement to slow motion. This breaks the dash-to-enemy trajectory calculation (which happens at normal speed) and produces inconsistent arc heights that vary based on how long the player was in slow motion. Use `Time.timeScale` exclusively. Physics2D global gravity stays at -9.81 always.
-
-### Do NOT use 3D Physics components
-
-`Rigidbody` (3D), `Collider` (3D) — none of these. This is a 2D game. All physics is `Rigidbody2D`, `Collider2D`, `Physics2D` queries. The project has both `com.unity.modules.physics` and `com.unity.modules.physics2d` installed. Using 3D physics accidentally (e.g., by selecting the wrong "Add Component" entry) will produce invisible interaction bugs.
-
-### Do NOT use Unity.Netcode or the Multiplayer Center
-
-`com.unity.multiplayer.center` is installed in the manifest. This is a single-player game. Ignore it entirely. Do not add any Netcode for GameObjects (NGO) components.
-
-### Do NOT use Visual Scripting for gameplay logic
-
-`com.unity.visualscripting` 1.9.10 is installed. Game logic belongs in C# MonoBehaviours. Bolt/Visual Scripting adds a reflection-heavy overhead on each node evaluation that is measurable on mobile and makes the code impossible to debug with breakpoints.
-
-### Do NOT pre-implement features that are Out of Scope
-
-The PROJECT.md explicitly excludes: double jump, wall jump, dash button, combat combos, leveling system, boss fights, ranking, ads, IAP. Do not architect for these. No abstract `IAbility` interface, no upgrade system hooks, no network-ready player state. Prototype scope only.
-
----
-
-## Installed Packages — Usage Guidance
-
-These are in `manifest.json` but may be misused:
-
-| Package | Use in This Game | Caution |
-|---------|-----------------|---------|
-| com.unity.2d.animation 13.0.4 | Skeletal rigging for character sprites | Only if doing bone-based animation. For silhouette graphics, frame-by-frame via Animator is simpler |
-| com.unity.2d.aseprite 3.0.1 | Import Aseprite files directly | Use if sprite assets are authored in Aseprite; skip otherwise |
-| com.unity.2d.spriteshape 13.0.0 | Freeform terrain curves | Useful for organic platform edges; overkill for geometric floor presets — use Tilemap instead |
-| com.unity.2d.tilemap + extras 6.0.1 | Floor layout construction | Use for the 3–5 preset floor layouts; Rule Tiles from tilemap.extras simplify platform auto-tiling |
-| com.unity.timeline 1.8.11 | Scripted sequences | Use for the camera-ascend transition between floors. Avoids hand-coding the timed sequence in a coroutine |
-| com.unity.visualscripting | Gameplay | Do not use |
-| com.unity.multiplayer.center | Networking | Do not use |
-
----
-
-## Confidence Assessment
-
-| Area | Confidence | Basis |
-|------|------------|-------|
-| Time.timeScale + fixedDeltaTime pairing | HIGH | Documented Unity behavior; well-established pattern |
-| Input System hold/release callbacks | HIGH | Verified against Input System 1.x API (started/canceled semantics) |
-| On-Screen Controls routing through action map | HIGH | Core Input System feature since 1.0 |
-| Rigidbody2D.linearVelocity (Unity 6 rename) | HIGH | Unity 6 renamed `velocity` to `linearVelocity` in Physics2D; confirmed in Unity 6 release notes |
-| Continuous collision for dash | HIGH | Physics2D API, standard recommendation |
-| ObjectPool<T> (UnityEngine.Pool) | HIGH | Introduced in Unity 2021.2, fully stable in Unity 6 |
-| PositionIterations recommendation (increase to 6) | MEDIUM | General physics tuning guidance; validate empirically on device |
-| Gravity scale 2.5–3.5 recommendation | LOW | Feel-based prototype recommendation; must be tuned to actual artist assets and level scale |
-| VFX Graph exclusion on minSdk 25 Android | MEDIUM | Known limitation; Compute Shader support on Android 7.x is hardware-dependent; validate on target device |
-
----
-
-*Sources: Unity 6 documentation knowledge (Aug 2025 cutoff), direct inspection of project files (`manifest.json`, `Physics2DSettings.asset`, `ProjectSettings.asset`, `TagManager.asset`, `QualitySettings.asset`). Web verification was unavailable during this research session — flag MEDIUM/LOW confidence items for spot-check against https://docs.unity3d.com/6000.0/ before implementation.*
+*Stack research for: Fast v3.1 — 보스 룸 콘텐츠 + 연출 고도화(사운드/타이밍/신규 스폰 VFX)*
+*Researched: 2026-07-08*
