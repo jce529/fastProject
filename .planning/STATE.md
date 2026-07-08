@@ -1,16 +1,16 @@
 ---
 gsd_state_version: 1.0
-milestone: v3.0
-milestone_name: 무한 복도 층 시스템
-status: milestone_complete
-stopped_at: v3.0 milestone shipped — archived to .planning/milestones/, awaiting /gsd:new-milestone
-last_updated: "2026-07-08T15:00:00.000Z"
+milestone: v3.1
+milestone_name: 보스 룸 & 연출 고도화
+status: defining_requirements
+stopped_at: v3.1 milestone started — defining requirements
+last_updated: "2026-07-08T16:00:00.000Z"
 last_activity: 2026-07-08
 progress:
-  total_phases: 5
-  completed_phases: 5
-  total_plans: 23
-  completed_plans: 23
+  total_phases: 0
+  completed_phases: 0
+  total_plans: 0
+  completed_plans: 0
 ---
 
 # Project State: Fast (가칭)
@@ -23,21 +23,20 @@ progress:
 
 **Core Value:** 공격 버튼을 누르면 시간이 느려지고, 손을 떼면 적에게 돌진해 한 방에 처치하는 손맛 — 이것이 재미있어야 게임이 살아난다.
 
-**Prototype Goal:** 층을 룸+길 수평 체인으로 재설계 — 양방향 무한 생성, 전투 Corridor, 확률적 EXIT 포탈, 제한 시간으로 "빠른 탈출" 긴장감 검증.
+**Prototype Goal:** 보스 룸 콘텐츠(1종, 확장 가능한 프레임워크)를 추가하고, 기존 포탈/히트/사망 연출에 사운드·타이밍 개선을 더하고, 적 등장(스폰) 연출을 신설한다.
 
 **Last Shipped Milestone:** v3.0 — 무한 복도 층 시스템 (2026-07-08)
 
-**Next Milestone:** TBD — run `/gsd:new-milestone`
+**Current Milestone:** v3.1 — 보스 룸 & 연출 고도화 (in progress)
 
 ---
 
 ## Current Position
 
-Phase: (none — v3.0 milestone complete)
+Phase: Not started (defining requirements)
 Plan: —
-Next: `/gsd:new-milestone` to define v3.1/v4.0 scope
-Status: Milestone complete, awaiting next milestone definition
-Last activity: 2026-07-08
+Status: Defining requirements
+Last activity: 2026-07-08 — Milestone v3.1 started
 
 ```
 Progress: [████████████████████] v3.0 milestone: 5/5 phases complete (Phase 8-12)
@@ -131,9 +130,9 @@ Progress: [████████████████████] v3.0 mi
 3. `.planning/REQUIREMENTS.md` deleted after v3.0 archive — fresh one created by `/gsd:new-milestone`
 4. See `.planning/milestones/v3.0-ROADMAP.md` and `.planning/milestones/v3.0-REQUIREMENTS.md` for full v3.0 history
 
-**Last session:** 2026-07-08T15:00:00.000Z
-**Stopped at:** v3.0 milestone complete — archived, PROJECT.md evolved, awaiting `/gsd:new-milestone`
+**Last session:** 2026-07-08T16:00:00.000Z
+**Stopped at:** v3.1 milestone started — defining requirements
 
 ---
 *State initialized: 2026-05-27*
-*Last updated: 2026-07-08 — v3.0 milestone shipped (Phase 8-12, 23/23 plans, 14/14 requirements)*
+*Last updated: 2026-07-08 — v3.1 milestone (보스 룸 & 연출 고도화) kicked off, requirements definition in progress*

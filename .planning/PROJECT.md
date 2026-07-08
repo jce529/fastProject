@@ -14,15 +14,14 @@
 
 전체 상세: `.planning/MILESTONES.md`, `.planning/milestones/v3.0-ROADMAP.md`
 
-## Next Milestone Goals
+## Current Milestone: v3.1 보스 룸 & 연출 고도화
 
-*(미정 — `/gsd:new-milestone`으로 다음 마일스톤 정의 예정)*
+**Goal:** 보스 룸 콘텐츠(1종, 확장 가능한 프레임워크)를 추가하고, 기존 포탈/히트/사망 연출에 사운드와 타이밍 개선을 더하고, 적 등장(스폰) 연출을 신설한다.
 
-다음 후보 방향 (Out of Scope/미검증 항목에서):
-- 프리셋 기반 고정 층 레이아웃 대신 현재는 Complex_Room 6종 랜덤 풀 — 레이아웃 다양성 확장 여지
-- 보스 룸 / 특수 룸 이벤트
-- EXIT 포탈 연출(사운드) 고도화
-- 실제 플레이테스트로 6개 프로토타입 검증 목표(아래 Context 참고) 결과 수집
+**Target features:**
+- 보스 룸: EXIT 포탈처럼 확률적 스폰, 보스 1종(공격 패턴+스프라이트+아레나 구조 모두 고유), 솔로 전투, 처치 시 점수 보너스, 층 진입은 기존 EXIT 포탈 그대로 필요
+- 적 등장 연출: 플레이어처럼 포탈을 타고 나오는 스폰 연출 신설
+- 기존 연출 개선: 포탈전환/히트/사망에 사운드 추가 + 타이밍·피드백 어색함 수정
 
 <details>
 <summary>이전 Current Milestone 섹션 (v3.0 진행 중 스냅샷, 아카이브)</summary>
@@ -104,6 +103,11 @@
 
 **코드베이스 현황 (v3.0 shipped 기준):** MainMenu/AttackSelect/SampleScene 3씬 구성. PlayerController/CombatController/GaugeController/RollController(전투), MeleeEnemy/RangedEnemy FSM(적), WorldGenerator/RoomConnector/ExitPortal/FloorTimer/ScoreManager(룸-길 무한 생성 + 층 전환 + 타이머/점수), HUDController/DeathScreenController(UI), FloorTransitionEffect/PortalEffectBuilder/HitSparkBuilder 등 애니메이션 폴리싱 컴포넌트. Room 프리팹은 Tilemap 기반(Complex_Room 6종), Corridor 3종은 TilemapCollider2D 기반.
 
+**v3.1 이후 후보 (이번 마일스톤에서 제외):**
+- 튜토리얼 (온보딩 UI/조작법 설명) — v3.1에서 보스 룸+연출로 범위를 좁히면서 별도 마일스톤으로 분리
+- 프리셋 기반 고정 층 레이아웃 (현재 Complex_Room 6종 랜덤 풀)
+- 실제 플레이테스트로 6개 프로토타입 검증 목표 결과 수집
+
 ## Constraints
 
 - **Tech Stack**: Unity 6 LTS + C# — 이미 설정된 프로젝트 환경
@@ -146,4 +150,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-07-08 after v3.0 milestone — 룸-길 무한 생성, EXIT 포탈 층 전환, 타이머/난이도/점수, 애니메이션 폴리싱 전체 검증 완료. 전체 요구사항(v1.0 13/13, v2.0 7/7, v3.0 14/14) 반영. Requirements Active 섹션 초기화, 다음 마일스톤 대기.*
+*Last updated: 2026-07-08 after v3.1 milestone kickoff — 보스 룸(1종, 확장 가능한 프레임워크) + 연출 고도화(적 등장 스폰 연출 신설, 포탈/히트/사망 사운드·타이밍 개선) 목표 확정. 튜토리얼은 별도 마일스톤으로 분리.*
