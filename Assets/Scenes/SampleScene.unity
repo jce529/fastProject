@@ -2550,7 +2550,7 @@ MonoBehaviour:
   _combatController: {fileID: 1394403464}
   _meleeEnemyPrefab: {fileID: 2920709404338958160, guid: 9f7e98af5cb28ed44bdae27b6bbeacfc, type: 3}
   _rangedEnemyPrefab: {fileID: 6096329199964086436, guid: 6683746b3080e3e4ea1543e3ab03c125, type: 3}
-  _portalEffectPrefab: {fileID: 0}
+  _portalEffectPrefab: {fileID: 4852289420351960297, guid: f509cdc3bda240940b1ac24888f0b970, type: 3}
 --- !u!1 &1365058120
 GameObject:
   m_ObjectHideFlags: 0
