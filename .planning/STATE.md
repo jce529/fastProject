@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v3.0
 milestone_name: Phases
 status: executing
-stopped_at: Completed 12-02, 12-08 (Wave 2 autonomous plans; 12-05/12-07 pending checkpoint)
-last_updated: "2026-07-08T04:35:00.000Z"
-last_activity: 2026-07-08 -- Phase 12 Wave 2 autonomous plans complete
+stopped_at: Completed 12-05, 12-07 (Wave 2 all plans done; D-05/D-06/D-07/D-08/D-10 playtest passed)
+last_updated: "2026-07-08T04:45:00.000Z"
+last_activity: 2026-07-08 -- Phase 12 Wave 2 complete
 progress:
   total_phases: 5
   completed_phases: 4
   total_plans: 23
-  completed_plans: 19
+  completed_plans: 21
 ---
 
 # Project State: Fast (가칭)
@@ -32,10 +32,10 @@ progress:
 ## Current Position
 
 Phase: 12 (animation-polish) — EXECUTING
-Plan: 5 of 9 (Wave 1 complete; Wave 2 autonomous done: 12-02, 12-08)
-Next: 12-05, 12-07 (checkpoint plans — need Unity Editor + playtest)
+Plan: 7 of 9 (Wave 1 + Wave 2 complete)
+Next: Wave 3 (12-03, 12-09 — final checkpoint playtests)
 Status: Executing Phase 12
-Last activity: 2026-07-08 -- Phase 12 Wave 2 autonomous plans complete
+Last activity: 2026-07-08 -- Phase 12 Wave 2 complete
 
 ```
 Progress: [██████████████████░░] 9/11 phases complete (v3.0: Phase 8, 9 complete)

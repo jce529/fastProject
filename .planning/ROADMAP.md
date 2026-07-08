@@ -435,9 +435,9 @@ Plans:
 - [x] 12-02-PLAN.md — PortalEffectBuilder.cs + WorldGenerator.cs FloorTransitionSequence 재작성 (D-01, D-02, D-03, D-04)
 - [ ] 12-03-PLAN.md — 에디터 도구 실행 + Inspector 연결 + 포탈 전환 플레이테스트 (D-01~D-04)
 - [x] 12-04-PLAN.md — PlayerAnimatorPatcher.cs (Whiff/Roll 트리거+상태 패치 도구) (D-05, D-06)
-- [ ] 12-05-PLAN.md — 에디터 도구 실행 + Whiff/Roll 애니메이션 플레이테스트 (D-05, D-06)
+- [x] 12-05-PLAN.md — 에디터 도구 실행 + Whiff/Roll 애니메이션 플레이테스트 (D-05, D-06)
 - [x] 12-06-PLAN.md — AutoDestroySelf/HitSparkBuilder/PlayerTrailBuilder + CameraFollow.Shake + CombatController 배선 (D-07, D-08, D-10)
-- [ ] 12-07-PLAN.md — 에디터 도구 실행 + Inspector 연결 + 히트 임팩트 플레이테스트 (D-07, D-08, D-10)
+- [x] 12-07-PLAN.md — 에디터 도구 실행 + Inspector 연결 + 히트 임팩트 플레이테스트 (D-07, D-08, D-10)
 - [x] 12-08-PLAN.md — EnemyDeathEffect.cs + MeleeEnemy/RangedEnemy 사망 연출 배선 (D-09, D-11)
 - [ ] 12-09-PLAN.md — 적 사망 연출 플레이테스트 (D-09, D-11)
 
