@@ -16,9 +16,24 @@ public class CameraFollow : MonoBehaviour
     private Bounds _activeBounds;
     private Camera _camera;
 
+    private float _shakeTimeRemaining;
+    private float _shakeDurationTotal;
+    private float _shakeAmplitude;
+
     private void Awake()
     {
         _camera = GetComponent<Camera>();
+    }
+
+    /// <summary>
+    /// 처치 순간 카메라를 짧게 흔든다 (D-08). Time.unscaledDeltaTime 기반으로 감쇠하므로
+    /// HitFreeze(Time.timeScale=0) 중에도 정상 동작한다.
+    /// </summary>
+    public void Shake(float duration, float amplitude)
+    {
+        _shakeDurationTotal = duration;
+        _shakeTimeRemaining = duration;
+        _shakeAmplitude = amplitude;
     }
 
     /// <summary>
@@ -67,6 +82,14 @@ public class CameraFollow : MonoBehaviour
         else
         {
             transform.position = desired;
+        }
+
+        if (_shakeTimeRemaining > 0f)
+        {
+            _shakeTimeRemaining -= Time.unscaledDeltaTime;
+            float damper = Mathf.Clamp01(_shakeTimeRemaining / _shakeDurationTotal);
+            Vector2 shakeOffset = Random.insideUnitCircle * _shakeAmplitude * damper;
+            transform.position += new Vector3(shakeOffset.x, shakeOffset.y, 0f);
         }
     }
 }

@@ -39,6 +39,9 @@ public class CombatController : MonoBehaviour
     /// to avoid a stuck state during playtesting.
     /// </summary>
     [SerializeField] private float maxSlowMoDuration  = 5f;
+    [SerializeField] private GameObject _hitSparkPrefab;
+    [SerializeField] private float _cameraShakeDuration = 0.15f;
+    [SerializeField] private float _cameraShakeAmplitude = 0.2f;
 
     // -- Component references -------------------------------------------------------
     [SerializeField] private PlayerController _player;
@@ -49,6 +52,7 @@ public class CombatController : MonoBehaviour
     private TrailRenderer        _trailRenderer;
     private Camera               _mainCamera;
     private Animator             _animator;
+    private CameraFollow         _cameraFollow;
 
     // RangeDisplay reference — found via GetComponentInChildren in Start
     private RangeDisplay _rangeDisplay;
@@ -81,7 +85,9 @@ public class CombatController : MonoBehaviour
         _gauge                = GetComponent<ChronoGaugeController>();
         _spriteRenderer       = GetComponent<SpriteRenderer>();
         _trailRenderer        = GetComponentInChildren<TrailRenderer>();
+        if (_trailRenderer != null) ConfigureTrailVisuals(_trailRenderer);
         _mainCamera           = Camera.main;
+        _cameraFollow         = _mainCamera != null ? _mainCamera.GetComponent<CameraFollow>() : null;
         _animator             = GetComponent<Animator>();
 
         // Cache layer masks once in Awake — avoid NameToLayer in Update (ROADMAP constraint)
@@ -299,6 +305,8 @@ public class CombatController : MonoBehaviour
 
         // 6. Kill and effects
         target.OnDashHit();
+        SpawnHitSpark(destination);
+        _cameraFollow?.Shake(_cameraShakeDuration, _cameraShakeAmplitude);
         ScoreManager.AddKillScore();
         yield return StartCoroutine(HitFreeze(hitFreezeDuration));
 
@@ -326,6 +334,27 @@ public class CombatController : MonoBehaviour
         // Restore both — forgetting fixedDeltaTime causes physics to stop permanently (Pitfall 5)
         Time.timeScale      = 1f;
         Time.fixedDeltaTime = 0.02f;
+    }
+
+    // -- Hit impact (D-07, D-10) ----------------------------------------------------
+
+    /// <summary>D-10: TrailRenderer 시각(그라데이션 색상, 폭 커브) 강화 설정.</summary>
+    private void ConfigureTrailVisuals(TrailRenderer trail)
+    {
+        trail.time = 0.25f;
+        trail.widthCurve = new AnimationCurve(new Keyframe(0f, 0.4f), new Keyframe(1f, 0f));
+        var grad = new Gradient();
+        grad.SetKeys(
+            new[] { new GradientColorKey(new Color(0.6f, 0.9f, 1f), 0f), new GradientColorKey(new Color(0.1f, 0.4f, 1f), 1f) },
+            new[] { new GradientAlphaKey(0.9f, 0f), new GradientAlphaKey(0f, 1f) });
+        trail.colorGradient = grad;
+    }
+
+    /// <summary>D-07: 처치 위치에 히트 스파크 이펙트를 재생한다.</summary>
+    private void SpawnHitSpark(Vector2 position)
+    {
+        if (_hitSparkPrefab == null) return;
+        Instantiate(_hitSparkPrefab, position, Quaternion.identity);
     }
 
     // -- Enemy detection -----------------------------------------------------------
