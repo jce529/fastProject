@@ -455,15 +455,13 @@ Plans:
 
 ## v3.1 — 보스 룸 & 연출 고도화 (in progress)
 
-# Roadmap: Fast (가칭) — v3.1
-
 **Milestone:** v3.1 — 보스 룸 & 연출 고도화
 **Granularity:** Standard
 **Coverage:** 18/18 v3.1 requirements mapped
 
 ---
 
-## v3.1 Phases
+## Phases
 
 - [ ] **Phase 13: 오디오 기반 구축 & 연출 사운드 폴리싱** - AudioManager 신설, 포탈전환/히트임팩트/적사망 사운드 추가 및 기존 타이밍 어색함 개선
 - [ ] **Phase 14: 적 등장 스폰 연출** - 근접/원거리 적(추후 보스 포함)이 포탈을 타고 등장하는 스폰 VFX, 연출 중 감지/타겟팅 차단
@@ -473,7 +471,7 @@ Plans:
 
 ---
 
-## v3.1 Phase Details
+## Phase Details
 
 ### Phase 13: 오디오 기반 구축 & 연출 사운드 폴리싱
 **Goal**: 프로젝트에 오디오 재생 인프라가 신설되고, 포탈전환/히트임팩트/적사망 연출에 사운드가 추가되며, 기존 타이밍·피드백 어색함이 개선된다
@@ -544,7 +542,7 @@ Plans:
 
 ---
 
-## v3.1 Progress Table
+## Progress Table
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
@@ -556,7 +554,7 @@ Plans:
 
 ---
 
-## v3.1 Coverage Map
+## Coverage Map
 
 | Requirement | Phase | Description |
 |-------------|-------|-------------|
@@ -583,7 +581,7 @@ Plans:
 
 ---
 
-## v3.1 Implementation Notes (for plan-phase reference)
+## Implementation Notes (for plan-phase reference)
 
 - AudioManager는 MonoBehaviour 싱글턴 + 풀링된 AudioSource 배열로 구현 (ScoreManager/FloorTimer의 순수 static 패턴과 의도적으로 다름 — WorldGenerator와 동일한 이유)
 - 모든 신규 오디오 타이밍 코드는 Time.unscaledDeltaTime/WaitForSecondsRealtime 컨벤션 준수 (프로젝트 전역 슬로우모션 면역 규칙)
