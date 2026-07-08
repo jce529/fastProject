@@ -34,6 +34,10 @@ public class EnemyDeathEffect : MonoBehaviour
             {
                 yield return null;
             }
+
+            // Die.anim은 loop 클립이라 완주 후 그대로 두면 처음부터 다시 재생된다(캐릭터가 일어나는 것처럼 보임).
+            // 파티클/마스크 페이드가 진행되는 동안 마지막 포즈에 고정되도록 Animator 재생을 멈춘다.
+            animator.speed = 0f;
         }
 
         // 2. 파티클 재생
