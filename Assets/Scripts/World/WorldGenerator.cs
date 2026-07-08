@@ -46,6 +46,9 @@ public class WorldGenerator : MonoBehaviour
     [SerializeField] private GameObject _meleeEnemyPrefab;
     [SerializeField] private GameObject _rangedEnemyPrefab;
 
+    [Header("Transition Animation (Phase 12, D-01~D-04)")]
+    [SerializeField] private GameObject _portalEffectPrefab;
+
     // Runtime state
     // D-10: List -> LinkedList로 전환. 양 끝(AddFirst/AddLast/RemoveFirst/RemoveLast)에서 O(1)로
     // 삽입/삭제하고, First/Last로 현재 체인 경계 room을 항상 "그때그때" 조회할 수 있어 GEN-04에서
@@ -58,6 +61,7 @@ public class WorldGenerator : MonoBehaviour
         // _playerCurrentIndex와 항상 함께 갱신되는 실제 노드 참조 — UpdatePlayerIndex()가 인접 노드를
         // O(1)로 탐색하는 데 사용한다(LinkedList는 인덱스 임의접근을 지원하지 않음).
     private int _activeExitCount;         // D-08: 현재 활성 포탈 수
+    private FloorTransitionEffect _transitionEffect;
 
     public static WorldGenerator Instance { get; private set; }
 
@@ -118,6 +122,14 @@ public class WorldGenerator : MonoBehaviour
         // (Pitfall 7: FloorSpawner가 설정한 _hasBounds 잔류 방지. 단일 룸 스냅 대신 병합 Bounds로
         // 교체해 Corridor 통과 중에도 카메라가 멈추지 않도록 한다.)
         RecomputeCameraBounds();
+
+        // Phase 12 (D-01): Player GameObject에 FloorTransitionEffect가 없으면 런타임에 부착
+        if (_playerTransform != null)
+        {
+            _transitionEffect = _playerTransform.GetComponent<FloorTransitionEffect>();
+            if (_transitionEffect == null)
+                _transitionEffect = _playerTransform.gameObject.AddComponent<FloorTransitionEffect>();
+        }
     }
 
     private void SpawnNextPair()
@@ -497,6 +509,10 @@ public class WorldGenerator : MonoBehaviour
         _combatController?.ForceExitCombatState();
         _player.LockInput();
 
+        // ENTRY (Phase 12 D-01 E1-E4) — portal은 아직 살아있는 상태에서 재생, 직후 옛 체인과 함께 파괴된다.
+        if (_transitionEffect != null)
+            yield return _transitionEffect.PlayEntry(portal.transform);
+
         FloorManager.CurrentFloor++;
 
         // D-07 — 기존 체인(현재 room+corridor 전부) 즉시 Destroy
@@ -542,7 +558,11 @@ public class WorldGenerator : MonoBehaviour
         // Step 4 — 적 활성화: WorldGenerator는 현재 EnemySpawner.Spawn()을 호출하지 않으므로 의도적 no-op
         // (Pitfall 5 — 적 스폰 배선은 EXIT-01/02/03 범위 밖. 이 단계는 구조적 자리만 유지한다.)
 
-        yield return new WaitForSecondsRealtime(0.05f); // Step 5
+        // EXIT (Phase 12 D-01 X1-X4) — 기존 WaitForSecondsRealtime(0.05f) 플레이스홀더를 대체 (Step 5)
+        if (_transitionEffect != null)
+            yield return _transitionEffect.PlayExit(teleportPos, _portalEffectPrefab);
+        else
+            yield return new WaitForSecondsRealtime(0.05f); // fallback — 컴포넌트 미부착 시
 
         _player.UnlockInput(); // Step 6
     }
