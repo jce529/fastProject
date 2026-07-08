@@ -26,8 +26,14 @@ public class EnemyDeathEffect : MonoBehaviour
         if (animator != null)
         {
             yield return null; // isDead bool 전환이 이 프레임에 반영되도록 한 프레임 대기
-            float dieLength = animator.GetCurrentAnimatorStateInfo(0).length;
-            yield return new WaitForSecondsRealtime(dieLength);
+            // Animator는 Time.timeScale의 영향을 받는 Scaled Time으로 재생되지만 WaitForSecondsRealtime은
+            // timeScale과 무관한 실시간이라 HitFreeze(timeScale=0) 등과 겹치면 어긋난다 -- 고정 시간 대기 대신
+            // Die 상태의 실제 재생 완료(normalizedTime >= 1) 여부를 매 프레임 직접 확인한다.
+            while (!animator.GetCurrentAnimatorStateInfo(0).IsName("Die")
+                   || animator.GetCurrentAnimatorStateInfo(0).normalizedTime < 1f)
+            {
+                yield return null;
+            }
         }
 
         // 2. 파티클 재생
