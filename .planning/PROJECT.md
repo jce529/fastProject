@@ -117,4 +117,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-07-07 — Phase 11 (타이머 & 난이도) 완료 및 검증(5/5 must-haves). 다음: Phase 12 (애니메이션 폴리시).*
+*Last updated: 2026-07-08 — Phase 12 (애니메이션 폴리시) 완료 및 검증(5/5 must-haves). 포탈 전환 연출, Whiff/Roll 애니메이션 수정, 히트 임팩트(스파크/쉐이크/트레일), 적 사망 연출 구현. v3.0 마일스톤의 마지막 Phase — 전체 9/9 Phase 완료.*
