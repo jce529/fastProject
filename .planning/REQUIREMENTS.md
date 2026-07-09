@@ -32,7 +32,7 @@ Requirements for the 보스 룸 & 연출 고도화 milestone. Each maps to roadm
 - [x] **SFX-03**: 히트 임팩트에 사운드가 추가된다
 - [x] **SFX-04**: 적 사망에 사운드가 추가된다
 - [ ] **SFX-05**: 보스 스폰에 전용 사운드가 추가된다
-- [ ] **SFX-06**: 포탈 전환/히트/사망 연출의 타이밍·피드백 어색함이 개선된다 (v3.0 Phase 12 폴리싱 갭 해소)
+- [x] **SFX-06**: 포탈 전환/히트/사망 연출의 타이밍·피드백 어색함이 개선된다 (v3.0 Phase 12 폴리싱 갭 해소)
 
 ## v2 Requirements
 
@@ -86,7 +86,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | SFX-03 | Phase 13 | Complete |
 | SFX-04 | Phase 13 | Complete |
 | SFX-05 | Phase 16 | Pending |
-| SFX-06 | Phase 13 | Pending |
+| SFX-06 | Phase 13 | Complete |
 
 **Coverage:**
 - v3.1 requirements: 18 total
