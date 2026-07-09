@@ -41,6 +41,7 @@ public class EnemyDeathEffect : MonoBehaviour
         }
 
         // 2. 파티클 재생
+        AudioManager.PlaySfx(Sfx.EnemyDeathGlitch); // SFX-04/D-05: 시뮬레이션 NPC 붕괴 노이즈 — Die 애니메이션 완주 후라 슬래시와 자연 시간차
         SpawnDeathParticles();
 
         // 3. SpriteMask 아래->위 페이드

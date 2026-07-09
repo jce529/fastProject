@@ -305,6 +305,7 @@ public class CombatController : MonoBehaviour
 
         // 6. Kill and effects
         target.OnDashHit();
+        AudioManager.PlaySfx(Sfx.Slash); // SFX-03/D-05: 처치 확정 순간 슬래시 — HitFreeze 이전 호출, DSP는 timeScale=0 중에도 계속 재생
         SpawnHitSpark(destination);
         _cameraFollow?.Shake(_cameraShakeDuration, _cameraShakeAmplitude);
         ScoreManager.AddKillScore();
