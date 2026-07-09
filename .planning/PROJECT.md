@@ -74,6 +74,11 @@
 - [x] MainMenu → AttackSelect → SampleScene 게임 시작 플로우, 사망 후 AttackSelect 복귀 — v2.0 (MENU-01/02/03, ATKS-01/02/03, FLOW-01)
 - [x] 포탈 전환/히트 임팩트/적 사망 애니메이션 폴리싱 — v3.0 (Phase 12)
 
+**오디오 (Validated in v3.1 Phase 13)**
+- [x] AudioManager 싱글턴 신설 (2채널 풀, DSP 512, 3씬 전환 간 생존) — v3.1 (SFX-01)
+- [x] 포탈 진입/퇴장, 대시 히트, 적 사망 사운드 재생 + 슬로우모션 피치 무결성 — v3.1 (SFX-02/03/04)
+- [x] 포탈/히트/사망 연출 타이밍·피드백 어색함 개선 — v3.1 (SFX-06, 플레이테스트 결과 전 항목 OK로 폴리싱 불요 판정)
+
 ### Active
 
 *(비어 있음 — `/gsd:new-milestone`으로 다음 마일스톤 요구사항 정의 예정)*
@@ -150,4 +155,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-07-08 after v3.1 milestone kickoff — 보스 룸(1종, 확장 가능한 프레임워크) + 연출 고도화(적 등장 스폰 연출 신설, 포탈/히트/사망 사운드·타이밍 개선) 목표 확정. 튜토리얼은 별도 마일스톤으로 분리.*
+*Last updated: 2026-07-09 — Phase 13(오디오 기반 구축 & 연출 사운드 폴리싱) 완료. AudioManager 인프라 신설, 포탈/히트/사망 사운드 배선, 타이밍 어색함 플레이테스트 결과 폴리싱 불요 판정. 다음: Phase 14 적 등장 스폰 연출.*
