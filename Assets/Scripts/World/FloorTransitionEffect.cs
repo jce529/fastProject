@@ -26,6 +26,7 @@ public class FloorTransitionEffect : MonoBehaviour
     /// <summary>E1-E4: 포탈 진입 시 플레이어가 포탈 경계선 너머로 점진적으로 사라지고, 포탈이 수축한다.</summary>
     public IEnumerator PlayEntry(Transform portal)
     {
+        AudioManager.PlaySfx(Sfx.PortalEnter); // SFX-02/D-06: 진입 = 상승 워프음 — E2 마스크 성장(0.4s)과 동시 시작
         float portalX = portal.position.x;
         float dir = transform.position.x > portalX ? 1f : -1f;
         float targetWidth = Mathf.Abs(transform.position.x - portalX) + _sr.bounds.extents.x;
@@ -60,6 +61,7 @@ public class FloorTransitionEffect : MonoBehaviour
     /// <summary>X1-X4: 새 층 진입 시 포탈이 성장하고, 플레이어가 마스크 수축에 의해 포탈에서 걸어나오듯 나타난다.</summary>
     public IEnumerator PlayExit(Vector3 spawnWorldPos, GameObject portalEffectPrefab)
     {
+        AudioManager.PlaySfx(Sfx.PortalExit); // SFX-02/D-06: 퇴장 = 하강 마무리음 — X1 포탈 성장(0.4s)과 동시 시작
         // X1: 퇴장 포탈 이펙트 성장.
         GameObject portalEffect = null;
         if (portalEffectPrefab != null)
