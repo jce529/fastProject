@@ -27,7 +27,7 @@ Requirements for the 보스 룸 & 연출 고도화 milestone. Each maps to roadm
 
 ### 연출 개선 / 오디오 (SFX)
 
-- [ ] **SFX-01**: 기본 오디오 재생 인프라(AudioManager)가 추가된다 (현재 프로젝트에 오디오가 전혀 없음)
+- [x] **SFX-01**: 기본 오디오 재생 인프라(AudioManager)가 추가된다 (현재 프로젝트에 오디오가 전혀 없음)
 - [ ] **SFX-02**: 포탈 전환에 사운드가 추가된다
 - [ ] **SFX-03**: 히트 임팩트에 사운드가 추가된다
 - [ ] **SFX-04**: 적 사망에 사운드가 추가된다
@@ -81,7 +81,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | BOSS-10 | Phase 16 | Pending |
 | SPWN-01 | Phase 14 | Pending |
 | SPWN-02 | Phase 14 | Pending |
-| SFX-01 | Phase 13 | Pending |
+| SFX-01 | Phase 13 | Complete |
 | SFX-02 | Phase 13 | Pending |
 | SFX-03 | Phase 13 | Pending |
 | SFX-04 | Phase 13 | Pending |
