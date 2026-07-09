@@ -487,7 +487,7 @@ Plans:
 
 Plans:
 - [x] 13-01-PLAN.md — AudioManager 싱글턴 + AssetPostprocessor 임포트 설정 + DSP 512 (SFX-01)
-- [ ] 13-02-PLAN.md — Kenney CC0 팩 2종 임포트 + 클립 4종 선별 + 프리팹 빌더 (SFX-01~04)
+- [x] 13-02-PLAN.md — Kenney CC0 팩 2종 임포트 + 클립 4종 선별 + 프리팹 빌더 (SFX-01~04)
 - [x] 13-03-PLAN.md — 연출 훅 배선: 슬래시/글리치/포탈 진입·퇴장 4줄 (SFX-02~04)
 - [ ] 13-04-PLAN.md — 에디터 빌더 실행 + 플레이테스트 검증 + SFX-06 폴리싱 레시피 (SFX-01~04, SFX-06)
 
@@ -552,7 +552,7 @@ Plans:
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 13. 오디오 기반 구축 & 연출 사운드 폴리싱 | 2/4 | In Progress|  |
+| 13. 오디오 기반 구축 & 연출 사운드 폴리싱 | 3/4 | In Progress|  |
 | 14. 적 등장 스폰 연출 | 0/? | Not started | - |
 | 15. 보스 FSM & 빈틈 타겟팅 | 0/? | Not started | - |
 | 16. 보스 룸 콘텐츠 & 생명주기 게이팅 | 0/? | Not started | - |
