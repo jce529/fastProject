@@ -99,8 +99,8 @@ CapsuleCollider2D:
   m_UsedByEffector: 0
   m_CompositeOperation: 0
   m_CompositeOrder: 0
-  m_Offset: {x: -0.006043911, y: 0.63515526}
-  m_Size: {x: 0.3285818, y: 1.283506}
+  m_Offset: {x: -0.0026590824, y: 0.63515526}
+  m_Size: {x: 0.46588087, y: 1.283506}
   m_Direction: 0
 --- !u!212 &8306162102390831394
 SpriteRenderer:
@@ -179,8 +179,12 @@ MonoBehaviour:
   patrolSpeed: 3
   patrolHalfRange: 3
   hitboxActiveDuration: 0.15
+  attackWindupDelay: 0.1
   _exclamationIcon: {fileID: 8043105589779039711}
   _meleeHitbox: {fileID: 845088323384848213}
+  jumpForce: 8
+  wallCheckDist: 0.4
+  gapCheckDist: 0.6
 --- !u!95 &6468506254783474201
 Animator:
   serializedVersion: 7
@@ -360,7 +364,7 @@ BoxCollider2D:
   m_UsedByEffector: 0
   m_CompositeOperation: 0
   m_CompositeOrder: 0
-  m_Offset: {x: 0.6049483, y: 0.6587768}
+  m_Offset: {x: 0.6, y: 0.7}
   m_SpriteTilingProperty:
     border: {x: 0, y: 0, z: 0, w: 0}
     pivot: {x: 0, y: 0}
@@ -370,5 +374,5 @@ BoxCollider2D:
     drawMode: 0
     adaptiveTiling: 0
   m_AutoTiling: 0
-  m_Size: {x: 1.2098966, y: 0.67363346}
+  m_Size: {x: 1, y: 0.5}
   m_EdgeRadius: 0
