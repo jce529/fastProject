@@ -609,3 +609,31 @@ Plans:
 ---
 *v3.1 Roadmap created: 2026-07-08*
 *Last updated: 2026-07-08 — v3.1 roadmap created, Phase 13-17 defined*
+
+---
+
+## Backlog
+
+### Phase 999.2: Enemy infinite respawn mechanism (BACKLOG)
+
+**Goal:** [Captured for future planning]
+**Requirements:** TBD
+**Plans:** 0 plans
+
+Captured 2026-07-10 during Phase 14 discussion (`.planning/phases/14-enemy-spawn-vfx/14-CONTEXT.md` `<deferred>`): 룸/Corridor을 플레이어가 반복 재진입할 때마다 적이 계속 새로 생성되는 아이디어. "가상 시뮬레이션에서 끝없이 싸우는 AI"라는 스토리 설정과 잘 맞고, WorldGenerator가 이미 좌우 2개 룸까지만 유지하므로 성능 부담도 크지 않을 것으로 추정. 다만 밸런스(엔드리스 파밍으로 타이머 긴장감 훼손 가능성)와 정확한 트리거 규칙 설계가 필요해 Phase 14는 1회성 스폰(D-02)으로 진행하고 이 아이디어는 보류.
+
+Plans:
+- [ ] TBD (promote with /gsd:review-backlog when ready)
+
+---
+
+### Phase 999.3: Player portal effect rework (BACKLOG)
+
+**Goal:** [Captured for future planning]
+**Requirements:** TBD
+**Plans:** 0 plans
+
+Captured 2026-07-10 during Phase 14 discussion (`.planning/phases/14-enemy-spawn-vfx/14-CONTEXT.md` `<deferred>`): Phase 12에서 완성된 `FloorTransitionEffect` 개선 아이디어 — 진입 시 포탈 중심으로 흡입(suction) 이펙트 추가, 퇴장 시 현재의 정적 마스크 페이드인 대신 플레이어의 기존 대쉬 애니메이션/모션을 활용해 포탈에서 튀어나오는 연출로 교체. 핵심 불만: 현재는 SpriteMask만 움직이고 플레이어 Transform 자체는 고정돼 있어 "걸어 들어가고 나온다"는 느낌이 실제 이동으로 반영되지 않음. 이 피드백은 Phase 14 적 스폰 연출 설계(D-07 실제 이동 추가)에는 반영됐지만, 플레이어 쪽 기존 연출을 고치는 작업 자체는 범위 밖.
+
+Plans:
+- [ ] TBD (promote with /gsd:review-backlog when ready)
