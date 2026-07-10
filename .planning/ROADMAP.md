@@ -649,14 +649,18 @@ Plans:
 
 ### Phase 999.4: Enemy AI enhancement pack (BACKLOG)
 
-**Goal:** [Captured for future planning]
-**Requirements:** TBD
-**Plans:** 0 plans
+**Goal:** 근접 적은 예방(gap-check 하드닝)과 사후처리(FallZone 즉시 Destroy) 이중 안전망으로 더 이상 낙사 좀비 상태로 남지 않고, 공격 예고(Telegraph)가 짧고 이동하며 예고하는 방식으로 개선되어 긴장감/속도감이 살아나며, 원거리 몬스터는 단순 키팅(거리 유지) 이동으로 더 이상 제자리에 고정되지 않는다.
+**Requirements:** 999.4-CONTEXT.md `<decisions>` D-01~D-10 — formal REQ-ID 없음, decision ID를 요구사항 앵커로 사용
+**Plans:** 3 plans (2 waves — Wave 1: 01/02 병렬, Wave 2: 03)
 
 Captured 2026-07-10: 플레이테스트 중 발견된 적 AI 관련 3가지 문제.
 1. 추격 중 낙사(추락) — Enemy가 KillZone 등 낙사 판정의 영향을 받지 않아, 화면 밖 아래로 떨어진 채로 계속 "살아있는" 좀비 상태로 남음.
 2. 공격 텔레그래프가 너무 관대함 — 사거리 내에서 플레이어를 발견하면 잠깐 멈췄다가 공격하는데, 이 딜레이 때문에 플레이어가 대응하기 너무 쉬워 긴장감/속도감이 반감됨.
 3. 원거리 몬스터가 정적임 — 원거리 몬스터가 제자리에서 움직이지 않음. 근거리 몬스터 뒤에 숨어서 싸우는 등의 포지셔닝 AI가 필요.
 
+Planned 2026-07-10 (999.4-CONTEXT.md/999.4-RESEARCH.md/999.4-VALIDATION.md 기반 — 3개 하위 기능은 서로 독립적이나 MeleeEnemy.cs를 공유하는 낙사 처리(999.4-01)와 텔레그래프 재작성(999.4-03)은 순차 실행):
+
 Plans:
-- [ ] TBD (promote with /gsd:review-backlog when ready)
+- [ ] 999.4-01-PLAN.md — MeleeEnemy GapAhead/TryJump 턴어라운드 하드닝 + FallZoneTrigger Enemy 사후처리 (D-01, D-02, D-03)
+- [ ] 999.4-02-PLAN.md — RangedEnemy UpdateChase 키팅 후퇴 이동 (D-07, D-08, D-09, D-10)
+- [ ] 999.4-03-PLAN.md — MeleeEnemy TelegraphAndAttack 이동형 예고 재작성 (D-04, D-05, D-06)
