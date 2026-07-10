@@ -9,6 +9,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 4845628018924567401}
+  - component: {fileID: 5133993712039818740}
   m_Layer: 0
   m_Name: EnemySpawn_0
   m_TagString: EnemySpawnPoint
@@ -31,6 +32,19 @@ Transform:
   m_Children: []
   m_Father: {fileID: 1874800230086599415}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &5133993712039818740
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 556553026135182743}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a4051606a0141994da86e36565c8932e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EnemySpawner
+  _type: 0
 --- !u!1 &637224129506304458
 GameObject:
   m_ObjectHideFlags: 0
