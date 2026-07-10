@@ -79,6 +79,10 @@
 - [x] 포탈 진입/퇴장, 대시 히트, 적 사망 사운드 재생 + 슬로우모션 피치 무결성 — v3.1 (SFX-02/03/04)
 - [x] 포탈/히트/사망 연출 타이밍·피드백 어색함 개선 — v3.1 (SFX-06, 플레이테스트 결과 전 항목 OK로 폴리싱 불요 판정)
 
+**적 등장 연출 (Validated in v3.1 Phase 14)**
+- [x] 근접형/원거리형 적이 스폰될 때 포탈을 타고 등장하는 연출 재생 (Room+Corridor 3종 동등) — v3.1 (SPWN-01, 보스 스폰 연출은 Phase 16에서 별도 검증)
+- [x] 스폰 연출이 끝나기 전까지 적은 감지/공격 대상이 되지 않는다 (IsAlive 게이팅, IEnemy 계약 불변) — v3.1 (SPWN-02)
+
 ### Active
 
 *(비어 있음 — `/gsd:new-milestone`으로 다음 마일스톤 요구사항 정의 예정)*
@@ -155,4 +159,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-07-09 — Phase 13(오디오 기반 구축 & 연출 사운드 폴리싱) 완료. AudioManager 인프라 신설, 포탈/히트/사망 사운드 배선, 타이밍 어색함 플레이테스트 결과 폴리싱 불요 판정. 다음: Phase 14 적 등장 스폰 연출.*
+*Last updated: 2026-07-10 — Phase 14(적 등장 스폰 연출) 완료. ISpawnGatable 게이팅 브릿지, EnemySpawner 2단계(Spawn/Activate) 분리, Room+Corridor 3종 포탈 스폰 연출 통일, 플레이테스트 10항목 전 통과. 다음: Phase 15 보스 FSM & 빈틈 타겟팅.*
