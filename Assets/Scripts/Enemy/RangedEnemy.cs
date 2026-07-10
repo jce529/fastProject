@@ -9,7 +9,7 @@ using UnityEngine;
 /// D-11, D-12: Projectile via ProjectileController.
 /// D-10: 0 = stationary. Chase waits for player to enter aimLineLength before telegraphing.
 /// </summary>
-public class RangedEnemy : MonoBehaviour, IEnemy
+public class RangedEnemy : MonoBehaviour, IEnemy, ISpawnGatable
 {
     // -- Tunable values (Inspector) ------------------------------------------------
     [SerializeField] private float detectionRadius = 12f;     // Detection + telegraph trigger (Claude's discretion: 10-15 units)
@@ -108,6 +108,10 @@ public class RangedEnemy : MonoBehaviour, IEnemy
         var sr = GetComponent<SpriteRenderer>();
         if (sr != null) sr.color = Color.white;
     }
+
+    // -- ISpawnGatable implementation (SPWN-02, IEnemy와 별도 추가 인터페이스) ------------
+
+    public void SetSpawnGate(bool isSpawning) => IsAlive = !isSpawning;
 
     // -- Player death listener ------------------------------------------------------
 

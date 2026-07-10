@@ -7,7 +7,7 @@ using UnityEngine;
 /// One-shot-kill both ways: player dash → OnDashHit(); enemy hitbox → OnPlayerDeath.
 /// D-03, D-04, D-05, D-06, D-07, D-08, D-16.
 /// </summary>
-public class MeleeEnemy : MonoBehaviour, IEnemy
+public class MeleeEnemy : MonoBehaviour, IEnemy, ISpawnGatable
 {
     // -- Tunable values (Inspector) ------------------------------------------------
     [SerializeField] private float detectionRadius      = 10f;   // Chase trigger distance (D-04)
@@ -102,6 +102,10 @@ public class MeleeEnemy : MonoBehaviour, IEnemy
         var sr = GetComponent<SpriteRenderer>();
         if (sr != null) sr.color = Color.white;
     }
+
+    // -- ISpawnGatable implementation (SPWN-02, IEnemy와 별도 추가 인터페이스) ------------
+
+    public void SetSpawnGate(bool isSpawning) => IsAlive = !isSpawning;
 
     // -- Player death listener (stop chasing dead player) ---------------------------
 
