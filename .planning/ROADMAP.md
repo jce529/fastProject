@@ -503,7 +503,13 @@ Plans:
   3. 스폰 연출 재생 중에는 적이 플레이어를 감지/추격/공격하지 않는다
   4. 연출 완료 즉시 적이 정상 FSM(감지/공격/피격)으로 전환된다
   5. 이 스폰 연출 컴포넌트는 적 타입에 종속되지 않아, 이후 보스 룸 통합(Phase 16) 시 별도 구현 없이 재사용된다
-**Plans**: TBD
+**Plans**: 4 plans (4 waves — 순차 의존)
+
+Plans:
+- [ ] 14-01-PLAN.md — ISpawnGatable + EnemySpawnEffect(포탈 성장/걸어나오기/마스크 수축/사운드) 신설 (SPWN-01, SPWN-02)
+- [ ] 14-02-PLAN.md — EnemySpawner Spawn/Activate 2단계 분리 + CorridorEnemySpawnerTool 에디터 도구 (SPWN-01, SPWN-02)
+- [ ] 14-03-PLAN.md — WorldGenerator 진입 감지(Room+Corridor) + 스태거 활성화 배선 (SPWN-01, SPWN-02)
+- [ ] 14-04-PLAN.md — 에디터 도구 실행(Corridor 마커 부착) + 플레이테스트 검증 (SPWN-01, SPWN-02)
 
 ---
 
@@ -553,7 +559,7 @@ Plans:
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 13. 오디오 기반 구축 & 연출 사운드 폴리싱 | 4/4 | Complete    | 2026-07-09 |
-| 14. 적 등장 스폰 연출 | 0/? | Not started | - |
+| 14. 적 등장 스폰 연출 | 0/4 | Not started | - |
 | 15. 보스 FSM & 빈틈 타겟팅 | 0/? | Not started | - |
 | 16. 보스 룸 콘텐츠 & 생명주기 게이팅 | 0/? | Not started | - |
 | 17. WorldGenerator 통합 & 보스 처치 후 층 진행 | 0/? | Not started | - |
