@@ -464,7 +464,7 @@ Plans:
 ## Phases
 
 - [x] **Phase 13: 오디오 기반 구축 & 연출 사운드 폴리싱** - AudioManager 신설, 포탈전환/히트임팩트/적사망 사운드 추가 및 기존 타이밍 어색함 개선 (completed 2026-07-09)
-- [ ] **Phase 14: 적 등장 스폰 연출** - 근접/원거리 적(추후 보스 포함)이 포탈을 타고 등장하는 스폰 VFX, 연출 중 감지/타겟팅 차단
+- [x] **Phase 14: 적 등장 스폰 연출** - 근접/원거리 적(추후 보스 포함)이 포탈을 타고 등장하는 스폰 VFX, 연출 중 감지/타겟팅 차단 (completed 2026-07-10)
 - [ ] **Phase 15: 보스 FSM & 빈틈 타겟팅** - 예고→빈틈 공격 패턴 루프, 빈틈에서만 피격 가능, 7회 피격 처치(진행률 비노출), 처치 점수 보너스
 - [ ] **Phase 16: 보스 룸 콘텐츠 & 생명주기 게이팅** - 확률적 보스 룸 스폰(솔로 전투 보장), 입장 카메라 연출+전용 스폰 사운드, 층 타이머 일시정지, 전투 중 정리(Destroy) 예외
 - [ ] **Phase 17: WorldGenerator 통합 & 보스 처치 후 층 진행** - 정상 플레이 경로에서 보스 룸이 실제로 등장하고, 처치 후에도 EXIT 포탈로만 층 전환되는 전체 플로우 통합
@@ -509,7 +509,7 @@ Plans:
 - [x] 14-01-PLAN.md — ISpawnGatable + EnemySpawnEffect(포탈 성장/걸어나오기/마스크 수축/사운드) 신설 (SPWN-01, SPWN-02)
 - [x] 14-02-PLAN.md — EnemySpawner Spawn/Activate 2단계 분리 + CorridorEnemySpawnerTool 에디터 도구 (SPWN-01, SPWN-02)
 - [x] 14-03-PLAN.md — WorldGenerator 진입 감지(Room+Corridor) + 스태거 활성화 배선 (SPWN-01, SPWN-02)
-- [ ] 14-04-PLAN.md — 에디터 도구 실행(Corridor 마커 부착) + 플레이테스트 검증 (SPWN-01, SPWN-02)
+- [x] 14-04-PLAN.md — 에디터 도구 실행(Corridor 마커 부착) + 플레이테스트 검증 (SPWN-01, SPWN-02)
 
 ---
 
@@ -559,7 +559,7 @@ Plans:
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 13. 오디오 기반 구축 & 연출 사운드 폴리싱 | 4/4 | Complete    | 2026-07-09 |
-| 14. 적 등장 스폰 연출 | 3/4 | In Progress|  |
+| 14. 적 등장 스폰 연출 | 4/4 | Complete   | 2026-07-10 |
 | 15. 보스 FSM & 빈틈 타겟팅 | 0/? | Not started | - |
 | 16. 보스 룸 콘텐츠 & 생명주기 게이팅 | 0/? | Not started | - |
 | 17. WorldGenerator 통합 & 보스 처치 후 층 진행 | 0/? | Not started | - |

@@ -2,15 +2,15 @@
 gsd_state_version: 1.0
 milestone: v3.1
 milestone_name: — 보스 룸 & 연출 고도화
-status: executing
-stopped_at: Completed 14-03-PLAN.md
-last_updated: "2026-07-10T05:18:55.867Z"
+status: verifying
+stopped_at: Completed 14-04-PLAN.md
+last_updated: "2026-07-10T05:37:11.268Z"
 last_activity: 2026-07-10
 progress:
   total_phases: 5
-  completed_phases: 1
+  completed_phases: 2
   total_plans: 8
-  completed_plans: 7
+  completed_plans: 8
 ---
 
 # Project State: Fast (가칭)
@@ -33,13 +33,13 @@ progress:
 
 ## Current Position
 
-Phase: 14 (enemy-spawn-vfx) — EXECUTING
-Plan: 4 of 4
-Status: Plan 14-03 complete, ready for 14-04
+Phase: 14 (enemy-spawn-vfx) — COMPLETE
+Plan: 4 of 4 (all plans complete)
+Status: Phase 14 complete — all success criteria playtest-verified, ready for /gsd:verify-work 14
 Last activity: 2026-07-10
 
 ```
-Progress: [██░░░░░░░░] v3.1 milestone: 1/5 phases complete (Phase 13-17)
+Progress: [████░░░░░░] v3.1 milestone: 2/5 phases complete (Phase 13-17)
 ```
 
 ---
@@ -66,6 +66,8 @@ Progress: [██░░░░░░░░] v3.1 milestone: 1/5 phases complete (
 | CorridorEnemySpawnerTool 메뉴 실행은 14-04로 연기 (Plan 14-02) | 도구는 코드만 작성, 실제 프리팹 저장(Unity 에디터 조작)은 checkpoint:human-action이 필요한 14-04에서 수행 |
 | WorldGenerator TrySpawnEnemies를 수집 전용으로 분리하고 TryActivateSection/ActivateStaggered로 실제 진입 시점에 D-05 스태거 Activate (Plan 14-03) | Room뿐 아니라 Corridor(CheckCorridorEntry Pattern 3 임계값 체크)와 새 층 시작 Room(FloorTransitionSequence Step 4)까지 동일한 진입 감지 게이트로 통일 |
 | FloorTransitionSequence 옛 체인 파괴 루프에서 _activatedSections/_pendingSpawns를 블랭킷 Clear() 대신 개별 엔트리만 제거 (Plan 14-03) | standbyRoom(=newRoom)은 _chain에 속한 적이 없어 사전 등록된 _pendingSpawns 엔트리가 Step 4까지 보존되어야 함 — 블랭킷 Clear 시 새 층 시작 Room의 적이 영원히 비활성화됨 |
+| CorridorEnemySpawnerTool 실행으로 Corridor 3종에 EnemySpawner(Melee) 마커 부착 완료 (Plan 14-04) | Room+Corridor 전체에서 스폰 VFX 콘텐츠 동등성 확보 (D-03) — git diff로 각 프리팹당 컴포넌트 1개만 추가됨을 확인, 재실행 시 멱등성 확인 |
+| Phase 14 전체 플레이테스트 체크리스트 10개 항목 전부 통과 판정 (Plan 14-04) | SPWN-01/SPWN-02 및 ROADMAP SC1-5, D-01~D-09 전부 실제 플레이로 검증 완료 — 별도 폴리싱/수정 불요, Phase 15/16 보스 스폰 재사용 전제 성립 |
 
 ### Key Decisions Locked (v1.0/v2.0/v3.0)
 
@@ -103,8 +105,8 @@ Full decision log lives in `.planning/PROJECT.md` Key Decisions table. Recent hi
 4. Read `.planning/research/SUMMARY.md` — architecture/pitfall context for Phase 13-17
 5. Next action: `/gsd:plan-phase 13`
 
-**Last session:** 2026-07-10T05:18:55.861Z
-**Stopped at:** Completed 14-03-PLAN.md
+**Last session:** 2026-07-10T05:37:11.262Z
+**Stopped at:** Completed 14-04-PLAN.md
 
 ---
 *State initialized: 2026-05-27*
