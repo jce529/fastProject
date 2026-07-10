@@ -63,10 +63,19 @@ public class RollController : MonoBehaviour
         float elapsed = 0f;
         while (elapsed < rollDuration)
         {
-            // Compensate velocity for current timeScale so roll feels the same speed during slow-mo
-            // Same pattern as PlayerController.ApplyMovement: speed * (1f / Time.timeScale)
-            float compensated = rollSpeed * (1f / Time.timeScale);
-            _rb.linearVelocity = new Vector2(dir * compensated, _rb.linearVelocity.y);
+            // Guard against HitFreeze (CombatController zeroes Time.timeScale for ~75ms on every
+            // dash-kill). Unlike PlayerController.ApplyMovement (FixedUpdate, naturally skipped
+            // because HitFreeze also zeroes fixedDeltaTime), this coroutine runs on `yield return
+            // null` every rendered frame regardless of timeScale. Dividing by 0 would yield
+            // Infinity and corrupt Rigidbody2D.linearVelocity. Skip the write and hold last
+            // velocity for this frame; roll resumes normally once timeScale is restored.
+            if (Time.timeScale > 0f)
+            {
+                // Compensate velocity for current timeScale so roll feels the same speed during slow-mo
+                // Same pattern as PlayerController.ApplyMovement: speed * (1f / Time.timeScale)
+                float compensated = rollSpeed * (1f / Time.timeScale);
+                _rb.linearVelocity = new Vector2(dir * compensated, _rb.linearVelocity.y);
+            }
 
             elapsed += Time.unscaledDeltaTime; // accumulate real time (not scaled)
             yield return null;
