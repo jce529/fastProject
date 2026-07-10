@@ -645,3 +645,18 @@ Plans:
 - [ ] 999.3-01-PLAN.md — PortalVFX 소팅 레이어 신설 + Renderer2D Camera Sorting Layer Texture 활성화 + PortalVortex.shader/.mat 신규 작성 + Play 모드 스파이크 검증 (D-01, D-02, D-08)
 - [ ] 999.3-02-PLAN.md — FloorTransitionEffect.cs 재작성: PlayEntry() 소용돌이 흡입 + PlayExit() 수직 도약(IsDashing 재사용) + WorldGenerator 배선 (D-01~D-08)
 - [ ] 999.3-03-PLAN.md — SampleScene WorldGenerator에 PortalVortex.mat 배선 + 전체 포탈 전환 플레이테스트 검증 (D-01~D-08)
+---
+
+### Phase 999.4: Enemy AI enhancement pack (BACKLOG)
+
+**Goal:** [Captured for future planning]
+**Requirements:** TBD
+**Plans:** 0 plans
+
+Captured 2026-07-10: 플레이테스트 중 발견된 적 AI 관련 3가지 문제.
+1. 추격 중 낙사(추락) — Enemy가 KillZone 등 낙사 판정의 영향을 받지 않아, 화면 밖 아래로 떨어진 채로 계속 "살아있는" 좀비 상태로 남음.
+2. 공격 텔레그래프가 너무 관대함 — 사거리 내에서 플레이어를 발견하면 잠깐 멈췄다가 공격하는데, 이 딜레이 때문에 플레이어가 대응하기 너무 쉬워 긴장감/속도감이 반감됨.
+3. 원거리 몬스터가 정적임 — 원거리 몬스터가 제자리에서 움직이지 않음. 근거리 몬스터 뒤에 숨어서 싸우는 등의 포지셔닝 AI가 필요.
+
+Plans:
+- [ ] TBD (promote with /gsd:review-backlog when ready)
