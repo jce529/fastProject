@@ -629,11 +629,15 @@ Plans:
 
 ### Phase 999.3: Player portal effect rework (BACKLOG)
 
-**Goal:** [Captured for future planning]
-**Requirements:** TBD
-**Plans:** 0 plans
+**Goal:** 포탈 진입 시 URP 셰이더 기반 소용돌이 흡입 이펙트(플레이어+주변 환경)가 재생되고, 퇴장 시 기존 IsDashing 대시 모션을 재사용한 수직 도약으로 착지하는 연출로 FloorTransitionEffect가 완전히 재작성된다 — 두 연출 모두 플레이어 Transform이 실제로 이동한다 (기존엔 SpriteMask만 움직였음).
+**Requirements:** TBD (formal REQ-ID 없음 — 999.3-CONTEXT.md의 D-01~D-08이 요구사항 앵커)
+**Plans:** 3 plans (3 waves — 순차 의존, Wave 0 스파이크 선행)
 
 Captured 2026-07-10 during Phase 14 discussion (`.planning/phases/14-enemy-spawn-vfx/14-CONTEXT.md` `<deferred>`): Phase 12에서 완성된 `FloorTransitionEffect` 개선 아이디어 — 진입 시 포탈 중심으로 흡입(suction) 이펙트 추가, 퇴장 시 현재의 정적 마스크 페이드인 대신 플레이어의 기존 대쉬 애니메이션/모션을 활용해 포탈에서 튀어나오는 연출로 교체. 핵심 불만: 현재는 SpriteMask만 움직이고 플레이어 Transform 자체는 고정돼 있어 "걸어 들어가고 나온다"는 느낌이 실제 이동으로 반영되지 않음. 이 피드백은 Phase 14 적 스폰 연출 설계(D-07 실제 이동 추가)에는 반영됐지만, 플레이어 쪽 기존 연출을 고치는 작업 자체는 범위 밖.
 
+Planned 2026-07-10 (999.3-CONTEXT.md/999.3-RESEARCH.md 기반):
+
 Plans:
-- [ ] TBD (promote with /gsd:review-backlog when ready)
+- [ ] 999.3-01-PLAN.md — PortalVFX 소팅 레이어 신설 + Renderer2D Camera Sorting Layer Texture 활성화 + PortalVortex.shader/.mat 신규 작성 + Play 모드 스파이크 검증 (D-01, D-02, D-08)
+- [ ] 999.3-02-PLAN.md — FloorTransitionEffect.cs 재작성: PlayEntry() 소용돌이 흡입 + PlayExit() 수직 도약(IsDashing 재사용) + WorldGenerator 배선 (D-01~D-08)
+- [ ] 999.3-03-PLAN.md — SampleScene WorldGenerator에 PortalVortex.mat 배선 + 전체 포탈 전환 플레이테스트 검증 (D-01~D-08)
