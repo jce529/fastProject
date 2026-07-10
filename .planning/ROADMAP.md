@@ -506,7 +506,7 @@ Plans:
 **Plans**: 4 plans (4 waves — 순차 의존)
 
 Plans:
-- [ ] 14-01-PLAN.md — ISpawnGatable + EnemySpawnEffect(포탈 성장/걸어나오기/마스크 수축/사운드) 신설 (SPWN-01, SPWN-02)
+- [x] 14-01-PLAN.md — ISpawnGatable + EnemySpawnEffect(포탈 성장/걸어나오기/마스크 수축/사운드) 신설 (SPWN-01, SPWN-02)
 - [ ] 14-02-PLAN.md — EnemySpawner Spawn/Activate 2단계 분리 + CorridorEnemySpawnerTool 에디터 도구 (SPWN-01, SPWN-02)
 - [ ] 14-03-PLAN.md — WorldGenerator 진입 감지(Room+Corridor) + 스태거 활성화 배선 (SPWN-01, SPWN-02)
 - [ ] 14-04-PLAN.md — 에디터 도구 실행(Corridor 마커 부착) + 플레이테스트 검증 (SPWN-01, SPWN-02)
@@ -559,7 +559,7 @@ Plans:
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 13. 오디오 기반 구축 & 연출 사운드 폴리싱 | 4/4 | Complete    | 2026-07-09 |
-| 14. 적 등장 스폰 연출 | 0/4 | Not started | - |
+| 14. 적 등장 스폰 연출 | 1/4 | In Progress|  |
 | 15. 보스 FSM & 빈틈 타겟팅 | 0/? | Not started | - |
 | 16. 보스 룸 콘텐츠 & 생명주기 게이팅 | 0/? | Not started | - |
 | 17. WorldGenerator 통합 & 보스 처치 후 층 진행 | 0/? | Not started | - |

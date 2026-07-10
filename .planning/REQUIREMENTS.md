@@ -22,8 +22,8 @@ Requirements for the 보스 룸 & 연출 고도화 milestone. Each maps to roadm
 
 ### 적 등장 연출 (SPWN)
 
-- [ ] **SPWN-01**: 일반 적(근접/원거리)과 보스가 스폰될 때 플레이어처럼 포탈을 타고 등장하는 연출이 재생된다
-- [ ] **SPWN-02**: 스폰 연출이 끝나기 전까지 적은 감지/공격 대상이 되지 않는다
+- [x] **SPWN-01**: 일반 적(근접/원거리)과 보스가 스폰될 때 플레이어처럼 포탈을 타고 등장하는 연출이 재생된다
+- [x] **SPWN-02**: 스폰 연출이 끝나기 전까지 적은 감지/공격 대상이 되지 않는다
 
 ### 연출 개선 / 오디오 (SFX)
 
@@ -79,8 +79,8 @@ Which phases cover which requirements. Updated during roadmap creation.
 | BOSS-08 | Phase 17 | Pending |
 | BOSS-09 | Phase 16 | Pending |
 | BOSS-10 | Phase 16 | Pending |
-| SPWN-01 | Phase 14 | Pending |
-| SPWN-02 | Phase 14 | Pending |
+| SPWN-01 | Phase 14 | Complete |
+| SPWN-02 | Phase 14 | Complete |
 | SFX-01 | Phase 13 | Complete |
 | SFX-02 | Phase 13 | Complete |
 | SFX-03 | Phase 13 | Complete |
