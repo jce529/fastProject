@@ -49,6 +49,9 @@ public class WorldGenerator : MonoBehaviour
     [Header("Transition Animation (Phase 12, D-01~D-04)")]
     [SerializeField] private GameObject _portalEffectPrefab;
 
+    [Header("Enemy Spawn VFX (Phase 14, D-01~D-09)")]
+    [SerializeField, Range(0.1f, 0.6f)] private float _spawnStaggerInterval = 0.3f; // D-05: 포탈 순차 배출 간격
+
     // Runtime state
     // D-10: List -> LinkedList로 전환. 양 끝(AddFirst/AddLast/RemoveFirst/RemoveLast)에서 O(1)로
     // 삽입/삭제하고, First/Last로 현재 체인 경계 room을 항상 "그때그때" 조회할 수 있어 GEN-04에서
@@ -62,6 +65,8 @@ public class WorldGenerator : MonoBehaviour
         // O(1)로 탐색하는 데 사용한다(LinkedList는 인덱스 임의접근을 지원하지 않음).
     private int _activeExitCount;         // D-08: 현재 활성 포탈 수
     private FloorTransitionEffect _transitionEffect;
+    private readonly HashSet<GameObject> _activatedSections = new HashSet<GameObject>();
+    private readonly Dictionary<GameObject, List<EnemySpawner>> _pendingSpawns = new Dictionary<GameObject, List<EnemySpawner>>();
 
     public static WorldGenerator Instance { get; private set; }
 
@@ -102,6 +107,7 @@ public class WorldGenerator : MonoBehaviour
         TrySpawnExitPortal(startRoom); // EXIT-01: 시작 룸도 포탈 스폰 대상 (예외 없음)
 
         TrySpawnEnemies(startRoom, FloorManager.CurrentFloor); // DIFF-01: 시작 룸 적 스폰
+        TryActivateSection(startRoom); // D-01: 플레이어가 이미 위치한 시작 룸은 즉시 활성화
 
         // 2. 초기 lookahead 스폰 (GEN-01: 시작 시 앞 _lookaheadCount쌍 미리 생성 — 오른쪽)
         for (int i = 0; i < _lookaheadCount; i++)
@@ -144,6 +150,7 @@ public class WorldGenerator : MonoBehaviour
         var corridorPrefab = SelectCorridor();
         var corridor = Instantiate(corridorPrefab, Vector3.zero, Quaternion.identity);
         AlignByEntry(corridor, headExitPos);
+        TrySpawnEnemies(corridor, FloorManager.CurrentFloor); // D-03: Corridor도 동일 처리
 
         // Corridor EXIT → Room ENT 스폰 기준점
         var corridorExit = FindConnector(corridor, RoomConnector.Direction.Right);
@@ -179,6 +186,7 @@ public class WorldGenerator : MonoBehaviour
         var corridorPrefab = SelectCorridor();
         var corridor = Instantiate(corridorPrefab, Vector3.zero, Quaternion.identity);
         AlignByExit(corridor, tailEntryPos);
+        TrySpawnEnemies(corridor, FloorManager.CurrentFloor); // D-03: Corridor도 동일 처리
 
         // Corridor ENT(왼쪽) → 새 Room의 EXIT(오른쪽) 스폰 기준점
         var corridorEntry = FindConnector(corridor, RoomConnector.Direction.Left);
@@ -383,30 +391,62 @@ public class WorldGenerator : MonoBehaviour
     }
 
     /// <summary>
-    /// D-04/D-04b: room이 Instantiate된 직후 즉시 호출한다. room의 EnemySpawner 마커를 타입별로
-    /// 필터링해 GetEnemyCount(floor) 카운트만큼 앞에서부터 Spawn()+Activate()한다.
-    /// 마커 수보다 카운트가 많으면 있는 만큼만 활성화한다(에러 없음, D-04b).
+    /// D-01/D-03/D-04b: Room 또는 Corridor가 Instantiate된 직후 호출한다 (Room/Corridor 구분 없이
+    /// 동일 처리 — D-03). section의 EnemySpawner 마커를 타입별로 필터링해 GetEnemyCount(floor)
+    /// 카운트만큼 Spawn()(비활성 인스턴스 생성)만 수행하고, Activate() 호출은 TryActivateSection()으로
+    /// 지연한다 (D-01: 화면 밖 사전 생성 시점에는 스폰 VFX를 재생하지 않는다).
     /// </summary>
-    private void TrySpawnEnemies(GameObject room, int floor)
+    private void TrySpawnEnemies(GameObject section, int floor)
     {
         (int meleeCount, int rangedCount) = GetEnemyCount(floor);
         int meleeSpawned = 0;
         int rangedSpawned = 0;
+        var pending = new List<EnemySpawner>();
 
-        foreach (EnemySpawner spawner in room.GetComponentsInChildren<EnemySpawner>(true))
+        foreach (EnemySpawner spawner in section.GetComponentsInChildren<EnemySpawner>(true))
         {
             if (spawner.Type == EnemySpawner.EnemyType.Melee && meleeSpawned < meleeCount)
             {
                 spawner.Spawn(_meleeEnemyPrefab, _rangedEnemyPrefab);
-                spawner.Activate();
+                pending.Add(spawner);
                 meleeSpawned++;
             }
             else if (spawner.Type == EnemySpawner.EnemyType.Ranged && rangedSpawned < rangedCount)
             {
                 spawner.Spawn(_meleeEnemyPrefab, _rangedEnemyPrefab);
-                spawner.Activate();
+                pending.Add(spawner);
                 rangedSpawned++;
             }
+        }
+
+        if (pending.Count > 0) _pendingSpawns[section] = pending;
+    }
+
+    /// <summary>
+    /// D-01/D-02: 플레이어가 실제로 section(Room 또는 Corridor)에 진입했을 때 호출한다. 이미 트리거된
+    /// section은 재진입해도 다시 재생하지 않는다(1회성 스폰). _pendingSpawns에 등록된 EnemySpawner
+    /// 목록을 D-05 스태거 간격으로 순차 Activate()한다.
+    /// </summary>
+    private void TryActivateSection(GameObject section)
+    {
+        if (section == null || _activatedSections.Contains(section)) return;
+        _activatedSections.Add(section);
+
+        if (_pendingSpawns.TryGetValue(section, out var list))
+        {
+            _pendingSpawns.Remove(section);
+            StartCoroutine(ActivateStaggered(list));
+        }
+    }
+
+    /// <summary>D-05: "배열에 넣고 하나씩 배출" — 기존 DIFF-01 필터링 순서(마커 씬 계층 순회 순서)를
+    /// 그대로 유지한 채, 스태거 간격만큼 실시간 대기 후 순차 Activate()한다.</summary>
+    private IEnumerator ActivateStaggered(List<EnemySpawner> spawners)
+    {
+        foreach (var spawner in spawners)
+        {
+            if (spawner != null) spawner.Activate(_portalEffectPrefab);
+            yield return new WaitForSecondsRealtime(_spawnStaggerInterval);
         }
     }
 
@@ -469,6 +509,7 @@ public class WorldGenerator : MonoBehaviour
             {
                 _playerCurrentNode = _playerCurrentNode.Next;
                 _playerCurrentIndex++;
+                TryActivateSection(_playerCurrentNode.Value.room); // D-01: 새 Room 진입 시 활성화
             }
             else
                 break;
@@ -483,6 +524,7 @@ public class WorldGenerator : MonoBehaviour
             {
                 _playerCurrentNode = _playerCurrentNode.Previous;
                 _playerCurrentIndex--;
+                TryActivateSection(_playerCurrentNode.Value.room); // D-01: 뒤로 이동해 Room 재진입 시에도 확인(이미 활성화됐으면 D-02로 스킵)
             }
             else
                 break;
