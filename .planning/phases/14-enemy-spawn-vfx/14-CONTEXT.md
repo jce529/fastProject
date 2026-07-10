@@ -62,7 +62,7 @@
 
 ### 적 스폰 아키텍처 (변경 대상)
 - `Assets/Scripts/World/EnemySpawner.cs` — Spawn()/Activate() 마커 컴포넌트 (2단계 분리 필요, D-01)
-- `Assets/Scripts/World/WorldGenerator.cs` — `TrySpawnEnemies()`(386-411행 부근, Instantiate 직후 즉시 Spawn+Activate 호출), `SpawnNextPair()`, `_playerCurrentIndex` 추적 로직 (Update() 내 GEN-01/GEN-02/GEN-05 처리부)
+- `Assets/Scripts/World/WorldGenerator.cs` — `TrySpawnEnemies()`(386-411행 부근, Instantiate 직후 즉시 Spawn+Activate 호출), `GetEnemyCount(floor)`(380-382행 부근, 층 난이도별 Melee/Ranged 카운트 반환 — D-05 스태거 배열의 크기 기준으로 재사용), `SpawnNextPair()`, `_playerCurrentIndex` 추적 로직 (Update() 내 GEN-01/GEN-02/GEN-05 처리부)
 - `Assets/Scripts/Enemy/IEnemy.cs` — 3-member 계약 (`IsAlive`, `OnDashHit()`, `ClearHighlight()`) — 변경 금지
 - `Assets/Scripts/Enemy/MeleeEnemy.cs`, `Assets/Scripts/Enemy/RangedEnemy.cs` — `IsAlive` 프로퍼티, `Update()` 최상단 `if (!IsAlive) return;` 가드 (감지/타겟팅 차단 재사용 후보)
 - `Assets/Scripts/Player/CombatController.cs` — `FindNearestEnemyInRange()` (363-410행 부근), `!enemy.IsAlive` 스킵 체크 (400행)
@@ -98,7 +98,7 @@
 ## Specific Ideas
 
 - 세계관 연결: 플레이어(F.A.S.T.)뿐 아니라 적도 "HELIX가 배치한 시뮬레이션 NPC"이므로, 포탈을 타고 등장하는 연출은 세계관상 자연스럽다 (PROJECT.md Story & World 참고).
-- "배열에 넣어놓고 하나씩 배출" — 사용자가 명시한 구현 이미지: 스폰이 필요한 적들을 큐/배열에 담아두고 순차적으로 하나씩 포탈에서 내보내는 방식.
+- "배열에 넣어놓고 하나씩 배출" (D-05 스태거 배출) 구현 방식 확정: 매 룸마다 스폰할 적을 수동으로 큐에 채워넣는 방식이 아니라, 기존 `WorldGenerator.GetEnemyCount(floor)`(난이도별 Melee/Ranged 카운트 반환, WorldGenerator.cs:380-382 부근)와 `TrySpawnEnemies()`가 이미 룸의 `EnemySpawner` 마커를 타입별로 필터링해두는 결과를 그대로 재사용한다 — Melee/Ranged 두 개의 타입별 리스트(배열)로 캡처해두고, 룸 진입 시 그 리스트를 인덱스 순서대로 순회하며 지연된 `Activate()`(+ 포탈 VFX)를 스태거 간격으로 트리거하는 방식. 새로운 수동 큐 구조를 추가로 만들 필요가 없다 — 기존 DIFF-01 필터링 로직 위에 스태거 재생 타이밍만 얹는다. 배출 순서는 마커의 씬 계층 순회 순서를 그대로 따르며, 이는 기존 D-04b 카운트 필터링과 동일한 순서라 새로운 제약이 아니다.
 - 적 스폰 포탈은 ExitPortal(층 전환용)과 반드시 동일한 프리팹일 필요는 없다 — 사용자가 "필요하면 ExitPortal이 아닌 다른 프리팹 생성도 가능"이라고 명시. 다만 이번 논의에서는 기존 `PortalEffect.prefab` 재사용으로 결정됨(D-06).
 - 적 스폰 시 실제 이동(D-07)을 넣기로 한 이유는 플레이어 쪽 기존 연출(제자리 마스크만 걷힘)의 한계를 사용자가 직접 지적했기 때문 — "포탈의 중심으로부터 걸어나오는 연출인데 실제로 걸어나오는 움직임이 안 됨"이라는 피드백이 그대로 반영된 결정.
 
