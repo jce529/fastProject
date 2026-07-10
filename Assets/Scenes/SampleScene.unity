@@ -2544,7 +2544,7 @@ MonoBehaviour:
   _maxYDrift: 12
   _floorHeight: 40
   _exitPortalPrefab: {fileID: 6335312812468809316, guid: d4d6fab2a7975194bb76f748434452eb, type: 3}
-  _exitSpawnChance: 0.5
+  _exitSpawnChance: 1
   _maxExitsActive: 3
   _player: {fileID: 1394403455}
   _combatController: {fileID: 1394403464}
