@@ -4,7 +4,7 @@ milestone: v3.1
 milestone_name: — 보스 룸 & 연출 고도화
 status: verifying
 stopped_at: Completed 14-04-PLAN.md
-last_updated: "2026-07-10T05:37:11.268Z"
+last_updated: "2026-07-10T05:46:22.746Z"
 last_activity: 2026-07-10
 progress:
   total_phases: 5
@@ -33,8 +33,8 @@ progress:
 
 ## Current Position
 
-Phase: 14 (enemy-spawn-vfx) — COMPLETE
-Plan: 4 of 4 (all plans complete)
+Phase: 15
+Plan: Not started
 Status: Phase 14 complete — all success criteria playtest-verified, ready for /gsd:verify-work 14
 Last activity: 2026-07-10
 

@@ -559,7 +559,7 @@ Plans:
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 13. 오디오 기반 구축 & 연출 사운드 폴리싱 | 4/4 | Complete    | 2026-07-09 |
-| 14. 적 등장 스폰 연출 | 4/4 | Complete   | 2026-07-10 |
+| 14. 적 등장 스폰 연출 | 4/4 | Complete    | 2026-07-10 |
 | 15. 보스 FSM & 빈틈 타겟팅 | 0/? | Not started | - |
 | 16. 보스 룸 콘텐츠 & 생명주기 게이팅 | 0/? | Not started | - |
 | 17. WorldGenerator 통합 & 보스 처치 후 층 진행 | 0/? | Not started | - |
