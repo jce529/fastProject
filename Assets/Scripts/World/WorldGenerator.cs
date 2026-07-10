@@ -221,6 +221,15 @@ public class WorldGenerator : MonoBehaviour
             Debug.Log($"[WorldGenerator] _activeExitCount = {_activeExitCount}");
         }
 
+        // Phase 14: 정리되는 section의 대기/활성 스폰 기록도 함께 제거 (참조 누수 방지)
+        _activatedSections.Remove(room);
+        _pendingSpawns.Remove(room);
+        if (corridor != null)
+        {
+            _activatedSections.Remove(corridor);
+            _pendingSpawns.Remove(corridor);
+        }
+
         if (corridor != null) Destroy(corridor);
         Destroy(room);
         _chain.RemoveFirst();
@@ -242,6 +251,14 @@ public class WorldGenerator : MonoBehaviour
             Destroy(portal.StandbyRoom);
             _activeExitCount--;
             Debug.Log($"[WorldGenerator] _activeExitCount = {_activeExitCount}");
+        }
+
+        _activatedSections.Remove(room);
+        _pendingSpawns.Remove(room);
+        if (corridor != null)
+        {
+            _activatedSections.Remove(corridor);
+            _pendingSpawns.Remove(corridor);
         }
 
         if (corridor != null) Destroy(corridor);
@@ -456,6 +473,7 @@ public class WorldGenerator : MonoBehaviour
 
         if (_playerTransform == null || _chain.Count == 0) return;
         UpdatePlayerIndex();
+        CheckCorridorEntry(); // D-03/Pattern 3: Room보다 먼저 통과하는 Corridor 진입 임계값 체크
 
         // GEN-01: 플레이어 앞 _lookaheadCount개 Room+Corridor 보장
         bool chainChanged = false;
@@ -532,6 +550,38 @@ public class WorldGenerator : MonoBehaviour
     }
 
     /// <summary>
+    /// D-03/Pitfall 2: _playerCurrentIndex/UpdatePlayerIndex()는 Room 경계(다음 Room의 Left/ENT)
+    /// 기준으로만 갱신되므로, Corridor 자체의 진입 시점(Room 경계보다 항상 먼저 통과하는 지점)을
+    /// 감지하려면 별도의 임계값 체크가 필요하다 (Pattern 3). O(1) — 커넥터 조회 2회 + 좌표 비교뿐이라
+    /// 매 프레임 호출해도 GC/성능 부담이 없다.
+    /// </summary>
+    private void CheckCorridorEntry()
+    {
+        // 전진: 다음 Room으로 이어지는 Corridor(현재 Room의 오른쪽 길)의 왼쪽(ENT) 커넥터를
+        // 플레이어가 지났는지 확인 — Room 진입 판정(다음 Room의 ENT)보다 항상 먼저 통과하는 지점이다.
+        if (_playerCurrentNode.Next != null)
+        {
+            var nextCorridor = _playerCurrentNode.Next.Value.corridor;
+            if (nextCorridor != null && !_activatedSections.Contains(nextCorridor))
+            {
+                var corridorEntry = FindConnector(nextCorridor, RoomConnector.Direction.Left);
+                if (corridorEntry != null && _playerTransform.position.x > corridorEntry.transform.position.x)
+                    TryActivateSection(nextCorridor);
+            }
+        }
+
+        // 후진: 현재 Room 자신의 왼쪽 Corridor(D-09: corridor = 이 room의 왼쪽 길)의 오른쪽(EXIT)
+        // 커넥터를 플레이어가 아래로 지났는지 확인 — 좌우 대칭.
+        var currentCorridor = _playerCurrentNode.Value.corridor;
+        if (currentCorridor != null && !_activatedSections.Contains(currentCorridor))
+        {
+            var corridorExit = FindConnector(currentCorridor, RoomConnector.Direction.Right);
+            if (corridorExit != null && _playerTransform.position.x < corridorExit.transform.position.x)
+                TryActivateSection(currentCorridor);
+        }
+    }
+
+    /// <summary>
     /// EXIT-03: ExitPortal.OnTriggerEnter2D()가 호출한다. 전환 코루틴은 반드시 WorldGenerator(this)에서
     /// 실행되어야 한다 — 시퀀스 도중 옛 체인(포탈이 속한 room 포함)을 Destroy하기 때문에,
     /// ExitPortal 자신에게서 StartCoroutine을 호출하면 Destroy 시점에 코루틴이 즉시 중단된다 (Pitfall 1).
@@ -568,6 +618,19 @@ public class WorldGenerator : MonoBehaviour
                 Destroy(orphanPortal.StandbyRoom);
             }
 
+            // Phase 14: 정리되는 옛 체인 section의 대기/활성 스폰 기록만 개별 제거한다 (RemoveTail/RemoveHead와
+            // 동일 패턴). standbyRoom(= 다음 Step의 newRoom)은 _chain에 속한 적이 없어 이 루프가 건드리지
+            // 않으므로, 블랭킷 _activatedSections.Clear()/_pendingSpawns.Clear()는 절대 호출하지 않는다 —
+            // 호출 시 standbyRoom의 사전 등록된 _pendingSpawns 엔트리까지 함께 지워져 Step 4의
+            // TryActivateSection(newRoom)이 등록을 찾지 못해 새 층 시작 Room의 적이 영원히 비활성 상태로 남는다.
+            _activatedSections.Remove(chainRoom);
+            _pendingSpawns.Remove(chainRoom);
+            if (chainCorridor != null)
+            {
+                _activatedSections.Remove(chainCorridor);
+                _pendingSpawns.Remove(chainCorridor);
+            }
+
             if (chainCorridor != null) Destroy(chainCorridor);
             Destroy(chainRoom);
         }
@@ -597,8 +660,9 @@ public class WorldGenerator : MonoBehaviour
 
         yield return null; // Step 3.5 — LateUpdate가 카메라 위치를 반영하도록 한 프레임 양보
 
-        // Step 4 — 적 활성화: WorldGenerator는 현재 EnemySpawner.Spawn()을 호출하지 않으므로 의도적 no-op
-        // (Pitfall 5 — 적 스폰 배선은 EXIT-01/02/03 범위 밖. 이 단계는 구조적 자리만 유지한다.)
+        // Step 4 — 적 활성화: 새 층 시작 Room은 UpdatePlayerIndex()의 노드 전환 경로를 거치지 않으므로
+        // (동일 프레임에 _playerCurrentNode를 직접 대입) 명시적으로 트리거한다 (D-01, Pitfall 5/Open Question 3 해소).
+        TryActivateSection(newRoom);
 
         // EXIT (Phase 12 D-01 X1-X4) — 기존 WaitForSecondsRealtime(0.05f) 플레이스홀더를 대체 (Step 5)
         if (_transitionEffect != null)
