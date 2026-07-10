@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v3.1
 milestone_name: — 보스 룸 & 연출 고도화
 status: executing
-stopped_at: Completed 14-02-PLAN.md
-last_updated: "2026-07-10T05:13:42.207Z"
+stopped_at: Completed 14-03-PLAN.md
+last_updated: "2026-07-10T05:18:55.867Z"
 last_activity: 2026-07-10
 progress:
   total_phases: 5
   completed_phases: 1
   total_plans: 8
-  completed_plans: 6
+  completed_plans: 7
 ---
 
 # Project State: Fast (가칭)
@@ -34,8 +34,8 @@ progress:
 ## Current Position
 
 Phase: 14 (enemy-spawn-vfx) — EXECUTING
-Plan: 3 of 4
-Status: Plan 14-02 complete, ready for 14-03
+Plan: 4 of 4
+Status: Plan 14-03 complete, ready for 14-04
 Last activity: 2026-07-10
 
 ```
@@ -64,6 +64,8 @@ Progress: [██░░░░░░░░] v3.1 milestone: 1/5 phases complete (
 | SFX-06 폴리싱 미적용 — 전 항목 OK (Plan 13-04) | 플레이테스트에서 SC1-4 + SFX-06 A-D 전부 통과 보고 — 13-03 훅 배치만으로 타이밍/피드백 어색함 없음, 4개 대상 파일(EnemyDeathEffect.cs/HitSparkBuilder.cs/AudioManagerPrefabBuilder.cs/FloorTransitionEffect.cs) diff 0 확정 |
 | EnemySpawner.Activate(GameObject = null) 기본 매개변수로 기존 DebugRoomTeleporter 호출부 무변경 유지 (Plan 14-02) | 2단계 Spawn/Activate 분리를 기존 호출자 수정 없이 완료 — 정밀 변경 원칙 준수 |
 | CorridorEnemySpawnerTool 메뉴 실행은 14-04로 연기 (Plan 14-02) | 도구는 코드만 작성, 실제 프리팹 저장(Unity 에디터 조작)은 checkpoint:human-action이 필요한 14-04에서 수행 |
+| WorldGenerator TrySpawnEnemies를 수집 전용으로 분리하고 TryActivateSection/ActivateStaggered로 실제 진입 시점에 D-05 스태거 Activate (Plan 14-03) | Room뿐 아니라 Corridor(CheckCorridorEntry Pattern 3 임계값 체크)와 새 층 시작 Room(FloorTransitionSequence Step 4)까지 동일한 진입 감지 게이트로 통일 |
+| FloorTransitionSequence 옛 체인 파괴 루프에서 _activatedSections/_pendingSpawns를 블랭킷 Clear() 대신 개별 엔트리만 제거 (Plan 14-03) | standbyRoom(=newRoom)은 _chain에 속한 적이 없어 사전 등록된 _pendingSpawns 엔트리가 Step 4까지 보존되어야 함 — 블랭킷 Clear 시 새 층 시작 Room의 적이 영원히 비활성화됨 |
 
 ### Key Decisions Locked (v1.0/v2.0/v3.0)
 
@@ -101,8 +103,8 @@ Full decision log lives in `.planning/PROJECT.md` Key Decisions table. Recent hi
 4. Read `.planning/research/SUMMARY.md` — architecture/pitfall context for Phase 13-17
 5. Next action: `/gsd:plan-phase 13`
 
-**Last session:** 2026-07-10T05:13:42.201Z
-**Stopped at:** Completed 14-02-PLAN.md
+**Last session:** 2026-07-10T05:18:55.861Z
+**Stopped at:** Completed 14-03-PLAN.md
 
 ---
 *State initialized: 2026-05-27*
