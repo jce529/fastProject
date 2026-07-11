@@ -2,15 +2,15 @@
 gsd_state_version: 1.0
 milestone: v3.1
 milestone_name: — 보스 룸 & 연출 고도화
-status: verifying
-stopped_at: Phase 999.4 context gathered
-last_updated: "2026-07-10T13:00:16.832Z"
-last_activity: 2026-07-10
+status: executing
+stopped_at: Completed 999.4-02-PLAN.md
+last_updated: "2026-07-11T00:11:51.201Z"
+last_activity: 2026-07-11
 progress:
   total_phases: 8
   completed_phases: 2
-  total_plans: 15
-  completed_plans: 8
+  total_plans: 18
+  completed_plans: 9
 ---
 
 # Project State: Fast (가칭)
@@ -33,10 +33,10 @@ progress:
 
 ## Current Position
 
-Phase: 15
-Plan: Not started
-Status: Phase 14 complete — all success criteria playtest-verified, ready for /gsd:verify-work 14
-Last activity: 2026-07-10
+Phase: 999.4 (enemy-ai-enhancement-pack) — EXECUTING
+Plan: 2 of 3 (999.4-02 complete — RangedEnemy 키팅 후퇴 이동)
+Status: 999.4-01(낙사 하드닝, Wave 1) 진행/완료 여부 확인 후 999.4-03(멜리 텔레그래프 재작성, Wave 2) 실행 대기
+Last activity: 2026-07-11
 
 ```
 Progress: [████░░░░░░] v3.1 milestone: 2/5 phases complete (Phase 13-17)
@@ -68,6 +68,7 @@ Progress: [████░░░░░░] v3.1 milestone: 2/5 phases complete (
 | FloorTransitionSequence 옛 체인 파괴 루프에서 _activatedSections/_pendingSpawns를 블랭킷 Clear() 대신 개별 엔트리만 제거 (Plan 14-03) | standbyRoom(=newRoom)은 _chain에 속한 적이 없어 사전 등록된 _pendingSpawns 엔트리가 Step 4까지 보존되어야 함 — 블랭킷 Clear 시 새 층 시작 Room의 적이 영원히 비활성화됨 |
 | CorridorEnemySpawnerTool 실행으로 Corridor 3종에 EnemySpawner(Melee) 마커 부착 완료 (Plan 14-04) | Room+Corridor 전체에서 스폰 VFX 콘텐츠 동등성 확보 (D-03) — git diff로 각 프리팹당 컴포넌트 1개만 추가됨을 확인, 재실행 시 멱등성 확인 |
 | Phase 14 전체 플레이테스트 체크리스트 10개 항목 전부 통과 판정 (Plan 14-04) | SPWN-01/SPWN-02 및 ROADMAP SC1-5, D-01~D-09 전부 실제 플레이로 검증 완료 — 별도 폴리싱/수정 불요, Phase 15/16 보스 스폰 재사용 전제 성립 |
+| RangedEnemy 키팅 kitingRetreatRange=7.5f/kitingSpeed=3f 확정, 재조정 불필요 (Plan 999.4-02) | D-07(단순 거리-유지)/D-08(Chase 진입 즉시 발동)/D-09(조준·발사 병행)/D-10(aimLineLength 50% 임계값) 플레이테스트 체크리스트 1~7번 전부 통과, D-06(원거리 텔레그래프) 회귀 없음 확인 |
 
 ### Key Decisions Locked (v1.0/v2.0/v3.0)
 
@@ -105,8 +106,8 @@ Full decision log lives in `.planning/PROJECT.md` Key Decisions table. Recent hi
 4. Read `.planning/research/SUMMARY.md` — architecture/pitfall context for Phase 13-17
 5. Next action: `/gsd:plan-phase 13`
 
-**Last session:** 2026-07-10T13:00:16.826Z
-**Stopped at:** Phase 999.4 context gathered
+**Last session:** 2026-07-11T00:11:51.194Z
+**Stopped at:** Completed 999.4-02-PLAN.md
 
 ---
 *State initialized: 2026-05-27*
