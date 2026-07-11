@@ -19,9 +19,10 @@ public class MeleeEnemy : MonoBehaviour, IEnemy, ISpawnGatable
     [SerializeField] private float attackWindupDelay = 0.1f;     // 애니메이션 windup 이후 히트박스 활성화까지 대기 (Inspector 조정)
     [SerializeField] private SpriteRenderer _exclamationIcon;    // Child SpriteRenderer with "!" sprite — assign in Inspector
     [SerializeField] private Collider2D     _meleeHitbox;        // Child Trigger Collider2D — assign in Inspector
-    [SerializeField] private float jumpForce     = 8f;    // 점프 초속 (Inspector 조정)
+    [SerializeField] private float jumpForce     = 13f;   // 점프 초속 (D-01 하드닝: 8f→13f, Room_Gap 3유닛 클리어 추정치 — RESEARCH.md 물리 계산, 플레이테스트로 재조정 가능)
     [SerializeField] private float wallCheckDist = 0.4f;  // 앞 벽 감지 거리
     [SerializeField] private float gapCheckDist  = 0.6f;  // 바닥 끊김 감지 거리 (발 앞으로)
+    [SerializeField] private float maxJumpableGapWidth = 3.2f; // D-01: 이 거리보다 먼 곳까지 바닥이 없으면 점프로 건널 수 없는 gap → 턴어라운드 (Room_Fall 5.5유닛을 걸러내고 Room_Gap 3유닛은 통과시키는 값)
 
     // -- Layer constants (hardcoded — matches TagManager.asset, established pattern) --
     private const int LayerPlayerHurtbox    = 7;
@@ -170,6 +171,11 @@ public class MeleeEnemy : MonoBehaviour, IEnemy, ISpawnGatable
 
         // Move toward player (x only — Y left to Unity 2D physics)
         float dirX = Mathf.Sign(_playerTransform.position.x - transform.position.x);
+
+        // D-01 하드닝 (RESEARCH.md Pitfall 2): 점프로 건널 수 없을 만큼 넓은 gap이면 뛰어들지 않고 턴어라운드
+        if (IsGrounded() && GapAhead(dirX) && GapTooWideToCross(dirX))
+            dirX = -dirX;
+
         _rb.linearVelocity = new Vector2(dirX * chaseSpeed, _rb.linearVelocity.y);
         FlipSprite(dirX);
         TryJump(dirX);
@@ -292,6 +298,15 @@ public class MeleeEnemy : MonoBehaviour, IEnemy, ISpawnGatable
     {
         // 발 앞 수평으로 gapCheckDist 이동한 지점에서 아래로 Ray
         Vector2 origin = (Vector2)transform.position + new Vector2(moveDir * gapCheckDist, -0.5f);
+        RaycastHit2D hit = Physics2D.Raycast(origin, Vector2.down, 0.5f,
+            LayerMask.GetMask("Default", "Ground", "Platform"));
+        return hit.collider == null;
+    }
+
+    /// <summary>D-01 하드닝(Pitfall 2): maxJumpableGapWidth보다 먼 지점까지도 바닥이 없으면 점프로 건널 수 없는 gap → true.</summary>
+    private bool GapTooWideToCross(float moveDir)
+    {
+        Vector2 origin = (Vector2)transform.position + new Vector2(moveDir * maxJumpableGapWidth, -0.5f);
         RaycastHit2D hit = Physics2D.Raycast(origin, Vector2.down, 0.5f,
             LayerMask.GetMask("Default", "Ground", "Platform"));
         return hit.collider == null;
