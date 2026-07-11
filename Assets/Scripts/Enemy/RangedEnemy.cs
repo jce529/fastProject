@@ -15,6 +15,8 @@ public class RangedEnemy : MonoBehaviour, IEnemy, ISpawnGatable
     [SerializeField] private float detectionRadius = 12f;     // Detection + telegraph trigger (Claude's discretion: 10-15 units)
     [SerializeField] private float moveSpeed       = 0f;      // D-10: 0 = stationary. Increase post-playtest.
     [SerializeField] private float aimLineLength   = 15f;     // LineRenderer endpoint length
+    [SerializeField] private float kitingRetreatRange = 7.5f; // D-10: aimLineLength(15f)의 약 50% — 이 거리보다 가까워지면 후퇴 시작
+    [SerializeField] private float kitingSpeed         = 3f;  // D-07: 후퇴 이동 속도 (Claude's Discretion — chaseSpeed 4f보다 약간 느리게 시작, 플레이테스트로 조정)
     [SerializeField] private float patrolSpeed     = 1.5f;
     [SerializeField] private float patrolHalfRange = 3f;
     [SerializeField] private GameObject projectilePrefab;     // Assign Projectile prefab in Inspector
@@ -164,7 +166,6 @@ public class RangedEnemy : MonoBehaviour, IEnemy, ISpawnGatable
 
     private void UpdateChase()
     {
-        _animator?.SetBool("isMoving", false);
         if (_playerTransform == null)
         {
             FindPlayerTransform();
@@ -178,6 +179,22 @@ public class RangedEnemy : MonoBehaviour, IEnemy, ISpawnGatable
             return;
         }
 
+        // D-07/D-08/D-10: Chase 진입 즉시, 거리가 kitingRetreatRange 미만이면 반대 방향으로 후퇴.
+        // 근접 적 위치는 참조하지 않는 단순 거리-유지 이동(D-07 명시 범위).
+        float dist = Vector2.Distance(transform.position, _playerTransform.position);
+        if (dist < kitingRetreatRange)
+        {
+            float dirAway = Mathf.Sign(transform.position.x - _playerTransform.position.x);
+            _rb.linearVelocity = new Vector2(dirAway * kitingSpeed, _rb.linearVelocity.y);
+            _animator?.SetBool("isMoving", true);
+        }
+        else
+        {
+            _rb.linearVelocity = new Vector2(0f, _rb.linearVelocity.y); // 임계값 밖 — 수평 이동 정지 (무한 후퇴 방지)
+            _animator?.SetBool("isMoving", false);
+        }
+
+        // D-09: 조준/발사는 위 후퇴 이동과 무관하게 매 프레임 그대로 체크 — StartCoroutine은 non-blocking이므로 병행 보장.
         if (IsPlayerInRange(aimLineLength) && _telegraphCoroutine == null)
         {
             _telegraphCoroutine = StartCoroutine(TelegraphAndFire());
