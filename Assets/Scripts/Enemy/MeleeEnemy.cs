@@ -17,6 +17,8 @@ public class MeleeEnemy : MonoBehaviour, IEnemy, ISpawnGatable
     [SerializeField] private float patrolHalfRange      = 3f;    // Half-width of patrol walk
     [SerializeField] private float hitboxActiveDuration = 0.15f; // Seconds hitbox stays active
     [SerializeField] private float attackWindupDelay = 0.1f;     // 애니메이션 windup 이후 히트박스 활성화까지 대기 (Inspector 조정)
+    [SerializeField] private float telegraphDuration       = 0.45f; // D-04: 0.8s→0.4~0.5s 단축 (원본 근거: Phase 3 D-06 "구르기로 회피 가능한 여유" 유지)
+    [SerializeField] private float telegraphSpeedMultiplier = 0.4f;  // D-05: chaseSpeed 대비 이동 속도 배율 (Claude's Discretion: 30~50% 범위 중 40%)
     [SerializeField] private SpriteRenderer _exclamationIcon;    // Child SpriteRenderer with "!" sprite — assign in Inspector
     [SerializeField] private Collider2D     _meleeHitbox;        // Child Trigger Collider2D — assign in Inspector
     [SerializeField] private float jumpForce     = 13f;   // 점프 초속 (D-01 하드닝: 8f→13f, Room_Gap 3유닛 클리어 추정치 — RESEARCH.md 물리 계산, 플레이테스트로 재조정 가능)
@@ -186,18 +188,37 @@ public class MeleeEnemy : MonoBehaviour, IEnemy, ISpawnGatable
     private IEnumerator TelegraphAndAttack()
     {
         _state = EnemyState.Telegraph;
-        _animator?.SetBool("isMoving", false);
+        _animator?.SetBool("isMoving", true);   // D-05: 이동을 계속하므로 walk-cycle 애니메이션 유지 (기존 false에서 변경 — 미확인 시 Task 2에서 시각 검증)
         _animator?.SetBool("isChasing", false);
 
         // Show "!" icon (D-05)
         if (_exclamationIcon != null) _exclamationIcon.enabled = true;
 
-        // 0.8 real seconds — WaitForSecondsRealtime is timeScale-immune (D-06, ROADMAP Stack Constraint)
-        yield return new WaitForSecondsRealtime(0.8f);
+        // D-04/D-05: RangedEnemy.TelegraphAndFire()의 per-frame 루프 형태를 mirror —
+        // 단일 블로킹 WaitForSecondsRealtime(0.8f) 대신 매 프레임 이동 + FlipSprite 갱신.
+        float elapsed = 0f;
+        while (elapsed < telegraphDuration)
+        {
+            elapsed += Time.unscaledDeltaTime; // timeScale-immune (ROADMAP Stack Constraint)
+
+            if (!IsAlive) yield break; // 가드: 루프 도중 언제든 처치될 수 있음 (기존엔 대기 종료 후 1회만 체크)
+
+            if (_playerTransform != null)
+            {
+                float dirX = Mathf.Sign(_playerTransform.position.x - transform.position.x);
+                _rb.linearVelocity = new Vector2(dirX * chaseSpeed * telegraphSpeedMultiplier, _rb.linearVelocity.y);
+                FlipSprite(dirX); // D-05: 기존 TelegraphAndAttack()은 FlipSprite를 호출하지 않았음 — 이동 방향과 스프라이트 일치를 위해 추가
+            }
+
+            yield return null;
+        }
 
         // Guard: enemy may have been killed during the telegraph window
         // This is the critical guard preventing attack on already-dead enemy
         if (!IsAlive) yield break;
+
+        // Telegraph 종료 — Attack 상태로 전환하며 이동 정지 (기존 Attack 단계는 정지 상태 유지, D-04/D-05는 Telegraph만 대상)
+        _rb.linearVelocity = new Vector2(0f, _rb.linearVelocity.y);
 
         if (_exclamationIcon != null) _exclamationIcon.enabled = false;
         _state = EnemyState.Attack;
