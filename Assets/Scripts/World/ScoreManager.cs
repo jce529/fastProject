@@ -9,6 +9,7 @@ public static class ScoreManager
 {
     // -- 보너스 기준 (Inspector 없음 — 프로토타입 상수로 충분) --------------------
     public const int   KillScore        = 100;
+    public const int   RespawnKillScore = 30;   // D-10(999.2): 리스폰 킬 감소 점수 — KillScore의 약 30%. 파밍을 점수 관점에서 비효율적으로 만들되 완전히 막지는 않는다(D-09: 무제한 리스폰과 일관).
     public const int   FastClearBonus   = 300;
     public const int   NormalClearBonus = 150;
     public const int   SlowClearBonus   = 50;
@@ -29,10 +30,12 @@ public static class ScoreManager
         _roomStartTime = Time.unscaledTime;
     }
 
-    /// <summary>CombatController.ExecuteDash() — target.OnDashHit() 직후 호출.</summary>
-    public static void AddKillScore()
+    /// <summary>CombatController.ExecuteDash() — target.OnDashHit() 직후 호출.
+    /// D-10(999.2): isRespawn=true면 RespawnKillScore(감소된 점수)를, 기본값 false면 기존 KillScore를 더한다.
+    /// 기본 매개변수로 인자 없는 기존 호출 형태(AddKillScore())도 그대로 컴파일된다.</summary>
+    public static void AddKillScore(bool isRespawn = false)
     {
-        Score += KillScore;
+        Score += isRespawn ? RespawnKillScore : KillScore;
     }
 
     /// <summary>
