@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v3.1
 milestone_name: — 보스 룸 & 연출 고도화
 status: executing
-stopped_at: Completed 999.4-03-PLAN.md — Phase 999.4 fully complete (3/3)
-last_updated: "2026-07-14T02:42:48.675Z"
-last_activity: 2026-07-14 -- Phase 999.2 execution started
+stopped_at: Completed 999.2-01-PLAN.md
+last_updated: "2026-07-14T02:49:46.822Z"
+last_activity: 2026-07-14
 progress:
   total_phases: 8
-  completed_phases: 3
+  completed_phases: 2
   total_plans: 18
-  completed_plans: 11
+  completed_plans: 10
 ---
 
 # Project State: Fast (가칭)
@@ -34,9 +34,9 @@ progress:
 ## Current Position
 
 Phase: 999.2 (enemy-infinite-respawn-mechanism) — EXECUTING
-Plan: 1 of 4
-Status: Executing Phase 999.2
-Last activity: 2026-07-14 -- Phase 999.2 execution started
+Plan: 1 of 4 (999.2-01 complete — RoomClearCondition IsCleared/ResetForRespawn + RoomRespawnGate 신설)
+Status: 999.2-02 실행 대기
+Last activity: 2026-07-14
 
 ```
 Progress: [████░░░░░░] v3.1 milestone: 2/5 phases complete (Phase 13-17)
@@ -69,10 +69,7 @@ Progress: [████░░░░░░] v3.1 milestone: 2/5 phases complete (
 | CorridorEnemySpawnerTool 실행으로 Corridor 3종에 EnemySpawner(Melee) 마커 부착 완료 (Plan 14-04) | Room+Corridor 전체에서 스폰 VFX 콘텐츠 동등성 확보 (D-03) — git diff로 각 프리팹당 컴포넌트 1개만 추가됨을 확인, 재실행 시 멱등성 확인 |
 | Phase 14 전체 플레이테스트 체크리스트 10개 항목 전부 통과 판정 (Plan 14-04) | SPWN-01/SPWN-02 및 ROADMAP SC1-5, D-01~D-09 전부 실제 플레이로 검증 완료 — 별도 폴리싱/수정 불요, Phase 15/16 보스 스폰 재사용 전제 성립 |
 | RangedEnemy 키팅 kitingRetreatRange=7.5f/kitingSpeed=3f 확정, 재조정 불필요 (Plan 999.4-02) | D-07(단순 거리-유지)/D-08(Chase 진입 즉시 발동)/D-09(조준·발사 병행)/D-10(aimLineLength 50% 임계값) 플레이테스트 체크리스트 1~7번 전부 통과, D-06(원거리 텔레그래프) 회귀 없음 확인 |
-| MeleeEnemy jumpForce=13f/maxJumpableGapWidth=3.2f 확정, 재조정 불필요 (Plan 999.4-01) | D-01(예방) — Room_Gap(3유닛) 점프 클리어, Room_Fall(5.5유닛) 턴어라운드, 플레이테스트 체크리스트 1~7 전부 통과 |
-| FallZoneTrigger Enemy 태그 사후처리(즉시 Destroy, VFX 없음) 확정 (Plan 999.4-01) | D-02/D-03 — MeleeEnemy/RangedEnemy 공통 Enemy 태그로 두 타입 모두 커버, Enemy×Default Layer Collision Matrix 활성화 확인, Player 낙사 경로(FallDetector.OnFall) 회귀 없음 |
-| MeleeEnemy telegraphDuration=0.45f/telegraphSpeedMultiplier=0.4f 확정, 재조정 불필요 (Plan 999.4-03) | D-04(0.8s→0.45s 단축)/D-05(이동하며 예고+FlipSprite)/D-06(RangedEnemy 미변경 회귀 없음) 플레이테스트 체크리스트 1~7 전부 통과 — Phase 999.4(enemy-ai-enhancement-pack) 3/3 plans 전체 완료 |
-| MeleeEnemy.prefab ExclamationIcon SpriteRenderer 스프라이트 미할당(m_Sprite fileID 0) 버그를 quick task 260714-fnr로 수정 (커밋 93a3d99) | 999.4-03 코드 로직은 정상이었으나 프리팹 애셋에 "!" 스프라이트가 애초에 배정된 적이 없어 Telegraph 아이콘이 안 보이던 사전 존재 버그 — ExclamationIconBuilder.cs 절차적 생성 도구로 해결, 재사용 가능 |
+| RoomClearCondition.DiscoverEnemies() 분리 + RoomRespawnGate.ConsumeRespawn()에 별도 쿨다운 타이머 미도입 확정 (Plan 999.2-01) | Start()/ResetForRespawn() 양쪽에서 동일 적 탐색 로직 재사용(중복 제거), D-03(쿨다운 없음)에 따라 "나갔다가 다시 들어옴" 자체가 게이트 역할을 하도록 설계 — GameObject 수명 종속 상태로 Case B(체인 이탈 재생성)를 구조적으로 배제(D-01a) |
 
 ### Key Decisions Locked (v1.0/v2.0/v3.0)
 
@@ -98,12 +95,6 @@ Full decision log lives in `.planning/PROJECT.md` Key Decisions table. Recent hi
 |------|-------|------|------|
 | _None pending_ | | | |
 
-### Quick Tasks Completed
-
-| # | Description | Date | Commit | Directory |
-|---|-------------|------|--------|-----------|
-| 260714-fnr | MeleeEnemy prefab ExclamationIcon sprite 미할당 수정 | 2026-07-14 | 93a3d99 | [260714-fnr-meleeenemy-prefab-exclamationicon-sprite](./quick/260714-fnr-meleeenemy-prefab-exclamationicon-sprite/) |
-
 ---
 
 ## Session Continuity
@@ -116,9 +107,9 @@ Full decision log lives in `.planning/PROJECT.md` Key Decisions table. Recent hi
 4. Read `.planning/research/SUMMARY.md` — architecture/pitfall context for Phase 13-17
 5. Next action: `/gsd:plan-phase 13`
 
-**Last session:** 2026-07-14T00:00:00.000Z
-**Stopped at:** Completed 999.4-03-PLAN.md — Phase 999.4 fully complete (3/3)
+**Last session:** 2026-07-14T02:49:46.816Z
+**Stopped at:** Completed 999.2-01-PLAN.md
 
 ---
 *State initialized: 2026-05-27*
-*Last updated: 2026-07-14 — Plan 999.4-03 complete (MeleeEnemy Telegraph per-frame 이동형 재작성, 플레이테스트 7/7 통과). Phase 999.4(enemy-ai-enhancement-pack) 전체 완료(3/3). ExclamationIcon 스프라이트 미할당 버그는 quick task 260714-fnr로 별도 수정. 다음: v3.1 Phase 15 계획.*
+*Last updated: 2026-07-09 — Plan 13-01 complete (AudioManager singleton + AssetPostprocessor + DSP 512), SFX-01 requirement satisfied*

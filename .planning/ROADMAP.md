@@ -618,14 +618,14 @@ Plans:
 
 **Goal:** 플레이어가 클리어한 Complex_Room을 벗어났다가(체인 안에 살아있는 동안) 다시 들어오면, 원래 EnemySpawner 마커 위치에 동일 타입의 적이 기존 스폰 VFX 파이프라인 그대로 재등장해 반복 전투가 가능해진다 — 리스폰 킬은 감소된 점수를 지급한다.
 **Requirements:** 999.2-CONTEXT.md `<decisions>` D-01~D-10 (+ D-01a 범위 명확화) — formal REQ-ID 없음, decision ID를 요구사항 앵커로 사용
-**Plans:** 4 plans (3 waves — Wave 1: 01/02 병렬, Wave 2: 03, Wave 3: 04 체크포인트)
+**Plans:** 1/4 plans executed
 
 Captured 2026-07-10 during Phase 14 discussion (`.planning/phases/14-enemy-spawn-vfx/14-CONTEXT.md` `<deferred>`): 룸/Corridor을 플레이어가 반복 재진입할 때마다 적이 계속 새로 생성되는 아이디어. "가상 시뮬레이션에서 끝없이 싸우는 AI"라는 스토리 설정과 잘 맞고, WorldGenerator가 이미 좌우 2개 룸까지만 유지하므로 성능 부담도 크지 않을 것으로 추정. 다만 밸런스(엔드리스 파밍으로 타이머 긴장감 훼손 가능성)와 정확한 트리거 규칙 설계가 필요해 Phase 14는 1회성 스폰(D-02)으로 진행하고 이 아이디어는 보류.
 
 Planned 2026-07-10 (999.2-CONTEXT.md/999.2-RESEARCH.md/999.2-VALIDATION.md 기반 — D-01a로 범위를 Case A(체인 내 재진입)로 한정, Case B(체인 이탈 후 재생성)는 명시적으로 이 phase 범위 밖):
 
 Plans:
-- [ ] 999.2-01-PLAN.md — RoomClearCondition.IsCleared/ResetForRespawn + RoomRespawnGate 신설 (D-01, D-01a, D-02, D-03)
+- [x] 999.2-01-PLAN.md — RoomClearCondition.IsCleared/ResetForRespawn + RoomRespawnGate 신설 (D-01, D-01a, D-02, D-03)
 - [ ] 999.2-02-PLAN.md — EnemySpawner.ResetForRespawn/Spawn 반환형 + RespawnedEnemyMarker + ScoreManager 감소 점수 (D-05, D-07, D-09, D-10)
 - [ ] 999.2-03-PLAN.md — WorldGenerator MarkRoomLeft/TryRespawnRoom + UpdatePlayerIndex 배선 (D-01, D-01a, D-02~D-09)
 - [ ] 999.2-04-PLAN.md — RoomRespawnTool 에디터 도구 실행(Complex_Room 6종 부착) + 플레이테스트 검증 (D-01~D-10)
