@@ -2,15 +2,15 @@
 gsd_state_version: 1.0
 milestone: v3.1
 milestone_name: — 보스 룸 & 연출 고도화
-status: executing
-stopped_at: Completed 999.2-02-PLAN.md
-last_updated: "2026-07-14T02:51:09.736Z"
+status: 999.2-04(최종 검증, Complex_Room 6종 RoomRespawnGate 부착) 실행 대기
+stopped_at: Completed 999.2-03-PLAN.md
+last_updated: "2026-07-14T03:02:17.268Z"
 last_activity: 2026-07-14
 progress:
   total_phases: 8
-  completed_phases: 2
+  completed_phases: 3
   total_plans: 18
-  completed_plans: 10
+  completed_plans: 14
 ---
 
 # Project State: Fast (가칭)
@@ -34,8 +34,8 @@ progress:
 ## Current Position
 
 Phase: 999.2 (enemy-infinite-respawn-mechanism) — EXECUTING
-Plan: 2 of 4 (999.2-02 complete — EnemySpawner ResetForRespawn() + 리스폰 킬 감소 점수)
-Status: 999.2-03(WorldGenerator 통합) 실행 대기
+Plan: 4 of 4 (999.2-01, 999.2-02, 999.2-03 complete — Wave 2 done: WorldGenerator.MarkRoomLeft()/TryRespawnRoom() 배선 완료)
+Status: 999.2-04(최종 검증, Complex_Room 6종 RoomRespawnGate 부착) 실행 대기
 Last activity: 2026-07-14
 
 ```
@@ -69,9 +69,15 @@ Progress: [████░░░░░░] v3.1 milestone: 2/5 phases complete (
 | CorridorEnemySpawnerTool 실행으로 Corridor 3종에 EnemySpawner(Melee) 마커 부착 완료 (Plan 14-04) | Room+Corridor 전체에서 스폰 VFX 콘텐츠 동등성 확보 (D-03) — git diff로 각 프리팹당 컴포넌트 1개만 추가됨을 확인, 재실행 시 멱등성 확인 |
 | Phase 14 전체 플레이테스트 체크리스트 10개 항목 전부 통과 판정 (Plan 14-04) | SPWN-01/SPWN-02 및 ROADMAP SC1-5, D-01~D-09 전부 실제 플레이로 검증 완료 — 별도 폴리싱/수정 불요, Phase 15/16 보스 스폰 재사용 전제 성립 |
 | RangedEnemy 키팅 kitingRetreatRange=7.5f/kitingSpeed=3f 확정, 재조정 불필요 (Plan 999.4-02) | D-07(단순 거리-유지)/D-08(Chase 진입 즉시 발동)/D-09(조준·발사 병행)/D-10(aimLineLength 50% 임계값) 플레이테스트 체크리스트 1~7번 전부 통과, D-06(원거리 텔레그래프) 회귀 없음 확인 |
+| MeleeEnemy jumpForce=13f/maxJumpableGapWidth=3.2f 확정, 재조정 불필요 (Plan 999.4-01) | D-01(예방) — Room_Gap(3유닛) 점프 클리어, Room_Fall(5.5유닛) 턴어라운드, 플레이테스트 체크리스트 1~7 전부 통과 |
+| FallZoneTrigger Enemy 태그 사후처리(즉시 Destroy, VFX 없음) 확정 (Plan 999.4-01) | D-02/D-03 — MeleeEnemy/RangedEnemy 공통 Enemy 태그로 두 타입 모두 커버, Enemy×Default Layer Collision Matrix 활성화 확인, Player 낙사 경로(FallDetector.OnFall) 회귀 없음 |
+| MeleeEnemy telegraphDuration=0.45f/telegraphSpeedMultiplier=0.4f 확정, 재조정 불필요 (Plan 999.4-03) | D-04(0.8s→0.45s 단축)/D-05(이동하며 예고+FlipSprite)/D-06(RangedEnemy 미변경 회귀 없음) 플레이테스트 체크리스트 1~7 전부 통과 — Phase 999.4(enemy-ai-enhancement-pack) 3/3 plans 전체 완료 |
+| MeleeEnemy.prefab ExclamationIcon SpriteRenderer 스프라이트 미할당(m_Sprite fileID 0) 버그를 quick task 260714-fnr로 수정 (커밋 93a3d99) | 999.4-03 코드 로직은 정상이었으나 프리팹 애셋에 "!" 스프라이트가 애초에 배정된 적이 없어 Telegraph 아이콘이 안 보이던 사전 존재 버그 — ExclamationIconBuilder.cs 절차적 생성 도구로 해결, 재사용 가능 |
+| RoomClearCondition.DiscoverEnemies() 분리 + RoomRespawnGate.ConsumeRespawn()에 별도 쿨다운 타이머 미도입 확정 (Plan 999.2-01) | Start()/ResetForRespawn() 양쪽에서 동일 적 탐색 로직 재사용(중복 제거), D-03(쿨다운 없음)에 따라 "나갔다가 다시 들어옴" 자체가 게이트 역할을 하도록 설계 — GameObject 수명 종속 상태로 Case B(체인 이탈 재생성)를 구조적으로 배제(D-01a) |
 | EnemySpawner.ResetForRespawn()은 HasActivated와 _spawned를 함께 비움 (Plan 999.2-02) | 재무장만 하고 _spawned를 안 비우면 Activate()가 댕글링 참조로 영구 no-op됨(999.2-RESEARCH.md Pitfall 1) — 반드시 함께 초기화 |
 | RespawnedEnemyMarker 빈 additive 컴포넌트로 리스폰 개체 태깅, IEnemy 미확장 (Plan 999.2-02) | ISpawnGatable(Phase 14)과 동일한 프로젝트 컨벤션 — 잠긴 3-member IEnemy 계약을 건드리지 않고 리스폰 판정 가능 |
 | ScoreManager.RespawnKillScore=30 (KillScore의 약 30%) 확정 (Plan 999.2-02) | 리스폰 파밍을 점수 관점에서 비효율적으로 만들되 완전히 막지는 않음 — D-09(무제한 리스폰)와 일관 |
+| WorldGenerator.MarkRoomLeft()/TryRespawnRoom()을 새 트리거 콜라이더 없이 UpdatePlayerIndex()의 기존 체인-인덱스 전이 신호에 배선 (Plan 999.2-03) | 999.2-RESEARCH.md Pitfall 2 회피 — Room 진입/이탈이 이미 매 프레임 계산되므로 별도 감지 시스템 불필요, Corridor는 RoomRespawnGate 미부착으로 자동 no-op(D-04) |
 
 ### Key Decisions Locked (v1.0/v2.0/v3.0)
 
@@ -97,6 +103,12 @@ Full decision log lives in `.planning/PROJECT.md` Key Decisions table. Recent hi
 |------|-------|------|------|
 | _None pending_ | | | |
 
+### Quick Tasks Completed
+
+| # | Description | Date | Commit | Directory |
+|---|-------------|------|--------|-----------|
+| 260714-fnr | MeleeEnemy prefab ExclamationIcon sprite 미할당 수정 | 2026-07-14 | 93a3d99 | [260714-fnr-meleeenemy-prefab-exclamationicon-sprite](./quick/260714-fnr-meleeenemy-prefab-exclamationicon-sprite/) |
+
 ---
 
 ## Session Continuity
@@ -109,9 +121,9 @@ Full decision log lives in `.planning/PROJECT.md` Key Decisions table. Recent hi
 4. Read `.planning/research/SUMMARY.md` — architecture/pitfall context for Phase 13-17
 5. Next action: `/gsd:plan-phase 13`
 
-**Last session:** 2026-07-14T02:51:09.736Z
-**Stopped at:** Completed 999.2-02-PLAN.md
+**Last session:** 2026-07-14T03:02:17.263Z
+**Stopped at:** Completed 999.2-03-PLAN.md
 
 ---
 *State initialized: 2026-05-27*
-*Last updated: 2026-07-14 — Plan 999.2-02 complete (EnemySpawner ResetForRespawn() + Spawn() GameObject 반환, RespawnedEnemyMarker 신설, ScoreManager 감소 점수 API, CombatController 배선). D-05/D-07/D-09/D-10 코드 레벨 완성. 다음: Plan 999.2-03(WorldGenerator 통합).*
+*Last updated: 2026-07-14 — Plan 999.2-03 (WorldGenerator.MarkRoomLeft()/TryRespawnRoom() 추가 + UpdatePlayerIndex() 배선) 완료. D-01/D-01a/D-02/D-03/D-04/D-05/D-06/D-07/D-08/D-09 전체가 실제 WorldGenerator 트리거 경로에 배선됨, Wave 2 종료. 다음: Plan 999.2-04(Complex_Room 6종 RoomRespawnGate 부착 + 최종 검증).*

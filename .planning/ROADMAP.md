@@ -618,16 +618,16 @@ Plans:
 
 **Goal:** 플레이어가 클리어한 Complex_Room을 벗어났다가(체인 안에 살아있는 동안) 다시 들어오면, 원래 EnemySpawner 마커 위치에 동일 타입의 적이 기존 스폰 VFX 파이프라인 그대로 재등장해 반복 전투가 가능해진다 — 리스폰 킬은 감소된 점수를 지급한다.
 **Requirements:** 999.2-CONTEXT.md `<decisions>` D-01~D-10 (+ D-01a 범위 명확화) — formal REQ-ID 없음, decision ID를 요구사항 앵커로 사용
-**Plans:** 1/4 plans executed
+**Plans:** 3/4 plans executed
 
 Captured 2026-07-10 during Phase 14 discussion (`.planning/phases/14-enemy-spawn-vfx/14-CONTEXT.md` `<deferred>`): 룸/Corridor을 플레이어가 반복 재진입할 때마다 적이 계속 새로 생성되는 아이디어. "가상 시뮬레이션에서 끝없이 싸우는 AI"라는 스토리 설정과 잘 맞고, WorldGenerator가 이미 좌우 2개 룸까지만 유지하므로 성능 부담도 크지 않을 것으로 추정. 다만 밸런스(엔드리스 파밍으로 타이머 긴장감 훼손 가능성)와 정확한 트리거 규칙 설계가 필요해 Phase 14는 1회성 스폰(D-02)으로 진행하고 이 아이디어는 보류.
 
 Planned 2026-07-10 (999.2-CONTEXT.md/999.2-RESEARCH.md/999.2-VALIDATION.md 기반 — D-01a로 범위를 Case A(체인 내 재진입)로 한정, Case B(체인 이탈 후 재생성)는 명시적으로 이 phase 범위 밖):
 
 Plans:
-- [ ] 999.2-01-PLAN.md — RoomClearCondition.IsCleared/ResetForRespawn + RoomRespawnGate 신설 (D-01, D-01a, D-02, D-03)
+- [x] 999.2-01-PLAN.md — RoomClearCondition.IsCleared/ResetForRespawn + RoomRespawnGate 신설 (D-01, D-01a, D-02, D-03)
 - [x] 999.2-02-PLAN.md — EnemySpawner.ResetForRespawn/Spawn 반환형 + RespawnedEnemyMarker + ScoreManager 감소 점수 (D-05, D-07, D-09, D-10)
-- [ ] 999.2-03-PLAN.md — WorldGenerator MarkRoomLeft/TryRespawnRoom + UpdatePlayerIndex 배선 (D-01, D-01a, D-02~D-09)
+- [x] 999.2-03-PLAN.md — WorldGenerator MarkRoomLeft/TryRespawnRoom + UpdatePlayerIndex 배선 (D-01, D-01a, D-02~D-09)
 - [ ] 999.2-04-PLAN.md — RoomRespawnTool 에디터 도구 실행(Complex_Room 6종 부착) + 플레이테스트 검증 (D-01~D-10)
 ---
 
@@ -651,7 +651,7 @@ Plans:
 
 **Goal:** 근접 적은 예방(gap-check 하드닝)과 사후처리(FallZone 즉시 Destroy) 이중 안전망으로 더 이상 낙사 좀비 상태로 남지 않고, 공격 예고(Telegraph)가 짧고 이동하며 예고하는 방식으로 개선되어 긴장감/속도감이 살아나며, 원거리 몬스터는 단순 키팅(거리 유지) 이동으로 더 이상 제자리에 고정되지 않는다.
 **Requirements:** 999.4-CONTEXT.md `<decisions>` D-01~D-10 — formal REQ-ID 없음, decision ID를 요구사항 앵커로 사용
-**Plans:** 1/3 plans executed
+**Plans:** 3/3 plans executed (완료 2026-07-14)
 
 Captured 2026-07-10: 플레이테스트 중 발견된 적 AI 관련 3가지 문제.
 1. 추격 중 낙사(추락) — Enemy가 KillZone 등 낙사 판정의 영향을 받지 않아, 화면 밖 아래로 떨어진 채로 계속 "살아있는" 좀비 상태로 남음.
@@ -661,6 +661,6 @@ Captured 2026-07-10: 플레이테스트 중 발견된 적 AI 관련 3가지 문�
 Planned 2026-07-10 (999.4-CONTEXT.md/999.4-RESEARCH.md/999.4-VALIDATION.md 기반 — 3개 하위 기능은 서로 독립적이나 MeleeEnemy.cs를 공유하는 낙사 처리(999.4-01)와 텔레그래프 재작성(999.4-03)은 순차 실행):
 
 Plans:
-- [ ] 999.4-01-PLAN.md — MeleeEnemy GapAhead/TryJump 턴어라운드 하드닝 + FallZoneTrigger Enemy 사후처리 (D-01, D-02, D-03)
+- [x] 999.4-01-PLAN.md — MeleeEnemy GapAhead/TryJump 턴어라운드 하드닝 + FallZoneTrigger Enemy 사후처리 (D-01, D-02, D-03)
 - [x] 999.4-02-PLAN.md — RangedEnemy UpdateChase 키팅 후퇴 이동 (D-07, D-08, D-09, D-10)
-- [ ] 999.4-03-PLAN.md — MeleeEnemy TelegraphAndAttack 이동형 예고 재작성 (D-04, D-05, D-06)
+- [x] 999.4-03-PLAN.md — MeleeEnemy TelegraphAndAttack 이동형 예고 재작성 (D-04, D-05, D-06)
