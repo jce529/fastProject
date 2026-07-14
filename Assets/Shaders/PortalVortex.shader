@@ -8,6 +8,7 @@ Shader "Custom/PortalVortex"
         _UnscaledTime ("Unscaled Time", Float) = 0.0
         _EffectAlpha ("Effect Alpha", Range(0,1)) = 1.0
         _DebugMode ("Debug Mode (0=Normal,1=SolidMagenta,2=RawGrabTexture)", Float) = 0.0
+        _DistortionScale ("Distortion Scale (screen-space)", Float) = 0.05
     }
     SubShader
     {
@@ -56,6 +57,7 @@ Shader "Custom/PortalVortex"
                 float _UnscaledTime;
                 float _EffectAlpha;
                 float _DebugMode;
+                float _DistortionScale;
             CBUFFER_END
 
             Varyings vert(Attributes IN)
@@ -82,7 +84,12 @@ Shader "Custom/PortalVortex"
                     toCenter.x * s + toCenter.y * c);
 
                 float2 pullOffset = (swirled - toCenter) - toCenter * falloff * _PullStrength;
-                float2 distortedUV = screenUV + pullOffset;
+                // pullOffset is computed in quad-local UV space (toCenter ~ [-0.5, 0.5]) but
+                // screenUV is full-screen normalized [0,1]. Adding pullOffset directly caused
+                // the sample point to jump up to ~100% of the screen away from the portal quad's
+                // own footprint (mirror-like smear instead of a localized sucking-in swirl).
+                // _DistortionScale rescales the local-UV offset into a small screen-space nudge.
+                float2 distortedUV = screenUV + pullOffset * _DistortionScale;
 
                 // Debug 2: raw, undistorted, fully-opaque grab-pass sample.
                 // Isolates whether _CameraSortingLayerTexture actually contains valid

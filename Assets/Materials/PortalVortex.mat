@@ -20,18 +20,19 @@ Material:
   stringTagMap:
     RenderType: Transparent
   disabledShaderPasses: []
-  m_LockedProperties:
+  m_LockedProperties: 
   m_SavedProperties:
     serializedVersion: 3
     m_TexEnvs: []
     m_Ints: []
     m_Floats:
-    - _SwirlStrength: 6
-    - _Radius: 0.5
-    - _PullStrength: 0.15
-    - _UnscaledTime: 0
+    - _DebugMode: 0
+    - _DistortionScale: 0.05
     - _EffectAlpha: 1
-    - _DebugMode: 1
+    - _PullStrength: 0.15
+    - _Radius: 0.5
+    - _SwirlStrength: 6
+    - _UnscaledTime: 0
     m_Colors: []
   m_BuildTextureStacks: []
   m_AllowLocking: 1
