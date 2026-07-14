@@ -563,9 +563,11 @@ public class WorldGenerator : MonoBehaviour
             if (nextEntryConnector == null) break;
             if (_playerTransform.position.x > nextEntryConnector.transform.position.x)
             {
+                MarkRoomLeft(_playerCurrentNode.Value.room); // D-01(999.2): 현재 room을 떠남 — 클리어됐다면 리스폰 대기 등록
                 _playerCurrentNode = _playerCurrentNode.Next;
                 _playerCurrentIndex++;
                 TryActivateSection(_playerCurrentNode.Value.room); // D-01: 새 Room 진입 시 활성화
+                TryRespawnRoom(_playerCurrentNode.Value.room); // D-01/D-02(999.2): 재진입 리스폰 체크
             }
             else
                 break;
@@ -578,9 +580,11 @@ public class WorldGenerator : MonoBehaviour
             if (prevExitConnector == null) break;
             if (_playerTransform.position.x < prevExitConnector.transform.position.x)
             {
+                MarkRoomLeft(_playerCurrentNode.Value.room); // D-01(999.2): 현재 room을 떠남 — 좌우 대칭
                 _playerCurrentNode = _playerCurrentNode.Previous;
                 _playerCurrentIndex--;
                 TryActivateSection(_playerCurrentNode.Value.room); // D-01: 뒤로 이동해 Room 재진입 시에도 확인(이미 활성화됐으면 D-02로 스킵)
+                TryRespawnRoom(_playerCurrentNode.Value.room); // D-01/D-02(999.2): 재진입 리스폰 체크
             }
             else
                 break;
