@@ -10,6 +10,11 @@ public class PortalVortexDriver : MonoBehaviour
 {
     private static readonly int UnscaledTimeId = Shader.PropertyToID("_UnscaledTime");
 
+    // 활성화 후 이 시간(초)까지만 각도가 감기고, 이후로는 고정된다 -- 수동 육안 검증이
+    // 몇 초 늦게 확인해도 항상 같은 모양으로 보이게 하고, 실제 사용처(999.3-02의
+    // ~0.3-0.4초 짧은 버스트)가 항상 이 창 안에서 끝나도록 보장하기 위함.
+    private const float MaxSwirlTime = 0.6f;
+
     private Renderer _renderer;
     private MaterialPropertyBlock _block;
     private float _localElapsed;
@@ -30,8 +35,9 @@ public class PortalVortexDriver : MonoBehaviour
     private void Update()
     {
         _localElapsed += Time.unscaledDeltaTime;
+        float shaderTime = Mathf.Min(_localElapsed, MaxSwirlTime);
         _renderer.GetPropertyBlock(_block);
-        _block.SetFloat(UnscaledTimeId, _localElapsed);
+        _block.SetFloat(UnscaledTimeId, shaderTime);
         _renderer.SetPropertyBlock(_block);
     }
 }
