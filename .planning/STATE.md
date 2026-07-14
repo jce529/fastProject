@@ -2,10 +2,10 @@
 gsd_state_version: 1.0
 milestone: v3.1
 milestone_name: — 보스 룸 & 연출 고도화
-status: executing
-stopped_at: Completed 999.2-04-PLAN.md — Phase 999.2(enemy-infinite-respawn-mechanism) 완료
-last_updated: "2026-07-14T03:47:36.056Z"
-last_activity: 2026-07-14 -- Phase 999.3 execution started
+status: 999.3-01 Task 1/2 완료(PortalVFX 소팅 레이어+Renderer2D 설정, PortalVortex.shader/.mat) — Task 3(Unity Play 모드 육안 검증) checkpoint 대기
+stopped_at: 999.3-01-PLAN.md Task 2 complete (commit 2a45956) — Task 3 checkpoint:human-verify 대기
+last_updated: "2026-07-14T03:49:46.000Z"
+last_activity: 2026-07-14 -- 999.3-01-PLAN.md Task 1-2 완료, Task 3 checkpoint 대기
 progress:
   total_phases: 8
   completed_phases: 4
@@ -34,9 +34,9 @@ progress:
 ## Current Position
 
 Phase: 999.3 (player-portal-effect-rework) — EXECUTING
-Plan: 1 of 3
-Status: Executing Phase 999.3
-Last activity: 2026-07-14 -- Phase 999.3 execution started
+Plan: 1 of 3 (Task 1/2 done, Task 3 checkpoint:human-verify 대기)
+Status: Executing Phase 999.3 — Plan 999.3-01 blocked on human Play-mode verification
+Last activity: 2026-07-14 -- 999.3-01-PLAN.md Task 1-2 완료, Task 3 checkpoint 대기
 
 ```
 Progress: [████░░░░░░] v3.1 milestone: 2/5 phases complete (Phase 13-17) — Phase 999.2(backlog) 4/4 plans complete
