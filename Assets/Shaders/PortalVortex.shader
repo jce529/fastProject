@@ -7,6 +7,7 @@ Shader "Custom/PortalVortex"
         _PullStrength ("Pull Strength", Float) = 0.15
         _UnscaledTime ("Unscaled Time", Float) = 0.0
         _EffectAlpha ("Effect Alpha", Range(0,1)) = 1.0
+        _DebugMode ("Debug Mode (0=Normal,1=SolidMagenta,2=RawGrabTexture)", Float) = 0.0
     }
     SubShader
     {
@@ -54,6 +55,7 @@ Shader "Custom/PortalVortex"
                 float _PullStrength;
                 float _UnscaledTime;
                 float _EffectAlpha;
+                float _DebugMode;
             CBUFFER_END
 
             Varyings vert(Attributes IN)
@@ -82,8 +84,31 @@ Shader "Custom/PortalVortex"
                 float2 pullOffset = (swirled - toCenter) - toCenter * falloff * _PullStrength;
                 float2 distortedUV = screenUV + pullOffset;
 
+                // Debug 2: raw, undistorted, fully-opaque grab-pass sample.
+                // Isolates whether _CameraSortingLayerTexture actually contains valid
+                // captured scene content (vs. this pass's own UV/mask math being at fault).
+                if (_DebugMode > 1.5)
+                {
+                    half4 raw = SAMPLE_TEXTURE2D(_CameraSortingLayerTexture, sampler_CameraSortingLayerTexture, screenUV);
+                    raw.a = 1.0;
+                    return raw;
+                }
+
+                // Debug 1: solid opaque magenta, no texture sampling at all.
+                // Isolates whether this Pass draws at all (Sorting Layer assignment /
+                // "LightMode"="Universal2D" tag matching / SRP Batcher wiring).
+                if (_DebugMode > 0.5)
+                    return half4(1.0, 0.0, 1.0, 1.0);
+
                 half4 col = SAMPLE_TEXTURE2D(_CameraSortingLayerTexture, sampler_CameraSortingLayerTexture, distortedUV);
-                half edgeMask = smoothstep(_Radius, _Radius * 0.4, dist);
+                // NOTE: smoothstep(edge0, edge1, x) requires edge0 < edge1 -- HLSL/GLSL spec
+                // leaves edge0 >= edge1 undefined (compiler/GPU-vendor dependent). The previous
+                // version passed (_Radius, _Radius*0.4) i.e. edge0 > edge1, which is technically
+                // undefined behavior even though it happens to numerically resolve via the
+                // canonical saturate((x-edge0)/(edge1-edge0)) formula on some compilers. Fixed to
+                // pass edges in ascending order and invert the result instead, which is
+                // well-defined on every platform (including the Android/GLES/Vulkan target).
+                half edgeMask = 1.0 - smoothstep(_Radius * 0.4, _Radius, dist);
                 col.a *= edgeMask * _EffectAlpha;
                 return col;
             }

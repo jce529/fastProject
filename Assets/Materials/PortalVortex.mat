@@ -31,6 +31,7 @@ Material:
     - _PullStrength: 0.15
     - _UnscaledTime: 0
     - _EffectAlpha: 1
+    - _DebugMode: 1
     m_Colors: []
   m_BuildTextureStacks: []
   m_AllowLocking: 1
