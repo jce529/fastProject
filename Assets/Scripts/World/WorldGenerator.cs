@@ -467,6 +467,44 @@ public class WorldGenerator : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// D-01/999.2: 플레이어가 이 room 노드를 떠날 때 UpdatePlayerIndex()가 호출한다. Corridor에는
+    /// RoomRespawnGate가 없으므로(D-04) GetComponent가 null을 반환해 안전하게 no-op된다.
+    /// </summary>
+    private void MarkRoomLeft(GameObject room)
+    {
+        var gate = room.GetComponent<RoomRespawnGate>();
+        gate?.MarkLeft();
+    }
+
+    /// <summary>
+    /// D-01/D-02/D-03/D-05/D-07/D-08/D-09(999.2): room 노드에 재진입했을 때 RoomRespawnGate가 대기 중인
+    /// 리스폰이 있으면 실행한다. EnemySpawner.ResetForRespawn()으로 댕글링 참조를 비운 뒤 Spawn()을
+    /// 재호출해 동일 마커 위치(D-07)에 동일 타입(D-05)으로 재생성하고, 기존 ActivateStaggered()
+    /// 파이프라인을 그대로 재사용해 스폰 VFX(D-08)까지 동일하게 재생한다. 새로 생성된 인스턴스에는
+    /// RespawnedEnemyMarker를 태깅해 D-10 감소 점수 판정에 사용한다. D-09: 별도 리스폰 횟수 제한을
+    /// 두지 않는다 — 클리어+이탈+재진입 사이클을 몇 번이든 반복할 수 있다.
+    /// </summary>
+    private void TryRespawnRoom(GameObject room)
+    {
+        var gate = room.GetComponent<RoomRespawnGate>();
+        if (gate == null || !gate.IsPendingRespawn) return;
+        gate.ConsumeRespawn(); // D-03: 별도 쿨다운 없이 이번 재진입 1회로 게이트 소비
+
+        var pending = new List<EnemySpawner>();
+        foreach (EnemySpawner spawner in room.GetComponentsInChildren<EnemySpawner>(true))
+        {
+            spawner.ResetForRespawn();
+            GameObject spawned = spawner.Spawn(_meleeEnemyPrefab, _rangedEnemyPrefab); // D-05/D-07: 동일 마커 위치, 동일 타입
+            if (spawned != null) spawned.AddComponent<RespawnedEnemyMarker>(); // D-10: 감소 점수 태깅
+            pending.Add(spawner);
+        }
+
+        gate.ClearCondition.ResetForRespawn(); // 재클리어 판정 재활성화 (Pitfall 3)
+
+        if (pending.Count > 0) StartCoroutine(ActivateStaggered(pending)); // D-08: 기존 스태거+포탈VFX 파이프라인 재사용
+    }
+
     private void Update()
     {
         FloorTimer.Tick(); // TIMER-02: 만료 시 1회 PlayerController.OnPlayerDeath 발동
