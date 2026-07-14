@@ -304,11 +304,12 @@ public class CombatController : MonoBehaviour
         if (_trailRenderer != null) _trailRenderer.emitting = false;
 
         // 6. Kill and effects
+        bool isRespawnKill = ((MonoBehaviour)target).GetComponent<RespawnedEnemyMarker>() != null; // D-10(999.2): 리스폰 개체 여부로 감소 점수 판정 — IEnemy 미확장(ISpawnGatable과 동일 패턴)
         target.OnDashHit();
         AudioManager.PlaySfx(Sfx.Slash); // SFX-03/D-05: 처치 확정 순간 슬래시 — HitFreeze 이전 호출, DSP는 timeScale=0 중에도 계속 재생
         SpawnHitSpark(destination);
         _cameraFollow?.Shake(_cameraShakeDuration, _cameraShakeAmplitude);
-        ScoreManager.AddKillScore();
+        ScoreManager.AddKillScore(isRespawnKill);
         yield return StartCoroutine(HitFreeze(hitFreezeDuration));
 
         _attackCooldown = postKillLockout;
