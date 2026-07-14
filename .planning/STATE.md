@@ -100,7 +100,7 @@ Full decision log lives in `.planning/PROJECT.md` Key Decisions table. Recent hi
 
 | # | Description | Date | Commit | Directory |
 |---|-------------|------|--------|-----------|
-| 260714-fnr | MeleeEnemy prefab ExclamationIcon sprite 미할당 수정 | 2026-07-14 | TBD | [260714-fnr-meleeenemy-prefab-exclamationicon-sprite](./quick/260714-fnr-meleeenemy-prefab-exclamationicon-sprite/) |
+| 260714-fnr | MeleeEnemy prefab ExclamationIcon sprite 미할당 수정 | 2026-07-14 | 93a3d99 | [260714-fnr-meleeenemy-prefab-exclamationicon-sprite](./quick/260714-fnr-meleeenemy-prefab-exclamationicon-sprite/) |
 
 ---
 
