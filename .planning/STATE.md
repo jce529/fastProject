@@ -3,8 +3,8 @@ gsd_state_version: 1.0
 milestone: v3.1
 milestone_name: — 보스 룸 & 연출 고도화
 status: executing
-stopped_at: Completed 999.2-01-PLAN.md
-last_updated: "2026-07-14T02:49:46.822Z"
+stopped_at: Completed 999.2-02-PLAN.md
+last_updated: "2026-07-14T02:51:09.736Z"
 last_activity: 2026-07-14
 progress:
   total_phases: 8
@@ -34,8 +34,8 @@ progress:
 ## Current Position
 
 Phase: 999.2 (enemy-infinite-respawn-mechanism) — EXECUTING
-Plan: 1 of 4 (999.2-01 complete — RoomClearCondition IsCleared/ResetForRespawn + RoomRespawnGate 신설)
-Status: 999.2-02 실행 대기
+Plan: 2 of 4 (999.2-02 complete — EnemySpawner ResetForRespawn() + 리스폰 킬 감소 점수)
+Status: 999.2-03(WorldGenerator 통합) 실행 대기
 Last activity: 2026-07-14
 
 ```
@@ -69,7 +69,9 @@ Progress: [████░░░░░░] v3.1 milestone: 2/5 phases complete (
 | CorridorEnemySpawnerTool 실행으로 Corridor 3종에 EnemySpawner(Melee) 마커 부착 완료 (Plan 14-04) | Room+Corridor 전체에서 스폰 VFX 콘텐츠 동등성 확보 (D-03) — git diff로 각 프리팹당 컴포넌트 1개만 추가됨을 확인, 재실행 시 멱등성 확인 |
 | Phase 14 전체 플레이테스트 체크리스트 10개 항목 전부 통과 판정 (Plan 14-04) | SPWN-01/SPWN-02 및 ROADMAP SC1-5, D-01~D-09 전부 실제 플레이로 검증 완료 — 별도 폴리싱/수정 불요, Phase 15/16 보스 스폰 재사용 전제 성립 |
 | RangedEnemy 키팅 kitingRetreatRange=7.5f/kitingSpeed=3f 확정, 재조정 불필요 (Plan 999.4-02) | D-07(단순 거리-유지)/D-08(Chase 진입 즉시 발동)/D-09(조준·발사 병행)/D-10(aimLineLength 50% 임계값) 플레이테스트 체크리스트 1~7번 전부 통과, D-06(원거리 텔레그래프) 회귀 없음 확인 |
-| RoomClearCondition.DiscoverEnemies() 분리 + RoomRespawnGate.ConsumeRespawn()에 별도 쿨다운 타이머 미도입 확정 (Plan 999.2-01) | Start()/ResetForRespawn() 양쪽에서 동일 적 탐색 로직 재사용(중복 제거), D-03(쿨다운 없음)에 따라 "나갔다가 다시 들어옴" 자체가 게이트 역할을 하도록 설계 — GameObject 수명 종속 상태로 Case B(체인 이탈 재생성)를 구조적으로 배제(D-01a) |
+| EnemySpawner.ResetForRespawn()은 HasActivated와 _spawned를 함께 비움 (Plan 999.2-02) | 재무장만 하고 _spawned를 안 비우면 Activate()가 댕글링 참조로 영구 no-op됨(999.2-RESEARCH.md Pitfall 1) — 반드시 함께 초기화 |
+| RespawnedEnemyMarker 빈 additive 컴포넌트로 리스폰 개체 태깅, IEnemy 미확장 (Plan 999.2-02) | ISpawnGatable(Phase 14)과 동일한 프로젝트 컨벤션 — 잠긴 3-member IEnemy 계약을 건드리지 않고 리스폰 판정 가능 |
+| ScoreManager.RespawnKillScore=30 (KillScore의 약 30%) 확정 (Plan 999.2-02) | 리스폰 파밍을 점수 관점에서 비효율적으로 만들되 완전히 막지는 않음 — D-09(무제한 리스폰)와 일관 |
 
 ### Key Decisions Locked (v1.0/v2.0/v3.0)
 
@@ -107,9 +109,9 @@ Full decision log lives in `.planning/PROJECT.md` Key Decisions table. Recent hi
 4. Read `.planning/research/SUMMARY.md` — architecture/pitfall context for Phase 13-17
 5. Next action: `/gsd:plan-phase 13`
 
-**Last session:** 2026-07-14T02:49:46.816Z
-**Stopped at:** Completed 999.2-01-PLAN.md
+**Last session:** 2026-07-14T02:51:09.736Z
+**Stopped at:** Completed 999.2-02-PLAN.md
 
 ---
 *State initialized: 2026-05-27*
-*Last updated: 2026-07-09 — Plan 13-01 complete (AudioManager singleton + AssetPostprocessor + DSP 512), SFX-01 requirement satisfied*
+*Last updated: 2026-07-14 — Plan 999.2-02 complete (EnemySpawner ResetForRespawn() + Spawn() GameObject 반환, RespawnedEnemyMarker 신설, ScoreManager 감소 점수 API, CombatController 배선). D-05/D-07/D-09/D-10 코드 레벨 완성. 다음: Plan 999.2-03(WorldGenerator 통합).*

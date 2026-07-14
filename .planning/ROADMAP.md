@@ -625,8 +625,8 @@ Captured 2026-07-10 during Phase 14 discussion (`.planning/phases/14-enemy-spawn
 Planned 2026-07-10 (999.2-CONTEXT.md/999.2-RESEARCH.md/999.2-VALIDATION.md 기반 — D-01a로 범위를 Case A(체인 내 재진입)로 한정, Case B(체인 이탈 후 재생성)는 명시적으로 이 phase 범위 밖):
 
 Plans:
-- [x] 999.2-01-PLAN.md — RoomClearCondition.IsCleared/ResetForRespawn + RoomRespawnGate 신설 (D-01, D-01a, D-02, D-03)
-- [ ] 999.2-02-PLAN.md — EnemySpawner.ResetForRespawn/Spawn 반환형 + RespawnedEnemyMarker + ScoreManager 감소 점수 (D-05, D-07, D-09, D-10)
+- [ ] 999.2-01-PLAN.md — RoomClearCondition.IsCleared/ResetForRespawn + RoomRespawnGate 신설 (D-01, D-01a, D-02, D-03)
+- [x] 999.2-02-PLAN.md — EnemySpawner.ResetForRespawn/Spawn 반환형 + RespawnedEnemyMarker + ScoreManager 감소 점수 (D-05, D-07, D-09, D-10)
 - [ ] 999.2-03-PLAN.md — WorldGenerator MarkRoomLeft/TryRespawnRoom + UpdatePlayerIndex 배선 (D-01, D-01a, D-02~D-09)
 - [ ] 999.2-04-PLAN.md — RoomRespawnTool 에디터 도구 실행(Complex_Room 6종 부착) + 플레이테스트 검증 (D-01~D-10)
 ---
@@ -651,7 +651,7 @@ Plans:
 
 **Goal:** 근접 적은 예방(gap-check 하드닝)과 사후처리(FallZone 즉시 Destroy) 이중 안전망으로 더 이상 낙사 좀비 상태로 남지 않고, 공격 예고(Telegraph)가 짧고 이동하며 예고하는 방식으로 개선되어 긴장감/속도감이 살아나며, 원거리 몬스터는 단순 키팅(거리 유지) 이동으로 더 이상 제자리에 고정되지 않는다.
 **Requirements:** 999.4-CONTEXT.md `<decisions>` D-01~D-10 — formal REQ-ID 없음, decision ID를 요구사항 앵커로 사용
-**Plans:** 3/3 plans executed (완료 2026-07-14)
+**Plans:** 1/3 plans executed
 
 Captured 2026-07-10: 플레이테스트 중 발견된 적 AI 관련 3가지 문제.
 1. 추격 중 낙사(추락) — Enemy가 KillZone 등 낙사 판정의 영향을 받지 않아, 화면 밖 아래로 떨어진 채로 계속 "살아있는" 좀비 상태로 남음.
@@ -661,6 +661,6 @@ Captured 2026-07-10: 플레이테스트 중 발견된 적 AI 관련 3가지 문�
 Planned 2026-07-10 (999.4-CONTEXT.md/999.4-RESEARCH.md/999.4-VALIDATION.md 기반 — 3개 하위 기능은 서로 독립적이나 MeleeEnemy.cs를 공유하는 낙사 처리(999.4-01)와 텔레그래프 재작성(999.4-03)은 순차 실행):
 
 Plans:
-- [x] 999.4-01-PLAN.md — MeleeEnemy GapAhead/TryJump 턴어라운드 하드닝 + FallZoneTrigger Enemy 사후처리 (D-01, D-02, D-03)
+- [ ] 999.4-01-PLAN.md — MeleeEnemy GapAhead/TryJump 턴어라운드 하드닝 + FallZoneTrigger Enemy 사후처리 (D-01, D-02, D-03)
 - [x] 999.4-02-PLAN.md — RangedEnemy UpdateChase 키팅 후퇴 이동 (D-07, D-08, D-09, D-10)
-- [x] 999.4-03-PLAN.md — MeleeEnemy TelegraphAndAttack 이동형 예고 재작성 (D-04, D-05, D-06)
+- [ ] 999.4-03-PLAN.md — MeleeEnemy TelegraphAndAttack 이동형 예고 재작성 (D-04, D-05, D-06)
