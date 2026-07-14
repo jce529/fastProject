@@ -2,15 +2,15 @@
 gsd_state_version: 1.0
 milestone: v3.1
 milestone_name: — 보스 룸 & 연출 고도화
-status: 999.2-04 Task 1/3 완료(RoomRespawnTool.cs 작성) — Task 2(Unity 에디터 메뉴 실행)/Task 3(플레이테스트) 사용자 액션 대기
-stopped_at: 999.2-04-PLAN.md Task 1 complete (commit 347373d) — Task 2/3 checkpoint 대기
-last_updated: "2026-07-14T03:02:17.268Z"
-last_activity: 2026-07-14
+status: executing
+stopped_at: Completed 999.2-04-PLAN.md — Phase 999.2(enemy-infinite-respawn-mechanism) 완료
+last_updated: "2026-07-14T03:47:36.056Z"
+last_activity: 2026-07-14 -- Phase 999.3 execution started
 progress:
   total_phases: 8
-  completed_phases: 3
+  completed_phases: 4
   total_plans: 18
-  completed_plans: 14
+  completed_plans: 15
 ---
 
 # Project State: Fast (가칭)
@@ -33,13 +33,13 @@ progress:
 
 ## Current Position
 
-Phase: 999.2 (enemy-infinite-respawn-mechanism) — EXECUTING
-Plan: 4 of 4 (999.2-01, 999.2-02, 999.2-03 complete — Wave 2 done: WorldGenerator.MarkRoomLeft()/TryRespawnRoom() 배선 완료)
-Status: 999.2-04(최종 검증, Complex_Room 6종 RoomRespawnGate 부착) 실행 대기
-Last activity: 2026-07-14
+Phase: 999.3 (player-portal-effect-rework) — EXECUTING
+Plan: 1 of 3
+Status: Executing Phase 999.3
+Last activity: 2026-07-14 -- Phase 999.3 execution started
 
 ```
-Progress: [████░░░░░░] v3.1 milestone: 2/5 phases complete (Phase 13-17)
+Progress: [████░░░░░░] v3.1 milestone: 2/5 phases complete (Phase 13-17) — Phase 999.2(backlog) 4/4 plans complete
 ```
 
 ---
@@ -78,6 +78,7 @@ Progress: [████░░░░░░] v3.1 milestone: 2/5 phases complete (
 | RespawnedEnemyMarker 빈 additive 컴포넌트로 리스폰 개체 태깅, IEnemy 미확장 (Plan 999.2-02) | ISpawnGatable(Phase 14)과 동일한 프로젝트 컨벤션 — 잠긴 3-member IEnemy 계약을 건드리지 않고 리스폰 판정 가능 |
 | ScoreManager.RespawnKillScore=30 (KillScore의 약 30%) 확정 (Plan 999.2-02) | 리스폰 파밍을 점수 관점에서 비효율적으로 만들되 완전히 막지는 않음 — D-09(무제한 리스폰)와 일관 |
 | WorldGenerator.MarkRoomLeft()/TryRespawnRoom()을 새 트리거 콜라이더 없이 UpdatePlayerIndex()의 기존 체인-인덱스 전이 신호에 배선 (Plan 999.2-03) | 999.2-RESEARCH.md Pitfall 2 회피 — Room 진입/이탈이 이미 매 프레임 계산되므로 별도 감지 시스템 불필요, Corridor는 RoomRespawnGate 미부착으로 자동 no-op(D-04) |
+| Phase 999.2(enemy-infinite-respawn-mechanism) 4/4 plans 전체 완료 판정 (Plan 999.2-04) | RoomRespawnTool 메뉴 실행으로 Complex_Room 6종에 RoomClearCondition+RoomRespawnGate 실제 부착 확인, D-01~D-10(D-01a 포함) 플레이테스트 체크리스트 11개 항목 전부 통과 — 리스폰 파이프라인은 Case A(체인 내 재진입)로 한정되고 Case B(체인 이탈 재생성)/Corridor/보스 룸에는 부작용 없음이 확인됨, 추가 폴리싱/수정 불요 |
 
 ### Key Decisions Locked (v1.0/v2.0/v3.0)
 
@@ -121,9 +122,9 @@ Full decision log lives in `.planning/PROJECT.md` Key Decisions table. Recent hi
 4. Read `.planning/research/SUMMARY.md` — architecture/pitfall context for Phase 13-17
 5. Next action: `/gsd:plan-phase 13`
 
-**Last session:** 2026-07-14T03:02:17.263Z
-**Stopped at:** Completed 999.2-03-PLAN.md
+**Last session:** 2026-07-14T03:46:34.222Z
+**Stopped at:** Completed 999.2-04-PLAN.md — Phase 999.2(enemy-infinite-respawn-mechanism) 완료
 
 ---
 *State initialized: 2026-05-27*
-*Last updated: 2026-07-14 — Plan 999.2-03 (WorldGenerator.MarkRoomLeft()/TryRespawnRoom() 추가 + UpdatePlayerIndex() 배선) 완료. D-01/D-01a/D-02/D-03/D-04/D-05/D-06/D-07/D-08/D-09 전체가 실제 WorldGenerator 트리거 경로에 배선됨, Wave 2 종료. 다음: Plan 999.2-04(Complex_Room 6종 RoomRespawnGate 부착 + 최종 검증).*
+*Last updated: 2026-07-14 — Plan 999.2-04(RoomRespawnTool 메뉴 실행 + Complex_Room 6종 RoomClearCondition+RoomRespawnGate 부착 + D-01~D-10/D-01a 전체 플레이테스트 검증) 완료. Phase 999.2(enemy-infinite-respawn-mechanism) 4/4 plans 전체 종료. 다음: v3.1 로드맵 Phase 15(보스 FSM & 빈틈 타겟팅) 계획.*
