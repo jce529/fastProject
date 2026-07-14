@@ -3,9 +3,9 @@ gsd_state_version: 1.0
 milestone: v3.1
 milestone_name: — 보스 룸 & 연출 고도화
 status: executing
-stopped_at: Completed 999.4-01-PLAN.md
-last_updated: "2026-07-12T08:04:53.053Z"
-last_activity: 2026-07-12
+stopped_at: Completed 999.4-03-PLAN.md (999.4 backlog phase fully done, 3/3)
+last_updated: "2026-07-14T00:00:00.000Z"
+last_activity: 2026-07-14
 progress:
   total_phases: 8
   completed_phases: 2
@@ -33,10 +33,10 @@ progress:
 
 ## Current Position
 
-Phase: 999.4 (enemy-ai-enhancement-pack) — EXECUTING
-Plan: 3 of 3 (999.4-01/999.4-02 complete — Wave 1 done; 999.4-03 Wave 2 next)
-Status: Executing — Wave 1 완료(999.4-01 낙사 하드닝 + 999.4-02 RangedEnemy 키팅), 999.4-03(멜리 텔레그래프 재작성) 코드 완료 — 999.4-03 자체 플레이테스트 체크리스트(7항목)는 아직 미승인 상태였으나, 그 과정에서 발견된 ExclamationIcon 스프라이트 미할당 버그는 quick task 260714-fnr로 수정 및 검증 완료
-Last activity: 2026-07-14 - Completed quick task 260714-fnr: MeleeEnemy prefab ExclamationIcon sprite 미할당 수정
+Phase: 999.4 (enemy-ai-enhancement-pack) — COMPLETE (3/3 plans)
+Plan: 3 of 3 — 999.4-01 (낙사 하드닝), 999.4-02 (RangedEnemy 키팅), 999.4-03 (멜리 텔레그래프 재작성) 전부 완료
+Status: Backlog phase 999.4 fully closed — 999.4-03 플레이테스트 체크리스트 7개 항목 전부 통과 승인 (2026-07-14). 이 과정에서 발견된 ExclamationIcon 스프라이트 미할당 버그는 quick task 260714-fnr로 별도 수정 및 검증 완료. 다음 순서: v3.1 Phase 15(보스 FSM & 빈틈 타겟팅) 계획 착수
+Last activity: 2026-07-14 - 999.4-03 플레이테스트 승인, Phase 999.4 전체 완료
 
 ```
 Progress: [████░░░░░░] v3.1 milestone: 2/5 phases complete (Phase 13-17)
@@ -71,6 +71,8 @@ Progress: [████░░░░░░] v3.1 milestone: 2/5 phases complete (
 | RangedEnemy 키팅 kitingRetreatRange=7.5f/kitingSpeed=3f 확정, 재조정 불필요 (Plan 999.4-02) | D-07(단순 거리-유지)/D-08(Chase 진입 즉시 발동)/D-09(조준·발사 병행)/D-10(aimLineLength 50% 임계값) 플레이테스트 체크리스트 1~7번 전부 통과, D-06(원거리 텔레그래프) 회귀 없음 확인 |
 | MeleeEnemy jumpForce=13f/maxJumpableGapWidth=3.2f 확정, 재조정 불필요 (Plan 999.4-01) | D-01(예방) — Room_Gap(3유닛) 점프 클리어, Room_Fall(5.5유닛) 턴어라운드, 플레이테스트 체크리스트 1~7 전부 통과 |
 | FallZoneTrigger Enemy 태그 사후처리(즉시 Destroy, VFX 없음) 확정 (Plan 999.4-01) | D-02/D-03 — MeleeEnemy/RangedEnemy 공통 Enemy 태그로 두 타입 모두 커버, Enemy×Default Layer Collision Matrix 활성화 확인, Player 낙사 경로(FallDetector.OnFall) 회귀 없음 |
+| MeleeEnemy telegraphDuration=0.45f/telegraphSpeedMultiplier=0.4f 확정, 재조정 불필요 (Plan 999.4-03) | D-04(0.8s→0.45s 단축)/D-05(이동하며 예고+FlipSprite)/D-06(RangedEnemy 미변경 회귀 없음) 플레이테스트 체크리스트 1~7 전부 통과 — Phase 999.4(enemy-ai-enhancement-pack) 3/3 plans 전체 완료 |
+| MeleeEnemy.prefab ExclamationIcon SpriteRenderer 스프라이트 미할당(m_Sprite fileID 0) 버그를 quick task 260714-fnr로 수정 (커밋 93a3d99) | 999.4-03 코드 로직은 정상이었으나 프리팹 애셋에 "!" 스프라이트가 애초에 배정된 적이 없어 Telegraph 아이콘이 안 보이던 사전 존재 버그 — ExclamationIconBuilder.cs 절차적 생성 도구로 해결, 재사용 가능 |
 
 ### Key Decisions Locked (v1.0/v2.0/v3.0)
 
@@ -114,9 +116,9 @@ Full decision log lives in `.planning/PROJECT.md` Key Decisions table. Recent hi
 4. Read `.planning/research/SUMMARY.md` — architecture/pitfall context for Phase 13-17
 5. Next action: `/gsd:plan-phase 13`
 
-**Last session:** 2026-07-12T08:04:53.046Z
-**Stopped at:** Completed 999.4-01-PLAN.md
+**Last session:** 2026-07-14T00:00:00.000Z
+**Stopped at:** Completed 999.4-03-PLAN.md — Phase 999.4 fully complete (3/3)
 
 ---
 *State initialized: 2026-05-27*
-*Last updated: 2026-07-12 — Plan 999.4-01 complete (MeleeEnemy 갭 턴어라운드 하드닝 + FallZoneTrigger Enemy 사후처리 + Layer Collision Matrix 활성화). Wave 1(999.4-01+999.4-02) 완료, Wave 2(999.4-03) 대기.*
+*Last updated: 2026-07-14 — Plan 999.4-03 complete (MeleeEnemy Telegraph per-frame 이동형 재작성, 플레이테스트 7/7 통과). Phase 999.4(enemy-ai-enhancement-pack) 전체 완료(3/3). ExclamationIcon 스프라이트 미할당 버그는 quick task 260714-fnr로 별도 수정. 다음: v3.1 Phase 15 계획.*
