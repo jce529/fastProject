@@ -12,6 +12,7 @@ public class PortalVortexDriver : MonoBehaviour
 
     private Renderer _renderer;
     private MaterialPropertyBlock _block;
+    private float _localElapsed;
 
     private void Awake()
     {
@@ -19,10 +20,18 @@ public class PortalVortexDriver : MonoBehaviour
         _block = new MaterialPropertyBlock();
     }
 
+    // 활성화될 때마다 0부터 다시 시작 -- Time.unscaledTime(절대 세션 시간)을 그대로 먹이면
+    // 켜져 있는 시간이 길어질수록 각도가 무한히 감겨 다중 나선(paisley) 패턴으로 보이는 문제 방지.
+    private void OnEnable()
+    {
+        _localElapsed = 0f;
+    }
+
     private void Update()
     {
+        _localElapsed += Time.unscaledDeltaTime;
         _renderer.GetPropertyBlock(_block);
-        _block.SetFloat(UnscaledTimeId, Time.unscaledTime);
+        _block.SetFloat(UnscaledTimeId, _localElapsed);
         _renderer.SetPropertyBlock(_block);
     }
 }
