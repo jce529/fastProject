@@ -1666,6 +1666,8 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 7065832018044827537}
+  - component: {fileID: 4760840604709255114}
+  - component: {fileID: 6542148108380738757}
   m_Layer: 0
   m_Name: Room_RiskCrossing
   m_TagString: Untagged
@@ -1695,6 +1697,32 @@ Transform:
   - {fileID: 8246613722947110094}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &4760840604709255114
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8226199497095424007}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: dea23ef7b441e3a4f9e954475bef4075, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::RoomClearCondition
+  enemies: []
+  targetObject: {fileID: 0}
+--- !u!114 &6542148108380738757
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8226199497095424007}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: efc73a7c069b551439f2425063decabb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::RoomRespawnGate
 --- !u!1 &9183239869788857901
 GameObject:
   m_ObjectHideFlags: 0
