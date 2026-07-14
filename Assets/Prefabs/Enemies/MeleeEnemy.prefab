@@ -180,11 +180,14 @@ MonoBehaviour:
   patrolHalfRange: 3
   hitboxActiveDuration: 0.15
   attackWindupDelay: 0.1
+  telegraphDuration: 0.45
+  telegraphSpeedMultiplier: 0.4
   _exclamationIcon: {fileID: 8043105589779039711}
   _meleeHitbox: {fileID: 845088323384848213}
   jumpForce: 8
   wallCheckDist: 0.4
   gapCheckDist: 0.6
+  maxJumpableGapWidth: 3.2
 --- !u!95 &6468506254783474201
 Animator:
   serializedVersion: 7
@@ -234,7 +237,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 1.5, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalScale: {x: 0.3, y: 0.3, z: 0}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 6752842152098974978}
@@ -288,15 +291,15 @@ SpriteRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 10
   m_MaskInteraction: 0
-  m_Sprite: {fileID: 0}
+  m_Sprite: {fileID: 21300000, guid: c4e0c2041da693e47847d75bb8fa6725, type: 3}
   m_Color: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0
-  m_Size: {x: 1, y: 1}
+  m_Size: {x: 0.5, y: 1}
   m_AdaptiveModeThreshold: 0.5
   m_SpriteTileMode: 0
-  m_WasSpriteAssigned: 0
+  m_WasSpriteAssigned: 1
   m_SpriteSortPoint: 0
 --- !u!1 &4818769020687682772
 GameObject:

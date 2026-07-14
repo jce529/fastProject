@@ -35,8 +35,8 @@ progress:
 
 Phase: 999.4 (enemy-ai-enhancement-pack) — EXECUTING
 Plan: 3 of 3 (999.4-01/999.4-02 complete — Wave 1 done; 999.4-03 Wave 2 next)
-Status: Executing — Wave 1 완료(999.4-01 낙사 하드닝 + 999.4-02 RangedEnemy 키팅) — 999.4-03(멜리 텔레그래프 재작성, Wave 2) 실행 대기
-Last activity: 2026-07-12
+Status: Executing — Wave 1 완료(999.4-01 낙사 하드닝 + 999.4-02 RangedEnemy 키팅), 999.4-03(멜리 텔레그래프 재작성) 코드 완료 — 999.4-03 자체 플레이테스트 체크리스트(7항목)는 아직 미승인 상태였으나, 그 과정에서 발견된 ExclamationIcon 스프라이트 미할당 버그는 quick task 260714-fnr로 수정 및 검증 완료
+Last activity: 2026-07-14 - Completed quick task 260714-fnr: MeleeEnemy prefab ExclamationIcon sprite 미할당 수정
 
 ```
 Progress: [████░░░░░░] v3.1 milestone: 2/5 phases complete (Phase 13-17)
@@ -95,6 +95,12 @@ Full decision log lives in `.planning/PROJECT.md` Key Decisions table. Recent hi
 | Date | Title | Area | File |
 |------|-------|------|------|
 | _None pending_ | | | |
+
+### Quick Tasks Completed
+
+| # | Description | Date | Commit | Directory |
+|---|-------------|------|--------|-----------|
+| 260714-fnr | MeleeEnemy prefab ExclamationIcon sprite 미할당 수정 | 2026-07-14 | TBD | [260714-fnr-meleeenemy-prefab-exclamationicon-sprite](./quick/260714-fnr-meleeenemy-prefab-exclamationicon-sprite/) |
 
 ---
 

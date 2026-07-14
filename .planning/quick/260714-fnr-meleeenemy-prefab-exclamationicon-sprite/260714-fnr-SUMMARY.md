@@ -16,15 +16,16 @@ tech-stack:
   patterns: ["절차적 텍스처 생성 → SpriteImporter 설정 → PrefabUtility.LoadPrefabContents/SaveAsPrefabAsset 배정 (HitSparkBuilder.cs/ExitPortalBuilder.cs와 동일한 [MenuItem] 정적 클래스 패턴)"]
 
 key-files:
-  created: [Assets/Editor/ExclamationIconBuilder.cs]
-  modified: []
+  created: [Assets/Editor/ExclamationIconBuilder.cs, Assets/Sprites/UI/ExclamationMark.png]
+  modified: [Assets/Prefabs/Enemies/MeleeEnemy.prefab]
 
 key-decisions:
   - "Task 1(코드 작성)만 auto로 실행, Task 2(Unity 에디터 메뉴 실행 + 프리팹 디스크 저장 + 플레이테스트)는 Unity MCP 도구 접근 권한이 없는 이 실행 세션에서는 수행 불가 — checkpoint:human-action으로 분리, 오케스트레이팅 세션(Unity MCP 접근 가능)이 이어서 처리"
+  - "오케스트레이팅 세션도 Unity MCP 연결이 revoked 상태여서 사용자가 직접 Unity 에디터에서 메뉴 실행 + 플레이테스트를 수행 — 정상 동작 확인 및 approved 보고 수신"
 
 patterns-established: []
 
-requirements-completed: []
+requirements-completed: [D-05]
 
 duration: 5min
 completed: 2026-07-14
@@ -32,13 +33,13 @@ completed: 2026-07-14
 
 # Quick Task 260714-fnr: MeleeEnemy Exclamation Icon Sprite Summary
 
-**ExclamationIconBuilder.cs 에디터 도구 작성 완료 (Task 1) — 절차적 "!" 텍스처 생성 및 MeleeEnemy.prefab 배정 로직 구현, 실제 Unity 에디터 메뉴 실행/저장/플레이테스트(Task 2)는 미완료 상태로 대기 중**
+**ExclamationIconBuilder.cs 에디터 도구 작성 + 실행 완료 — "!" 아이콘이 Telegraph 상태에서 실제로 렌더링됨을 사용자 플레이테스트로 확인**
 
 ## Performance
 
-- **Duration:** ~5 min
-- **Tasks:** 1/2 completed (Task 2는 checkpoint:human-action, 이 실행 세션에서는 Unity MCP 접근 불가로 수행 불가)
-- **Files modified:** 1 (신규 생성)
+- **Duration:** ~5 min (Task 1) + 사용자 직접 실행(Task 2)
+- **Tasks:** 2/2 completed
+- **Files modified:** 1 신규 스크립트 + 1 신규 스프라이트 + 1 프리팹 수정
 
 ## Accomplishments
 - `Assets/Editor/ExclamationIconBuilder.cs` 생성 — 기존 `HitSparkBuilder.cs`/`ExitPortalBuilder.cs`와 동일한 `[MenuItem]` 정적 클래스 패턴 준수
@@ -52,60 +53,42 @@ completed: 2026-07-14
 Each task was committed atomically:
 
 1. **Task 1: ExclamationIconBuilder 에디터 도구 작성** - `32545bf` (feat)
-
-**Task 2 (Unity 에디터 — 도구 실행 + "!" 아이콘 표시 확인): NOT EXECUTED** — `checkpoint:human-action` 타입이며, 이 실행 세션은 Unity Editor/MCP 도구에 접근할 수 없음. 아래 "Task 2 대기 안내" 섹션 참조.
+2. **Task 2: Unity 에디터 도구 실행 + 프리팹 배정 + 플레이테스트** - 사용자가 Unity 에디터에서 직접 메뉴 실행(Unity MCP 연결이 orchestrating 세션에서도 revoked 상태였음) → `MeleeEnemy.prefab` 디스크 저장 → Play 모드 플레이테스트 수행, "잘 작동하는 것 확인" 보고 수신 (approved)
 
 ## Files Created/Modified
 - `Assets/Editor/ExclamationIconBuilder.cs` - "!" 텍스처 절차적 생성 + Sprite 임포트 설정 + MeleeEnemy.prefab ExclamationIcon 자동 배정 에디터 도구 (신규, MenuItem: Fast/Quick/Build MeleeEnemy Exclamation Icon)
+- `Assets/Sprites/UI/ExclamationMark.png` - 절차적으로 생성된 24x48px "!" 스프라이트 (신규, 48 PPU, Point filter)
+- `Assets/Prefabs/Enemies/MeleeEnemy.prefab` - ExclamationIcon 자식 SpriteRenderer에 위 스프라이트 배정 (`m_WasSpriteAssigned: 0` → `1`), Transform scale을 0.3으로 조정(시각적 크기), `telegraphDuration`/`telegraphSpeedMultiplier`/`maxJumpableGapWidth` 필드가 프리팹 오버라이드로 함께 직렬화됨(999.4-01/03에서 스크립트에 추가된 이후 처음 저장되며 동기화된 것 — 값 자체는 스크립트 기본값과 동일, 기능 변경 없음)
 
 ## Decisions Made
-- Task 1(코드 작성)과 Task 2(Unity 에디터 메뉴 실행/프리팹 저장/플레이테스트)를 계획대로 분리 실행. 이 실행 세션은 Unity Editor/MCP 도구 접근 권한이 없으므로 Task 2는 오케스트레이팅 세션(Unity MCP 접근 가능)이 직접 이어서 처리해야 함.
-- 저장소에 이 커밋과 무관한 사전 미커밋 변경사항(`Room_LastStand.prefab`, `Room_RiskCrossing.prefab`)이 존재 — 이번 quick task 범위 밖이므로 건드리지 않고 스테이징에서 제외함.
+- Task 1(코드 작성)과 Task 2(Unity 에디터 메뉴 실행/프리팹 저장/플레이테스트)를 계획대로 분리 실행. 오케스트레이팅 세션도 Unity MCP 연결이 revoked 상태라 사용자가 직접 Unity 에디터에서 메뉴 실행 및 플레이테스트를 수행.
+- 저장소에 이 작업과 무관한 사전 미커밋 변경사항(`Room_LastStand.prefab`, `Room_RiskCrossing.prefab` — 위치 이동/타일 삭제)이 함께 존재 — 사용자 확인 결과 "의도된 별도 작업"으로 이번 quick task 커밋에서 제외하고 별도 커밋 처리.
 
 ## Deviations from Plan
 
-None - Task 1은 계획에 명시된 코드를 정확히 그대로 작성했으며 자동 검증을 통과함.
+None - Task 1/Task 2 모두 계획에 명시된 절차 그대로 실행됨. 자동 검증(`m_WasSpriteAssigned: 1`) 통과.
 
 ## Issues Encountered
 
-없음 (Task 1 관련). Task 2는 실패나 이슈가 아니라, 이 실행 세션의 도구 접근 범위(Unity MCP 미보유)로 인한 의도된 정지임 — Unity 에디터 컴파일 확인/메뉴 실행/프리팹 디스크 저장/플레이테스트는 실제 Unity 세션에서만 가능.
-
-## Task 2 대기 안내 (오케스트레이팅 세션에서 처리 필요)
-
-**What was built (Task 1):** `ExclamationIconBuilder.cs` — "!" 텍스처 절차적 생성 + Sprite 임포트 설정 + MeleeEnemy.prefab ExclamationIcon 자동 배정 도구 (코드 작성 완료, 아직 미실행)
-
-**How to verify (plan의 `<how-to-verify>` 블록 그대로):**
-
-Unity 에디터(6000.3.11f1)에서 프로젝트를 열고 순서대로:
-1. **컴파일 확인**: Console에 컴파일 에러 0건 (경고는 허용)
-2. **도구 실행**: 상단 메뉴 → Fast → Quick → Build MeleeEnemy Exclamation Icon 실행 → Console에 "[ExclamationIconBuilder] ExclamationMark sprite generated and assigned to MeleeEnemy.prefab ExclamationIcon." 로그 확인, 에러 0건
-3. **애셋 확인**: `Assets/Sprites/UI/ExclamationMark.png`가 생성되었고 Inspector에서 Sprite (2D and UI) 타입으로 임포트되어 있는지 확인
-4. **프리팹 확인**: `Assets/Prefabs/Enemies/MeleeEnemy.prefab` 선택 → Hierarchy에서 ExclamationIcon 자식 오브젝트 선택 → Inspector의 SpriteRenderer에 Sprite 필드가 "ExclamationMark"로 채워져 있고 색상은 기존 노란색 그대로인지 확인
-5. **플레이테스트**: Play 모드 진입 → MeleeEnemy에게 접근해 공격 범위 안으로 들어가 Telegraph 상태를 유도 → 적 머리 위에 노란색 "!" 아이콘이 실제로 나타났다가, 공격 전환 시 사라지는지 확인
-6. **회귀 확인**: MeleeEnemy의 이동/추격/공격 타이밍이 기존과 동일하게 동작하는지 확인 (999.4-03 로직 변경 없음)
-
-**Automated verify (완료 후 실행):**
-```
-test -f "Assets/Sprites/UI/ExclamationMark.png" && grep -A 45 "&8043105589779039711" Assets/Prefabs/Enemies/MeleeEnemy.prefab | grep -q "m_WasSpriteAssigned: 1"
-```
-
-**Resume signal:** "approved" 입력 또는 문제 항목 설명 (예: "컴파일 에러 발생" 또는 "아이콘이 여전히 안 보임")
+Unity MCP 연결이 revoked 상태여서 orchestrating 세션도 메뉴를 직접 실행할 수 없었음 — 사용자가 수동으로 Task 2 절차를 수행하고 결과를 보고하는 방식으로 완료.
 
 ## User Setup Required
 
-None - no external service configuration required. Unity 에디터 내부 조작만 필요.
+None - no external service configuration required.
 
 ## Next Phase Readiness
 
-- Task 1 완료 — 에디터 도구 코드는 정적으로 검증됨(grep 통과)이나 아직 컴파일/실행 미검증
-- Task 2가 완료되어야 이 quick task 전체 목표(D-05 "!" 아이콘 실제 렌더링)가 달성됨 — 이 SUMMARY 작성 시점에서는 **미완료 상태**
-- 이후 STATE.md는 Task 1 진행 상황만 반영하고, 전체 완료로 표기하지 않음
+- Task 1, Task 2 모두 완료 — D-05("!" 아이콘 실제 렌더링) 달성 확인됨
+- MeleeEnemy Telegraph 상태에서 "!" 아이콘이 정상 표시되고, 기존 이동/공격 타이밍 회귀 없음이 사용자 플레이테스트로 확인됨
 
 ---
 *Plan: quick/260714-fnr*
-*Task 1 completed: 2026-07-14 (Task 2 pending human/editor action)*
+*Completed: 2026-07-14*
 
 ## Self-Check: PASSED
 
 - FOUND: Assets/Editor/ExclamationIconBuilder.cs
+- FOUND: Assets/Sprites/UI/ExclamationMark.png
+- FOUND: MeleeEnemy.prefab m_WasSpriteAssigned: 1 (git diff confirmed)
 - FOUND: 32545bf (git log)
+- CONFIRMED: User playtest approval received
