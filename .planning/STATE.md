@@ -2,8 +2,8 @@
 gsd_state_version: 1.0
 milestone: v3.1
 milestone_name: — 보스 룸 & 연출 고도화
-status: 999.2-04(최종 검증, Complex_Room 6종 RoomRespawnGate 부착) 실행 대기
-stopped_at: Completed 999.2-03-PLAN.md
+status: 999.2-04 Task 1/3 완료(RoomRespawnTool.cs 작성) — Task 2(Unity 에디터 메뉴 실행)/Task 3(플레이테스트) 사용자 액션 대기
+stopped_at: 999.2-04-PLAN.md Task 1 complete (commit 347373d) — Task 2/3 checkpoint 대기
 last_updated: "2026-07-14T03:02:17.268Z"
 last_activity: 2026-07-14
 progress:
