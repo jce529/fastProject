@@ -27,11 +27,11 @@ Material:
     m_Ints: []
     m_Floats:
     - _DebugMode: 0
-    - _DistortionScale: 0.1
+    - _DistortionScale: 0.05
     - _EffectAlpha: 1
-    - _PullStrength: 0.3
-    - _Radius: 1
-    - _SwirlStrength: 12
+    - _PullStrength: 0.15
+    - _Radius: 0.5
+    - _SwirlStrength: 6
     - _UnscaledTime: 0
     m_Colors: []
   m_BuildTextureStacks: []
