@@ -21,9 +21,12 @@ public class FloorTransitionEffect : MonoBehaviour
     // (999.3-01의 PortalVortexDriver.MaxSwirlTime=0.6f를 시작값으로 재사용한 결과) 회전감이 여전히
     // 약하다는 피드백(round 7)에 따라 진입 연출(_entryVortexDuration=0.4s) 전용으로 별도 튜닝한
     // 값이다 -- 더 이상 PortalVortexDriver.MaxSwirlTime과 같을 필요는 없다(_SwirlStrength=6 기준
-    // angle_max가 3.6rad에서 6.0rad로 상승). 999.3-01에서 문제였던 "과도하게 감긴" 느낌(다회전)까지는
-    // 가지 않는 선에서 강도만 올렸다 -- 부족/과함이 재확인되면 이 상수만 다시 조정한다.
-    private const float EntrySwirlPhase = 1.0f;
+    // angle_max가 3.6rad에서 6.0rad로 상승). round 7(1.0f)은 "과도하게 감긴" 느낌은 없었지만
+    // 이번엔 반대로 회전팔(spiral arm) 개수가 너무 적어 부자연스럽다는 피드백(round 8)을 받았다 --
+    // angle_max = _SwirlStrength(6) * EntrySwirlPhase 가 2π(≈6.28)에 못 미쳐 한 바퀴도 채 못 감겼기
+    // 때문. 2.0f로 재상향하면 angle_max=12.0rad(≈1.9바퀴)로 늘어나 회전팔이 여러 개 보이게 된다 --
+    // 부족/과함이 재확인되면 이 상수만 다시 조정한다.
+    private const float EntrySwirlPhase = 2.0f;
 
     [Header("Entry Vortex (Phase 999.3 D-01~D-03)")]
     [SerializeField] private Material _vortexMaterial;          // PortalVortex.mat — WorldGenerator가 PlayEntry() 호출 시 전달 (999.3-01 산출물)
