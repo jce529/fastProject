@@ -640,9 +640,8 @@ public class WorldGenerator : MonoBehaviour
         FloorManager.CurrentFloor++;
 
         // D-07 — 기존 체인(현재 room+corridor 전부) 즉시 Destroy
-        // 리뷰 수정: 입장한 portal 외 다른 미사용 포탈의 대기룸도 함께 Destroy
-        // (RemoveTail()의 D-08 정리 패턴과 동일 — _maxExitsActive > 1일 때 고아 GameObject 누수 방지)
         // 리뷰 수정: 입장한 portal 외 다른 미사용 포탈의 대기룸도 함께 Destroy (excludePortal: portal).
+        // (RemoveTail()의 D-08 정리 패턴과 동일 — _maxExitsActive > 1일 때 고아 GameObject 누수 방지)
         // Phase 14: 정리되는 옛 체인 section의 대기/활성 스폰 기록만 개별 제거한다 — standbyRoom(= 다음
         // Step의 newRoom)은 _chain에 속한 적이 없어 이 루프가 건드리지 않는다. CleanupSection() 내부의
         // 개별 _activeExitCount-- 는 아래 무조건적인 = 0 리셋으로 덮어써지므로 원래 동작과 동등하다.
