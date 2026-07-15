@@ -26,10 +26,6 @@ public class MeleeEnemy : MonoBehaviour, IEnemy, ISpawnGatable
     [SerializeField] private float gapCheckDist  = 0.6f;  // 바닥 끊김 감지 거리 (발 앞으로)
     [SerializeField] private float maxJumpableGapWidth = 3.2f; // D-01: 이 거리보다 먼 곳까지 바닥이 없으면 점프로 건널 수 없는 gap → 턴어라운드 (Room_Fall 5.5유닛을 걸러내고 Room_Gap 3유닛은 통과시키는 값)
 
-    // -- Layer constants (hardcoded — matches TagManager.asset, established pattern) --
-    private const int LayerPlayerHurtbox    = 7;
-    private const int LayerPlayerInvincible = 8;
-
     // -- FSM state ------------------------------------------------------------------
     private enum EnemyState { Idle, Chase, Telegraph, Attack }
     private EnemyState _state = EnemyState.Idle;

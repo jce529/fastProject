@@ -24,8 +24,6 @@ public class RangedEnemy : MonoBehaviour, IEnemy, ISpawnGatable
     [SerializeField] private float attackWindupDelay = 0.1f; // 발사 애니메이션 트리거 이후 실제 발사까지 대기 (Inspector 조정)
 
     // -- Layer constants ------------------------------------------------------------
-    private const int LayerPlayerHurtbox    = 7;
-    private const int LayerPlayerInvincible = 8;
     private const float TelegraphDuration   = 0.8f;
 
     // -- FSM ------------------------------------------------------------------------
