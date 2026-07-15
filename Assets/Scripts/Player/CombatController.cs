@@ -228,7 +228,6 @@ public class CombatController : MonoBehaviour
 
     private IEnumerator DashOrWhiff(IEnemy cachedTarget = null)
     {
-        Debug.Log("[Combat] Coroutine: DashOrWhiff started.");
         _isBusy = true;
         _animator?.SetBool("IsAttacking", true);
 
@@ -238,25 +237,19 @@ public class CombatController : MonoBehaviour
             : FindNearestEnemyInRange();
         if (target != null)
         {
-            Debug.Log($"[Combat] DashOrWhiff: Target '{((MonoBehaviour)target).name}' confirmed. Jumping to ExecuteDash.");
             yield return ExecuteDash(target);
-            Debug.Log("[Combat] DashOrWhiff: ExecuteDash yield returned.");
         }
         else
         {
-            Debug.Log("[Combat] DashOrWhiff: No target. Jumping to ExecuteWhiff.");
             yield return ExecuteWhiff();
         }
 
         _animator?.SetBool("IsAttacking", false);
-        Debug.Log("[Combat] DashOrWhiff: Setting _isBusy = false and exiting.");
         _isBusy = false;
     }
 
     private IEnumerator ExecuteDash(IEnemy target)
     {
-        Debug.Log("[Combat] ExecuteDash: ENTRANCE - Coroutine effectively started.");
-
         if (target == null)
         {
             Debug.LogError("[Combat] ExecuteDash: TARGET IS NULL at start! Aborting.");
@@ -264,17 +257,11 @@ public class CombatController : MonoBehaviour
         }
 
         // 1. ExitSlowMotion BEFORE first yield — ensures MovePosition runs at timeScale=1
-        Debug.Log("[Combat] ExecuteDash: Calling ExitSlowMotion.");
         ExitSlowMotion();
-        Debug.Log("[Combat] ExecuteDash: ExitSlowMotion finished.");
 
         Vector2 startPos    = _rb.position;
         Vector2 destination = (Vector2)((MonoBehaviour)target).transform.position;
         Vector2 dirToTarget = (destination - startPos).normalized;
-
-        Debug.Log($"[Combat] ExecuteDash: StartPos={startPos}, Dest={destination}, Dir={dirToTarget}");
-
-        Debug.Log("[Combat] ExecuteDash: Path clear. Preparing movement.");
 
         // 3. 대상 방향으로 스프라이트 전환
         _spriteRenderer.flipX = destination.x < startPos.x;
@@ -297,24 +284,20 @@ public class CombatController : MonoBehaviour
         }
         _rb.MovePosition(destination);
 
-        Debug.Log("[Combat] ExecuteDash: Arrived at target");
-
         // 6. Cleanup visual and animation
         _animator?.SetBool("IsDashing", false);
         if (_trailRenderer != null) _trailRenderer.emitting = false;
 
-        // 6. Kill and effects
-        bool isRespawnKill = ((MonoBehaviour)target).GetComponent<RespawnedEnemyMarker>() != null; // D-10(999.2): 리스폰 개체 여부로 감소 점수 판정 — IEnemy 미확장(ISpawnGatable과 동일 패턴)
+        // 6. Kill and effects — D-08(Phase 16): 점수 적립 호출은 각 적의 OnDashHit()(EnemyBase 공통 부분,
+        // 16-03에서 구현)로 이동했다 — 여기서는 더 이상 점수 적립 API를 직접 호출하지 않는다.
         target.OnDashHit();
         AudioManager.PlaySfx(Sfx.Slash); // SFX-03/D-05: 처치 확정 순간 슬래시 — HitFreeze 이전 호출, DSP는 timeScale=0 중에도 계속 재생
         SpawnHitSpark(destination);
         _cameraFollow?.Shake(_cameraShakeDuration, _cameraShakeAmplitude);
-        ScoreManager.AddKillScore(isRespawnKill);
         yield return StartCoroutine(HitFreeze(hitFreezeDuration));
 
         _attackCooldown = postKillLockout;
         _gauge.AddKillBonus();
-        Debug.Log("[Combat] ExecuteDash: Sequence Complete");
     }
 
     private IEnumerator ExecuteWhiff()
