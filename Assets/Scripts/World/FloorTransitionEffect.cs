@@ -22,9 +22,13 @@ public class FloorTransitionEffect : MonoBehaviour
     [SerializeField] private float _entryVortexDuration = 0.4f; // D-08: 기존 E1-E4 총합(~0.4s)과 동일 기준 유지
     [SerializeField] private float _vortexWorldRadius = 4f;     // 소용돌이가 덮는 월드 반경 — 플레이어+주변 타일 포함
 
+    [Header("Exit Portal Backdrop — X1/X4 존치 (Open Question 1 기본값: KEEP)")]
     [SerializeField] private float _exitPortalGrowDuration = 0.4f;
-    [SerializeField] private float _exitMaskDuration = 0.5f;    // NOTE: Plan 999.3-02 Task 2가 이 필드를 leap 필드로 교체 예정 — 이 태스크에서는 값만 유지
     [SerializeField] private float _portalFadeDuration = 0.3f;
+
+    [Header("Exit Leap (Phase 999.3 D-04~D-06)")]
+    [SerializeField] private float _exitLeapDuration = 0.45f; // D-08: 기존 X1-X4 총합(~0.4~0.5s)과 동일 기준 유지
+    [SerializeField] private float _exitLeapHeight = 2.5f;    // 포탈에서 머리 위로 튀어오르는 높이(월드 유닛)
 
     private void Awake()
     {
@@ -87,48 +91,48 @@ public class FloorTransitionEffect : MonoBehaviour
         if (vortexGO != null) Destroy(vortexGO);
     }
 
-    /// <summary>X1-X4: 새 층 진입 시 포탈이 성장하고, 플레이어가 마스크 수축에 의해 포탈에서 걸어나오듯 나타난다.</summary>
+    /// <summary>D-04/D-05/D-06: 새 층 진입 시 기존 IsDashing 애니메이터 대시 모션을 재사용해 포탈에서
+    /// 머리 위로 짧게 도약(수직 arc)한 뒤 원래 spawnWorldPos에 정확히 착지한다. 기존 SpriteMask
+    /// 수축(X2/X3)은 완전히 대체됨 — X1(포탈 성장)/X4(포탈 페이드)는 Open Question 1 기본값(KEEP)에
+    /// 따라 배경 요소로 존치한다.</summary>
     public IEnumerator PlayExit(Vector3 spawnWorldPos, GameObject portalEffectPrefab)
     {
-        AudioManager.PlaySfx(Sfx.PortalExit); // SFX-02/D-06: 퇴장 = 하강 마무리음 — X1 포탈 성장(0.4s)과 동시 시작
-        // X1: 퇴장 포탈 이펙트 성장.
+        AudioManager.PlaySfx(Sfx.PortalExit); // SFX-02/D-07: 그대로 재사용
+
+        // X1(존치): 퇴장 포탈 이펙트 성장 — 도약과 동시 진행(병렬, StartCoroutine — 대기하지 않음)
         GameObject portalEffect = null;
         if (portalEffectPrefab != null)
         {
             portalEffect = Instantiate(portalEffectPrefab, spawnWorldPos, Quaternion.identity);
             portalEffect.transform.localScale = Vector3.zero;
-            yield return ScaleTransform(portalEffect.transform, Vector3.zero, Vector3.one, _exitPortalGrowDuration);
+            StartCoroutine(ScaleTransform(portalEffect.transform, Vector3.zero, Vector3.one, _exitPortalGrowDuration));
         }
 
-        float portalX = spawnWorldPos.x;
-        float dir = transform.position.x > portalX ? 1f : -1f;
-        float startWidth = Mathf.Abs(transform.position.x - portalX) + _sr.bounds.extents.x + 2f;
-
-        var maskGO = new GameObject("ExitMask");
-        var mask = maskGO.AddComponent<SpriteMask>();
-        mask.sprite = RuntimeMaskSprite.CreateMaskSprite();
-        _sr.maskInteraction = SpriteMaskInteraction.VisibleOutsideMask;
+        // D-04/D-05/D-06: X2/X3 마스크 로직을 수직 도약으로 완전히 대체
         _sr.enabled = true;
+        if (_animator == null) _animator = GetComponent<Animator>(); // Awake에서 이미 캐시되지만 방어적으로 재확인
+        _animator?.SetBool("IsDashing", true);
+        if (_rb != null) _rb.linearVelocity = Vector2.zero;
 
-        // X2: 마스크가 startWidth -> 0으로 수축하며 플레이어가 포탈에서 걸어나오는 효과를 낸다.
+        // Pitfall 5: spawnWorldPos는 이미 WorldGenerator.FloorTransitionSequence Step 2에서 하드
+        // 텔레포트된 현재 위치와 동일하다 — 수평 이동 없이 순수 수직 오프셋만 적용한다.
         float elapsed = 0f;
-        while (elapsed < _exitMaskDuration)
+        while (elapsed < _exitLeapDuration)
         {
-            elapsed += Time.unscaledDeltaTime;
-            float t = Mathf.Clamp01(elapsed / _exitMaskDuration);
-            float width = Mathf.Lerp(startWidth, 0f, t);
-            Vector3 pos = transform.position;
-            pos.x = portalX + (width * 0.5f * dir);
-            maskGO.transform.position = pos;
-            maskGO.transform.localScale = new Vector3(Mathf.Max(width, 0.001f), 20f, 1f);
+            elapsed += Time.unscaledDeltaTime; // 슬로우모션/HitFreeze 면역
+            float t = Mathf.Clamp01(elapsed / _exitLeapDuration);
+            float height = _exitLeapHeight * Mathf.Sin(t * Mathf.PI); // 0 -> 정점 -> 0
+            Vector3 pos = spawnWorldPos + Vector3.up * height;
+            if (_rb != null) _rb.MovePosition(pos);
+            else transform.position = pos;
             yield return null;
         }
 
-        // X3: 마스크 정리.
-        Destroy(maskGO);
-        _sr.maskInteraction = SpriteMaskInteraction.None;
+        if (_rb != null) _rb.MovePosition(spawnWorldPos);
+        else transform.position = spawnWorldPos;
+        _animator?.SetBool("IsDashing", false);
 
-        // X4: 퇴장 포탈 이펙트 페이드 아웃 후 정리.
+        // X4(존치): 퇴장 포탈 이펙트 페이드 아웃 후 정리.
         if (portalEffect != null)
         {
             yield return ScaleTransform(portalEffect.transform, Vector3.one, Vector3.zero, _portalFadeDuration);
