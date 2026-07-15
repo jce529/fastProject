@@ -11,9 +11,9 @@ Requirements for the 보스 룸 & 연출 고도화 milestone. Each maps to roadm
 
 - [ ] **BOSS-01**: 보스 룸은 EXIT 포탈처럼 확률적으로 스폰된다 (동시 활성 1개 제한)
 - [ ] **BOSS-02**: 보스 룸에는 일반 적이 스폰되지 않는다 (솔로 전투 보장)
-- [ ] **BOSS-03**: 보스는 공격 패턴(예고 → 빈틈) 루프를 반복하며, 빈틈 상태에서만 플레이어의 돌진 공격 대상이 된다
+- [x] **BOSS-03**: 보스는 공격 패턴(예고 → 빈틈) 루프를 반복하며, 빈틈 상태에서만 플레이어의 돌진 공격 대상이 된다
 - [x] **BOSS-04**: 보스는 7회 피격 시 처치되며, 매 피격 후 공격 패턴이 처음부터 다시 시작된다
-- [ ] **BOSS-05**: 보스 처치 진행률(피격 횟수)은 플레이어에게 노출되지 않는다 (의도적 숨김)
+- [x] **BOSS-05**: 보스 처치 진행률(피격 횟수)은 플레이어에게 노출되지 않는다 (의도적 숨김)
 - [x] **BOSS-06**: 보스 처치 시 점수 보너스가 지급된다 (ScoreManager 연동)
 - [ ] **BOSS-07**: 보스 룸 입장 시 층 타이머가 일시정지되고, 보스방을 벗어나면(처치 또는 EXIT 이용) 재개된다
 - [ ] **BOSS-08**: 보스 처치 후에도 층 진입은 기존 EXIT 포탈을 통해서만 가능하다 (보스 처치가 자동으로 층을 넘기지 않음)
@@ -71,9 +71,9 @@ Which phases cover which requirements. Updated during roadmap creation.
 |-------------|-------|--------|
 | BOSS-01 | Phase 16 | Pending |
 | BOSS-02 | Phase 16 | Pending |
-| BOSS-03 | Phase 15 | Pending |
+| BOSS-03 | Phase 15 | Complete |
 | BOSS-04 | Phase 15 | Complete |
-| BOSS-05 | Phase 15 | Pending |
+| BOSS-05 | Phase 15 | Complete |
 | BOSS-06 | Phase 15 | Complete |
 | BOSS-07 | Phase 16 | Pending |
 | BOSS-08 | Phase 17 | Pending |

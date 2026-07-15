@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v3.1
 milestone_name: — 보스 룸 & 연출 고도화
 status: executing
-stopped_at: Completed 15-01-PLAN.md
-last_updated: "2026-07-15T07:47:31.902Z"
+stopped_at: Completed 15-02-PLAN.md
+last_updated: "2026-07-15T07:53:29.940Z"
 last_activity: 2026-07-15
 progress:
   total_phases: 8
   completed_phases: 5
   total_plans: 26
-  completed_plans: 22
+  completed_plans: 23
 ---
 
 # Project State: Fast (가칭)
@@ -34,7 +34,7 @@ progress:
 ## Current Position
 
 Phase: 15 (fsm) — EXECUTING
-Plan: 2 of 4
+Plan: 3 of 4
 Status: Ready to execute
 Last activity: 2026-07-15
 
@@ -84,6 +84,7 @@ Progress: [████░░░░░░] v3.1 milestone: 2/5 phases complete (
 | TestWorldGenerator.cs/FloorSpawner.cs/RoomExit.cs(+.meta) 삭제 및 MeleeEnemy.cs/RangedEnemy.cs 죽은 LayerPlayerHurtbox/LayerPlayerInvincible 상수 제거 완료 (Plan 16-01) | D-01~D-04 — GUID 교차검증으로 100% 죽은 코드 확인 후 삭제, Physics2D 충돌 매트릭스로 대체된 중복 상수 정리. Unity 에디터 측 잔여 정리(비활성 FloorSpawner GameObject, 구형 Room_*.prefab 14종+Room_Debug.prefab 삭제)는 사용자가 직접 처리하기로 확정 — 이 플랜 범위 밖. Wave 2(16-03) EnemyBase 추출의 사전 정지 작업 완료 |
 | EnemyBase 추상 클래스 신설 후 MeleeEnemy/RangedEnemy가 상속하도록 리팩토링 완료, D-08 점수 시점 재설계 전체 완성 (Plan 16-03) | D-05 — OnDashHit() 공통부(가드+IsAlive=false+rb정지+콜라이더비활성화+animator+DeathEffect)/ClearHighlight()/IsPlayerInRange()/OnEnable-OnDisable 구독/SetSpawnGate()를 최소 범위로만 추출, 타입별 고유 로직(텔레그래프/히트박스/점프-gap, 조준선/발사체/카이팅)은 그대로 서브클래스에 유지. D-08 — 각 적이 EnemyBase.OnDashHit() 안에서 IsAlive=false 커밋 직후 스스로 RespawnedEnemyMarker 판정 후 ScoreManager.AddKillScore() 호출(16-02의 CombatController 측 제거와 합쳐 D-08 완성). Phase 15(BossEnemy, 미실행) EnemyBase 상속 전제 마련 |
 | ScoreManager.BossKillScore=750 + AddBossKillScore()/SubtractScore(int) 정적 메서드, EnemyDeathEffect.ConfigureIntensity() additive 메서드 확정 (Plan 15-01) | BOSS-06/D-09(보스 처치 보너스)/D-12(비치명타 자기 상쇄)/D-08(보스 전용 사망 연출 강도)를 위해 BossEnemy.cs(15-02)가 즉시 참조할 계약을 순수 추가 변경으로 선반영 — MeleeEnemy.cs/RangedEnemy.cs 호출부 git diff 0 확인 |
+| BossEnemy.cs 신설 완료 — Telegraph→Attack→Vulnerable 단일 패턴 루프, IsAlive를 "빈틈 여부"로 오버로드 + 별도 _isDefeated로 처치 판정 분리, 7회 피격 처치 + 보스 전용 사망 연출/점수 보너스 (Plan 15-02) | BOSS-03/04/05/06 — EnemyBase를 상속하지 않는 독립 IEnemy+ISpawnGatable 구현으로 다중 히트/패턴 리셋 요구를 EnemyBase.OnDashHit()의 단발성 사망 경로와 분리. D-12(비치명타 점수 자기 상쇄) 코드는 최종 제거 — Phase 16(16-02/16-03)이 ScoreManager.AddKillScore() 호출을 CombatController.ExecuteDash()에서 EnemyBase.OnDashHit()으로 이미 옮겨서 CombatController가 보스 히트에 +100을 더 이상 주지 않으므로 상쇄할 점수 자체가 없음 (15-CONTEXT.md D-12 SUPERSEDED와 일치) |
 
 ### Key Decisions Locked (v1.0/v2.0/v3.0)
 
@@ -127,12 +128,12 @@ Full decision log lives in `.planning/PROJECT.md` Key Decisions table. Recent hi
 3. Read `.planning/REQUIREMENTS.md` — v3.1 requirements + traceability (18/18 mapped)
 4. Read `.planning/research/SUMMARY.md` — architecture/pitfall context for Phase 13-17
 5. Read `.planning/phases/16-boss-room-lifecycle/16-CONTEXT.md` — 리팩토링 배치(D-01~D-08) + 미논의 보스 룸 그레이 에어리어 목록
-6. Read `.planning/phases/15-fsm/15-CONTEXT.md` D-11/D-12 — SUPERSEDED 표시 확인 (Room_Debug 삭제, 점수 상쇄 우회책 불필요화)
-7. Next action: 리팩토링 배치 실행(`/gsd:quick --full`) 또는 보스 룸 그레이 에어리어 논의 후 `/gsd:plan-phase 16`
+6. Read `.planning/phases/15-fsm/15-CONTEXT.md` D-11/D-12 — SUPERSEDED 표시 확인 (Room_Debug 삭제, 점수 상쇄 우회책 불필요화 — 16-02/16-03/15-02 완료로 이제 코드에도 반영됨)
+7. Next action: `/gsd:execute-phase 15` 계속 — Plan 3(15-03, 보스 프리팹 빌더 + DebugRoomTeleporter 배선) 실행
 
-**Last session:** 2026-07-15T07:47:31.895Z
-**Stopped at:** Completed 15-01-PLAN.md
+**Last session:** 2026-07-15T07:53:29.934Z
+**Stopped at:** Completed 15-02-PLAN.md
 
 ---
 *State initialized: 2026-05-27*
-*Last updated: 2026-07-15 — discuss-phase-16 세션이 실시간 코드 리뷰로 전환됨. WorldGenerator.cs 정리(quick 260715-kci)는 완료, 나머지 리팩토링 배치(죽은 파일 삭제/EnemyBase/CombatController/점수 시점 재설계)는 16-CONTEXT.md에 문서화, 실행은 다음 세션. 보스 룸 기능 그레이 에어리어는 미논의.*
+*Last updated: 2026-07-15 — Phase 16(16-01~16-03) 리팩토링 배치 전체 완료(죽은 파일 삭제, EnemyBase 추출, D-08 점수 시점 재설계) 후 Phase 15 재개. Plan 15-02(BossEnemy.cs FSM) 완료 — D-12 점수 상쇄 우회책은 Phase 16 리팩토링으로 실제로 불필요해져 코드에서 제거됨(15-CONTEXT.md D-12 SUPERSEDED와 일치). 다음: 15-03(보스 프리팹 빌더).*

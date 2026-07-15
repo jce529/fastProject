@@ -527,7 +527,7 @@ Plans:
 
 Plans:
 - [x] 15-01-PLAN.md — ScoreManager 보스 점수 유틸 + EnemyDeathEffect 보스 강도 확장 (BOSS-04, BOSS-06)
-- [ ] 15-02-PLAN.md — BossEnemy.cs 전체 FSM (Telegraph→Attack→Vulnerable 패턴 루프, 피격/처치/하이라이트) (BOSS-03, BOSS-04, BOSS-05, BOSS-06)
+- [x] 15-02-PLAN.md — BossEnemy.cs 전체 FSM (Telegraph→Attack→Vulnerable 패턴 루프, 피격/처치/하이라이트) (BOSS-03, BOSS-04, BOSS-05, BOSS-06)
 - [ ] 15-03-PLAN.md — BossEnemyPrefabBuilder 에디터 도구 + DebugRoomTeleporter 보스 스폰 배선 (BOSS-03, BOSS-04, BOSS-05, BOSS-06)
 - [ ] 15-04-PLAN.md — 에디터 도구 실행(프리팹 생성+배선) + 플레이테스트 검증 (BOSS-03, BOSS-04, BOSS-05, BOSS-06)
 
@@ -573,7 +573,7 @@ Plans:
 |-------|----------------|--------|-----------|
 | 13. 오디오 기반 구축 & 연출 사운드 폴리싱 | 4/4 | Complete    | 2026-07-09 |
 | 14. 적 등장 스폰 연출 | 4/4 | Complete    | 2026-07-10 |
-| 15. 보스 FSM & 빈틈 타겟팅 | 1/4 | In Progress|  |
+| 15. 보스 FSM & 빈틈 타겟팅 | 2/4 | In Progress|  |
 | 16. 보스 룸 콘텐츠 & 생명주기 게이팅 | 2/4 | In Progress|  |
 | 17. WorldGenerator 통합 & 보스 처치 후 층 진행 | 0/? | Not started | - |
 
@@ -631,7 +631,7 @@ Plans:
 
 **Goal:** 플레이어가 클리어한 Complex_Room을 벗어났다가(체인 안에 살아있는 동안) 다시 들어오면, 원래 EnemySpawner 마커 위치에 동일 타입의 적이 기존 스폰 VFX 파이프라인 그대로 재등장해 반복 전투가 가능해진다 — 리스폰 킬은 감소된 점수를 지급한다.
 **Requirements:** 999.2-CONTEXT.md `<decisions>` D-01~D-10 (+ D-01a 범위 명확화) — formal REQ-ID 없음, decision ID를 요구사항 앵커로 사용
-**Plans:** 1/4 plans executed
+**Plans:** 2/4 plans executed
 
 Captured 2026-07-10 during Phase 14 discussion (`.planning/phases/14-enemy-spawn-vfx/14-CONTEXT.md` `<deferred>`): 룸/Corridor을 플레이어가 반복 재진입할 때마다 적이 계속 새로 생성되는 아이디어. "가상 시뮬레이션에서 끝없이 싸우는 AI"라는 스토리 설정과 잘 맞고, WorldGenerator가 이미 좌우 2개 룸까지만 유지하므로 성능 부담도 크지 않을 것으로 추정. 다만 밸런스(엔드리스 파밍으로 타이머 긴장감 훼손 가능성)와 정확한 트리거 규칙 설계가 필요해 Phase 14는 1회성 스폰(D-02)으로 진행하고 이 아이디어는 보류.
 
