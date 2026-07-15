@@ -17,11 +17,13 @@ public class FloorTransitionEffect : MonoBehaviour
     private static readonly int UnscaledTimeId = Shader.PropertyToID("_UnscaledTime");
     private static readonly int EffectAlphaId  = Shader.PropertyToID("_EffectAlpha");
 
-    // 999.3-01의 PortalVortexDriver.MaxSwirlTime(0.6f)과 동일값 -- 999.3-01 체크리스트가 8라운드에
-    // 걸쳐 확정한 "육안으로 확인된 좋은" 소용돌이 각도(_SwirlStrength=6 기준 angle_max=3.6rad)를
-    // 그대로 재사용한다. _entryVortexDuration(0.4s)이 0부터 이 각도까지 애니메이션으로 감아올리기엔
-    // 너무 짧아 소용돌이가 옅게 보이는 문제(round 4 피드백)가 있어, 애니메이션 대신 고정값으로 홀드한다.
-    private const float EntrySwirlPhase = 0.6f;
+    // round 6에서 t(0→1)를 그대로 EntrySwirlPhase까지 감아올리는 애니메이션 방식은 확정됐지만
+    // (999.3-01의 PortalVortexDriver.MaxSwirlTime=0.6f를 시작값으로 재사용한 결과) 회전감이 여전히
+    // 약하다는 피드백(round 7)에 따라 진입 연출(_entryVortexDuration=0.4s) 전용으로 별도 튜닝한
+    // 값이다 -- 더 이상 PortalVortexDriver.MaxSwirlTime과 같을 필요는 없다(_SwirlStrength=6 기준
+    // angle_max가 3.6rad에서 6.0rad로 상승). 999.3-01에서 문제였던 "과도하게 감긴" 느낌(다회전)까지는
+    // 가지 않는 선에서 강도만 올렸다 -- 부족/과함이 재확인되면 이 상수만 다시 조정한다.
+    private const float EntrySwirlPhase = 1.0f;
 
     [Header("Entry Vortex (Phase 999.3 D-01~D-03)")]
     [SerializeField] private Material _vortexMaterial;          // PortalVortex.mat — WorldGenerator가 PlayEntry() 호출 시 전달 (999.3-01 산출물)
