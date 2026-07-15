@@ -17,6 +17,12 @@ public class FloorTransitionEffect : MonoBehaviour
     private static readonly int UnscaledTimeId = Shader.PropertyToID("_UnscaledTime");
     private static readonly int EffectAlphaId  = Shader.PropertyToID("_EffectAlpha");
 
+    // 999.3-01의 PortalVortexDriver.MaxSwirlTime(0.6f)과 동일값 -- 999.3-01 체크리스트가 8라운드에
+    // 걸쳐 확정한 "육안으로 확인된 좋은" 소용돌이 각도(_SwirlStrength=6 기준 angle_max=3.6rad)를
+    // 그대로 재사용한다. _entryVortexDuration(0.4s)이 0부터 이 각도까지 애니메이션으로 감아올리기엔
+    // 너무 짧아 소용돌이가 옅게 보이는 문제(round 4 피드백)가 있어, 애니메이션 대신 고정값으로 홀드한다.
+    private const float EntrySwirlPhase = 0.6f;
+
     [Header("Entry Vortex (Phase 999.3 D-01~D-03)")]
     [SerializeField] private Material _vortexMaterial;          // PortalVortex.mat — WorldGenerator가 PlayEntry() 호출 시 전달 (999.3-01 산출물)
     [SerializeField] private float _entryVortexDuration = 0.4f; // D-08: 기존 E1-E4 총합(~0.4s)과 동일 기준 유지
@@ -71,11 +77,12 @@ public class FloorTransitionEffect : MonoBehaviour
             if (vortexMat != null)
             {
                 // Pitfall 1: Shader Graph/_Time 대신 반드시 수동으로 시간을 매 프레임 주입.
-                // 999.3-01 Deviation #6/#7과 동일 클래스 버그 회피: 절대 Time.unscaledTime이 아니라
-                // 이 코루틴 자신의 로컬 elapsed(0에서 시작해 _entryVortexDuration에서 종료)를 사용 —
-                // 절대 세션 시간을 먹이면 오래 켜져 있을수록(float32 정밀도 손실까지 겹쳐) 소용돌이가
-                // 과도하게 감겨 일렁이는 아티팩트가 생긴다.
-                vortexMat.SetFloat(UnscaledTimeId, elapsed);
+                // 999.3-01 Deviation #6/#7과 동일 클래스 버그 회피: 절대 Time.unscaledTime(세션 절대
+                // 시간)을 먹이지 않는다. round 4에서는 이 코루틴의 로컬 elapsed를 대신 먹였으나,
+                // _entryVortexDuration(0.4s)이 짧아 소용돌이가 0에서부터 옅게 감겨 보이는 문제가
+                // 있었다(round 4 피드백) — 매 프레임 애니메이션하는 대신 EntrySwirlPhase 고정값으로
+                // 홀드해 전체 구간에서 항상 확정된 각도로 보이게 한다.
+                vortexMat.SetFloat(UnscaledTimeId, EntrySwirlPhase);
                 vortexMat.SetFloat(EffectAlphaId, Mathf.Sin(t * Mathf.PI)); // 0→1→0 — 등장과 동시에 옅어지며 사라짐
             }
 
