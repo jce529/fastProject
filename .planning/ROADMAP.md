@@ -523,7 +523,13 @@ Plans:
   3. 보스는 정확히 7회 피격 시 처치(사망 연출 재생 + Destroy)되며, 6회까지는 처치되지 않는다
   4. 보스 처치 진행률(피격 횟수)을 나타내는 UI/텍스트 요소가 화면 어디에도 존재하지 않는다
   5. 보스 처치 시 ScoreManager에 일반 적보다 큰 점수 보너스가 즉시 누적된다
-**Plans**: TBD
+**Plans**: 4 plans (4 waves — 순차 의존)
+
+Plans:
+- [ ] 15-01-PLAN.md — ScoreManager 보스 점수 유틸 + EnemyDeathEffect 보스 강도 확장 (BOSS-04, BOSS-06)
+- [ ] 15-02-PLAN.md — BossEnemy.cs 전체 FSM (Telegraph→Attack→Vulnerable 패턴 루프, 피격/처치/하이라이트) (BOSS-03, BOSS-04, BOSS-05, BOSS-06)
+- [ ] 15-03-PLAN.md — BossEnemyPrefabBuilder 에디터 도구 + DebugRoomTeleporter 보스 스폰 배선 (BOSS-03, BOSS-04, BOSS-05, BOSS-06)
+- [ ] 15-04-PLAN.md — 에디터 도구 실행(프리팹 생성+배선) + 플레이테스트 검증 (BOSS-03, BOSS-04, BOSS-05, BOSS-06)
 
 ---
 
@@ -560,7 +566,7 @@ Plans:
 |-------|----------------|--------|-----------|
 | 13. 오디오 기반 구축 & 연출 사운드 폴리싱 | 4/4 | Complete    | 2026-07-09 |
 | 14. 적 등장 스폰 연출 | 4/4 | Complete    | 2026-07-10 |
-| 15. 보스 FSM & 빈틈 타겟팅 | 0/? | Not started | - |
+| 15. 보스 FSM & 빈틈 타겟팅 | 0/4 | Not started | - |
 | 16. 보스 룸 콘텐츠 & 생명주기 게이팅 | 0/? | Not started | - |
 | 17. WorldGenerator 통합 & 보스 처치 후 층 진행 | 0/? | Not started | - |
 
