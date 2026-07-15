@@ -18,6 +18,9 @@ public class DebugRoomTeleporter : MonoBehaviour
     [SerializeField] private GameObject _meleePrefab;
     [SerializeField] private GameObject _rangedPrefab;
 
+    [Header("Boss (D-11)")]
+    [SerializeField] private GameObject _bossPrefab;
+
     // 모든 인스턴스가 공유하는 static 상태 — 다른 텔레포터로 전환 시 이전 방 정리 보장
     private static GameObject s_lastDebugRoom;
     private static Vector3    s_nextSpawnPos = Vector3.zero;
@@ -93,6 +96,12 @@ public class DebugRoomTeleporter : MonoBehaviour
         Vector3 entryPos = entry != null
             ? entry.transform.position
             : s_lastDebugRoom.transform.position + Vector3.up * 2f;
+
+        if (_bossPrefab != null)
+        {
+            Vector3 bossSpawnPos = entryPos + Vector3.right * 6f; // D-11: 진입 지점에서 우측 6유닛 — 즉시 시야 확보 (격리 테스트)
+            Instantiate(_bossPrefab, bossSpawnPos, Quaternion.identity, s_lastDebugRoom.transform);
+        }
 
         _player.LockInput();
         var rb = _playerTransform.GetComponent<Rigidbody2D>();
