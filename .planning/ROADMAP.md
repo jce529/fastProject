@@ -544,7 +544,13 @@ Plans:
   4. 보스 룸 입장과 동시에 층 타이머가 일시정지되고, 보스 룸을 벗어나면(처치 또는 EXIT 이용) 재개된다
   5. 보스와의 전투가 진행 중인 동안에는 WorldGenerator의 앞뒤 2개 유지 정리(Destroy) 로직에서 보스 룸이 예외 처리되어 파괴되지 않는다
   6. 이번 Phase가 다루는 기존 코드 안의 중복 로직/이상 패턴이 식별되어 정리된다 (16-CONTEXT.md 리팩토링 결정사항 기준)
-**Plans**: TBD
+**Plans**: 4 plans (2 waves) — 2026-07-15 plan-phase 세션은 관련 코드 리팩토링 트랙(D-01~D-08, Success Criteria #6)만 계획함. 보스 룸 기능 자체(BOSS-01/02/07/09/10, SFX-05, Success Criteria #1-5)는 그레이 에어리어 미논의로 이번 라운드에 포함되지 않음 — 별도 discuss-phase 세션 후 후속 plan-phase 라운드에서 16-05+로 이어서 계획 예정.
+
+Plans:
+- [ ] 16-01-PLAN.md — 죽은 파일 3종 삭제 + MeleeEnemy/RangedEnemy 죽은 레이어 상수 제거 (D-01, D-02, D-03, D-04)
+- [ ] 16-02-PLAN.md — CombatController 마우스 방향 헬퍼 통합 + 디버그 로그 정리 + 점수 호출 제거 (D-06, D-07, D-08)
+- [ ] 16-03-PLAN.md — EnemyBase 추출 + 점수 시점 재설계(Enemy 측) (D-05, D-08)
+- [ ] 16-04-PLAN.md — 리팩토링 배치(D-01~D-08) 전체 플레이테스트 검증
 
 ---
 
@@ -568,7 +574,7 @@ Plans:
 | 13. 오디오 기반 구축 & 연출 사운드 폴리싱 | 4/4 | Complete    | 2026-07-09 |
 | 14. 적 등장 스폰 연출 | 4/4 | Complete    | 2026-07-10 |
 | 15. 보스 FSM & 빈틈 타겟팅 | 0/4 | Not started | - |
-| 16. 보스 룸 콘텐츠 & 생명주기 게이팅 | 0/? | Not started | - |
+| 16. 보스 룸 콘텐츠 & 생명주기 게이팅 | 0/4 | In Progress (리팩토링 트랙만 계획됨) | - |
 | 17. WorldGenerator 통합 & 보스 처치 후 층 진행 | 0/? | Not started | - |
 
 ---
