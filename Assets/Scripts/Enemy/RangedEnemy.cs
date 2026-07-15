@@ -8,8 +8,10 @@ using UnityEngine;
 /// D-10: moveSpeed=0f default — stationary. Inspector-adjustable post-playtest.
 /// D-11, D-12: Projectile via ProjectileController.
 /// D-10: 0 = stationary. Chase waits for player to enter aimLineLength before telegraphing.
+/// D-05(Phase 16): OnDashHit()/ClearHighlight()/IsPlayerInRange()/OnEnable-OnDisable/SetSpawnGate
+/// 공통 부분은 EnemyBase로 이동 — 조준선/발사체/카이팅은 여기 그대로 남는다.
 /// </summary>
-public class RangedEnemy : MonoBehaviour, IEnemy, ISpawnGatable
+public class RangedEnemy : EnemyBase
 {
     // -- Tunable values (Inspector) ------------------------------------------------
     [SerializeField] private float detectionRadius = 12f;     // Detection + telegraph trigger (Claude's discretion: 10-15 units)
@@ -23,28 +25,17 @@ public class RangedEnemy : MonoBehaviour, IEnemy, ISpawnGatable
     [SerializeField] private Transform  firePoint;            // Assign child FirePoint transform in Inspector
     [SerializeField] private float attackWindupDelay = 0.1f; // 발사 애니메이션 트리거 이후 실제 발사까지 대기 (Inspector 조정)
 
-    // -- Layer constants ------------------------------------------------------------
     private const float TelegraphDuration   = 0.8f;
 
     // -- FSM ------------------------------------------------------------------------
     private enum EnemyState { Idle, Chase, Telegraph, Attack }
     private EnemyState _state = EnemyState.Idle;
 
-    // -- Detection buffer (pre-allocated — no GC, ROADMAP Stack Constraint) ---------
-    private readonly Collider2D[] _detectionBuffer = new Collider2D[4];
-    private ContactFilter2D _playerFilter;
-
-    // -- Runtime refs ---------------------------------------------------------------
-    private Rigidbody2D  _rb;
-    private Animator     _animator;
+    // -- Runtime refs (EnemyBase가 _rb/_animator/_detectionBuffer/_playerFilter/_playerTransform 제공) --
     private LineRenderer _aimLine;
-    private Transform    _playerTransform;
     private Vector3      _spawnPosition;
     private float        _patrolDir = 1f;
     private Coroutine    _telegraphCoroutine;
-
-    // -- IEnemy ---------------------------------------------------------------------
-    public bool IsAlive { get; private set; } = true;
 
     // -------------------------------------------------------------------------------
 
@@ -73,49 +64,15 @@ public class RangedEnemy : MonoBehaviour, IEnemy, ISpawnGatable
         }
     }
 
-    private void OnEnable()
-    {
-        PlayerController.OnPlayerDeath += OnPlayerDied;
-    }
+    // -- EnemyBase hooks (D-05) -------------------------------------------------------
 
-    private void OnDisable()
+    protected override void StopEnemySpecificState()
     {
-        PlayerController.OnPlayerDeath -= OnPlayerDied;
-    }
-
-    // -- IEnemy implementation ------------------------------------------------------
-
-    public void OnDashHit()
-    {
-        if (!IsAlive) return;
-        IsAlive = false;
         if (_telegraphCoroutine != null) StopCoroutine(_telegraphCoroutine);
         if (_aimLine != null) _aimLine.enabled = false;
-
-        // Freeze physics so corpse stays in place
-        if (_rb != null) { _rb.linearVelocity = Vector2.zero; _rb.bodyType = RigidbodyType2D.Static; }
-
-        foreach (var c in GetComponents<Collider2D>()) c.enabled = false;
-        _animator?.SetBool("isDead", true);
-
-        var deathEffect = GetComponent<EnemyDeathEffect>();
-        if (deathEffect == null) deathEffect = gameObject.AddComponent<EnemyDeathEffect>();
-        StartCoroutine(deathEffect.PlayDeathSequence(_animator));
     }
 
-    public void ClearHighlight()
-    {
-        var sr = GetComponent<SpriteRenderer>();
-        if (sr != null) sr.color = Color.white;
-    }
-
-    // -- ISpawnGatable implementation (SPWN-02, IEnemy와 별도 추가 인터페이스) ------------
-
-    public void SetSpawnGate(bool isSpawning) => IsAlive = !isSpawning;
-
-    // -- Player death listener ------------------------------------------------------
-
-    private void OnPlayerDied()
+    protected override void OnPlayerDied()
     {
         if (_telegraphCoroutine != null) StopCoroutine(_telegraphCoroutine);
         if (_aimLine != null) _aimLine.enabled = false;
@@ -277,18 +234,6 @@ public class RangedEnemy : MonoBehaviour, IEnemy, ISpawnGatable
     }
 
     // -- Helpers --------------------------------------------------------------------
-
-    private bool IsPlayerInRange(float radius)
-    {
-        int count = Physics2D.OverlapCircle(
-            (Vector2)transform.position,
-            radius,
-            _playerFilter,
-            _detectionBuffer);
-        if (count > 0 && _detectionBuffer[0] != null)
-            _playerTransform = _detectionBuffer[0].transform;
-        return count > 0;
-    }
 
     private void FindPlayerTransform()
     {

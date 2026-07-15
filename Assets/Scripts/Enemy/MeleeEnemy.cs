@@ -6,8 +6,10 @@ using UnityEngine;
 /// States: Idle (patrol) → Chase (close distance) → Telegraph (0.8s ! icon) → Attack (hitbox).
 /// One-shot-kill both ways: player dash → OnDashHit(); enemy hitbox → OnPlayerDeath.
 /// D-03, D-04, D-05, D-06, D-07, D-08, D-16.
+/// D-05(Phase 16): OnDashHit()/ClearHighlight()/IsPlayerInRange()/OnEnable-OnDisable/SetSpawnGate
+/// 공통 부분은 EnemyBase로 이동 — 텔레그래프/공격 히트박스/점프-gap 회피는 여기 그대로 남는다.
 /// </summary>
-public class MeleeEnemy : MonoBehaviour, IEnemy, ISpawnGatable
+public class MeleeEnemy : EnemyBase
 {
     // -- Tunable values (Inspector) ------------------------------------------------
     [SerializeField] private float detectionRadius      = 10f;   // Chase trigger distance (D-04)
@@ -30,21 +32,11 @@ public class MeleeEnemy : MonoBehaviour, IEnemy, ISpawnGatable
     private enum EnemyState { Idle, Chase, Telegraph, Attack }
     private EnemyState _state = EnemyState.Idle;
 
-    // -- Detection buffer (pre-allocated — no GC per frame, ROADMAP Stack Constraint) --
-    private readonly Collider2D[] _detectionBuffer = new Collider2D[4];
-    private ContactFilter2D _playerFilter;
-
-    // -- Runtime refs ---------------------------------------------------------------
-    private Rigidbody2D _rb;
-    private Animator     _animator;
+    // -- Runtime refs (EnemyBase가 _rb/_animator/_detectionBuffer/_playerFilter/_playerTransform 제공) --
     private SpriteRenderer _sr;
-    private Transform   _playerTransform;
     private Vector3     _spawnPosition;
     private float       _patrolDir = 1f;
     private Coroutine   _attackCoroutine;
-
-    // -- IEnemy ---------------------------------------------------------------------
-    public bool IsAlive { get; private set; } = true;
 
     // -------------------------------------------------------------------------------
 
@@ -65,50 +57,16 @@ public class MeleeEnemy : MonoBehaviour, IEnemy, ISpawnGatable
         if (_exclamationIcon  != null) _exclamationIcon.enabled  = false;
     }
 
-    private void OnEnable()
-    {
-        PlayerController.OnPlayerDeath += OnPlayerDied;
-    }
+    // -- EnemyBase hooks (D-05) -------------------------------------------------------
 
-    private void OnDisable()
+    protected override void StopEnemySpecificState()
     {
-        PlayerController.OnPlayerDeath -= OnPlayerDied;
-    }
-
-    // -- IEnemy implementation ------------------------------------------------------
-
-    public void OnDashHit()
-    {
-        if (!IsAlive) return;
-        IsAlive = false;
         if (_attackCoroutine != null) StopCoroutine(_attackCoroutine);
         if (_meleeHitbox     != null) _meleeHitbox.enabled    = false;
         if (_exclamationIcon != null) _exclamationIcon.enabled = false;
-
-        // Freeze physics so corpse stays in place
-        if (_rb != null) { _rb.linearVelocity = Vector2.zero; _rb.bodyType = RigidbodyType2D.Static; }
-
-        foreach (var c in GetComponents<Collider2D>()) c.enabled = false;
-        _animator?.SetBool("isDead", true);
-
-        var deathEffect = GetComponent<EnemyDeathEffect>();
-        if (deathEffect == null) deathEffect = gameObject.AddComponent<EnemyDeathEffect>();
-        StartCoroutine(deathEffect.PlayDeathSequence(_animator));
     }
 
-    public void ClearHighlight()
-    {
-        var sr = GetComponent<SpriteRenderer>();
-        if (sr != null) sr.color = Color.white;
-    }
-
-    // -- ISpawnGatable implementation (SPWN-02, IEnemy와 별도 추가 인터페이스) ------------
-
-    public void SetSpawnGate(bool isSpawning) => IsAlive = !isSpawning;
-
-    // -- Player death listener (stop chasing dead player) ---------------------------
-
-    private void OnPlayerDied()
+    protected override void OnPlayerDied()
     {
         if (_attackCoroutine != null) StopCoroutine(_attackCoroutine);
         if (_exclamationIcon != null) _exclamationIcon.enabled = false;
@@ -259,18 +217,6 @@ public class MeleeEnemy : MonoBehaviour, IEnemy, ISpawnGatable
     }
 
     // -- Helpers --------------------------------------------------------------------
-
-    private bool IsPlayerInRange(float radius)
-    {
-        int count = Physics2D.OverlapCircle(
-            (Vector2)transform.position,
-            radius,
-            _playerFilter,
-            _detectionBuffer);
-        if (count > 0 && _detectionBuffer[0] != null)
-            _playerTransform = _detectionBuffer[0].transform;
-        return count > 0;
-    }
 
     private void FindPlayerTransform()
     {
