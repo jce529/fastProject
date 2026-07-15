@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v3.1
 milestone_name: — 보스 룸 & 연출 고도화
 status: executing
-stopped_at: Completed 16-02-PLAN.md
-last_updated: "2026-07-15T07:29:57.213Z"
+stopped_at: Completed 16-03-PLAN.md
+last_updated: "2026-07-15T07:35:28.889Z"
 last_activity: 2026-07-15
 progress:
   total_phases: 8
   completed_phases: 5
   total_plans: 26
-  completed_plans: 20
+  completed_plans: 21
 ---
 
 # Project State: Fast (가칭)
@@ -34,7 +34,7 @@ progress:
 ## Current Position
 
 Phase: 16 (boss-room-lifecycle) — EXECUTING
-Plan: 3 of 4
+Plan: 4 of 4
 Status: Ready to execute
 Last activity: 2026-07-15
 
@@ -82,6 +82,7 @@ Progress: [████░░░░░░] v3.1 milestone: 2/5 phases complete (
 | FloorTransitionEffect.PlayEntry()/PlayExit()를 SpriteMask 페이드에서 Rigidbody2D 실제 이동으로 전면 재작성 (Plan 999.3-02) | PlayEntry는 999.3-01 산출물 PortalVortex.mat 소용돌이 오버레이 + 포탈 중심으로 실제 이동, PlayExit은 CombatController가 이미 쓰는 IsDashing 애니메이터 bool을 재사용한 수직 도약으로 대체 — PlayExit() 호출 시그니처는 그대로 유지해 WorldGenerator EXIT 호출부 무변경, ENTRY 호출부만 _portalVortexMaterial 전달로 갱신 |
 | SampleScene WorldGenerator._portalVortexMaterial 배선 + EntryVortex 회오리 반복 플레이테스트 튜닝 후 Phase 999.3 전체 완료 판정 (Plan 999.3-03) | 초기 튜닝 회귀를 999.3-01 확정 베이스라인으로 되돌린 뒤 재튜닝 — 월드 사이즈 축소, distortion scale 재조정, phase 드라이버를 절대 시간에서 로컬 경과 시간으로 전환, winding count/강도 강화까지 다단계 사용자 피드백 반영, 최종 사용자 확인("회오리는 이정도면 괜찮은것 같아")으로 D-01~D-08 전체 체크리스트 완주 없이 페이즈 종료 |
 | TestWorldGenerator.cs/FloorSpawner.cs/RoomExit.cs(+.meta) 삭제 및 MeleeEnemy.cs/RangedEnemy.cs 죽은 LayerPlayerHurtbox/LayerPlayerInvincible 상수 제거 완료 (Plan 16-01) | D-01~D-04 — GUID 교차검증으로 100% 죽은 코드 확인 후 삭제, Physics2D 충돌 매트릭스로 대체된 중복 상수 정리. Unity 에디터 측 잔여 정리(비활성 FloorSpawner GameObject, 구형 Room_*.prefab 14종+Room_Debug.prefab 삭제)는 사용자가 직접 처리하기로 확정 — 이 플랜 범위 밖. Wave 2(16-03) EnemyBase 추출의 사전 정지 작업 완료 |
+| EnemyBase 추상 클래스 신설 후 MeleeEnemy/RangedEnemy가 상속하도록 리팩토링 완료, D-08 점수 시점 재설계 전체 완성 (Plan 16-03) | D-05 — OnDashHit() 공통부(가드+IsAlive=false+rb정지+콜라이더비활성화+animator+DeathEffect)/ClearHighlight()/IsPlayerInRange()/OnEnable-OnDisable 구독/SetSpawnGate()를 최소 범위로만 추출, 타입별 고유 로직(텔레그래프/히트박스/점프-gap, 조준선/발사체/카이팅)은 그대로 서브클래스에 유지. D-08 — 각 적이 EnemyBase.OnDashHit() 안에서 IsAlive=false 커밋 직후 스스로 RespawnedEnemyMarker 판정 후 ScoreManager.AddKillScore() 호출(16-02의 CombatController 측 제거와 합쳐 D-08 완성). Phase 15(BossEnemy, 미실행) EnemyBase 상속 전제 마련 |
 
 ### Key Decisions Locked (v1.0/v2.0/v3.0)
 
@@ -128,8 +129,8 @@ Full decision log lives in `.planning/PROJECT.md` Key Decisions table. Recent hi
 6. Read `.planning/phases/15-fsm/15-CONTEXT.md` D-11/D-12 — SUPERSEDED 표시 확인 (Room_Debug 삭제, 점수 상쇄 우회책 불필요화)
 7. Next action: 리팩토링 배치 실행(`/gsd:quick --full`) 또는 보스 룸 그레이 에어리어 논의 후 `/gsd:plan-phase 16`
 
-**Last session:** 2026-07-15T07:29:57.206Z
-**Stopped at:** Completed 16-02-PLAN.md
+**Last session:** 2026-07-15T07:35:28.882Z
+**Stopped at:** Completed 16-03-PLAN.md
 
 ---
 *State initialized: 2026-05-27*

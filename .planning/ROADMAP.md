@@ -549,7 +549,7 @@ Plans:
 Plans:
 - [x] 16-01-PLAN.md — 죽은 파일 3종 삭제 + MeleeEnemy/RangedEnemy 죽은 레이어 상수 제거 (D-01, D-02, D-03, D-04)
 - [x] 16-02-PLAN.md — CombatController 마우스 방향 헬퍼 통합 + 디버그 로그 정리 + 점수 호출 제거 (D-06, D-07, D-08)
-- [ ] 16-03-PLAN.md — EnemyBase 추출 + 점수 시점 재설계(Enemy 측) (D-05, D-08)
+- [x] 16-03-PLAN.md — EnemyBase 추출 + 점수 시점 재설계(Enemy 측) (D-05, D-08)
 - [ ] 16-04-PLAN.md — 리팩토링 배치(D-01~D-08) 전체 플레이테스트 검증
 
 ---
