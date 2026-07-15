@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v3.1
 milestone_name: — 보스 룸 & 연출 고도화
 status: executing
-stopped_at: Completed 999.3-02-PLAN.md
-last_updated: "2026-07-15T01:34:42.397Z"
+stopped_at: Completed 999.3-03-PLAN.md (Phase 999.3 complete)
+last_updated: "2026-07-15T02:38:37.000Z"
 last_activity: 2026-07-15
 progress:
   total_phases: 8
-  completed_phases: 4
+  completed_phases: 5
   total_plans: 18
-  completed_plans: 17
+  completed_plans: 18
 ---
 
 # Project State: Fast (가칭)
@@ -33,13 +33,13 @@ progress:
 
 ## Current Position
 
-Phase: 999.3 (player-portal-effect-rework) — EXECUTING
-Plan: 2 of 3 complete (999.3-01 완료, 999.3-02 완료 — FloorTransitionEffect.PlayEntry()/PlayExit() 전체 재작성) — 999.3-03 실행 예정
-Status: Ready to execute 999.3-03
+Phase: 999.3 (player-portal-effect-rework) — COMPLETE
+Plan: 3 of 3 complete (999.3-01, 999.3-02, 999.3-03 전부 완료 — PortalVortex 셰이더 신설부터 FloorTransitionEffect 재작성, 씬 배선+플레이테스트 튜닝까지)
+Status: Ready to plan next phase (15-fsm)
 Last activity: 2026-07-15
 
 ```
-Progress: [████░░░░░░] v3.1 milestone: 2/5 phases complete (Phase 13-17) — Phase 999.2(backlog) 4/4 plans complete
+Progress: [████░░░░░░] v3.1 milestone: 2/5 phases complete (Phase 13-17) — Phase 999.2/999.3/999.4(backlog) 전부 완료
 ```
 
 ---
@@ -80,6 +80,7 @@ Progress: [████░░░░░░] v3.1 milestone: 2/5 phases complete (
 | WorldGenerator.MarkRoomLeft()/TryRespawnRoom()을 새 트리거 콜라이더 없이 UpdatePlayerIndex()의 기존 체인-인덱스 전이 신호에 배선 (Plan 999.2-03) | 999.2-RESEARCH.md Pitfall 2 회피 — Room 진입/이탈이 이미 매 프레임 계산되므로 별도 감지 시스템 불필요, Corridor는 RoomRespawnGate 미부착으로 자동 no-op(D-04) |
 | Phase 999.2(enemy-infinite-respawn-mechanism) 4/4 plans 전체 완료 판정 (Plan 999.2-04) | RoomRespawnTool 메뉴 실행으로 Complex_Room 6종에 RoomClearCondition+RoomRespawnGate 실제 부착 확인, D-01~D-10(D-01a 포함) 플레이테스트 체크리스트 11개 항목 전부 통과 — 리스폰 파이프라인은 Case A(체인 내 재진입)로 한정되고 Case B(체인 이탈 재생성)/Corridor/보스 룸에는 부작용 없음이 확인됨, 추가 폴리싱/수정 불요 |
 | FloorTransitionEffect.PlayEntry()/PlayExit()를 SpriteMask 페이드에서 Rigidbody2D 실제 이동으로 전면 재작성 (Plan 999.3-02) | PlayEntry는 999.3-01 산출물 PortalVortex.mat 소용돌이 오버레이 + 포탈 중심으로 실제 이동, PlayExit은 CombatController가 이미 쓰는 IsDashing 애니메이터 bool을 재사용한 수직 도약으로 대체 — PlayExit() 호출 시그니처는 그대로 유지해 WorldGenerator EXIT 호출부 무변경, ENTRY 호출부만 _portalVortexMaterial 전달로 갱신 |
+| SampleScene WorldGenerator._portalVortexMaterial 배선 + EntryVortex 회오리 반복 플레이테스트 튜닝 후 Phase 999.3 전체 완료 판정 (Plan 999.3-03) | 초기 튜닝 회귀를 999.3-01 확정 베이스라인으로 되돌린 뒤 재튜닝 — 월드 사이즈 축소, distortion scale 재조정, phase 드라이버를 절대 시간에서 로컬 경과 시간으로 전환, winding count/강도 강화까지 다단계 사용자 피드백 반영, 최종 사용자 확인("회오리는 이정도면 괜찮은것 같아")으로 D-01~D-08 전체 체크리스트 완주 없이 페이즈 종료 |
 
 ### Key Decisions Locked (v1.0/v2.0/v3.0)
 
@@ -123,9 +124,9 @@ Full decision log lives in `.planning/PROJECT.md` Key Decisions table. Recent hi
 4. Read `.planning/research/SUMMARY.md` — architecture/pitfall context for Phase 13-17
 5. Next action: `/gsd:plan-phase 13`
 
-**Last session:** 2026-07-15T01:34:42.387Z
-**Stopped at:** Completed 999.3-02-PLAN.md
+**Last session:** 2026-07-15T02:38:37.000Z
+**Stopped at:** Completed 999.3-03-PLAN.md (Phase 999.3 complete)
 
 ---
 *State initialized: 2026-05-27*
-*Last updated: 2026-07-15 — Plan 999.3-02(FloorTransitionEffect.cs PlayEntry()/PlayExit() 전면 재작성: 소용돌이 흡입 + IsDashing 재사용 수직 도약, WorldGenerator 배선) 완료. 다음: 999.3-03(SampleScene 배선 + 전체 플레이테스트 검증) 실행.*
+*Last updated: 2026-07-15 — Plan 999.3-03(SampleScene 배선 + EntryVortex 플레이테스트 튜닝) 완료, Phase 999.3(player-portal-effect-rework) 전체 완료. 다음: Phase 15(보스 FSM & 빈틈 타겟팅) 계획.*
