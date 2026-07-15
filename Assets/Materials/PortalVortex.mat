@@ -27,7 +27,7 @@ Material:
     m_Ints: []
     m_Floats:
     - _DebugMode: 0
-    - _DistortionScale: 0.05
+    - _DistortionScale: 0.025
     - _EffectAlpha: 1
     - _PullStrength: 0.15
     - _Radius: 0.5
