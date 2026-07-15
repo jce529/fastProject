@@ -642,29 +642,13 @@ public class WorldGenerator : MonoBehaviour
         // D-07 — 기존 체인(현재 room+corridor 전부) 즉시 Destroy
         // 리뷰 수정: 입장한 portal 외 다른 미사용 포탈의 대기룸도 함께 Destroy
         // (RemoveTail()의 D-08 정리 패턴과 동일 — _maxExitsActive > 1일 때 고아 GameObject 누수 방지)
+        // 리뷰 수정: 입장한 portal 외 다른 미사용 포탈의 대기룸도 함께 Destroy (excludePortal: portal).
+        // Phase 14: 정리되는 옛 체인 section의 대기/활성 스폰 기록만 개별 제거한다 — standbyRoom(= 다음
+        // Step의 newRoom)은 _chain에 속한 적이 없어 이 루프가 건드리지 않는다. CleanupSection() 내부의
+        // 개별 _activeExitCount-- 는 아래 무조건적인 = 0 리셋으로 덮어써지므로 원래 동작과 동등하다.
         foreach (var (chainRoom, chainCorridor) in _chain)
         {
-            var orphanPortal = chainRoom.GetComponentInChildren<ExitPortal>(true);
-            if (orphanPortal != null && orphanPortal != portal && orphanPortal.StandbyRoom != null)
-            {
-                Destroy(orphanPortal.StandbyRoom);
-            }
-
-            // Phase 14: 정리되는 옛 체인 section의 대기/활성 스폰 기록만 개별 제거한다 (RemoveTail/RemoveHead와
-            // 동일 패턴). standbyRoom(= 다음 Step의 newRoom)은 _chain에 속한 적이 없어 이 루프가 건드리지
-            // 않으므로, 블랭킷 _activatedSections.Clear()/_pendingSpawns.Clear()는 절대 호출하지 않는다 —
-            // 호출 시 standbyRoom의 사전 등록된 _pendingSpawns 엔트리까지 함께 지워져 Step 4의
-            // TryActivateSection(newRoom)이 등록을 찾지 못해 새 층 시작 Room의 적이 영원히 비활성 상태로 남는다.
-            _activatedSections.Remove(chainRoom);
-            _pendingSpawns.Remove(chainRoom);
-            if (chainCorridor != null)
-            {
-                _activatedSections.Remove(chainCorridor);
-                _pendingSpawns.Remove(chainCorridor);
-            }
-
-            if (chainCorridor != null) Destroy(chainCorridor);
-            Destroy(chainRoom);
+            CleanupSection(chainRoom, chainCorridor, excludePortal: portal);
         }
         _chain.Clear();
         _activeExitCount = 0; // 옛 체인에 있던 모든 포탈(입장한 포탈 + 정리된 미사용 포탈)이 함께 사라짐
