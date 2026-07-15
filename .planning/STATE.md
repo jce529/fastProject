@@ -3,8 +3,8 @@ gsd_state_version: 1.0
 milestone: v3.1
 milestone_name: — 보스 룸 & 연출 고도화
 status: planning
-stopped_at: Phase 15 context gathered
-last_updated: "2026-07-15T03:05:49.207Z"
+stopped_at: Phase 16 context gathered (refactor batch only — boss room gray areas deferred)
+last_updated: "2026-07-15T06:30:00.000Z"
 last_activity: 2026-07-15
 progress:
   total_phases: 8
@@ -33,9 +33,9 @@ progress:
 
 ## Current Position
 
-Phase: 999.3 (player-portal-effect-rework) — COMPLETE
-Plan: 3 of 3 complete (999.3-01, 999.3-02, 999.3-03 전부 완료 — PortalVortex 셰이더 신설부터 FloorTransitionEffect 재작성, 씬 배선+플레이테스트 튜닝까지)
-Status: Ready to plan next phase (15-fsm)
+Phase: 16 (boss-room-lifecycle) — CONTEXT PARTIAL
+Plan: discuss-phase 세션이 코드 리팩토링 조사로 전환됨 — WorldGenerator.cs 중복 정리는 quick task 260715-kci로 완료, 나머지 배치(죽은 파일 삭제/EnemyBase/CombatController 정리/점수 시점 재설계)는 16-CONTEXT.md에 문서화만 하고 실행은 다음 세션으로 이관. 보스 룸 기능 자체의 그레이 에어리어(BOSS-01/02/07/09/10) 4개는 미논의 — `/gsd:plan-phase 16` 전에 필수.
+Status: Ready to (a) 리팩토링 배치 실행 `/gsd:quick --full` 또는 (b) 보스 룸 그레이 에어리어 마저 논의 후 계획
 Last activity: 2026-07-15
 
 ```
@@ -123,11 +123,13 @@ Full decision log lives in `.planning/PROJECT.md` Key Decisions table. Recent hi
 2. Read `.planning/ROADMAP.md` — v3.1 section active (Phase 13-17); v1.0/v2.0/v3.0 archived in collapsed `<details>`
 3. Read `.planning/REQUIREMENTS.md` — v3.1 requirements + traceability (18/18 mapped)
 4. Read `.planning/research/SUMMARY.md` — architecture/pitfall context for Phase 13-17
-5. Next action: `/gsd:plan-phase 13`
+5. Read `.planning/phases/16-boss-room-lifecycle/16-CONTEXT.md` — 리팩토링 배치(D-01~D-08) + 미논의 보스 룸 그레이 에어리어 목록
+6. Read `.planning/phases/15-fsm/15-CONTEXT.md` D-11/D-12 — SUPERSEDED 표시 확인 (Room_Debug 삭제, 점수 상쇄 우회책 불필요화)
+7. Next action: 리팩토링 배치 실행(`/gsd:quick --full`) 또는 보스 룸 그레이 에어리어 논의 후 `/gsd:plan-phase 16`
 
-**Last session:** 2026-07-15T03:05:49.201Z
-**Stopped at:** Phase 15 context gathered
+**Last session:** 2026-07-15T06:30:00.000Z
+**Stopped at:** Phase 16 context gathered (refactor batch only — boss room gray areas deferred)
 
 ---
 *State initialized: 2026-05-27*
-*Last updated: 2026-07-15 — Plan 999.3-03(SampleScene 배선 + EntryVortex 플레이테스트 튜닝) 완료, Phase 999.3(player-portal-effect-rework) 전체 완료. 다음: Phase 15(보스 FSM & 빈틈 타겟팅) 계획.*
+*Last updated: 2026-07-15 — discuss-phase-16 세션이 실시간 코드 리뷰로 전환됨. WorldGenerator.cs 정리(quick 260715-kci)는 완료, 나머지 리팩토링 배치(죽은 파일 삭제/EnemyBase/CombatController/점수 시점 재설계)는 16-CONTEXT.md에 문서화, 실행은 다음 세션. 보스 룸 기능 그레이 에어리어는 미논의.*
