@@ -2,15 +2,15 @@
 gsd_state_version: 1.0
 milestone: v3.1
 milestone_name: — 보스 룸 & 연출 고도화
-status: 999.3-01 Task 1/2 완료(PortalVFX 소팅 레이어+Renderer2D 설정, PortalVortex.shader/.mat) — Task 3(Unity Play 모드 육안 검증) checkpoint 대기
-stopped_at: 999.3-01-PLAN.md Task 2 complete (commit 2a45956) — Task 3 checkpoint:human-verify 대기
-last_updated: "2026-07-14T03:49:46.000Z"
-last_activity: 2026-07-14 -- 999.3-01-PLAN.md Task 1-2 완료, Task 3 checkpoint 대기
+status: executing
+stopped_at: 999.3-01-PLAN.md 완료 (Task 1-3 전부, Task 3 checkpoint 8차 재시도 끝에 승인) — 999.3-02 실행 대기
+last_updated: "2026-07-15T01:27:32.383Z"
+last_activity: 2026-07-14
 progress:
   total_phases: 8
   completed_phases: 4
   total_plans: 18
-  completed_plans: 15
+  completed_plans: 16
 ---
 
 # Project State: Fast (가칭)
@@ -34,9 +34,9 @@ progress:
 ## Current Position
 
 Phase: 999.3 (player-portal-effect-rework) — EXECUTING
-Plan: 1 of 3 (Task 1/2 done, Task 3 checkpoint:human-verify 대기)
-Status: Executing Phase 999.3 — Plan 999.3-01 blocked on human Play-mode verification
-Last activity: 2026-07-14 -- 999.3-01-PLAN.md Task 1-2 완료, Task 3 checkpoint 대기
+Plan: 1 of 3 complete (999.3-01 Task 1-3 전부 완료, Task 3 checkpoint 승인) — 999.3-02 실행 예정
+Status: Ready to execute 999.3-02
+Last activity: 2026-07-14
 
 ```
 Progress: [████░░░░░░] v3.1 milestone: 2/5 phases complete (Phase 13-17) — Phase 999.2(backlog) 4/4 plans complete
@@ -123,8 +123,8 @@ Full decision log lives in `.planning/PROJECT.md` Key Decisions table. Recent hi
 5. Next action: `/gsd:plan-phase 13`
 
 **Last session:** 2026-07-14T03:46:34.222Z
-**Stopped at:** Completed 999.2-04-PLAN.md — Phase 999.2(enemy-infinite-respawn-mechanism) 완료
+**Stopped at:** 999.3-01-PLAN.md 완료 — Task 3 checkpoint(human-verify) 8차 재시도 끝에 승인, 999.3-02 실행 대기
 
 ---
 *State initialized: 2026-05-27*
-*Last updated: 2026-07-14 — Plan 999.2-04(RoomRespawnTool 메뉴 실행 + Complex_Room 6종 RoomClearCondition+RoomRespawnGate 부착 + D-01~D-10/D-01a 전체 플레이테스트 검증) 완료. Phase 999.2(enemy-infinite-respawn-mechanism) 4/4 plans 전체 종료. 다음: v3.1 로드맵 Phase 15(보스 FSM & 빈틈 타겟팅) 계획.*
+*Last updated: 2026-07-15 — Plan 999.3-01(PortalVortex.shader/.mat 그랩패스 소용돌이 왜곡 스파이크 + PortalVortexDriver.cs) 완료. Task 3 human Play-mode checkpoint 8차 재시도 끝에 승인. 다음: 999.3-02(FloorTransitionEffect 전체 재작성) 실행.*

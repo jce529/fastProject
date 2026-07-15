@@ -217,11 +217,14 @@ MonoBehaviour:
   patrolHalfRange: 3
   hitboxActiveDuration: 0.15
   attackWindupDelay: 0.1
+  telegraphDuration: 0.45
+  telegraphSpeedMultiplier: 0.4
   _exclamationIcon: {fileID: 1365058121}
   _meleeHitbox: {fileID: 836273552}
   jumpForce: 8
   wallCheckDist: 0.4
   gapCheckDist: 0.6
+  maxJumpableGapWidth: 3.2
 --- !u!212 &39141187
 SpriteRenderer:
   serializedVersion: 2
@@ -2551,6 +2554,7 @@ MonoBehaviour:
   _meleeEnemyPrefab: {fileID: 2920709404338958160, guid: 9f7e98af5cb28ed44bdae27b6bbeacfc, type: 3}
   _rangedEnemyPrefab: {fileID: 6096329199964086436, guid: 6683746b3080e3e4ea1543e3ab03c125, type: 3}
   _portalEffectPrefab: {fileID: 4852289420351960297, guid: f509cdc3bda240940b1ac24888f0b970, type: 3}
+  _spawnStaggerInterval: 0.3
 --- !u!1 &1365058120
 GameObject:
   m_ObjectHideFlags: 0
@@ -3893,6 +3897,8 @@ MonoBehaviour:
   detectionRadius: 12
   moveSpeed: 3
   aimLineLength: 5
+  kitingRetreatRange: 7.5
+  kitingSpeed: 3
   patrolSpeed: 1.5
   patrolHalfRange: 3
   projectilePrefab: {fileID: 589011035376871884, guid: 9ad9704f35659284d8465dcfd5e5f846, type: 3}
