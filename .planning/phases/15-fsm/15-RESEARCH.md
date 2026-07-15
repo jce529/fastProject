@@ -235,11 +235,11 @@ public void ClearHighlight()
 ```
 **Warning signs:** Boss visually "loses" its vulnerability tint after a cancelled attack-pending sequence while still being targetable — a purely visual bug (D-02's dual-signal requirement silently degrades to single-signal, since the stop-in-place cue would still be present but the color cue would be wrong).
 
-### Pitfall 4: Every non-lethal boss hit also grants the normal `KillScore` (100pts) — verify this is intended
-**What goes wrong (or: what needs an explicit decision):** `CombatController.ExecuteDash()` calls `ScoreManager.AddKillScore(isRespawnKill)` unconditionally after every `OnDashHit()` (`CombatController.cs:312`), with no knowledge of enemy type. Since the roadmap explicitly locks "no `CombatController` changes" for targeting, this call site is very likely to stay untouched — meaning each of the boss's 7 hits (not just the killing 7th) will add +100 to score via the existing path, and the boss-specific bonus (D-09, 500-1000) stacks on top only on the 7th. Net score per full boss kill would be `7 × 100 + bossBonus` = 1200–1700, not just the bonus.
-**Why it happens:** `CombatController` has no concept of "boss" — it treats every `OnDashHit()` identically, by design (that's the reusability that made BOSS-03 cheap to implement).
-**How to avoid:** This is not necessarily a bug — REQUIREMENTS.md BOSS-06 only specifies a bonus "on kill," it does not forbid per-hit score. Flag this explicitly for the planner/user as a design decision point rather than silently "fixing" it (which would require touching the locked-untouched `CombatController`). If per-hit scoring during boss fights is undesired, the alternative requires either (a) `CombatController` special-casing boss targets before calling `AddKillScore` (contradicts the "no `CombatController` changes" premise), or (b) `ScoreManager.AddKillScore` accepting a "is this the boss and not yet dead" signal — both are bigger changes than this phase's locked scope implies. **Recommendation: accept the stacking as intended behavior** (each hit already feels rewarding per the core value pillar — "손을 떼면 적에게 돌진해 한 방에 처치하는 손맛"), and document the actual total score in the phase's plan for user awareness.
-**Warning signs:** None at runtime — this is a design-intent question, not a functional defect. Surface it during planning, not during a bug hunt.
+### Pitfall 4: Every non-lethal boss hit also grants the normal `KillScore` (100pts) — RESOLVED (D-12)
+**What goes wrong:** `CombatController.ExecuteDash()` calls `ScoreManager.AddKillScore(isRespawnKill)` unconditionally after every `OnDashHit()` (`CombatController.cs:312`), with no knowledge of enemy type. Since the roadmap locks "no `CombatController` changes" for targeting, this call site stays untouched — meaning each of the boss's 7 hits would add +100 to score via the existing path, on top of the D-09 kill bonus.
+**Resolution (D-12, user-decided 2026-07-15):** Per-hit stacking is **not** desired — only the 7th (killing) hit should net a score change (the D-09 bonus). Since `CombatController` must stay untouched and `IEnemy`'s 3-member contract is locked, the surgical fix lives entirely inside `BossEnemy`: every time `BossEnemy.OnDashHit()` registers a **non-lethal** hit (hits 1–6), it immediately subtracts the `KillScore` amount that `CombatController` just added a few lines earlier in the same call chain, netting to zero for that hit. On the 7th (lethal) hit, no subtraction occurs, so the existing +100 combines with the new D-09 bonus exactly as `Die()`/`AddBossKillScore()` already does (Code Example 2) — planner should decide whether the lethal hit's own +100 is also folded into the boss bonus constant or left additive; either is consistent with D-12 since D-12 only concerns the 6 non-lethal hits.
+**How to implement:** Add a small `ScoreManager` utility (e.g. `SubtractScore(int amount)` or direct `Score -=` if `Score` is already a public settable) and call it from `BossEnemy.OnDashHit()`'s non-lethal branch, right after `_hitCount++`. This requires zero changes to `CombatController` or `IEnemy` — see updated Code Example 1.
+**Warning signs:** If implemented wrong, score would visibly tick up by 100 on hits 1–6 before settling — verify via manual playtest (note `ScoreManager.Score` before/after each non-lethal hit; it should be unchanged) as part of the BOSS-06 verification map row.
 
 ### Pitfall 5: `EnemyDeathEffect`'s runtime-`AddComponent` pattern has no Inspector — intensity knobs must be code-configured, not tuned in-editor
 **What goes wrong:** Because `MeleeEnemy`/`RangedEnemy`/`BossEnemy` all call `gameObject.AddComponent<EnemyDeathEffect>()` at runtime rather than referencing a pre-configured prefab component, there is no way to tune `_maskRiseDuration`/`_particleColor` per-enemy-type through the Inspector — any per-type variation (D-08's "boss extension") must be passed programmatically via a new public method (see Architecture Patterns §4), not by creating a second prefab variant.
@@ -274,6 +274,10 @@ public void OnDashHit()
         return;
     }
 
+    // D-12: non-lethal hits must not net +100 — CombatController.ExecuteDash() already
+    // called AddKillScore() unconditionally just before this method ran; cancel it out.
+    ScoreManager.SubtractScore(ScoreManager.KillScore);
+
     _patternCoroutine = StartCoroutine(HitReactionAndReset()); // D-06 + D-07
 }
 ```
@@ -306,6 +310,13 @@ public static void AddBossKillScore()
 {
     Score += BossKillScore;
 }
+
+// D-12: lets BossEnemy cancel out the +100 CombatController.ExecuteDash() already
+// added via AddKillScore() for the 6 non-lethal hits — no CombatController/IEnemy change needed.
+public static void SubtractScore(int amount)
+{
+    Score -= amount;
+}
 ```
 
 ### 4. `DebugRoomTeleporter` boss field (D-11, additive)
@@ -333,10 +344,7 @@ public static void AddBossKillScore()
 
 ## Open Questions
 
-1. **Should the boss grant `ScoreManager.AddKillScore(false)` (+100) on every non-lethal hit, in addition to the D-09 bonus on the 7th?**
-   - What we know: `CombatController.ExecuteDash()` calls `AddKillScore()` unconditionally on every `OnDashHit()`, and the roadmap locks "no `CombatController` changes."
-   - What's unclear: Whether this stacking (7×100 + 500-1000 = 1200-1700 total) is the intended design, or an unconsidered side effect.
-   - Recommendation: Treat as intended (matches the core "each hit feels rewarding" value pillar) unless the user/planner explicitly wants it suppressed — suppressing it would require touching the locked-untouched `CombatController`, which is out of this phase's scope as currently defined. Surface this explicitly in the plan for a quick user confirmation rather than silently deciding.
+1. ~~Should the boss grant `ScoreManager.AddKillScore(false)` (+100) on every non-lethal hit, in addition to the D-09 bonus on the 7th?~~ **RESOLVED (D-12, 2026-07-15):** No — non-lethal hits (1-6) must net zero score change; `BossEnemy.OnDashHit()` self-cancels the `KillScore` that `CombatController` unconditionally adds, without touching `CombatController`/`IEnemy`. See Pitfall 4 and Code Example 1.
 
 2. **Does `EnemySpawner` need a `Boss` case in its `EnemyType` enum this phase, or is a direct `Instantiate()` in `DebugRoomTeleporter` sufficient for D-11's isolated test scope?**
    - What we know: D-11 explicitly scopes boss testing to `DebugRoomTeleporter` only, not `WorldGenerator`/room-content integration (that's Phase 16/17). `EnemySpawner.Spawn()` currently branches on `EnemyType.Melee`/`Ranged` only.
@@ -370,7 +378,7 @@ Skipped — this phase has no external dependencies beyond already-installed Uni
 | BOSS-03 | Telegraph→Vulnerable loop; only targetable when vulnerable | Manual playtest (isolated `DebugRoomTeleporter` boss room) | Hold Attack while boss is Telegraphing — confirm boss is NOT highlighted/selectable; hold Attack while boss is Vulnerable — confirm boss IS highlighted red and dash-targetable | Boss never selected as dash target outside the Vulnerable window, across ≥5 loop cycles |
 | BOSS-04 | Exactly 7 hits to kill, pattern resets on each non-lethal hit | Manual playtest | Land dash hits 1-6, confirm boss survives and pattern visibly restarts from Telegraph after each (with D-07 pause); land hit 7, confirm death sequence plays | Boss dies on exactly the 7th hit, not before, not after (Pitfall 1 regression check) |
 | BOSS-05 | No progress UI exposed | Manual playtest + code review | Visually scan HUD/screen during a full boss fight; grep codebase for any new UI Text/Canvas binding to `_hitCount` | Zero UI elements reference hit count anywhere |
-| BOSS-06 | Score bonus on kill | Manual playtest | Note `ScoreManager.Score` before boss fight, confirm it increases by the expected total (bonus + any per-hit stacking per Open Question 1) after the 7th hit | Score increases by the documented expected amount at the moment of the 7th hit |
+| BOSS-06 | Score bonus on kill only (no per-hit stacking, D-12) | Manual playtest | Note `ScoreManager.Score` before each of hits 1-6, confirm it is UNCHANGED after each (D-12 self-cancel); note score before hit 7, confirm it increases by the documented boss-kill total after the 7th hit | Score is flat across hits 1-6; increases by exactly the documented amount at the moment of the 7th hit |
 
 ### Sampling Rate
 - **Per task commit:** Manual spot-check of the specific state transition just implemented (e.g., after adding Telegraph→Vulnerable, verify the loop visually in-editor)

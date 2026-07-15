@@ -33,6 +33,7 @@
 ### 테스트 환경 & 보스 비주얼
 - **D-10:** 보스 스프라이트/애니메이션은 **기존 적 스프라이트를 재활용**한다(크기를 키우거나 색조를 변형하는 정도) — 신규 아트 제작(Unity_AssetGeneration 등)은 이번 Phase에서 진행하지 않는다. 실제 보스 전용 아트는 보스 룸(Phase 16) 이후로 미룬다.
 - **D-11:** Phase 15의 FSM 검증은 `DebugRoomTeleporter`를 확장해 보스 프리팹 스폰 필드를 추가하는 방식으로 진행한다 — 기존 `_meleePrefab`/`_rangedPrefab` Inspector 필드와 동일한 패턴으로 보스 프리팹 필드를 추가해 `Room_Debug`에서 즉시 스폰/테스트할 수 있게 한다. 보스 룸 콘텐츠(Phase 16)나 WorldGenerator 통합(Phase 17)은 필요하지 않다.
+- **D-12:** 보스의 6회 비치명타(1~6회)는 일반 `KillScore`(+100) 점수를 적립하지 않는다 — 오직 7회째(처치) 시에만 D-09 보너스가 적립된다. `CombatController.ExecuteDash()`는 매 `OnDashHit()` 호출 후 무조건 `AddKillScore()`를 호출하므로(락된 "CombatController 무변경" 전제 유지), `BossEnemy.OnDashHit()`이 비치명타를 받을 때마다 방금 적립된 `KillScore`만큼을 스스로 상쇄(차감)하는 방식으로 구현한다 — `CombatController`/`IEnemy` 계약은 손대지 않는다. 정확한 상쇄 메커니즘(예: `ScoreManager`에 `SubtractScore` 유틸 추가)은 Claude's Discretion.
 
 ### Claude's Discretion
 - 빈틈 상태 정확한 지속시간 수치 (0.8~1.2초 범위 내)
@@ -42,6 +43,7 @@
 - 처치 점수 보너스 정확한 수치 (500~1000 권장 범위 내)
 - 기존 적 스프라이트를 보스처럼 보이게 하는 크기/색상 변형 값
 - 텔레그래프 이동 속도 배율, 돌진/휘두르기 공격의 정확한 구현 방식(단순 돌진 vs 히트박스 스윕)
+- D-12 비치명타 점수 상쇄의 정확한 구현 방식(예: `ScoreManager.SubtractScore(int)` 신규 메서드 vs 기존 `Score` 프로퍼티 직접 조작)
 
 </decisions>
 
