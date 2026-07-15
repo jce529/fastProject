@@ -20,7 +20,7 @@ public class FloorTransitionEffect : MonoBehaviour
     [Header("Entry Vortex (Phase 999.3 D-01~D-03)")]
     [SerializeField] private Material _vortexMaterial;          // PortalVortex.mat — WorldGenerator가 PlayEntry() 호출 시 전달 (999.3-01 산출물)
     [SerializeField] private float _entryVortexDuration = 0.4f; // D-08: 기존 E1-E4 총합(~0.4s)과 동일 기준 유지
-    [SerializeField] private float _vortexWorldRadius = 4f;     // 소용돌이가 덮는 월드 반경 — 플레이어+주변 타일 포함
+    [SerializeField] private float _vortexWorldRadius = 2f;     // 소용돌이가 덮는 월드 반경 — 플레이어+주변 타일 포함
 
     [Header("Exit Portal Backdrop — X1/X4 존치 (Open Question 1 기본값: KEEP)")]
     [SerializeField] private float _exitPortalGrowDuration = 0.4f;
