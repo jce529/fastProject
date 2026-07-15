@@ -533,16 +533,17 @@ Plans:
 
 ---
 
-### Phase 16: 보스 룸 콘텐츠 & 생명주기 게이팅
-**Goal**: 보스 룸이 EXIT 포탈처럼 확률적으로 스폰되어 솔로 전투를 보장하고, 입장 시 카메라 연출과 전용 스폰 사운드가 재생되며, 층 타이머가 일시정지되고, 전투 중에는 WorldGenerator 정리 로직에서 예외 처리된다
+### Phase 16: 보스 룸 콘텐츠 & 생명주기 게이팅 (+ 관련 코드 리팩토링)
+**Goal**: 보스 룸이 EXIT 포탈처럼 확률적으로 스폰되어 솔로 전투를 보장하고, 입장 시 카메라 연출과 전용 스폰 사운드가 재생되며, 층 타이머가 일시정지되고, 전투 중에는 WorldGenerator 정리 로직에서 예외 처리된다. 이 기능이 통합되는 기존 코드(WorldGenerator 등)에서 발견되는 중복/이상 패턴도 이번 Phase 범위에서 함께 정리한다 (2026-07-15 discuss-phase에서 범위 확장 확정 — CleanupSection() 추출 등 사전 정리 작업이 이미 quick task 260715-kci로 완료됨).
 **Depends on**: Phase 14, Phase 15
-**Requirements**: BOSS-01, BOSS-02, BOSS-07, BOSS-09, BOSS-10, SFX-05
+**Requirements**: BOSS-01, BOSS-02, BOSS-07, BOSS-09, BOSS-10, SFX-05 (+ 16-CONTEXT.md 리팩토링 결정사항 — formal REQ-ID 없음, decision ID를 요구사항 앵커로 사용)
 **Success Criteria** (what must be TRUE):
   1. 보스 룸은 EXIT 포탈과 마찬가지로 확률적으로 스폰되며, 동시에 활성 보스 룸이 1개를 초과하지 않는다
   2. 보스 룸에는 EnemySpawner 마커가 없어 일반 적(근접/원거리)이 스폰되지 않는다 — 보스 단독 전투가 보장된다
   3. 플레이어가 보스 룸에 입장하면 카메라 잠금/줄임 연출이 재생됨과 동시에 보스 전용 스폰 사운드가 재생된다
   4. 보스 룸 입장과 동시에 층 타이머가 일시정지되고, 보스 룸을 벗어나면(처치 또는 EXIT 이용) 재개된다
   5. 보스와의 전투가 진행 중인 동안에는 WorldGenerator의 앞뒤 2개 유지 정리(Destroy) 로직에서 보스 룸이 예외 처리되어 파괴되지 않는다
+  6. 이번 Phase가 다루는 기존 코드 안의 중복 로직/이상 패턴이 식별되어 정리된다 (16-CONTEXT.md 리팩토링 결정사항 기준)
 **Plans**: TBD
 
 ---
