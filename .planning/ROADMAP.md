@@ -547,8 +547,8 @@ Plans:
 **Plans**: 4 plans (2 waves) — 2026-07-15 plan-phase 세션은 관련 코드 리팩토링 트랙(D-01~D-08, Success Criteria #6)만 계획함. 보스 룸 기능 자체(BOSS-01/02/07/09/10, SFX-05, Success Criteria #1-5)는 그레이 에어리어 미논의로 이번 라운드에 포함되지 않음 — 별도 discuss-phase 세션 후 후속 plan-phase 라운드에서 16-05+로 이어서 계획 예정.
 
 Plans:
-- [ ] 16-01-PLAN.md — 죽은 파일 3종 삭제 + MeleeEnemy/RangedEnemy 죽은 레이어 상수 제거 (D-01, D-02, D-03, D-04)
-- [ ] 16-02-PLAN.md — CombatController 마우스 방향 헬퍼 통합 + 디버그 로그 정리 + 점수 호출 제거 (D-06, D-07, D-08)
+- [x] 16-01-PLAN.md — 죽은 파일 3종 삭제 + MeleeEnemy/RangedEnemy 죽은 레이어 상수 제거 (D-01, D-02, D-03, D-04)
+- [x] 16-02-PLAN.md — CombatController 마우스 방향 헬퍼 통합 + 디버그 로그 정리 + 점수 호출 제거 (D-06, D-07, D-08)
 - [ ] 16-03-PLAN.md — EnemyBase 추출 + 점수 시점 재설계(Enemy 측) (D-05, D-08)
 - [ ] 16-04-PLAN.md — 리팩토링 배치(D-01~D-08) 전체 플레이테스트 검증
 
