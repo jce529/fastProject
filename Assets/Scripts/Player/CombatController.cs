@@ -361,32 +361,26 @@ public class CombatController : MonoBehaviour
 
     // -- Enemy detection -----------------------------------------------------------
 
+    /// <summary>D-06(Phase 16): FindNearestEnemyInRange()의 Linear/Fan 두 분기가 거의 동일하게
+    /// 복붙하던 마우스→월드 방향 계산을 통합. 마우스가 origin과 거의 겹치는 예외 상황
+    /// (sqrMagnitude 낮음)에는 Vector2.right로 폴백 — 기존 Fan 분기에만 있던 안전장치를
+    /// Linear 분기에도 동일하게 적용한다(정상 플레이 동작 변경 없음, 극단적 edge case만 보강).</summary>
+    private Vector2 GetMouseWorldDirection(Vector2 origin)
+    {
+        UnityEngine.InputSystem.Mouse mouse = UnityEngine.InputSystem.Mouse.current;
+        Vector2 mousePos = mouse != null ? mouse.position.ReadValue() : (Vector2)_mainCamera.WorldToScreenPoint(origin);
+        Vector3 mouseWorld = _mainCamera.ScreenToWorldPoint(new Vector3(mousePos.x, mousePos.y, Mathf.Abs(_mainCamera.transform.position.z)));
+        Vector2 dir = (Vector2)mouseWorld - origin;
+        return dir.sqrMagnitude > 0.001f ? dir.normalized : Vector2.right;
+    }
+
     private IEnemy FindNearestEnemyInRange()
     {
         Vector2 origin = (Vector2)transform.position;
-        Vector2 attackDir = Vector2.right;
-        float currentMaxDist = searchRadius;
 
-        // [D-01/D-02 Integration] Calculate direction and specific radius once per search
-        if (AttackTypeSelector.Selected == AttackType.Linear)
-        {
-            // Linear attack uses mouse-driven direction (matches RangeDisplay)
-            UnityEngine.InputSystem.Mouse mouse = UnityEngine.InputSystem.Mouse.current;
-            Vector2 mousePos = mouse != null ? mouse.position.ReadValue() : (Vector2)_mainCamera.WorldToScreenPoint(origin);
-            Vector3 mouseWorld = _mainCamera.ScreenToWorldPoint(new Vector3(mousePos.x, mousePos.y, Mathf.Abs(_mainCamera.transform.position.z)));
-            attackDir = ((Vector2)mouseWorld - origin).normalized;
-            currentMaxDist = searchRadius; // matches linearLength=10
-        }
-        else
-        {
-            // Fan attack uses mouse-driven direction (matches RangeDisplay)
-            UnityEngine.InputSystem.Mouse mouse = UnityEngine.InputSystem.Mouse.current;
-            Vector2 mousePos2 = mouse != null ? mouse.position.ReadValue() : (Vector2)_mainCamera.WorldToScreenPoint(origin);
-            Vector3 mouseWorld2 = _mainCamera.ScreenToWorldPoint(new Vector3(mousePos2.x, mousePos2.y, Mathf.Abs(_mainCamera.transform.position.z)));
-            Vector2 dir = (Vector2)mouseWorld2 - origin;
-            attackDir = dir.sqrMagnitude > 0.001f ? dir.normalized : Vector2.right;
-            currentMaxDist = fanRadius;
-        }
+        // D-06(Phase 16): Linear/Fan 분기가 거의 동일했던 마우스→월드 방향 계산을 헬퍼로 통합.
+        Vector2 attackDir = GetMouseWorldDirection(origin);
+        float currentMaxDist = (AttackTypeSelector.Selected == AttackType.Linear) ? searchRadius : fanRadius;
 
         // Pre-allocated buffer — no GC (ROADMAP Stack Constraint)
         int count = Physics2D.OverlapCircle(origin, searchRadius, _enemyFilter, _hitBuffer);
