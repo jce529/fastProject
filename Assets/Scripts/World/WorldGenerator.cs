@@ -209,20 +209,22 @@ public class WorldGenerator : MonoBehaviour
         _chain.AddFirst((room, null));
     }
 
-    private void RemoveTail()
+    /// <summary>
+    /// RemoveTail/RemoveHead/FloorTransitionSequence가 공유하는 "room+corridor 노드 정리" 로직.
+    /// 포탈 StandbyRoom 파괴(+_activeExitCount 감소, excludePortal이 아닌 경우만) → _activatedSections/
+    /// _pendingSpawns에서 제거 → corridor/room GameObject Destroy까지 수행한다. _chain에서의 실제 노드 제거
+    /// (RemoveFirst/RemoveLast/Clear)는 호출자 책임으로 남긴다 — 호출자마다 다른 LinkedList 연산이 필요하기 때문.
+    /// </summary>
+    private void CleanupSection(GameObject room, GameObject corridor, ExitPortal excludePortal = null)
     {
-        var (room, corridor) = _chain.First.Value;
-
-        // D-08: 이 room이 보유한 포탈의 대기룸을 함께 정리 — 대기룸 메모리 누수 방지 + 포탈 스폰 기회 복원
         ExitPortal portal = room.GetComponentInChildren<ExitPortal>(true);
-        if (portal != null && portal.StandbyRoom != null)
+        if (portal != null && portal != excludePortal && portal.StandbyRoom != null)
         {
             Destroy(portal.StandbyRoom);
             _activeExitCount--;
             Debug.Log($"[WorldGenerator] _activeExitCount = {_activeExitCount}");
         }
 
-        // Phase 14: 정리되는 section의 대기/활성 스폰 기록도 함께 제거 (참조 누수 방지)
         _activatedSections.Remove(room);
         _pendingSpawns.Remove(room);
         if (corridor != null)
@@ -233,6 +235,12 @@ public class WorldGenerator : MonoBehaviour
 
         if (corridor != null) Destroy(corridor);
         Destroy(room);
+    }
+
+    private void RemoveTail()
+    {
+        var (room, corridor) = _chain.First.Value;
+        CleanupSection(room, corridor);
         _chain.RemoveFirst();
     }
 
@@ -244,26 +252,7 @@ public class WorldGenerator : MonoBehaviour
     private void RemoveHead()
     {
         var (room, corridor) = _chain.Last.Value;
-
-        // D-08: 이 room이 보유한 포탈의 대기룸을 함께 정리 — RemoveTail()과 동일 패턴
-        ExitPortal portal = room.GetComponentInChildren<ExitPortal>(true);
-        if (portal != null && portal.StandbyRoom != null)
-        {
-            Destroy(portal.StandbyRoom);
-            _activeExitCount--;
-            Debug.Log($"[WorldGenerator] _activeExitCount = {_activeExitCount}");
-        }
-
-        _activatedSections.Remove(room);
-        _pendingSpawns.Remove(room);
-        if (corridor != null)
-        {
-            _activatedSections.Remove(corridor);
-            _pendingSpawns.Remove(corridor);
-        }
-
-        if (corridor != null) Destroy(corridor);
-        Destroy(room);
+        CleanupSection(room, corridor);
         _chain.RemoveLast();
     }
 
