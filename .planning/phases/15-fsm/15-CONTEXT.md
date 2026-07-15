@@ -32,8 +32,8 @@
 
 ### 테스트 환경 & 보스 비주얼
 - **D-10:** 보스 스프라이트/애니메이션은 **기존 적 스프라이트를 재활용**한다(크기를 키우거나 색조를 변형하는 정도) — 신규 아트 제작(Unity_AssetGeneration 등)은 이번 Phase에서 진행하지 않는다. 실제 보스 전용 아트는 보스 룸(Phase 16) 이후로 미룬다.
-- **D-11:** Phase 15의 FSM 검증은 `DebugRoomTeleporter`를 확장해 보스 프리팹 스폰 필드를 추가하는 방식으로 진행한다 — 기존 `_meleePrefab`/`_rangedPrefab` Inspector 필드와 동일한 패턴으로 보스 프리팹 필드를 추가해 `Room_Debug`에서 즉시 스폰/테스트할 수 있게 한다. 보스 룸 콘텐츠(Phase 16)나 WorldGenerator 통합(Phase 17)은 필요하지 않다.
-- **D-12:** 보스의 6회 비치명타(1~6회)는 일반 `KillScore`(+100) 점수를 적립하지 않는다 — 오직 7회째(처치) 시에만 D-09 보너스가 적립된다. `CombatController.ExecuteDash()`는 매 `OnDashHit()` 호출 후 무조건 `AddKillScore()`를 호출하므로(락된 "CombatController 무변경" 전제 유지), `BossEnemy.OnDashHit()`이 비치명타를 받을 때마다 방금 적립된 `KillScore`만큼을 스스로 상쇄(차감)하는 방식으로 구현한다 — `CombatController`/`IEnemy` 계약은 손대지 않는다. 정확한 상쇄 메커니즘(예: `ScoreManager`에 `SubtractScore` 유틸 추가)은 Claude's Discretion.
+- **D-11 (SUPERSEDED 2026-07-15, Phase 16 discuss-phase 세션):** ~~Phase 15의 FSM 검증은 `DebugRoomTeleporter`를 확장해 보스 프리팹 스폰 필드를 추가하는 방식으로 진행한다 — `Room_Debug`에서 즉시 스폰/테스트할 수 있게 한다.~~ **`Room_Debug.prefab`이 죽은 레거시 코드 정리 과정에서 통째로 삭제되기로 결정됨**(구형 `Room_*.prefab` 14종을 가리키던 디버그 텔레포터 허브였음 — 자세한 배경은 `.planning/phases/16-boss-room-lifecycle/16-CONTEXT.md` 참고). **Phase 15를 실제로 계획/실행하기 전에 보스 FSM 격리 테스트 환경을 새로 정해야 한다** — `DebugRoomTeleporter` 자체는 여전히 유효한 도구이지만 `targetRoomPrefab`으로 쓸 대상(신규 미니멀 테스트 룸 제작 vs 기존 `Complex_Room` 중 하나 임시 활용 등)을 재논의 필요.
+- **D-12 (SUPERSEDED 2026-07-15, Phase 16 discuss-phase 세션):** ~~보스의 6회 비치명타(1~6회)는 일반 `KillScore`(+100) 점수를 적립하지 않는다... `BossEnemy.OnDashHit()`이 비치명타를 받을 때마다 방금 적립된 `KillScore`만큼을 스스로 상쇄(차감)하는 방식으로 구현한다.~~ **점수 시점 자체가 "공격 시"에서 "사망 시"로 재설계되어 이 상쇄 우회책이 불필요해짐** (자세한 내용은 `.planning/phases/16-boss-room-lifecycle/16-CONTEXT.md` D-08 참고). `ScoreManager.AddKillScore()` 호출이 `CombatController.ExecuteDash()`가 아니라 각 적의 `OnDashHit()` 안에서 `IsAlive=false`를 커밋하는 지점에 직접 놓이므로, `BossEnemy.OnDashHit()`은 7번째(치명타) 히트에서만 점수 호출을 하면 된다 — 1~6회차는 애초에 점수 관련 코드를 아예 실행하지 않는다. `CombatController`/`IEnemy` 계약은 여전히 변경 없음(D-12 원안의 이 전제는 유지됨).
 
 ### Claude's Discretion
 - 빈틈 상태 정확한 지속시간 수치 (0.8~1.2초 범위 내)
