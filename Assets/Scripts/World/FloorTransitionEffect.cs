@@ -11,51 +11,80 @@ using UnityEngine;
 public class FloorTransitionEffect : MonoBehaviour
 {
     private SpriteRenderer _sr;
+    private Rigidbody2D _rb;
+    private Animator _animator;
 
-    [SerializeField] private float _entryMaskDuration = 0.4f;
-    [SerializeField] private float _portalShrinkDuration = 0.3f;
+    private static readonly int UnscaledTimeId = Shader.PropertyToID("_UnscaledTime");
+    private static readonly int EffectAlphaId  = Shader.PropertyToID("_EffectAlpha");
+
+    [Header("Entry Vortex (Phase 999.3 D-01~D-03)")]
+    [SerializeField] private Material _vortexMaterial;          // PortalVortex.mat — WorldGenerator가 PlayEntry() 호출 시 전달 (999.3-01 산출물)
+    [SerializeField] private float _entryVortexDuration = 0.4f; // D-08: 기존 E1-E4 총합(~0.4s)과 동일 기준 유지
+    [SerializeField] private float _vortexWorldRadius = 4f;     // 소용돌이가 덮는 월드 반경 — 플레이어+주변 타일 포함
+
     [SerializeField] private float _exitPortalGrowDuration = 0.4f;
-    [SerializeField] private float _exitMaskDuration = 0.5f;
+    [SerializeField] private float _exitMaskDuration = 0.5f;    // NOTE: Plan 999.3-02 Task 2가 이 필드를 leap 필드로 교체 예정 — 이 태스크에서는 값만 유지
     [SerializeField] private float _portalFadeDuration = 0.3f;
 
     private void Awake()
     {
         _sr = GetComponent<SpriteRenderer>();
+        _rb = GetComponent<Rigidbody2D>();       // D-05: 흡입/도약 이동에 사용 — Player 루트에 이미 존재(CombatController RequireComponent)
+        _animator = GetComponent<Animator>();    // D-04: IsDashing 재사용에 사용
     }
 
-    /// <summary>E1-E4: 포탈 진입 시 플레이어가 포탈 경계선 너머로 점진적으로 사라지고, 포탈이 수축한다.</summary>
-    public IEnumerator PlayEntry(Transform portal)
+    /// <summary>D-01/D-02/D-03: 포탈 진입 시 URP 셰이더 기반 소용돌이 흡입 이펙트를 재생하고, 플레이어
+    /// Transform 자체도 포탈 중심으로 실제 이동한다(기존 SpriteMask 페이드를 완전히 대체 — 겹쳐 쓰지 않음).
+    /// vortexMaterial은 WorldGenerator가 호출 시 전달한다(null이면 이동만 재생, 셰이더 오버레이는 생략).</summary>
+    public IEnumerator PlayEntry(Transform portal, Material vortexMaterial)
     {
-        AudioManager.PlaySfx(Sfx.PortalEnter); // SFX-02/D-06: 진입 = 상승 워프음 — E2 마스크 성장(0.4s)과 동시 시작
-        float portalX = portal.position.x;
-        float dir = transform.position.x > portalX ? 1f : -1f;
-        float targetWidth = Mathf.Abs(transform.position.x - portalX) + _sr.bounds.extents.x;
+        AudioManager.PlaySfx(Sfx.PortalEnter); // SFX-02/D-07: 그대로 재사용 — 새 이펙트 시작과 동시
 
-        var maskGO = new GameObject("EntryMask");
-        var mask = maskGO.AddComponent<SpriteMask>();
-        mask.sprite = RuntimeMaskSprite.CreateMaskSprite();
-        _sr.maskInteraction = SpriteMaskInteraction.VisibleOutsideMask;
+        Vector3 startPos = transform.position;
 
-        // E2: 마스크가 0 -> targetWidth로 성장하며 플레이어를 포탈 경계선 너머로 가린다.
-        float elapsed = 0f;
-        while (elapsed < _entryMaskDuration)
+        GameObject vortexGO = null;
+        Material vortexMat = null;
+        if (vortexMaterial != null)
         {
-            elapsed += Time.unscaledDeltaTime;
-            float t = Mathf.Clamp01(elapsed / _entryMaskDuration);
-            float width = Mathf.Lerp(0f, targetWidth, t);
-            Vector3 pos = transform.position;
-            pos.x = portalX + (width * 0.5f * dir);
-            maskGO.transform.position = pos;
-            maskGO.transform.localScale = new Vector3(Mathf.Max(width, 0.001f), 20f, 1f);
+            vortexGO = new GameObject("EntryVortex");
+            vortexGO.transform.position = portal.position;
+            vortexGO.transform.localScale = new Vector3(_vortexWorldRadius * 2f, _vortexWorldRadius * 2f, 1f);
+            var vortexSr = vortexGO.AddComponent<SpriteRenderer>();
+            vortexSr.sprite = RuntimeMaskSprite.CreateMaskSprite(); // 기존 12-01/14-01 공용 4x4 흰 스프라이트 재사용 — UV 0..1 매핑용
+            vortexSr.sortingLayerName = "PortalVFX"; // 999.3-01에서 신설한 레이어 — Default보다 항상 위에 렌더되어야 그랩 텍스처를 왜곡해 덮어씌울 수 있다
+            vortexMat = new Material(vortexMaterial); // Pitfall 3: 인스턴스 카피 — sharedMaterial 절대 금지(플레이어+전 Room Tilemap이 공유하는 기본 머티리얼과 무관하게 항상 신규 인스턴스)
+            vortexSr.material = vortexMat;
+        }
+
+        if (_rb != null) _rb.linearVelocity = Vector2.zero;
+
+        float elapsed = 0f;
+        while (elapsed < _entryVortexDuration)
+        {
+            elapsed += Time.unscaledDeltaTime; // 슬로우모션/HitFreeze 면역
+            float t = Mathf.Clamp01(elapsed / _entryVortexDuration);
+
+            if (vortexMat != null)
+            {
+                // Pitfall 1: Shader Graph/_Time 대신 반드시 수동으로 Time.unscaledTime을 매 프레임 주입
+                vortexMat.SetFloat(UnscaledTimeId, Time.unscaledTime);
+                vortexMat.SetFloat(EffectAlphaId, Mathf.Sin(t * Mathf.PI)); // 0→1→0 — 등장과 동시에 옅어지며 사라짐
+            }
+
+            // 핵심 불만 해소(999.3-CONTEXT.md <domain>): 플레이어 Transform이 실제로 포탈 중심을 향해
+            // 이동한다 — 기존엔 SpriteMask만 움직이고 Transform은 고정이었다.
+            Vector3 pos = Vector3.Lerp(startPos, portal.position, t * t); // ease-in
+            if (_rb != null) _rb.MovePosition(pos);
+            else transform.position = pos;
+
             yield return null;
         }
 
-        // E3: 포탈 자체가 수축한다.
-        yield return ScaleTransform(portal, Vector3.one, Vector3.zero, _portalShrinkDuration);
+        if (_rb != null) _rb.MovePosition(portal.position);
+        else transform.position = portal.position;
 
-        // E4: 플레이어 완전 비가시 상태로 전환.
-        _sr.enabled = false;
-        Destroy(maskGO);
+        _sr.enabled = false; // 기존 E4와 동일 목적 — 완전 비가시 전환(새 층 텔레포트 전까지)
+        if (vortexGO != null) Destroy(vortexGO);
     }
 
     /// <summary>X1-X4: 새 층 진입 시 포탈이 성장하고, 플레이어가 마스크 수축에 의해 포탈에서 걸어나오듯 나타난다.</summary>

@@ -46,8 +46,9 @@ public class WorldGenerator : MonoBehaviour
     [SerializeField] private GameObject _meleeEnemyPrefab;
     [SerializeField] private GameObject _rangedEnemyPrefab;
 
-    [Header("Transition Animation (Phase 12, D-01~D-04)")]
+    [Header("Transition Animation (Phase 12, D-01~D-04 / Phase 999.3 D-01~D-08)")]
     [SerializeField] private GameObject _portalEffectPrefab;
+    [SerializeField] private Material _portalVortexMaterial; // Phase 999.3 D-01~D-03: PortalVortex.mat — Inspector 할당은 999.3-03에서 SampleScene에 배선
 
     [Header("Enemy Spawn VFX (Phase 14, D-01~D-09)")]
     [SerializeField, Range(0.1f, 0.6f)] private float _spawnStaggerInterval = 0.3f; // D-05: 포탈 순차 배출 간격
@@ -645,7 +646,7 @@ public class WorldGenerator : MonoBehaviour
 
         // ENTRY (Phase 12 D-01 E1-E4) — portal은 아직 살아있는 상태에서 재생, 직후 옛 체인과 함께 파괴된다.
         if (_transitionEffect != null)
-            yield return _transitionEffect.PlayEntry(portal.transform);
+            yield return _transitionEffect.PlayEntry(portal.transform, _portalVortexMaterial);
 
         FloorManager.CurrentFloor++;
 
