@@ -70,8 +70,12 @@ public class FloorTransitionEffect : MonoBehaviour
 
             if (vortexMat != null)
             {
-                // Pitfall 1: Shader Graph/_Time 대신 반드시 수동으로 Time.unscaledTime을 매 프레임 주입
-                vortexMat.SetFloat(UnscaledTimeId, Time.unscaledTime);
+                // Pitfall 1: Shader Graph/_Time 대신 반드시 수동으로 시간을 매 프레임 주입.
+                // 999.3-01 Deviation #6/#7과 동일 클래스 버그 회피: 절대 Time.unscaledTime이 아니라
+                // 이 코루틴 자신의 로컬 elapsed(0에서 시작해 _entryVortexDuration에서 종료)를 사용 —
+                // 절대 세션 시간을 먹이면 오래 켜져 있을수록(float32 정밀도 손실까지 겹쳐) 소용돌이가
+                // 과도하게 감겨 일렁이는 아티팩트가 생긴다.
+                vortexMat.SetFloat(UnscaledTimeId, elapsed);
                 vortexMat.SetFloat(EffectAlphaId, Mathf.Sin(t * Mathf.PI)); // 0→1→0 — 등장과 동시에 옅어지며 사라짐
             }
 
