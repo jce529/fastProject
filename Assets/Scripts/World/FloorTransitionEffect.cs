@@ -78,11 +78,13 @@ public class FloorTransitionEffect : MonoBehaviour
             {
                 // Pitfall 1: Shader Graph/_Time 대신 반드시 수동으로 시간을 매 프레임 주입.
                 // 999.3-01 Deviation #6/#7과 동일 클래스 버그 회피: 절대 Time.unscaledTime(세션 절대
-                // 시간)을 먹이지 않는다. round 4에서는 이 코루틴의 로컬 elapsed를 대신 먹였으나,
-                // _entryVortexDuration(0.4s)이 짧아 소용돌이가 0에서부터 옅게 감겨 보이는 문제가
-                // 있었다(round 4 피드백) — 매 프레임 애니메이션하는 대신 EntrySwirlPhase 고정값으로
-                // 홀드해 전체 구간에서 항상 확정된 각도로 보이게 한다.
-                vortexMat.SetFloat(UnscaledTimeId, EntrySwirlPhase);
+                // 시간)을 먹이지 않는다. round 4에서는 이 코루틴의 로컬 elapsed를 그대로 먹여
+                // _entryVortexDuration(0.4s)까지만 감기다 보니 각도가 얕아 옅게 보였고(round 4 피드백),
+                // round 5는 EntrySwirlPhase 고정값으로 홀드해 각도는 확정됐지만 매 프레임 값이 바뀌지
+                // 않아 회전감/흡입감이 완전히 사라졌다(round 5 피드백). t(0→1, 이미 알파 페이드/포지션
+                // 보간에 쓰이는 진행률)를 그대로 재사용해 EntrySwirlPhase까지 부드럽게 감아올리면,
+                // 애니메이션(회전감)과 t=1 시점의 확정 각도(강도)를 동시에 만족한다.
+                vortexMat.SetFloat(UnscaledTimeId, t * EntrySwirlPhase);
                 vortexMat.SetFloat(EffectAlphaId, Mathf.Sin(t * Mathf.PI)); // 0→1→0 — 등장과 동시에 옅어지며 사라짐
             }
 
