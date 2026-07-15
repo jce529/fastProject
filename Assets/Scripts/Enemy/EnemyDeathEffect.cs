@@ -12,6 +12,7 @@ public class EnemyDeathEffect : MonoBehaviour
 {
     [SerializeField] private float _maskRiseDuration = 0.6f;
     [SerializeField] private Color _particleColor = new Color(1f, 0.3f, 0.1f);
+    [SerializeField] private int _particleBurstCount = 12; // 기본값 12 — MeleeEnemy/RangedEnemy 기존 동작과 동일 유지
 
     private SpriteRenderer _sr;
 
@@ -69,6 +70,19 @@ public class EnemyDeathEffect : MonoBehaviour
         Destroy(gameObject);
     }
 
+    /// <summary>
+    /// D-08: 이 컴포넌트는 AddComponent()로 매번 새로 붙기 때문에 Inspector 프리팹 값이 존재하지 않는다
+    /// (EnemyDeathEffect.cs 상단 doc-comment 참조). BossEnemy.Die()가 AddComponent 직후,
+    /// StartCoroutine(PlayDeathSequence(...)) 호출 전에 호출해 보스 전용 강도로 재정의한다.
+    /// MeleeEnemy/RangedEnemy는 이 메서드를 호출하지 않으므로 기존 기본값 그대로 동작한다.
+    /// </summary>
+    public void ConfigureIntensity(float maskRiseDuration, Color particleColor, int particleBurstCount)
+    {
+        _maskRiseDuration = maskRiseDuration;
+        _particleColor = particleColor;
+        _particleBurstCount = particleBurstCount;
+    }
+
     private void SpawnDeathParticles()
     {
         var psGO = new GameObject("DeathParticles");
@@ -85,7 +99,7 @@ public class EnemyDeathEffect : MonoBehaviour
 
         var emission = ps.emission;
         emission.rateOverTime = 0f;
-        emission.SetBursts(new[] { new ParticleSystem.Burst(0f, 12) });
+        emission.SetBursts(new[] { new ParticleSystem.Burst(0f, (short)_particleBurstCount) });
 
         var shape = ps.shape;
         shape.shapeType = ParticleSystemShapeType.Circle;
