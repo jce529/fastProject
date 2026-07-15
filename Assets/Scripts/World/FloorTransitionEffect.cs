@@ -2,10 +2,10 @@ using System.Collections;
 using UnityEngine;
 
 /// <summary>
-/// D-01/D-03 -- 포탈 입장/퇴장 SpriteMask 애니메이션 컴포넌트. Player GameObject에
-/// 부착된다. WorldGenerator(Plan 12-02)가 PlayEntry()/PlayExit() 코루틴을 호출해
-/// FloorTransitionSequence의 ENTRY/EXIT 구간을 재생한다. 모든 타이밍은
-/// Time.unscaledDeltaTime 기반이라 슬로우모션/HitFreeze(timeScale=0) 중에도 정상 진행된다.
+/// Phase 999.3 D-01~D-08 -- 포탈 입장(소용돌이 흡입 + 실제 Transform 이동)/퇴장(IsDashing 재사용
+/// 수직 도약) 연출 컴포넌트. Player GameObject에 부착된다. WorldGenerator(Plan 999.3-02)가
+/// PlayEntry()/PlayExit() 코루틴을 호출해 FloorTransitionSequence의 ENTRY/EXIT 구간을 재생한다.
+/// 모든 타이밍은 Time.unscaledDeltaTime 기반이라 슬로우모션/HitFreeze(timeScale=0) 중에도 정상 진행된다.
 /// </summary>
 [RequireComponent(typeof(SpriteRenderer))]
 public class FloorTransitionEffect : MonoBehaviour
