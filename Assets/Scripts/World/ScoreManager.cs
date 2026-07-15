@@ -9,6 +9,7 @@ public static class ScoreManager
 {
     // -- 보너스 기준 (Inspector 없음 — 프로토타입 상수로 충분) --------------------
     public const int   KillScore        = 100;
+    public const int   BossKillScore    = 750; // D-09: KillScore(100) 대비 유의미하게 큰 값, 500~1000 권장 범위 내
     public const int   RespawnKillScore = 30;   // D-10(999.2): 리스폰 킬 감소 점수 — KillScore의 약 30%. 파밍을 점수 관점에서 비효율적으로 만들되 완전히 막지는 않는다(D-09: 무제한 리스폰과 일관).
     public const int   FastClearBonus   = 300;
     public const int   NormalClearBonus = 150;
@@ -36,6 +37,22 @@ public static class ScoreManager
     public static void AddKillScore(bool isRespawn = false)
     {
         Score += isRespawn ? RespawnKillScore : KillScore;
+    }
+
+    /// <summary>BOSS-06/D-09: 보스 처치(7회째 피격) 순간 CombatController와 무관하게 BossEnemy.Die()가 직접 호출한다.</summary>
+    public static void AddBossKillScore()
+    {
+        Score += BossKillScore;
+    }
+
+    /// <summary>
+    /// D-12: BossEnemy.OnDashHit()의 비치명타(1~6회)가 CombatController.ExecuteDash()의
+    /// 무조건적인 AddKillScore(false) 호출(+100)을 즉시 상쇄하기 위해 사용한다.
+    /// CombatController/IEnemy 계약은 변경하지 않는다 — BossEnemy 내부에서만 소비.
+    /// </summary>
+    public static void SubtractScore(int amount)
+    {
+        Score -= amount;
     }
 
     /// <summary>
