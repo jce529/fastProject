@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v3.1
 milestone_name: — 보스 룸 & 연출 고도화
 status: executing
-stopped_at: 999.3-01-PLAN.md 완료 (Task 1-3 전부, Task 3 checkpoint 8차 재시도 끝에 승인) — 999.3-02 실행 대기
-last_updated: "2026-07-15T01:27:32.383Z"
-last_activity: 2026-07-14
+stopped_at: Completed 999.3-02-PLAN.md
+last_updated: "2026-07-15T01:34:42.397Z"
+last_activity: 2026-07-15
 progress:
   total_phases: 8
   completed_phases: 4
   total_plans: 18
-  completed_plans: 16
+  completed_plans: 17
 ---
 
 # Project State: Fast (가칭)
@@ -34,9 +34,9 @@ progress:
 ## Current Position
 
 Phase: 999.3 (player-portal-effect-rework) — EXECUTING
-Plan: 1 of 3 complete (999.3-01 Task 1-3 전부 완료, Task 3 checkpoint 승인) — 999.3-02 실행 예정
-Status: Ready to execute 999.3-02
-Last activity: 2026-07-14
+Plan: 2 of 3 complete (999.3-01 완료, 999.3-02 완료 — FloorTransitionEffect.PlayEntry()/PlayExit() 전체 재작성) — 999.3-03 실행 예정
+Status: Ready to execute 999.3-03
+Last activity: 2026-07-15
 
 ```
 Progress: [████░░░░░░] v3.1 milestone: 2/5 phases complete (Phase 13-17) — Phase 999.2(backlog) 4/4 plans complete
@@ -79,6 +79,7 @@ Progress: [████░░░░░░] v3.1 milestone: 2/5 phases complete (
 | ScoreManager.RespawnKillScore=30 (KillScore의 약 30%) 확정 (Plan 999.2-02) | 리스폰 파밍을 점수 관점에서 비효율적으로 만들되 완전히 막지는 않음 — D-09(무제한 리스폰)와 일관 |
 | WorldGenerator.MarkRoomLeft()/TryRespawnRoom()을 새 트리거 콜라이더 없이 UpdatePlayerIndex()의 기존 체인-인덱스 전이 신호에 배선 (Plan 999.2-03) | 999.2-RESEARCH.md Pitfall 2 회피 — Room 진입/이탈이 이미 매 프레임 계산되므로 별도 감지 시스템 불필요, Corridor는 RoomRespawnGate 미부착으로 자동 no-op(D-04) |
 | Phase 999.2(enemy-infinite-respawn-mechanism) 4/4 plans 전체 완료 판정 (Plan 999.2-04) | RoomRespawnTool 메뉴 실행으로 Complex_Room 6종에 RoomClearCondition+RoomRespawnGate 실제 부착 확인, D-01~D-10(D-01a 포함) 플레이테스트 체크리스트 11개 항목 전부 통과 — 리스폰 파이프라인은 Case A(체인 내 재진입)로 한정되고 Case B(체인 이탈 재생성)/Corridor/보스 룸에는 부작용 없음이 확인됨, 추가 폴리싱/수정 불요 |
+| FloorTransitionEffect.PlayEntry()/PlayExit()를 SpriteMask 페이드에서 Rigidbody2D 실제 이동으로 전면 재작성 (Plan 999.3-02) | PlayEntry는 999.3-01 산출물 PortalVortex.mat 소용돌이 오버레이 + 포탈 중심으로 실제 이동, PlayExit은 CombatController가 이미 쓰는 IsDashing 애니메이터 bool을 재사용한 수직 도약으로 대체 — PlayExit() 호출 시그니처는 그대로 유지해 WorldGenerator EXIT 호출부 무변경, ENTRY 호출부만 _portalVortexMaterial 전달로 갱신 |
 
 ### Key Decisions Locked (v1.0/v2.0/v3.0)
 
@@ -122,9 +123,9 @@ Full decision log lives in `.planning/PROJECT.md` Key Decisions table. Recent hi
 4. Read `.planning/research/SUMMARY.md` — architecture/pitfall context for Phase 13-17
 5. Next action: `/gsd:plan-phase 13`
 
-**Last session:** 2026-07-14T03:46:34.222Z
-**Stopped at:** 999.3-01-PLAN.md 완료 — Task 3 checkpoint(human-verify) 8차 재시도 끝에 승인, 999.3-02 실행 대기
+**Last session:** 2026-07-15T01:34:42.387Z
+**Stopped at:** Completed 999.3-02-PLAN.md
 
 ---
 *State initialized: 2026-05-27*
-*Last updated: 2026-07-15 — Plan 999.3-01(PortalVortex.shader/.mat 그랩패스 소용돌이 왜곡 스파이크 + PortalVortexDriver.cs) 완료. Task 3 human Play-mode checkpoint 8차 재시도 끝에 승인. 다음: 999.3-02(FloorTransitionEffect 전체 재작성) 실행.*
+*Last updated: 2026-07-15 — Plan 999.3-02(FloorTransitionEffect.cs PlayEntry()/PlayExit() 전면 재작성: 소용돌이 흡입 + IsDashing 재사용 수직 도약, WorldGenerator 배선) 완료. 다음: 999.3-03(SampleScene 배선 + 전체 플레이테스트 검증) 실행.*
