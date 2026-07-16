@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v3.1
 milestone_name: — 보스 룸 & 연출 고도화
 status: executing
-stopped_at: Completed 15-03-PLAN.md
-last_updated: "2026-07-15T07:57:15.732Z"
+stopped_at: "Checkpoint reached in 15-05-PLAN.md Task 3 (checkpoint:human-action) -- Task 1/2 complete"
+last_updated: "2026-07-16T04:22:42.454Z"
 last_activity: 2026-07-15
 progress:
   total_phases: 8
   completed_phases: 5
-  total_plans: 26
-  completed_plans: 24
+  total_plans: 27
+  completed_plans: 25
 ---
 
 # Project State: Fast (가칭)
@@ -34,9 +34,9 @@ progress:
 ## Current Position
 
 Phase: 15 (fsm) — EXECUTING
-Plan: 4 of 4
-Status: Ready to execute
-Last activity: 2026-07-15
+Plan: 5 of 5 (15-05, supersedes 15-04)
+Status: Checkpoint reached — Task 3 (checkpoint:human-action, Unity Editor menu execution) blocking. Task 1/2 complete (commits a220a39, 42d404c on branch worktree-agent-a6441b325656830c7 — see decision below for merge-to-main instructions).
+Last activity: 2026-07-16
 
 ```
 Progress: [████░░░░░░] v3.1 milestone: 2/5 phases complete (Phase 13-17) — Phase 999.2/999.3/999.4(backlog) 전부 완료
@@ -86,6 +86,7 @@ Progress: [████░░░░░░] v3.1 milestone: 2/5 phases complete (
 | ScoreManager.BossKillScore=750 + AddBossKillScore()/SubtractScore(int) 정적 메서드, EnemyDeathEffect.ConfigureIntensity() additive 메서드 확정 (Plan 15-01) | BOSS-06/D-09(보스 처치 보너스)/D-12(비치명타 자기 상쇄)/D-08(보스 전용 사망 연출 강도)를 위해 BossEnemy.cs(15-02)가 즉시 참조할 계약을 순수 추가 변경으로 선반영 — MeleeEnemy.cs/RangedEnemy.cs 호출부 git diff 0 확인 |
 | BossEnemy.cs 신설 완료 — Telegraph→Attack→Vulnerable 단일 패턴 루프, IsAlive를 "빈틈 여부"로 오버로드 + 별도 _isDefeated로 처치 판정 분리, 7회 피격 처치 + 보스 전용 사망 연출/점수 보너스 (Plan 15-02) | BOSS-03/04/05/06 — EnemyBase를 상속하지 않는 독립 IEnemy+ISpawnGatable 구현으로 다중 히트/패턴 리셋 요구를 EnemyBase.OnDashHit()의 단발성 사망 경로와 분리. D-12(비치명타 점수 자기 상쇄) 코드는 최종 제거 — Phase 16(16-02/16-03)이 ScoreManager.AddKillScore() 호출을 CombatController.ExecuteDash()에서 EnemyBase.OnDashHit()으로 이미 옮겨서 CombatController가 보스 히트에 +100을 더 이상 주지 않으므로 상쇄할 점수 자체가 없음 (15-CONTEXT.md D-12 SUPERSEDED와 일치) |
 | BossEnemyPrefabBuilder.cs 신설 완료 — MeleeEnemy.prefab 구조 복제해 BossEnemy.prefab 생성(1.6배 스케일+진한 붉은색 틴트) + Room_Debug.prefab 배선 도구 2종, DebugRoomTeleporter._bossPrefab 필드로 EnemySpawner 우회 직접 Instantiate 스폰 배선 완료 (Plan 15-03) | BOSS-03/04/05/06/D-10/D-11 — 두 메뉴("Build BossEnemy Prefab", "Wire Boss Into Room Debug") 모두 멱등적, 실제 실행(프리팹 자산 생성/Room_Debug 배선)은 Unity 에디터 조작이 필요한 15-04로 연기. 보스는 EnemySpawner를 거치지 않고 직접 Instantiate되어 BossEnemy 기본 IsAlive=true + Start() 가드로 패턴 루프 즉시 시작(RESEARCH.md Open Question 2 권장안, Phase 16에서 EnemySpawner 경유로 교체 예정) |
+| 15-04-PLAN.md SUPERSEDED, 15-05-PLAN.md가 D-11 재논의(RE-RESOLVED) 반영해 대체 — Task 1(RoomBossFsmTestBuilder.cs)/Task 2(BossEnemyPrefabBuilder.cs 재배선) 완료, Task 3(checkpoint:human-action) 대기 중 (Plan 15-05) | D-11 RE-RESOLVED — 목적지 룸을 Room_Debug.prefab이 아니라 신규 독립 프리팹 Room_BossFsmTest.prefab으로, 진입 지점을 Room_Debug.prefab 자식이 아니라 영속 씬(SampleScene.unity)의 독립 GameObject "BossFsmTest_Teleporter"로 배치해 Phase 16의 Room_Debug 삭제와 완전히 무관하게 함. Room_Debug.prefab git diff 0 확인. 실행 환경 참고: 이 세션은 격리된 git worktree(branch worktree-agent-a6441b325656830c7)에서 작업 — 세션 시작 시 main보다 92커밋 뒤처져 있어(Phase 999.4까지만 반영) 편집 전 `git merge main --ff-only`로 무손실 동기화 후 Task 1/2 커밋(a220a39, 42d404c) 진행. Unity 에디터를 열어 Task 3 메뉴를 실행하기 전, 실제 프로젝트 체크아웃에서 `git merge worktree-agent-a6441b325656830c7 --ff-only`로 이 두 커밋을 반드시 먼저 병합해야 함(충돌 없는 순수 fast-forward) |
 
 ### Key Decisions Locked (v1.0/v2.0/v3.0)
 
@@ -130,11 +131,11 @@ Full decision log lives in `.planning/PROJECT.md` Key Decisions table. Recent hi
 4. Read `.planning/research/SUMMARY.md` — architecture/pitfall context for Phase 13-17
 5. Read `.planning/phases/16-boss-room-lifecycle/16-CONTEXT.md` — 리팩토링 배치(D-01~D-08) + 미논의 보스 룸 그레이 에어리어 목록
 6. Read `.planning/phases/15-fsm/15-CONTEXT.md` D-11/D-12 — SUPERSEDED 표시 확인 (Room_Debug 삭제, 점수 상쇄 우회책 불필요화 — 16-02/16-03/15-02 완료로 이제 코드에도 반영됨)
-7. Next action: `/gsd:execute-phase 15` 계속 — Plan 4(15-04, checkpoint:human-action — Unity 에디터에서 두 메뉴 실행 + Play 모드 검증) 실행
+7. Next action: 15-05-PLAN.md Task 3(checkpoint:human-action) 재개 — 먼저 `git merge worktree-agent-a6441b325656830c7 --ff-only`로 Task 1/2 커밋을 병합한 뒤, Unity 에디터에서 컴파일 확인 → Fast/Phase15/Build Room_BossFsmTest → Fast/Phase15/Wire Boss Into BossFsmTest Room 실행 (15-05-PLAN.md Task 3 how-to-verify 참고). 15-04-PLAN.md는 SUPERSEDED — 실행하지 않음
 
-**Last session:** 2026-07-15T07:57:15.725Z
-**Stopped at:** Completed 15-03-PLAN.md
+**Last session:** 2026-07-16T04:22:42.446Z
+**Stopped at:** Checkpoint reached in 15-05-PLAN.md Task 3 (checkpoint:human-action) -- Task 1/2 complete
 
 ---
 *State initialized: 2026-05-27*
-*Last updated: 2026-07-15 — Plan 15-03(BossEnemyPrefabBuilder.cs + DebugRoomTeleporter._bossPrefab 배선) 완료 — BossEnemy.prefab 생성/Room_Debug 배선 에디터 도구 2종(멱등적) 작성, 메뉴 실행은 아직 안 함. 다음: 15-04(checkpoint:human-action — Unity 에디터에서 메뉴 실행 + Play 모드 검증).*
+*Last updated: 2026-07-16 — Plan 15-05 Task 1/2(RoomBossFsmTestBuilder.cs 신설 + BossEnemyPrefabBuilder.cs 재배선, D-11 RE-RESOLVED checker fix) 완료 — Task 3(checkpoint:human-action)에서 대기 중. 15-04-PLAN.md는 SUPERSEDED로 남고 15-05가 최종 실행 플랜.*
