@@ -3,9 +3,9 @@ gsd_state_version: 1.0
 milestone: v3.1
 milestone_name: — 보스 룸 & 연출 고도화
 status: executing
-stopped_at: "Checkpoint reached in 15-05-PLAN.md Task 3 (checkpoint:human-action) -- Task 1/2 complete"
-last_updated: "2026-07-16T04:22:42.454Z"
-last_activity: 2026-07-15
+stopped_at: "Checkpoint reached in 15-06-PLAN.md Task 3 (checkpoint:human-action) -- Task 1/2 complete"
+last_updated: "2026-07-17T00:00:00.000Z"
+last_activity: 2026-07-17
 progress:
   total_phases: 8
   completed_phases: 5
@@ -34,9 +34,9 @@ progress:
 ## Current Position
 
 Phase: 15 (fsm) — EXECUTING
-Plan: 5 of 5 (15-05, supersedes 15-04)
-Status: Checkpoint reached — Task 3 (checkpoint:human-action, Unity Editor menu execution) blocking. Task 1/2 complete (commits a220a39, 42d404c on branch worktree-agent-a6441b325656830c7 — see decision below for merge-to-main instructions).
-Last activity: 2026-07-16
+Plan: 6 of 6 (15-06, supersedes 15-05 Task 2/3, D-13 WorldGenerator pool-swap entry path). 15-04 superseded/skipped (see 15-04-SUMMARY.md).
+Status: Checkpoint reached — Task 3 (checkpoint:human-action, Unity Editor menu execution) blocking. Task 1/2 complete (commits 01ed135, 5c240be on main).
+Last activity: 2026-07-17
 
 ```
 Progress: [████░░░░░░] v3.1 milestone: 2/5 phases complete (Phase 13-17) — Phase 999.2/999.3/999.4(backlog) 전부 완료
