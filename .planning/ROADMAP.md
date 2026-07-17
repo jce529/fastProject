@@ -523,14 +523,15 @@ Plans:
   3. 보스는 정확히 7회 피격 시 처치(사망 연출 재생 + Destroy)되며, 6회까지는 처치되지 않는다
   4. 보스 처치 진행률(피격 횟수)을 나타내는 UI/텍스트 요소가 화면 어디에도 존재하지 않는다
   5. 보스 처치 시 ScoreManager에 일반 적보다 큰 점수 보너스가 즉시 누적된다
-**Plans**: 5 plans (4 waves — 순차 의존) — 15-04는 D-11 재논의(2026-07-15)로 SUPERSEDED, 15-05가 대체
+**Plans**: 6 plans (5 waves — 순차 의존) — 15-04는 D-11 재논의(2026-07-15)로 SUPERSEDED, 15-05는 D-13 재논의(2026-07-17)로 부분 대체(Task 2/3), 15-06이 최종 실행 플랜
 
 Plans:
 - [x] 15-01-PLAN.md — ScoreManager 보스 점수 유틸 + EnemyDeathEffect 보스 강도 확장 (BOSS-04, BOSS-06)
 - [x] 15-02-PLAN.md — BossEnemy.cs 전체 FSM (Telegraph→Attack→Vulnerable 패턴 루프, 피격/처치/하이라이트) (BOSS-03, BOSS-04, BOSS-05, BOSS-06)
 - [x] 15-03-PLAN.md — BossEnemyPrefabBuilder 에디터 도구 + DebugRoomTeleporter 보스 스폰 배선 (BOSS-03, BOSS-04, BOSS-05, BOSS-06)
 - [ ] ~~15-04-PLAN.md — 에디터 도구 실행(프리팹 생성+배선) + 플레이테스트 검증~~ SUPERSEDED by 15-05 (D-11 재논의 — Room_Debug 대상 배선을 Room_BossFsmTest로 교체, 15-CONTEXT.md D-11 RE-RESOLVED 참고)
-- [ ] 15-05-PLAN.md — Room_BossFsmTest.prefab 신설(D-11 RE-RESOLVED) + BossEnemyPrefabBuilder 재배선(전용 teleporter 1개) + 에디터 도구 실행 + 플레이테스트 검증 (BOSS-03, BOSS-04, BOSS-05, BOSS-06)
+- [ ] ~~15-05-PLAN.md — Room_BossFsmTest.prefab 신설(D-11 RE-RESOLVED) + BossEnemyPrefabBuilder 재배선(전용 teleporter 1개) + 에디터 도구 실행 + 플레이테스트 검증~~ Task 1(RoomBossFsmTestBuilder.cs)은 15-06이 확장하여 재사용, Task 2/3(teleporter 재배선)은 D-13 재논의로 부분 SUPERSEDED — 15-06이 대체 (15-CONTEXT.md D-13 참고)
+- [ ] 15-06-PLAN.md — RoomBossFsmTestBuilder.cs 확장(RoomConnector+nested boss) + BossFsmTestPoolSwapTool 신설(WorldGenerator._roomPrefabs 임시 스왑/복원) + 에디터 도구 실행 + 플레이테스트 검증 (BOSS-03, BOSS-04, BOSS-05, BOSS-06)
 
 ---
 
