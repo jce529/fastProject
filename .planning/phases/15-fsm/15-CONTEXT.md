@@ -32,7 +32,8 @@
 
 ### 테스트 환경 & 보스 비주얼
 - **D-10:** 보스 스프라이트/애니메이션은 **기존 적 스프라이트를 재활용**한다(크기를 키우거나 색조를 변형하는 정도) — 신규 아트 제작(Unity_AssetGeneration 등)은 이번 Phase에서 진행하지 않는다. 실제 보스 전용 아트는 보스 룸(Phase 16) 이후로 미룬다.
-- **D-11 (RE-RESOLVED 2026-07-15, execute-phase 15 checkpoint):** ~~Phase 15의 FSM 검증은 `DebugRoomTeleporter`를 확장해 보스 프리팹 스폰 필드를 추가하는 방식으로 진행한다 — `Room_Debug`에서 즉시 스폰/테스트할 수 있게 한다.~~ ~~SUPERSEDED — Room_Debug.prefab이 삭제 결정됨, 재논의 필요~~ **재논의 결과: 신규 `Room_BossFsmTest.prefab`(RoomEntry 하나 + 평평한 바닥만, 기존 적/기믹 없음)을 새로 만들어 `DebugRoomTeleporter.targetRoomPrefab`으로 배선한다.** `Room_Debug.prefab`과는 완전히 독립적이므로 Phase 16의 레거시 정리(Room_Debug + 구형 Room_*.prefab 14종 삭제)가 실행되어도 영향받지 않는다. 15-03/15-04는 실행 당시 아직 이 재논의 이전 상태(Room_Debug 대상)로 작성/실행되었으므로, 후속 gap-closure 플랜에서 `BossEnemyPrefabBuilder.cs`의 `RoomDebugPath`와 `DebugRoomTeleporter` 배선 대상을 `Room_BossFsmTest.prefab`으로 교체해야 한다.
+- **D-11 (RE-RESOLVED 2026-07-15, execute-phase 15 checkpoint):** ~~Phase 15의 FSM 검증은 `DebugRoomTeleporter`를 확장해 보스 프리팹 스폰 필드를 추가하는 방식으로 진행한다 — `Room_Debug`에서 즉시 스폰/테스트할 수 있게 한다.~~ ~~SUPERSEDED — Room_Debug.prefab이 삭제 결정됨, 재논의 필요~~ ~~재논의 결과: 신규 `Room_BossFsmTest.prefab`(RoomEntry 하나 + 평평한 바닥만, 기존 적/기믹 없음)을 새로 만들어 `DebugRoomTeleporter.targetRoomPrefab`으로 배선한다.~~ **D-13에서 진입 방식 자체가 재차 교체됨(아래) — Room_BossFsmTest.prefab 자체(독립 프리팹이라는 결정)는 유지.**
+- **D-13 (2026-07-17, 사용자 피드백 — 텔레포터 방식 사용성 문제):** `BossFsmTest_Teleporter`(SampleScene 독립 GameObject, D-11 산출물)를 걸어서 찾아가야 하는 방식은 테스트하기 번거롭다는 사용자 피드백으로 재차 교체. **`Assets/Scripts/World/WorldGenerator.cs`(Phase 9, 현재 라이브 룸 생성기 — `FloorSpawner.cs`는 이미 Phase 16-01에서 죽은 코드로 삭제됨)의 `_roomPrefabs[]` 풀을 재사용한다.** 방식: (1) `Room_BossFsmTest.prefab`에 다른 룸들과 동일 컨벤션으로 Left/Right `RoomConnector` 마커를 추가한다(`CameraBound`는 추가하지 않음 — Claude's Discretion, 문제 생기면 후속 조정) — RoomEntry/평평한 바닥 외에 적 스폰 마커나 기믹은 여전히 없음(D-11 취지 유지). (2) SampleScene의 `WorldGenerator` 컴포넌트 Inspector에서 `_roomPrefabs`를 **테스트 전용으로 `Room_BossFsmTest.prefab` 하나만 들어있도록 임시 교체**한다 — 기존 룸 풀 배열 원본은 되돌릴 수 있도록 어딘가에 기록해 둔다(예: 플랜 SUMMARY 또는 커밋 메시지에 원래 배열 내용 명시). Play만 누르면 매번 확실히 Room_BossFsmTest가 나온다. FSM 검증(Task 4)이 끝나면 `_roomPrefabs`를 원래 룸 풀로 되돌리는 것이 후속 작업(이 플랜 또는 다음 플랜)의 책임. D-11이 만든 `BossFsmTest_Teleporter` GameObject/`DebugRoomTeleporter` 배선/`RoomBossFsmTestBuilder.cs`/`BossEnemyPrefabBuilder.cs`의 `WireBossIntoBossFsmTestRoom()`은 삭제하지 않고 그대로 둔다(사용하지 않을 뿐 — 정리는 이번 Phase 범위 밖, 필요시 Phase 16 레거시 정리 때 함께 검토).
 - **D-12 (SUPERSEDED 2026-07-15, Phase 16 discuss-phase 세션):** ~~보스의 6회 비치명타(1~6회)는 일반 `KillScore`(+100) 점수를 적립하지 않는다... `BossEnemy.OnDashHit()`이 비치명타를 받을 때마다 방금 적립된 `KillScore`만큼을 스스로 상쇄(차감)하는 방식으로 구현한다.~~ **점수 시점 자체가 "공격 시"에서 "사망 시"로 재설계되어 이 상쇄 우회책이 불필요해짐** (자세한 내용은 `.planning/phases/16-boss-room-lifecycle/16-CONTEXT.md` D-08 참고). `ScoreManager.AddKillScore()` 호출이 `CombatController.ExecuteDash()`가 아니라 각 적의 `OnDashHit()` 안에서 `IsAlive=false`를 커밋하는 지점에 직접 놓이므로, `BossEnemy.OnDashHit()`은 7번째(치명타) 히트에서만 점수 호출을 하면 된다 — 1~6회차는 애초에 점수 관련 코드를 아예 실행하지 않는다. `CombatController`/`IEnemy` 계약은 여전히 변경 없음(D-12 원안의 이 전제는 유지됨).
 
 ### Claude's Discretion
@@ -68,8 +69,10 @@
 - `Assets/Scripts/World/ScoreManager.cs` — `KillScore=100`, `AddKillScore(bool isRespawn=false)` 패턴 — D-09 보스 보너스 신규 상수/메서드 추가 지점
 
 ### 테스트 환경
-- `Assets/Scripts/World/DebugRoomTeleporter.cs` — `_meleePrefab`/`_rangedPrefab` Inspector 필드 + `TeleportToRoom()`에서 `EnemySpawner.Spawn()/Activate()` 호출 패턴 — D-11 보스 프리팹 필드 추가 지점
-- `Assets/Prefabs/Rooms/Room_Debug/Room_Debug.prefab` — 격리 테스트용 룸 프리팹
+- `Assets/Scripts/World/DebugRoomTeleporter.cs` — `_meleePrefab`/`_rangedPrefab` Inspector 필드 + `TeleportToRoom()`에서 `EnemySpawner.Spawn()/Activate()` 호출 패턴 — D-11 산출물, D-13으로 사용 중단(삭제는 안 함)
+- `Assets/Prefabs/Rooms/Room_Debug/Room_Debug.prefab` — 격리 테스트용 룸 프리팹(레거시, D-13과 무관)
+- `Assets/Scripts/World/WorldGenerator.cs` — D-13이 재사용하는 라이브 룸 생성기. `_roomPrefabs[]`(룸 풀), `SelectCorridor()`, `AlignByEntry()`/`AlignByExit()`(RoomConnector 기준 정렬), `FindConnector()`, `RecomputeCameraBounds()`(CameraBound 없으면 그냥 스킵 — D-13이 CameraBound 생략을 선택한 근거)
+- `Assets/Scripts/World/RoomConnector.cs` — Room 프리팹의 ENT/EXIT 자식에 붙는 `Direction { Left, Right }` 마커 컴포넌트. D-13이 Room_BossFsmTest에 추가할 대상 — 다른 룸 프리팹의 배치 컨벤션(ENT=Left/좌측 진입, EXIT=Right/우측 진출)을 그대로 따른다
 
 ### 프로젝트 컨벤션
 - `.planning/phases/03-enemy-system/03-CONTEXT.md` — 원본 FSM 설계 근거(D-03 4상태 FSM, D-06 텔레그래프 회피 가능성 근거)
