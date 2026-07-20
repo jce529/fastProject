@@ -1,7 +1,7 @@
 ---
 gsd_state_version: 1.0
-milestone: v3.1
-milestone_name: — 보스 룸 & 연출 고도화
+milestone: v4.0
+milestone_name: — 보스 캐릭터 확장 & 게임 모드
 status: "Roadmap ready — awaiting /gsd:plan-phase 18 (or discuss-phase 18 first)"
 stopped_at: Phase 18 context gathered; platform target reset Android->PC
 last_updated: "2026-07-20T05:09:12.845Z"
