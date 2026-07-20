@@ -658,9 +658,13 @@ Plans:
   1. 기존 F.I.O.R.A(Overclock) 전투 흐름(홀드=슬로우모션+범위표시 → 릴리즈=대시처치)이 IPlayerCombatModule 마이그레이션 이후에도 회귀 없이 동일하게 동작한다
   2. BossEnemyBase를 상속한 신규 보스 클래스가 defeat-guard/사망 시퀀스/스폰 게이팅/피격 하이라이트를 별도 재작성 없이 즉시 사용할 수 있다
   3. 보스를 격파하면 PlayerPrefs에 해금 플래그가 기록되고, 앱을 완전히 재시작해도 해금 상태가 유지된다
-**Plans**: TBD
+**Plans**: 2 plans (1 wave — 상호 독립적, 완전 병렬)
 
 **(2026-07-20 discuss-phase 18 세션: 플랫폼 타겟이 Android/모바일에서 PC로 재설정됨에 따라 INFRA-02(터치 조준 입력)가 이 Phase 범위에서 제거됨 — 상세는 REQUIREMENTS.md/18-CONTEXT.md 참고.)**
+
+Plans:
+- [ ] 18-01-PLAN.md — IPlayerCombatModule/CombatContext/OverclockModule 추출 + CombatController host 재배선 (INFRA-01)
+- [ ] 18-02-PLAN.md — BossUnlockManager 신설 + BossEnemyBase 추출/FioraBoss rename + BossEnemyPrefabBuilder 갱신 (INFRA-03, UNLOCK-01)
 
 ---
 
@@ -750,7 +754,7 @@ Plans:
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 18. 공유 인프라 | 0/? | Not started | - |
+| 18. 공유 인프라 | 0/2 | Planned | - |
 | 19. SAMURAI 보스 & 패링 모듈 | 0/? | Not started | - |
 | 20. DeadEye 보스 & 탄약/재장전 모듈 | 0/? | Not started | - |
 | 21. WorldGenerator 보스룸 정리 예외 | 0/? | Not started | - |
