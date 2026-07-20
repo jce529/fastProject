@@ -10,7 +10,7 @@ Requirements for the 보스 캐릭터 확장 & 게임 모드 milestone. Each map
 ### 공유 인프라 (INFRA)
 
 - [ ] **INFRA-01**: CombatController의 기존 Overclock(F.I.O.R.A) 로직이 IPlayerCombatModule 인터페이스로 무손상 마이그레이션된다 (기존 동작 100% 동일, 회귀 없음)
-- [ ] **INFRA-02**: 조준 방향 입력이 Mouse.current 대신 Pointer.current/EnhancedTouch 기반으로 동작해 Android 터치 기기에서도 정상 작동한다
+- ~~**INFRA-02**: 조준 방향 입력이 Mouse.current 대신 Pointer.current/EnhancedTouch 기반으로 동작해 Android 터치 기기에서도 정상 작동한다~~ **DESCOPED (2026-07-20, discuss-phase 18)** — 플랫폼 타겟이 PC로 재설정되어 터치 입력 요구사항 제거. 기존 Mouse.current 방식 유지.
 - [ ] **INFRA-03**: BossEnemy.cs에서 BossEnemyBase(EnemyBase와 별개의 형제 클래스)가 추출되어, 이후 신규 보스 4종이 이를 상속한다
 
 ### 보스 언락 진행 (UNLOCK)
@@ -25,7 +25,7 @@ Requirements for the 보스 캐릭터 확장 & 게임 모드 milestone. Each map
 - [ ] **SAMURAI-02**: 패링 모듈은 슬로우모션 없이 실시간으로 동작하며, 탭 입력 시 방향성 베기 공격을 수행한다
 - [ ] **SAMURAI-03**: 적 공격과 타이밍이 겹치는 시점에 입력하면 패링이 발동해 공격을 무효화하고 투사체를 반사한다
 - [ ] **SAMURAI-04**: SAMURAI 보스는 평시 전투와 간헐적 패링 전용 타이밍을 반복하며, 패링 전용 타이밍에 공격을 시도하면 플레이어는 즉사한다
-- [ ] **SAMURAI-05**: 패링 판정 타이밍은 터치 입력 지연을 고려해 넉넉하게 설정되고 실기기에서 튜닝된다
+- [ ] **SAMURAI-05**: 패링 판정 타이밍은 입력 지연을 고려해 넉넉하게 설정되고 실측 튜닝된다
 
 ### DeadEye 보스 + 탄약/재장전 모듈 (DEADEYE)
 
@@ -117,7 +117,7 @@ Explicitly excluded. Documented to prevent scope creep.
 |---------|--------|
 | 보스 러시 모드 | v4.0에서 제외 — endless 보스 전용 생성 로직이 미설계 상태이며 4개 모듈이 개별 검증된 후 착수하는 것이 안전 (Future Requirements RUSH-01) |
 | 모듈 업그레이드 티어 / 패시브 스킬트리 / 상점 | 핵심 검증과 무관, PROJECT.md Out of Scope 유지 |
-| 클라우드 저장 / 기기 간 동기화 | 로컬 Android 프로토타입 범위 밖 — PlayerPrefs로 충분 |
+| 클라우드 저장 / 기기 간 동기화 | 로컬 단일 기기 프로토타입 범위 밖 — PlayerPrefs로 충분 |
 | 보스 HP바 / 멀티페이즈 전투 | 원샷원킬 코어 밸류와 충돌 — HP 시스템은 이 게임 어디에도 존재하지 않음 |
 | 보스 다이얼로그 / 네임카드 컷신 | 6개 프로토타입 검증 목표와 무관, 내러티브 검증 목적 없음 |
 | MAX 물리 기반 드리프트/바운스 시뮬레이션 고도화 | v4.0은 원안 스펙(정지 불가+충돌 즉사) 구현까지만, 물리 디테일 고도화는 플레이테스트 후 재검토 |
@@ -129,7 +129,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | Requirement | Phase | Status |
 |-------------|-------|--------|
 | INFRA-01 | Phase 18 | Pending |
-| INFRA-02 | Phase 18 | Pending |
+| INFRA-02 | Phase 18 | Descoped (2026-07-20, PC 전환) |
 | INFRA-03 | Phase 18 | Pending |
 | UNLOCK-01 | Phase 18 | Pending |
 | UNLOCK-02 | Phase 19 | Pending |
@@ -157,10 +157,10 @@ Which phases cover which requirements. Updated during roadmap creation.
 | WGEN-01 | Phase 21 | Pending |
 
 **Coverage:**
-- v4.0 requirements: 27 total
-- Mapped to phases: 27 (Phase 18-24, roadmap created 2026-07-20)
+- v4.0 requirements: 27 total (26 active + 1 descoped)
+- Mapped to phases: 26 active (Phase 18-24, roadmap created 2026-07-20); INFRA-02 descoped 2026-07-20 (platform reset to PC)
 - Unmapped: 0
 
 ---
 *Requirements defined: 2026-07-08 (v3.1)*
-*Last updated: 2026-07-20 — v4.0 roadmap created (Phase 18-24). All 27 v4.0 requirements mapped, no orphans. v3.1's 8 pending requirements preserved as parked (not invalidated). Boss Rush deferred to Future Requirements (RUSH-01).*
+*Last updated: 2026-07-20 — v4.0 roadmap created (Phase 18-24). All 27 v4.0 requirements mapped, no orphans. v3.1's 8 pending requirements preserved as parked (not invalidated). Boss Rush deferred to Future Requirements (RUSH-01). Same-day discuss-phase 18 session: platform target reset from Android/mobile to PC — INFRA-02 descoped, SAMURAI-05 touch-latency wording generalized.*

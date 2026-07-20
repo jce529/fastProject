@@ -2,7 +2,7 @@
 
 ## What This Is
 
-모바일 2D 가로 화면 플랫포머 액션 게임 프로토타입. 플레이어는 끝없이 이어지는 탑을 올라가며, 공격 버튼을 누르면 슬로우 모션이 발동하고 손을 떼면 범위 안 가장 가까운 적에게 돌진해 원샷으로 처치한다. 이 핵심 전투 메카닉과 구르기를 이용한 회피 시스템이 모바일에서 실제로 재미있는지 검증하는 것이 목적이다.
+2D 가로 화면 플랫포머 액션 게임 프로토타입 (PC 우선 — 2026-07-20 플랫폼 재설정). 플레이어는 끝없이 이어지는 탑을 올라가며, 공격 버튼을 누르면 슬로우 모션이 발동하고 손을 떼면 범위 안 가장 가까운 적에게 돌진해 원샷으로 처치한다. 이 핵심 전투 메카닉과 구르기를 이용한 회피 시스템이 실제로 재미있는지 검증하는 것이 목적이다.
 
 ## Core Value
 
@@ -116,12 +116,12 @@
 
 ## Context
 
-**기술 환경:** Unity 6000.3.11f1 LTS, C#, Universal Render Pipeline 2D Renderer, Unity Input System 1.19.0. Android 우선 (minSdk 25 / ARM64), iOS 추후. 가로 화면(1920×1080 기본).
+**기술 환경:** Unity 6000.3.11f1 LTS, C#, Universal Render Pipeline 2D Renderer, Unity Input System 1.19.0. PC(Standalone) 우선 — Android/iOS는 2026-07-20부로 보류(엔진 Player Settings 자체는 미변경, 문서상 우선순위만 재조정). 가로 화면(1920×1080 기본).
 
 **프로토타입 검증 목표 (6개):**
 1. 공격 버튼 누르기/떼기 전투가 재미있는가?
 2. 직선형 vs 부채꼴형 — 어떤 공격 범위가 모바일에 더 적합한가?
-3. 원샷원킬 구조가 모바일 조작에서 불쾌하지 않은가?
+3. 원샷원킬 구조가 조작감상 불쾌하지 않은가?
 4. 무한 탑 등반 구조가 자연스럽게 이어지는가?
 5. 적을 모두 죽이지 않아도 되는 등반 플레이가 재미있는가?
 6. 낙사 복귀 방식이 액션감을 해치지 않는가?
@@ -139,9 +139,9 @@
 ## Constraints
 
 - **Tech Stack**: Unity 6 LTS + C# — 이미 설정된 프로젝트 환경
-- **Platform**: Android 우선 (ARM64, minSdk 25) — 성능 예산 고려 필요
+- **Platform**: PC (Standalone) 우선 — Android/모바일은 2026-07-20부로 재검토 대상 보류 (Unity Player Settings 자체는 변경하지 않음)
 - **Scope**: 핵심 메카닉 검증에만 집중 — 프로토타입 외 기능 추가 금지
-- **Performance**: 현재 층 + 다음 층만 유지, 이전 층 제거 — 모바일 메모리 관리
+- **Performance**: 현재 층 + 다음 층만 유지, 이전 층 제거 — 메모리 관리 관례 유지
 
 ## Key Decisions
 
@@ -178,4 +178,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-07-20 — 마일스톤 v4.0(보스 캐릭터 확장 & 게임 모드) 시작. v3.1은 Phase 15 블로킹 상태로 파킹. Out of Scope에서 패링 제외 항목 제거(v4.0에서 SAMURAI 메커니즘으로 In Scope 전환).*
+*Last updated: 2026-07-20 — 마일스톤 v4.0(보스 캐릭터 확장 & 게임 모드) 시작. v3.1은 Phase 15 블로킹 상태로 파킹. Out of Scope에서 패링 제외 항목 제거(v4.0에서 SAMURAI 메커니즘으로 In Scope 전환). 같은 날 discuss-phase 18 세션 중 플랫폼 타겟을 Android/모바일에서 PC로 재설정(기획/로드맵 문서만 반영, Unity 엔진 Player Settings는 미변경).*

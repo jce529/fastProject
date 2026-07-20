@@ -76,6 +76,8 @@ This research is 100% codebase-derived. Every claim below traces to a specific f
 
 **Critical finding: nothing in this codebase persists to disk today.** `PlayerPrefs` is not used anywhere in `Assets/Scripts`. All "persistence" across scene loads is in-memory statics that are either explicitly reset (Score, Floor) or simply never reset (AttackTypeSelector). This means the unlock-progression requirement ("survives across deaths/runs") is a genuinely new capability class for this project, not an extension of an existing pattern.
 
+## AMENDED 2026-07-20 (discuss-phase 18): platform target reset from Android/mobile to PC. Every touch/`Pointer.current`/`EnhancedTouch` recommendation below is superseded — `Mouse.current` stays the correct input source, no swap needed. Left below unmodified for historical record only; do not action those specific recommendations.
+
 ## Question 1: Restructuring CombatController for Pluggable Combat Modules
 
 ### What must NOT change

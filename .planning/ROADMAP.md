@@ -453,7 +453,7 @@ Plans:
 
 ---
 
-## v3.1 — 보스 룸 & 연출 고도화 (PARKED — Phase 15 Task 3 checkpoint:human-action에서 블로킹, v4.0 완료 후 재검토)
+## v3.1 — 보스 룸 & 연출 고도화 (PARKED — Phase 15 Task 3 checkpoint:human-action에서 블로킹, 다음 마일스톤 완료 후 재검토)
 
 **Milestone:** v3.1 — 보스 룸 & 연출 고도화
 **Granularity:** Standard
@@ -636,9 +636,9 @@ Plans:
 
 ---
 
-## v4.0 Phases
+## Phases
 
-- [ ] **Phase 18: 공유 인프라 — 전투 모듈 추상화 & 터치 입력 & 보스 베이스** - 기존 Overclock 로직이 IPlayerCombatModule로 무손상 이관되고, 터치 조준이 동작하며, BossEnemyBase가 추출되고, 보스 해금이 영구 저장된다
+- [ ] **Phase 18: 공유 인프라 — 전투 모듈 추상화 & 보스 베이스** - 기존 Overclock 로직이 IPlayerCombatModule로 무손상 이관되고, BossEnemyBase가 추출되고, 보스 해금이 영구 저장된다
 - [ ] **Phase 19: SAMURAI 보스 & 패링 모듈 & 모듈 선택 UI 확장** - 튜토리얼 보스 SAMURAI를 격파하면 패링 모듈이 해금되고, N-way 모듈 선택 화면에서 해금/잠금 상태를 확인하며 시작할 수 있다
 - [ ] **Phase 20: DeadEye 보스 & 탄약/재장전 모듈** - 6조준점 지정→일괄 발사→재장전 자원관리 모듈이 해금되고, DeadEye 보스는 추적 조준점 패턴으로 대응한다
 - [ ] **Phase 21: WorldGenerator 보스룸 정리 예외** - 전투 중인 보스룸이 보스 타입 무관하게 WorldGenerator의 앞뒤 자동 정리(Destroy)에서 예외 처리된다
@@ -648,18 +648,19 @@ Plans:
 
 ---
 
-## v4.0 Phase Details
+## Phase Details
 
-### Phase 18: 공유 인프라 — 전투 모듈 추상화 & 터치 입력 & 보스 베이스
-**Goal**: 신규 보스 4종과 그 전투 모듈을 얹을 수 있는 기반이 갖춰진다 — 기존 Overclock 전투가 회귀 없이 모듈화되고, 터치 조준이 실기기에서 동작하며, 보스 확장 베이스와 영구 해금 저장소가 준비된다
+### Phase 18: 공유 인프라 — 전투 모듈 추상화 & 보스 베이스
+**Goal**: 신규 보스 4종과 그 전투 모듈을 얹을 수 있는 기반이 갖춰진다 — 기존 Overclock 전투가 회귀 없이 모듈화되고, 보스 확장 베이스와 영구 해금 저장소가 준비된다
 **Depends on**: 기존 코드베이스 (Phase 15 BossEnemy FSM — v3.1, 파킹 상태지만 코드는 존재) — v4.0의 첫 Phase
-**Requirements**: INFRA-01, INFRA-02, INFRA-03, UNLOCK-01
+**Requirements**: INFRA-01, INFRA-03, UNLOCK-01
 **Success Criteria** (what must be TRUE):
   1. 기존 F.I.O.R.A(Overclock) 전투 흐름(홀드=슬로우모션+범위표시 → 릴리즈=대시처치)이 IPlayerCombatModule 마이그레이션 이후에도 회귀 없이 동일하게 동작한다
-  2. Android 터치 기기(또는 에디터 터치 시뮬레이션)에서 조준 방향이 Pointer.current/EnhancedTouch 기반으로 정상 추적된다 — 기존 Mouse.current 전용 방식은 터치 기기에서 죽은 벡터였다
-  3. BossEnemyBase를 상속한 신규 보스 클래스가 defeat-guard/사망 시퀀스/스폰 게이팅/피격 하이라이트를 별도 재작성 없이 즉시 사용할 수 있다
-  4. 보스를 격파하면 PlayerPrefs에 해금 플래그가 기록되고, 앱을 완전히 재시작해도 해금 상태가 유지된다
+  2. BossEnemyBase를 상속한 신규 보스 클래스가 defeat-guard/사망 시퀀스/스폰 게이팅/피격 하이라이트를 별도 재작성 없이 즉시 사용할 수 있다
+  3. 보스를 격파하면 PlayerPrefs에 해금 플래그가 기록되고, 앱을 완전히 재시작해도 해금 상태가 유지된다
 **Plans**: TBD
+
+**(2026-07-20 discuss-phase 18 세션: 플랫폼 타겟이 Android/모바일에서 PC로 재설정됨에 따라 INFRA-02(터치 조준 입력)가 이 Phase 범위에서 제거됨 — 상세는 REQUIREMENTS.md/18-CONTEXT.md 참고.)**
 
 ---
 
@@ -672,7 +673,7 @@ Plans:
   2. 패링 모듈 사용 중에는 슬로우모션 없이 실시간으로 동작하며, 탭 입력 시 방향성 베기 공격이 나간다
   3. 적 공격과 타이밍이 겹치는 시점에 탭하면 패링이 발동해 공격이 무효화되고 투사체가 반사된다
   4. SAMURAI 보스는 평시 전투와 패링 전용 타이밍을 번갈아 반복하며, 패링 타이밍에 공격을 시도하면 플레이어는 즉사한다
-  5. 실기기 터치 입력 지연을 고려해 넉넉하게 설정된 패링 판정 타이밍이 실기기에서 튜닝되어 있다
+  5. 입력 지연을 고려해 넉넉하게 설정된 패링 판정 타이밍이 실측 튜닝되어 있다
   6. 게임 시작 전 선택 화면(screen)에서 해금된 모듈은 선택 가능하게, 아직 해금되지 않은 모듈은 잠금 상태(자물쇠 아이콘 등)로 표시된다
 **Plans**: TBD
 **UI hint**: yes
@@ -745,7 +746,7 @@ Plans:
 
 ---
 
-## v4.0 Progress Table
+## Progress Table
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
@@ -759,19 +760,18 @@ Plans:
 
 ---
 
-## v4.0 Coverage Map
+## Coverage Map
 
 | Requirement | Phase | Description |
 |-------------|-------|--------------|
 | INFRA-01 | Phase 18 | Overclock → IPlayerCombatModule 무손상 마이그레이션 |
-| INFRA-02 | Phase 18 | Pointer/EnhancedTouch 기반 조준 방향 (터치 대응) |
 | INFRA-03 | Phase 18 | BossEnemyBase 추출 (신규 보스 4종의 공통 베이스) |
 | UNLOCK-01 | Phase 18 | 보스 격파 시 모듈 영구 해금 (PlayerPrefs) |
 | SAMURAI-01 | Phase 19 | SAMURAI 격파 시 패링 모듈 최초 해금 |
 | SAMURAI-02 | Phase 19 | 패링 모듈: 실시간 탭 방향성 베기 |
 | SAMURAI-03 | Phase 19 | 패링 판정: 공격 무효화 + 투사체 반사 |
 | SAMURAI-04 | Phase 19 | 보스 패턴: 평시/패링전용 타이밍 반복, 실패 시 즉사 |
-| SAMURAI-05 | Phase 19 | 패링 판정 타이밍 실기기 튜닝 |
+| SAMURAI-05 | Phase 19 | 패링 판정 타이밍 실측 튜닝 |
 | UNLOCK-02 | Phase 19 | N-way 모듈 선택 화면 (AttackSelect 확장) |
 | UNLOCK-03 | Phase 19 | 미해금 모듈 잠금 표시 |
 | DEADEYE-01 | Phase 20 | DeadEye 격파 시 자원관리 원거리 모듈 해금 |
@@ -791,24 +791,23 @@ Plans:
 | MODE-01 | Phase 24 | 한계 시험: 단일 모듈 고정 로그라이크 등반 |
 | MODE-02 | Phase 24 | 한계 시험: 기존 ScoreManager 재사용 |
 
-**v4.0 Coverage: 27/27 requirements mapped. No orphans.**
+**v4.0 Coverage: 26/26 requirements mapped. No orphans.** (INFRA-02는 2026-07-20 플랫폼 재설정으로 제거 — 원래 27개 중 26개)
 
 ---
 
-## v4.0 Implementation Notes (for plan-phase reference)
+## Implementation Notes (for plan-phase reference)
 
 - 빌드 순서(research 권장, risk-ordered): 공유 인프라(18) → SAMURAI(19) → DeadEye(20) → WorldGenerator 보스룸 예외(21) → MAX(22) → NOVA(23) → 게임 모드(24). Phase 21은 Phase 22(MAX) 진입 전 하드 프리레퀴짓 — MAX의 지속적 전진 관성이 룸 정리 스윕에 가장 취약하다.
 - BossEnemyBase(Phase 18, INFRA-03)는 EnemyBase와 별개의 형제 클래스로 추출 — 4개 신규 보스가 모두 상속하되, 각 보스의 패턴 루프 상태 모양이 서로 달라(패링/탄약/관성/이원화) 공유 FSM은 강제하지 않는다 (research Architecture Q2 권장).
 - CombatController는 IPlayerCombatModule 인터페이스의 호스트로 남고(슬로우모션 생명주기/게이지/_isBusy 락아웃/히트프리즈 유지), 타겟팅+해석만 활성 모듈에 위임한다.
 - 신규 보스/모듈의 모든 타이머·쿨다운은 반드시 Time.unscaledDeltaTime/WaitForSecondsRealtime 컨벤션을 따른다 — 플레이어 자신의 슬로우모션/히트프리즈(Time.timeScale=0 근접) 중에도 깨지지 않아야 한다 (전 마일스톤 공통 제약, 최우선 회귀 리스크로 지목됨).
 - BossUnlockManager(Phase 18, UNLOCK-01)는 신규 static/PlayerPrefs 기반 클래스로, DeathScreenController.RestartGame()의 기존 "전체 리셋" 스윕과 의도적으로 분리 유지한다.
-- Mouse.current → Pointer.current/EnhancedTouch 교체(Phase 18, INFRA-02)는 공유 인프라에서 한 번만 해결 — SAMURAI/DeadEye/NOVA 3개 보스 모듈이 모두 이 조준 신호에 의존한다.
 - 보스 러시(Boss Rush) 모드는 이번 v4.0 로드맵 범위 밖 — Future Requirements RUSH-01로 이연 (4개 모듈 개별 안정화 후 별도 마일스톤에서 착수, endless 생성 로직은 v3.1 Phase 15/16 블로킹과 동일한 클래스의 리스크로 지목됨).
 - NOVA 조작 스킴(토글/포제션-스왑 vs 동시 듀얼)과 DeadEye 6-탭 마킹의 fat-finger 완화(넉넉한 히트테스트 반경, 즉시 태그 확인, 재탭 시 언태그)는 각 Phase의 discuss-phase/plan-phase 단계에서 명시적으로 확정한다 (research가 기본값은 제안하되 최종 확정은 아님).
 
 ---
 *v4.0 Roadmap created: 2026-07-20*
-*Last updated: 2026-07-20 — v4.0 milestone roadmap created, Phase 18-24 defined (27/27 requirements mapped). Phase 13-17 remain reserved for v3.1's eventual resumption.*
+*Last updated: 2026-07-20 — v4.0 milestone roadmap created, Phase 18-24 defined (27/27 requirements mapped). Phase 13-17 remain reserved for v3.1's eventual resumption. Same-day discuss-phase 18 session: platform target reset from Android/mobile to PC — INFRA-02 removed, coverage now 26/26.*
 
 ---
 

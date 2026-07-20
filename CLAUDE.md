@@ -3,7 +3,7 @@
 
 **Fast (가칭)**
 
-모바일 2D 가로 화면 플랫포머 액션 게임 프로토타입. 플레이어는 끝없이 이어지는 탑을 올라가며, 공격 버튼을 누르면 슬로우 모션이 발동하고 손을 떼면 범위 안 가장 가까운 적에게 돌진해 원샷으로 처치한다. 이 핵심 전투 메카닉과 구르기를 이용한 회피 시스템이 모바일에서 실제로 재미있는지 검증하는 것이 목적이다.
+2D 가로 화면 플랫포머 액션 게임 프로토타입 (PC 우선 — 2026-07-20 플랫폼 재설정). 플레이어는 끝없이 이어지는 탑을 올라가며, 공격 버튼을 누르면 슬로우 모션이 발동하고 손을 떼면 범위 안 가장 가까운 적에게 돌진해 원샷으로 처치한다. 이 핵심 전투 메카닉과 구르기를 이용한 회피 시스템이 실제로 재미있는지 검증하는 것이 목적이다.
 
 **Core Value:** **공격 버튼을 누르면 시간이 느려지고, 손을 떼면 적에게 돌진해 한 방에 처치하는 손맛 — 이것이 재미있어야 게임이 살아난다.**
 
@@ -23,9 +23,9 @@
 ### Constraints
 
 - **Tech Stack**: Unity 6 LTS + C# — 이미 설정된 프로젝트 환경
-- **Platform**: Android 우선 (ARM64, minSdk 25) — 성능 예산 고려 필요
+- **Platform**: PC (Standalone) 우선 — Android/모바일은 2026-07-20부로 재검토 대상 보류 (Unity Player Settings 자체는 변경하지 않음)
 - **Scope**: 핵심 메카닉 검증에만 집중 — 프로토타입 외 기능 추가 금지
-- **Performance**: 현재 층 + 다음 층만 유지, 이전 층 제거 — 모바일 메모리 관리
+- **Performance**: 현재 층 + 다음 층만 유지, 이전 층 제거 — 메모리 관리 관례 유지
 <!-- GSD:project-end -->
 
 <!-- GSD:stack-start source:codebase/STACK.md -->
@@ -90,13 +90,11 @@
 - Windows 10/11 (primary dev machine: Windows 11, confirmed by environment)
 - JetBrains Rider or Visual Studio (IDE integration packages present)
 - Target build architecture: StandaloneWindows64 (editor default)
-- Primary target: **Android** (AndroidMinSdkVersion: 25 / Android 7.1+)
-- Android target architecture: ARM64 (AndroidTargetArchitectures: 2)
-- Secondary target: iOS (future; iOSTargetOSVersionString: 15.0 configured)
+- Primary target (재설정 2026-07-20): **PC (Standalone Windows/Mac/Linux)** — 마우스+키보드 기준 개발/검증
+- Android/iOS는 보류 — 엔진 Player Settings는 변경하지 않음 (기존 AndroidMinSdkVersion: 25 / ARM64, iOS 15.0 설정 그대로 유지, 추후 재검토 시 그대로 활용 가능)
 - Screen orientation: Landscape (defaultScreenOrientation: 4 = Landscape)
 - Default resolution: 1920x1080
-- Game category: `androidAppCategory: 3` (Game)
-- URP 2D Renderer configured for mobile-appropriate rendering
+- URP 2D Renderer
 <!-- GSD:stack-end -->
 
 <!-- GSD:conventions-start source:CONVENTIONS.md -->

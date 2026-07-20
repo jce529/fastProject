@@ -104,13 +104,11 @@
 - Target build architecture: StandaloneWindows64 (editor default)
 
 **Production:**
-- Primary target: **Android** (AndroidMinSdkVersion: 25 / Android 7.1+)
-- Android target architecture: ARM64 (AndroidTargetArchitectures: 2)
-- Secondary target: iOS (future; iOSTargetOSVersionString: 15.0 configured)
+- Primary target (재설정 2026-07-20): **PC (Standalone Windows/Mac/Linux)** — 마우스+키보드 기준 개발/검증
+- Android/iOS는 보류 — 엔진 Player Settings는 변경하지 않음 (기존 AndroidMinSdkVersion: 25 / ARM64 / iOS 15.0 설정 그대로 유지, 추후 재검토 시 그대로 활용 가능)
 - Screen orientation: Landscape (defaultScreenOrientation: 4 = Landscape)
 - Default resolution: 1920x1080
-- Game category: `androidAppCategory: 3` (Game)
-- URP 2D Renderer configured for mobile-appropriate rendering
+- URP 2D Renderer
 
 ---
 

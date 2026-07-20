@@ -104,7 +104,9 @@ Must be resolved as its own explicit design+implementation step (this is literal
 
 ---
 
-### Pitfall 5: Mouse-only aim direction + zero touch bindings for movement — the existing input layer cannot run on the target platform, and new boss mechanics will inherit that gap
+### Pitfall 5 — AMENDED 2026-07-20 (discuss-phase 18): platform target reset from Android/mobile to PC. This pitfall's touch/`Pointer`/`EnhancedTouch` concerns no longer apply — `Mouse.current` is now the correct, in-scope input source. Left below unmodified for historical record only; do not action.
+
+### ~~Pitfall 5: Mouse-only aim direction + zero touch bindings for movement — the existing input layer cannot run on the target platform, and new boss mechanics will inherit that gap~~
 
 **What goes wrong:**
 Two separate, compounding issues, both confirmed directly in code:
