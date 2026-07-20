@@ -2,12 +2,12 @@
 gsd_state_version: 1.0
 milestone: v4.0
 milestone_name: — 보스 캐릭터 확장 & 게임 모드
-status: defining-requirements
-stopped_at: "Milestone v4.0 started -- requirements/roadmap not yet created. v3.1 parked at 15-06-PLAN.md Task 3 (checkpoint:human-action), see Parked Milestone section below."
-last_updated: "2026-07-20T02:00:00.000Z"
+status: roadmap-ready
+stopped_at: "Milestone v4.0 roadmap created (Phase 18-24, 27/27 requirements mapped). Ready to plan Phase 18. v3.1 parked at 15-06-PLAN.md Task 3 (checkpoint:human-action), see Parked Milestone section below."
+last_updated: "2026-07-20T03:00:00.000Z"
 last_activity: 2026-07-20
 progress:
-  total_phases: 0
+  total_phases: 7
   completed_phases: 0
   total_plans: 0
   completed_plans: 0
@@ -27,7 +27,7 @@ progress:
 
 **Last Shipped Milestone:** v3.0 — 무한 복도 층 시스템 (2026-07-08)
 
-**Current Milestone:** v4.0 — 보스 캐릭터 확장 & 게임 모드 (requirements/roadmap 정의 중)
+**Current Milestone:** v4.0 — 보스 캐릭터 확장 & 게임 모드 (roadmap 완성 — Phase 18-24, 27/27 requirements mapped. Phase 18 계획 대기 중)
 
 **Parked Milestone:** v3.1 — 보스 룸 & 연출 고도화 (Phase 13-17, Phase 15에서 human-action 체크포인트로 블로킹, 미완료 상태로 파킹 — v4.0 완료 후 재검토)
 
@@ -35,13 +35,13 @@ progress:
 
 ## Current Position
 
-Phase: Not started (defining requirements)
-Plan: —
-Status: Defining requirements for milestone v4.0
+Phase: 18 of 24 (공유 인프라 — 전투 모듈 추상화 & 터치 입력 & 보스 베이스) — ready to plan
+Plan: — (Phase 18 not yet planned)
+Status: Roadmap ready — awaiting /gsd:plan-phase 18 (or discuss-phase 18 first)
 Last activity: 2026-07-20
 
 ```
-Progress: [░░░░░░░░░░] v4.0 milestone: requirements/roadmap 정의 중
+Progress: [░░░░░░░░░░] 0/7 v4.0 phases complete (Phase 18-24)
 ```
 
 ---
@@ -130,11 +130,11 @@ Full decision log lives in `.planning/PROJECT.md` Key Decisions table. Recent hi
 
 1. Read `.planning/STATE.md` (this file) — current position and decisions
 2. Read `.planning/PROJECT.md` — Current Milestone: v4.0 (보스 캐릭터 확장 & 게임 모드)
-3. Read `.planning/REQUIREMENTS.md` / `.planning/ROADMAP.md` once created for v4.0
-4. Next action: `/gsd:new-milestone` 계속 진행 중이었다면 research 여부 결정 → REQUIREMENTS.md 작성 → 로드맵 생성 단계부터 재개. 이미 로드맵까지 완료됐다면 `/gsd:discuss-phase [N]` 또는 `/gsd:plan-phase [N]`으로 첫 v4.0 phase 시작
+3. Read `.planning/REQUIREMENTS.md` / `.planning/ROADMAP.md` — v4.0 Phase 18-24 already defined
+4. Next action: `/gsd:discuss-phase 18` 또는 곧바로 `/gsd:plan-phase 18`으로 v4.0 첫 Phase(공유 인프라) 계획 시작 — ROADMAP.md/REQUIREMENTS.md는 이미 Phase 18-24로 완성됨
 
-**Last session:** 2026-07-20T02:00:00.000Z
-**Stopped at:** Milestone v4.0 시작 — PROJECT.md/STATE.md 갱신 완료, requirements/roadmap 정의 진행 중
+**Last session:** 2026-07-20T03:00:00.000Z
+**Stopped at:** v4.0 로드맵 생성 완료 — ROADMAP.md(Phase 18-24)/REQUIREMENTS.md(traceability 27/27) 갱신 완료, Phase 18 계획 대기 중
 
 ### Parked Milestone: v3.1 (보스 룸 & 연출 고도화) — 재개 방법
 
@@ -152,4 +152,4 @@ v4.0 완료 후 v3.1 잔여 범위(Phase 15 Task 3 이후, Phase 16/17)를 재�
 
 ---
 *State initialized: 2026-05-27*
-*Last updated: 2026-07-20 — 마일스톤 v4.0(보스 캐릭터 확장 & 게임 모드) 시작. v3.1은 Phase 15 Task 3(checkpoint:human-action)에서 파킹, 재개 절차는 "Parked Milestone" 섹션 참고.*
+*Last updated: 2026-07-20 — v4.0 로드맵 생성 완료 (Phase 18-24, 27/27 requirements mapped). v3.1은 Phase 15 Task 3(checkpoint:human-action)에서 파킹, 재개 절차는 "Parked Milestone" 섹션 참고.*

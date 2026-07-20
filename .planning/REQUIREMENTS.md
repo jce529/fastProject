@@ -128,39 +128,39 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| INFRA-01 | TBD | Pending |
-| INFRA-02 | TBD | Pending |
-| INFRA-03 | TBD | Pending |
-| UNLOCK-01 | TBD | Pending |
-| UNLOCK-02 | TBD | Pending |
-| UNLOCK-03 | TBD | Pending |
-| SAMURAI-01 | TBD | Pending |
-| SAMURAI-02 | TBD | Pending |
-| SAMURAI-03 | TBD | Pending |
-| SAMURAI-04 | TBD | Pending |
-| SAMURAI-05 | TBD | Pending |
-| DEADEYE-01 | TBD | Pending |
-| DEADEYE-02 | TBD | Pending |
-| DEADEYE-03 | TBD | Pending |
-| DEADEYE-04 | TBD | Pending |
-| MAXB-01 | TBD | Pending |
-| MAXB-02 | TBD | Pending |
-| MAXB-03 | TBD | Pending |
-| MAXB-04 | TBD | Pending |
-| MAXB-05 | TBD | Pending |
-| NOVA-01 | TBD | Pending |
-| NOVA-02 | TBD | Pending |
-| NOVA-03 | TBD | Pending |
-| NOVA-04 | TBD | Pending |
-| MODE-01 | TBD | Pending |
-| MODE-02 | TBD | Pending |
-| WGEN-01 | TBD | Pending |
+| INFRA-01 | Phase 18 | Pending |
+| INFRA-02 | Phase 18 | Pending |
+| INFRA-03 | Phase 18 | Pending |
+| UNLOCK-01 | Phase 18 | Pending |
+| UNLOCK-02 | Phase 19 | Pending |
+| UNLOCK-03 | Phase 19 | Pending |
+| SAMURAI-01 | Phase 19 | Pending |
+| SAMURAI-02 | Phase 19 | Pending |
+| SAMURAI-03 | Phase 19 | Pending |
+| SAMURAI-04 | Phase 19 | Pending |
+| SAMURAI-05 | Phase 19 | Pending |
+| DEADEYE-01 | Phase 20 | Pending |
+| DEADEYE-02 | Phase 20 | Pending |
+| DEADEYE-03 | Phase 20 | Pending |
+| DEADEYE-04 | Phase 20 | Pending |
+| MAXB-01 | Phase 22 | Pending |
+| MAXB-02 | Phase 22 | Pending |
+| MAXB-03 | Phase 22 | Pending |
+| MAXB-04 | Phase 22 | Pending |
+| MAXB-05 | Phase 22 | Pending |
+| NOVA-01 | Phase 23 | Pending |
+| NOVA-02 | Phase 23 | Pending |
+| NOVA-03 | Phase 23 | Pending |
+| NOVA-04 | Phase 23 | Pending |
+| MODE-01 | Phase 24 | Pending |
+| MODE-02 | Phase 24 | Pending |
+| WGEN-01 | Phase 21 | Pending |
 
 **Coverage:**
 - v4.0 requirements: 27 total
-- Mapped to phases: 0 (roadmap not yet created)
-- Unmapped: 27
+- Mapped to phases: 27 (Phase 18-24, roadmap created 2026-07-20)
+- Unmapped: 0
 
 ---
 *Requirements defined: 2026-07-08 (v3.1)*
-*Last updated: 2026-07-20 — v4.0 milestone requirements defined (27 requirements across INFRA/UNLOCK/SAMURAI/DEADEYE/MAXB/NOVA/MODE/WGEN). v3.1's 8 pending requirements preserved as parked (not invalidated). Boss Rush deferred to Future Requirements (RUSH-01).*
+*Last updated: 2026-07-20 — v4.0 roadmap created (Phase 18-24). All 27 v4.0 requirements mapped, no orphans. v3.1's 8 pending requirements preserved as parked (not invalidated). Boss Rush deferred to Future Requirements (RUSH-01).*

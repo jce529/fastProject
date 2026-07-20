@@ -453,7 +453,7 @@ Plans:
 
 ---
 
-## v3.1 — 보스 룸 & 연출 고도화 (in progress)
+## v3.1 — 보스 룸 & 연출 고도화 (PARKED — Phase 15 Task 3 checkpoint:human-action에서 블로킹, v4.0 완료 후 재검토)
 
 **Milestone:** v3.1 — 보스 룸 & 연출 고도화
 **Granularity:** Standard
@@ -624,6 +624,191 @@ Plans:
 ---
 *v3.1 Roadmap created: 2026-07-08*
 *Last updated: 2026-07-08 — v3.1 roadmap created, Phase 13-17 defined*
+
+---
+
+## v4.0 — 보스 캐릭터 확장 & 게임 모드 (in progress)
+
+**Milestone:** v4.0 — 보스 캐릭터 확장 & 게임 모드
+**Granularity:** Standard
+**Coverage:** 27/27 v4.0 requirements mapped
+**Phase numbering continues from v3.1 (Phase 13-17, parked). v4.0 starts at Phase 18 — Phase 13-17 remain reserved for v3.1's eventual resumption, not reused here.**
+
+---
+
+## v4.0 Phases
+
+- [ ] **Phase 18: 공유 인프라 — 전투 모듈 추상화 & 터치 입력 & 보스 베이스** - 기존 Overclock 로직이 IPlayerCombatModule로 무손상 이관되고, 터치 조준이 동작하며, BossEnemyBase가 추출되고, 보스 해금이 영구 저장된다
+- [ ] **Phase 19: SAMURAI 보스 & 패링 모듈 & 모듈 선택 UI 확장** - 튜토리얼 보스 SAMURAI를 격파하면 패링 모듈이 해금되고, N-way 모듈 선택 화면에서 해금/잠금 상태를 확인하며 시작할 수 있다
+- [ ] **Phase 20: DeadEye 보스 & 탄약/재장전 모듈** - 6조준점 지정→일괄 발사→재장전 자원관리 모듈이 해금되고, DeadEye 보스는 추적 조준점 패턴으로 대응한다
+- [ ] **Phase 21: WorldGenerator 보스룸 정리 예외** - 전투 중인 보스룸이 보스 타입 무관하게 WorldGenerator의 앞뒤 자동 정리(Destroy)에서 예외 처리된다
+- [ ] **Phase 22: MAX 보스 & 순수 속도/관성 모듈** - 정지 불가·충돌 즉사 리스크의 모듈이 해금되고, MAX 보스는 벽 유도→스턴→타격 패턴으로 상대해야 한다
+- [ ] **Phase 23: NOVA 보스 & 이원화 조작 모듈** - 본체+드론 동시 조작 모듈이 해금되고, NOVA 보스는 회피 기동하는 본체와 견제하는 드론을 동시에 운용한다
+- [ ] **Phase 24: 게임 모드 — 한계 시험** - 해금된 모듈 중 하나만 선택해 기존 점수 체계 그대로 로그라이크 층 등반에 진입할 수 있다
+
+---
+
+## v4.0 Phase Details
+
+### Phase 18: 공유 인프라 — 전투 모듈 추상화 & 터치 입력 & 보스 베이스
+**Goal**: 신규 보스 4종과 그 전투 모듈을 얹을 수 있는 기반이 갖춰진다 — 기존 Overclock 전투가 회귀 없이 모듈화되고, 터치 조준이 실기기에서 동작하며, 보스 확장 베이스와 영구 해금 저장소가 준비된다
+**Depends on**: 기존 코드베이스 (Phase 15 BossEnemy FSM — v3.1, 파킹 상태지만 코드는 존재) — v4.0의 첫 Phase
+**Requirements**: INFRA-01, INFRA-02, INFRA-03, UNLOCK-01
+**Success Criteria** (what must be TRUE):
+  1. 기존 F.I.O.R.A(Overclock) 전투 흐름(홀드=슬로우모션+범위표시 → 릴리즈=대시처치)이 IPlayerCombatModule 마이그레이션 이후에도 회귀 없이 동일하게 동작한다
+  2. Android 터치 기기(또는 에디터 터치 시뮬레이션)에서 조준 방향이 Pointer.current/EnhancedTouch 기반으로 정상 추적된다 — 기존 Mouse.current 전용 방식은 터치 기기에서 죽은 벡터였다
+  3. BossEnemyBase를 상속한 신규 보스 클래스가 defeat-guard/사망 시퀀스/스폰 게이팅/피격 하이라이트를 별도 재작성 없이 즉시 사용할 수 있다
+  4. 보스를 격파하면 PlayerPrefs에 해금 플래그가 기록되고, 앱을 완전히 재시작해도 해금 상태가 유지된다
+**Plans**: TBD
+
+---
+
+### Phase 19: SAMURAI 보스 & 패링 모듈 & 모듈 선택 UI 확장
+**Goal**: 튜토리얼 보스 SAMURAI를 격파하면 패링 모듈이 최초로 해금되고, 플레이어는 확장된 N-way 선택 화면(screen)에서 해금/잠금 상태를 확인하며 모듈을 골라 시작할 수 있다
+**Depends on**: Phase 18
+**Requirements**: SAMURAI-01, SAMURAI-02, SAMURAI-03, SAMURAI-04, SAMURAI-05, UNLOCK-02, UNLOCK-03
+**Success Criteria** (what must be TRUE):
+  1. SAMURAI 보스를 격파하면 패링 모듈이 최초로 해금된다 (다른 모듈보다 먼저 해금 가능한 튜토리얼 보스)
+  2. 패링 모듈 사용 중에는 슬로우모션 없이 실시간으로 동작하며, 탭 입력 시 방향성 베기 공격이 나간다
+  3. 적 공격과 타이밍이 겹치는 시점에 탭하면 패링이 발동해 공격이 무효화되고 투사체가 반사된다
+  4. SAMURAI 보스는 평시 전투와 패링 전용 타이밍을 번갈아 반복하며, 패링 타이밍에 공격을 시도하면 플레이어는 즉사한다
+  5. 실기기 터치 입력 지연을 고려해 넉넉하게 설정된 패링 판정 타이밍이 실기기에서 튜닝되어 있다
+  6. 게임 시작 전 선택 화면(screen)에서 해금된 모듈은 선택 가능하게, 아직 해금되지 않은 모듈은 잠금 상태(자물쇠 아이콘 등)로 표시된다
+**Plans**: TBD
+**UI hint**: yes
+
+---
+
+### Phase 20: DeadEye 보스 & 탄약/재장전 모듈
+**Goal**: DeadEye를 격파하면 탄약 관리형 원거리 모듈이 해금되고, 조준점 지정 → 일괄 발사 → 재장전 루프가 동작하며, DeadEye 보스는 추적 조준점 패턴으로 플레이어를 압박한다
+**Depends on**: Phase 18
+**Requirements**: DEADEYE-01, DEADEYE-02, DEADEYE-03, DEADEYE-04
+**Success Criteria** (what must be TRUE):
+  1. DeadEye 보스 격파 시 자원관리형 원거리 모듈이 해금된다
+  2. 홀드 시 슬로우모션과 부채꼴 범위가 표시되고, 탭으로 범위 내 최대 6개 조준점을 지정한 뒤 별도 입력으로 일괄 발사한다
+  3. 발사한 탄수만큼 재장전이 필요하다 — 부분 재장전은 1초/발, 탄이 완전히 소진되면 3초 전체 재장전 대기가 발생한다
+  4. DeadEye 보스는 플레이어를 추적하는 조준점 6개를 남긴 뒤 발사하며, 플레이어는 조준점을 피하며 보스를 타격해야 한다
+**Plans**: TBD
+
+---
+
+### Phase 21: WorldGenerator 보스룸 정리 예외
+**Goal**: 전투 중인 보스룸이 보스 타입에 관계없이 WorldGenerator의 앞뒤 2개 유지 정리(Destroy) 로직에서 예외 처리되어, 길거나 이동량이 큰 보스전(특히 Phase 22 MAX) 중에도 룸이 파괴되지 않는다
+**Depends on**: Phase 18
+**Requirements**: WGEN-01
+**Success Criteria** (what must be TRUE):
+  1. 보스와 전투 중(미처치)인 보스룸은 플레이어가 앞뒤로 얼마나 이동하든 WorldGenerator의 Destroy 대상에서 제외된다
+  2. 이 예외 처리는 보스 타입에 종속되지 않고 BossEnemyBase 공통 상태(IsAlive/미처치 여부)만으로 동작해 Phase 19/20/22/23의 모든 보스에 동일하게 적용된다
+  3. 보스 전투가 종료(처치 또는 보스룸 이탈)되면 해당 룸은 즉시 일반 앞뒤 2개 정리 대상으로 복귀한다
+**Plans**: TBD
+
+---
+
+### Phase 22: MAX 보스 & 순수 속도/관성 모듈
+**Goal**: 정지 불가·충돌 즉사 리스크를 가진 순수 속도/관성 모듈이 해금되고, MAX 보스는 멈추지 못하고 돌진하며 벽 유도→스턴→타격 패턴으로 상대해야 한다
+**Depends on**: Phase 18, Phase 21 (WGEN-01 하드 프리레퀴짓 — 보스룸 정리 예외가 먼저 해결되어야 함)
+**Requirements**: MAXB-01, MAXB-02, MAXB-03, MAXB-04, MAXB-05
+**Success Criteria** (what must be TRUE):
+  1. MAX 보스 격파 시 순수 속도/관성 모듈이 해금된다
+  2. 이 모듈 사용 중 캐릭터는 멈출 수 없으며, 몸 자체가 적에게 닿으면 처치 판정이 발생한다
+  3. 홀드 시 슬로우모션이 발동해 동선을 미리 설계할 수 있다
+  4. 벽 또는 적의 공격에 충돌하면 플레이어가 즉시 사망한다
+  5. MAX 보스는 멈추지 못하고 계속 돌진하며, 벽에 유도해 충돌시키면 스턴이 발생해 그 틈에 타격할 수 있다
+**Plans**: TBD
+
+---
+
+### Phase 23: NOVA 보스 & 이원화 조작 모듈
+**Goal**: 본체+드론 동시 조작(이원화) 모듈이 해금되고, NOVA 보스는 회피 기동하는 본체와 진로를 막는 드론을 동시에 운용해 플레이어에게 두 가지 공략 선택지를 제시한다
+**Depends on**: Phase 18 (보스 4종 중 마지막 순서 — Phase 19/20/22에서 안정화된 모듈 인터페이스 위에서 가장 높은 리스크의 조작 방식을 마지막에 검증)
+**Requirements**: NOVA-01, NOVA-02, NOVA-03, NOVA-04
+**Success Criteria** (what must be TRUE):
+  1. NOVA 보스 격파 시 이원화 조작(본체+드론) 모듈이 해금된다
+  2. 본체 이동과, 공격 판정을 가진 드론의 조작이 동시에 독립적으로 가능하다
+  3. NOVA 보스는 본체가 회피 기동하는 동시에 드론을 조종해 플레이어의 진로를 막고 공격한다
+  4. 플레이어는 드론을 먼저 무력화하거나 본체를 직접 타격하는 두 가지 선택지 중 하나를 고를 수 있다
+**Plans**: TBD
+
+---
+
+### Phase 24: 게임 모드 — 한계 시험
+**Goal**: 4개 모듈과 해금 시스템이 모두 존재/검증된 상태에서, 플레이어는 해금된 모듈 중 단 하나만 선택해 기존 점수 체계 그대로 로그라이크 층 등반(한계 시험 모드)에 진입할 수 있다
+**Depends on**: Phase 19, Phase 20, Phase 22, Phase 23 (4개 모듈 전부 개별 검증 완료 후 통합 — 보스 러시는 이번 로드맵 범위 밖, Future Requirements RUSH-01로 이연)
+**Requirements**: MODE-01, MODE-02
+**Success Criteria** (what must be TRUE):
+  1. 한계 시험 모드 선택 화면(screen)에 진입하면 해금된 모듈 중 단 하나만 골라 로그라이크 층 등반을 시작할 수 있다
+  2. 한계 시험 모드로 진입한 세션 중에는 전투 중 모듈을 다른 모듈로 전환할 수 없다 (선택이 세션 시작 시점에 고정된다)
+  3. 한계 시험 모드의 점수는 기존 ScoreManager 체계(시간 비례 점수 등)를 그대로 재사용하며 별도 점수 로직이 추가되지 않는다
+  4. 한계 시험 모드에서도 EXIT 포탈 진입 시 층이 오르는 기존 흐름이 동일하게 동작한다 (보스 처치가 자동으로 층을 넘기지 않는 기존 규칙 유지)
+**Plans**: TBD
+**UI hint**: yes
+
+---
+
+## v4.0 Progress Table
+
+| Phase | Plans Complete | Status | Completed |
+|-------|----------------|--------|-----------|
+| 18. 공유 인프라 | 0/? | Not started | - |
+| 19. SAMURAI 보스 & 패링 모듈 | 0/? | Not started | - |
+| 20. DeadEye 보스 & 탄약/재장전 모듈 | 0/? | Not started | - |
+| 21. WorldGenerator 보스룸 정리 예외 | 0/? | Not started | - |
+| 22. MAX 보스 & 순수 속도/관성 모듈 | 0/? | Not started | - |
+| 23. NOVA 보스 & 이원화 조작 모듈 | 0/? | Not started | - |
+| 24. 게임 모드 — 한계 시험 | 0/? | Not started | - |
+
+---
+
+## v4.0 Coverage Map
+
+| Requirement | Phase | Description |
+|-------------|-------|--------------|
+| INFRA-01 | Phase 18 | Overclock → IPlayerCombatModule 무손상 마이그레이션 |
+| INFRA-02 | Phase 18 | Pointer/EnhancedTouch 기반 조준 방향 (터치 대응) |
+| INFRA-03 | Phase 18 | BossEnemyBase 추출 (신규 보스 4종의 공통 베이스) |
+| UNLOCK-01 | Phase 18 | 보스 격파 시 모듈 영구 해금 (PlayerPrefs) |
+| SAMURAI-01 | Phase 19 | SAMURAI 격파 시 패링 모듈 최초 해금 |
+| SAMURAI-02 | Phase 19 | 패링 모듈: 실시간 탭 방향성 베기 |
+| SAMURAI-03 | Phase 19 | 패링 판정: 공격 무효화 + 투사체 반사 |
+| SAMURAI-04 | Phase 19 | 보스 패턴: 평시/패링전용 타이밍 반복, 실패 시 즉사 |
+| SAMURAI-05 | Phase 19 | 패링 판정 타이밍 실기기 튜닝 |
+| UNLOCK-02 | Phase 19 | N-way 모듈 선택 화면 (AttackSelect 확장) |
+| UNLOCK-03 | Phase 19 | 미해금 모듈 잠금 표시 |
+| DEADEYE-01 | Phase 20 | DeadEye 격파 시 자원관리 원거리 모듈 해금 |
+| DEADEYE-02 | Phase 20 | 홀드+부채꼴 범위 + 6조준점 탭 + 일괄 발사 |
+| DEADEYE-03 | Phase 20 | 부분/완전 재장전 (1초/발, 3초 전체) |
+| DEADEYE-04 | Phase 20 | 보스 패턴: 추적 조준점 6개 후 발사 |
+| WGEN-01 | Phase 21 | 전투 중 보스룸 WorldGenerator 정리 예외 |
+| MAXB-01 | Phase 22 | MAX 격파 시 순수 속도/관성 모듈 해금 |
+| MAXB-02 | Phase 22 | 정지 불가 + 몸 충돌 처치 판정 |
+| MAXB-03 | Phase 22 | 홀드 시 슬로우모션 (동선 설계) |
+| MAXB-04 | Phase 22 | 벽/적 공격 충돌 시 즉사 |
+| MAXB-05 | Phase 22 | 보스 패턴: 벽 유도 → 스턴 → 타격 |
+| NOVA-01 | Phase 23 | NOVA 격파 시 이원화 조작 모듈 해금 |
+| NOVA-02 | Phase 23 | 본체+드론 동시 독립 조작 |
+| NOVA-03 | Phase 23 | 보스 패턴: 본체 회피 + 드론 견제 |
+| NOVA-04 | Phase 23 | 드론 무력화 vs 본체 직격 선택지 |
+| MODE-01 | Phase 24 | 한계 시험: 단일 모듈 고정 로그라이크 등반 |
+| MODE-02 | Phase 24 | 한계 시험: 기존 ScoreManager 재사용 |
+
+**v4.0 Coverage: 27/27 requirements mapped. No orphans.**
+
+---
+
+## v4.0 Implementation Notes (for plan-phase reference)
+
+- 빌드 순서(research 권장, risk-ordered): 공유 인프라(18) → SAMURAI(19) → DeadEye(20) → WorldGenerator 보스룸 예외(21) → MAX(22) → NOVA(23) → 게임 모드(24). Phase 21은 Phase 22(MAX) 진입 전 하드 프리레퀴짓 — MAX의 지속적 전진 관성이 룸 정리 스윕에 가장 취약하다.
+- BossEnemyBase(Phase 18, INFRA-03)는 EnemyBase와 별개의 형제 클래스로 추출 — 4개 신규 보스가 모두 상속하되, 각 보스의 패턴 루프 상태 모양이 서로 달라(패링/탄약/관성/이원화) 공유 FSM은 강제하지 않는다 (research Architecture Q2 권장).
+- CombatController는 IPlayerCombatModule 인터페이스의 호스트로 남고(슬로우모션 생명주기/게이지/_isBusy 락아웃/히트프리즈 유지), 타겟팅+해석만 활성 모듈에 위임한다.
+- 신규 보스/모듈의 모든 타이머·쿨다운은 반드시 Time.unscaledDeltaTime/WaitForSecondsRealtime 컨벤션을 따른다 — 플레이어 자신의 슬로우모션/히트프리즈(Time.timeScale=0 근접) 중에도 깨지지 않아야 한다 (전 마일스톤 공통 제약, 최우선 회귀 리스크로 지목됨).
+- BossUnlockManager(Phase 18, UNLOCK-01)는 신규 static/PlayerPrefs 기반 클래스로, DeathScreenController.RestartGame()의 기존 "전체 리셋" 스윕과 의도적으로 분리 유지한다.
+- Mouse.current → Pointer.current/EnhancedTouch 교체(Phase 18, INFRA-02)는 공유 인프라에서 한 번만 해결 — SAMURAI/DeadEye/NOVA 3개 보스 모듈이 모두 이 조준 신호에 의존한다.
+- 보스 러시(Boss Rush) 모드는 이번 v4.0 로드맵 범위 밖 — Future Requirements RUSH-01로 이연 (4개 모듈 개별 안정화 후 별도 마일스톤에서 착수, endless 생성 로직은 v3.1 Phase 15/16 블로킹과 동일한 클래스의 리스크로 지목됨).
+- NOVA 조작 스킴(토글/포제션-스왑 vs 동시 듀얼)과 DeadEye 6-탭 마킹의 fat-finger 완화(넉넉한 히트테스트 반경, 즉시 태그 확인, 재탭 시 언태그)는 각 Phase의 discuss-phase/plan-phase 단계에서 명시적으로 확정한다 (research가 기본값은 제안하되 최종 확정은 아님).
+
+---
+*v4.0 Roadmap created: 2026-07-20*
+*Last updated: 2026-07-20 — v4.0 milestone roadmap created, Phase 18-24 defined (27/27 requirements mapped). Phase 13-17 remain reserved for v3.1's eventual resumption.*
 
 ---
 
