@@ -1,11 +1,66 @@
 # Requirements: Fast (가칭)
 
-**Defined:** 2026-07-08
+**Defined:** 2026-07-08 (v3.1), updated 2026-07-20 (v4.0)
 **Core Value:** 공격 버튼을 누르면 시간이 느려지고, 손을 떼면 적에게 돌진해 한 방에 처치하는 손맛 — 이것이 재미있어야 게임이 살아난다.
 
-## v3.1 Requirements
+## v4.0 Requirements
 
-Requirements for the 보스 룸 & 연출 고도화 milestone. Each maps to roadmap phases.
+Requirements for the 보스 캐릭터 확장 & 게임 모드 milestone. Each maps to roadmap phases.
+
+### 공유 인프라 (INFRA)
+
+- [ ] **INFRA-01**: CombatController의 기존 Overclock(F.I.O.R.A) 로직이 IPlayerCombatModule 인터페이스로 무손상 마이그레이션된다 (기존 동작 100% 동일, 회귀 없음)
+- [ ] **INFRA-02**: 조준 방향 입력이 Mouse.current 대신 Pointer.current/EnhancedTouch 기반으로 동작해 Android 터치 기기에서도 정상 작동한다
+- [ ] **INFRA-03**: BossEnemy.cs에서 BossEnemyBase(EnemyBase와 별개의 형제 클래스)가 추출되어, 이후 신규 보스 4종이 이를 상속한다
+
+### 보스 언락 진행 (UNLOCK)
+
+- [ ] **UNLOCK-01**: 보스 격파 시 해당 보스의 전투 모듈이 영구 해금된다 (PlayerPrefs 기반, 앱 재시작 후에도 유지)
+- [ ] **UNLOCK-02**: 플레이어는 해금된 모듈 중 하나를 게임 시작 전 선택할 수 있다 (기존 AttackSelect를 N-way로 확장)
+- [ ] **UNLOCK-03**: 아직 해금되지 않은 모듈은 선택 화면에 잠금 상태로 표시된다
+
+### SAMURAI 보스 + 패링 모듈 (SAMURAI)
+
+- [ ] **SAMURAI-01**: SAMURAI 보스 격파 시 패링 모듈이 최초로 해금된다 (튜토리얼 보스, 최우선 해금)
+- [ ] **SAMURAI-02**: 패링 모듈은 슬로우모션 없이 실시간으로 동작하며, 탭 입력 시 방향성 베기 공격을 수행한다
+- [ ] **SAMURAI-03**: 적 공격과 타이밍이 겹치는 시점에 입력하면 패링이 발동해 공격을 무효화하고 투사체를 반사한다
+- [ ] **SAMURAI-04**: SAMURAI 보스는 평시 전투와 간헐적 패링 전용 타이밍을 반복하며, 패링 전용 타이밍에 공격을 시도하면 플레이어는 즉사한다
+- [ ] **SAMURAI-05**: 패링 판정 타이밍은 터치 입력 지연을 고려해 넉넉하게 설정되고 실기기에서 튜닝된다
+
+### DeadEye 보스 + 탄약/재장전 모듈 (DEADEYE)
+
+- [ ] **DEADEYE-01**: DeadEye 보스 격파 시 자원관리형 원거리 모듈이 해금된다
+- [ ] **DEADEYE-02**: 홀드 시 슬로우모션 + 부채꼴 범위가 표시되고, 탭으로 범위 내 최대 6개 조준점을 지정한 뒤 별도 입력으로 일괄 발사한다
+- [ ] **DEADEYE-03**: 발사한 탄수만큼 재장전이 필요하다 (부분 재장전 1초/발, 완전 소진 시 3초 전체 재장전)
+- [ ] **DEADEYE-04**: DeadEye 보스는 플레이어를 추적하는 조준점 6개를 남긴 뒤 발사하며, 플레이어는 조준점을 피하며 보스를 타격해야 한다
+
+### MAX 보스 + 순수 속도/관성 모듈 (MAXB)
+
+- [ ] **MAXB-01**: MAX 보스 격파 시 순수 속도/관성 모듈이 해금된다
+- [ ] **MAXB-02**: 이 모듈 사용 중 캐릭터는 멈출 수 없으며, 몸 자체가 적에게 닿으면 처치 판정이 발생한다
+- [ ] **MAXB-03**: 홀드 시 슬로우모션이 발동해 동선을 미리 설계할 수 있다
+- [ ] **MAXB-04**: 벽 또는 적의 공격에 충돌 시 플레이어가 즉사한다
+- [ ] **MAXB-05**: MAX 보스는 멈추지 못하고 계속 돌진하며, 벽에 유도해 충돌시키면 스턴이 발생해 그 틈에 타격할 수 있다
+
+### NOVA 보스 + 이원화 조작 모듈 (NOVA)
+
+- [ ] **NOVA-01**: NOVA 보스 격파 시 이원화 조작(본체+드론) 모듈이 해금된다
+- [ ] **NOVA-02**: 본체 이동과 공격 판정을 가진 드론의 조작이 동시에 독립적으로 가능하다
+- [ ] **NOVA-03**: NOVA 보스는 본체가 회피 기동하는 동시에 드론을 조종해 플레이어의 진로를 막고 공격한다
+- [ ] **NOVA-04**: 플레이어는 드론을 먼저 무력화하거나 본체를 직접 타격하는 두 가지 선택지를 가진다
+
+### 게임 모드 (MODE)
+
+- [ ] **MODE-01**: 한계 시험 모드에서는 해금된 모듈 중 단 하나만 선택해 로그라이크 층 등반에 진입한다
+- [ ] **MODE-02**: 한계 시험 모드의 점수는 기존 ScoreManager 체계를 재사용한다
+
+### WorldGenerator 보스룸 정리 예외 (WGEN)
+
+- [ ] **WGEN-01**: 전투 중인 보스룸은 WorldGenerator의 앞뒤 정리(Destroy) 대상에서 예외 처리된다 (보스 타입 무관, Phase 16 BOSS-10 연장)
+
+## v3.1 Requirements (파킹됨 — Phase 15 블로킹, 미완료)
+
+Phase 15(fsm)이 Task 3(checkpoint:human-action)에서 블로킹된 채 v3.1이 파킹되어 완료되지 않은 항목. v4.0 완료 후 재검토 예정. 무효화된 것은 아니므로 그대로 보존.
 
 ### 보스 룸 (BOSS)
 
@@ -18,7 +73,7 @@ Requirements for the 보스 룸 & 연출 고도화 milestone. Each maps to roadm
 - [ ] **BOSS-07**: 보스 룸 입장 시 층 타이머가 일시정지되고, 보스방을 벗어나면(처치 또는 EXIT 이용) 재개된다
 - [ ] **BOSS-08**: 보스 처치 후에도 층 진입은 기존 EXIT 포탈을 통해서만 가능하다 (보스 처치가 자동으로 층을 넘기지 않음)
 - [ ] **BOSS-09**: 보스 룸 입장 시 카메라 연출(잠금/줄임)이 재생된다
-- [ ] **BOSS-10**: 전투 중에는 WorldGenerator의 앞뒤 2개 유지 정리(Destroy) 로직에서 보스방이 예외된다 (전투 중 파괴 방지)
+- [ ] **BOSS-10**: 전투 중에는 WorldGenerator의 앞뒤 2개 유지 정리(Destroy) 로직에서 보스방이 예외된다 (전투 중 파괴 방지) — v4.0의 WGEN-01로 범위 확장되어 이어짐
 
 ### 적 등장 연출 (SPWN)
 
@@ -34,9 +89,13 @@ Requirements for the 보스 룸 & 연출 고도화 milestone. Each maps to roadm
 - [ ] **SFX-05**: 보스 스폰에 전용 사운드가 추가된다
 - [x] **SFX-06**: 포탈 전환/히트/사망 연출의 타이밍·피드백 어색함이 개선된다 (v3.0 Phase 12 폴리싱 갭 해소)
 
-## v2 Requirements
+## Future Requirements
 
 Deferred to future release. Tracked but not in current roadmap.
+
+### 보스 러시 모드
+
+- **RUSH-01**: 보스전만 연속으로 이어지는 엔드리스 모드, 전투 중 해금된 모듈 자유 전환 (v4.1 후보 — endless 생성 로직 리서치에서 최고 위험 항목으로 지목, 4개 모듈이 개별 안정화된 후 착수)
 
 ### 온보딩
 
@@ -46,10 +105,9 @@ Deferred to future release. Tracked but not in current roadmap.
 
 - **LAYOUT-01**: 프리셋 기반 고정 층 레이아웃 (현재 Complex_Room 6종 랜덤 풀 대체 검토)
 
-### 보스 콘텐츠 확장
+### 컨트롤 스킴 대안
 
-- **BOSS-11**: 두 번째/세 번째 보스 타입 (프레임워크 확장 검증 후)
-- **BOSS-12**: 아레나 환경 해저드 (기본 전투 루프 검증 후)
+- **NOVA-05**: 실기 검증 후 NOVA 조작이 지나치게 어렵다고 판단되면 토글/포제션-스왑 대체 컨트롤 스킴 검토 (원안은 동시 듀얼 조작 유지가 v4.0 기본값)
 
 ## Out of Scope
 
@@ -57,11 +115,12 @@ Explicitly excluded. Documented to prevent scope creep.
 
 | Feature | Reason |
 |---------|--------|
-| 보스 HP바 / 멀티페이즈 전투 | 원샷원킬(빈틈 타겟팅 + 7회 피격) 코어 밸류와 충돌 — HP 시스템은 이 게임 어디에도 존재하지 않음 |
-| 어댑티브/다이나믹 보스 음악 | 음악 시스템 자체가 전무 — 이번 마일스톤은 SFX 폴리싱까지만 |
-| 보스 다이얼로그/네임카드 컷신 | 6개 프로토타입 검증 목표와 무관, 내러티브 검증 목적 없음 |
-| 콤보/프레임 퍼펙트 히트스탑 시스템 | 콤보 시스템 자체가 Out of Scope (기존 PROJECT.md) |
-| 튜토리얼 | 이번 마일스톤은 보스 룸+연출로 범위를 좁힘 — 별도 마일스톤으로 분리 |
+| 보스 러시 모드 | v4.0에서 제외 — endless 보스 전용 생성 로직이 미설계 상태이며 4개 모듈이 개별 검증된 후 착수하는 것이 안전 (Future Requirements RUSH-01) |
+| 모듈 업그레이드 티어 / 패시브 스킬트리 / 상점 | 핵심 검증과 무관, PROJECT.md Out of Scope 유지 |
+| 클라우드 저장 / 기기 간 동기화 | 로컬 Android 프로토타입 범위 밖 — PlayerPrefs로 충분 |
+| 보스 HP바 / 멀티페이즈 전투 | 원샷원킬 코어 밸류와 충돌 — HP 시스템은 이 게임 어디에도 존재하지 않음 |
+| 보스 다이얼로그 / 네임카드 컷신 | 6개 프로토타입 검증 목표와 무관, 내러티브 검증 목적 없음 |
+| MAX 물리 기반 드리프트/바운스 시뮬레이션 고도화 | v4.0은 원안 스펙(정지 불가+충돌 즉사) 구현까지만, 물리 디테일 고도화는 플레이테스트 후 재검토 |
 
 ## Traceability
 
@@ -69,30 +128,39 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| BOSS-01 | Phase 16 | Pending |
-| BOSS-02 | Phase 16 | Pending |
-| BOSS-03 | Phase 15 | Complete |
-| BOSS-04 | Phase 15 | Complete |
-| BOSS-05 | Phase 15 | Complete |
-| BOSS-06 | Phase 15 | Complete |
-| BOSS-07 | Phase 16 | Pending |
-| BOSS-08 | Phase 17 | Pending |
-| BOSS-09 | Phase 16 | Pending |
-| BOSS-10 | Phase 16 | Pending |
-| SPWN-01 | Phase 14 | Complete |
-| SPWN-02 | Phase 14 | Complete |
-| SFX-01 | Phase 13 | Complete |
-| SFX-02 | Phase 13 | Complete |
-| SFX-03 | Phase 13 | Complete |
-| SFX-04 | Phase 13 | Complete |
-| SFX-05 | Phase 16 | Pending |
-| SFX-06 | Phase 13 | Complete |
+| INFRA-01 | TBD | Pending |
+| INFRA-02 | TBD | Pending |
+| INFRA-03 | TBD | Pending |
+| UNLOCK-01 | TBD | Pending |
+| UNLOCK-02 | TBD | Pending |
+| UNLOCK-03 | TBD | Pending |
+| SAMURAI-01 | TBD | Pending |
+| SAMURAI-02 | TBD | Pending |
+| SAMURAI-03 | TBD | Pending |
+| SAMURAI-04 | TBD | Pending |
+| SAMURAI-05 | TBD | Pending |
+| DEADEYE-01 | TBD | Pending |
+| DEADEYE-02 | TBD | Pending |
+| DEADEYE-03 | TBD | Pending |
+| DEADEYE-04 | TBD | Pending |
+| MAXB-01 | TBD | Pending |
+| MAXB-02 | TBD | Pending |
+| MAXB-03 | TBD | Pending |
+| MAXB-04 | TBD | Pending |
+| MAXB-05 | TBD | Pending |
+| NOVA-01 | TBD | Pending |
+| NOVA-02 | TBD | Pending |
+| NOVA-03 | TBD | Pending |
+| NOVA-04 | TBD | Pending |
+| MODE-01 | TBD | Pending |
+| MODE-02 | TBD | Pending |
+| WGEN-01 | TBD | Pending |
 
 **Coverage:**
-- v3.1 requirements: 18 total
-- Mapped to phases: 18
-- Unmapped: 0
+- v4.0 requirements: 27 total
+- Mapped to phases: 0 (roadmap not yet created)
+- Unmapped: 27
 
 ---
-*Requirements defined: 2026-07-08*
-*Last updated: 2026-07-08 — v3.1 roadmap created, all 18 requirements mapped to Phase 13-17*
+*Requirements defined: 2026-07-08 (v3.1)*
+*Last updated: 2026-07-20 — v4.0 milestone requirements defined (27 requirements across INFRA/UNLOCK/SAMURAI/DEADEYE/MAXB/NOVA/MODE/WGEN). v3.1's 8 pending requirements preserved as parked (not invalidated). Boss Rush deferred to Future Requirements (RUSH-01).*
