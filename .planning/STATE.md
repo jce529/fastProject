@@ -1,16 +1,16 @@
 ---
 gsd_state_version: 1.0
-milestone: v3.1
-milestone_name: — 보스 룸 & 연출 고도화
-status: executing
-stopped_at: "Checkpoint reached in 15-06-PLAN.md Task 3 (checkpoint:human-action) -- Task 1/2 complete"
-last_updated: "2026-07-17T00:00:00.000Z"
-last_activity: 2026-07-17
+milestone: v4.0
+milestone_name: — 보스 캐릭터 확장 & 게임 모드
+status: defining-requirements
+stopped_at: "Milestone v4.0 started -- requirements/roadmap not yet created. v3.1 parked at 15-06-PLAN.md Task 3 (checkpoint:human-action), see Parked Milestone section below."
+last_updated: "2026-07-20T02:00:00.000Z"
+last_activity: 2026-07-20
 progress:
-  total_phases: 8
-  completed_phases: 5
-  total_plans: 27
-  completed_plans: 25
+  total_phases: 0
+  completed_phases: 0
+  total_plans: 0
+  completed_plans: 0
 ---
 
 # Project State: Fast (가칭)
@@ -27,19 +27,21 @@ progress:
 
 **Last Shipped Milestone:** v3.0 — 무한 복도 층 시스템 (2026-07-08)
 
-**Current Milestone:** v3.1 — 보스 룸 & 연출 고도화 (roadmap created, Phase 13-17)
+**Current Milestone:** v4.0 — 보스 캐릭터 확장 & 게임 모드 (requirements/roadmap 정의 중)
+
+**Parked Milestone:** v3.1 — 보스 룸 & 연출 고도화 (Phase 13-17, Phase 15에서 human-action 체크포인트로 블로킹, 미완료 상태로 파킹 — v4.0 완료 후 재검토)
 
 ---
 
 ## Current Position
 
-Phase: 15 (fsm) — EXECUTING
-Plan: 6 of 6 (15-06, supersedes 15-05 Task 2/3, D-13 WorldGenerator pool-swap entry path). 15-04 superseded/skipped (see 15-04-SUMMARY.md).
-Status: Checkpoint reached — Task 3 (checkpoint:human-action, Unity Editor menu execution) blocking. Task 1/2 complete (commits 01ed135, 5c240be on main).
-Last activity: 2026-07-17
+Phase: Not started (defining requirements)
+Plan: —
+Status: Defining requirements for milestone v4.0
+Last activity: 2026-07-20
 
 ```
-Progress: [████░░░░░░] v3.1 milestone: 2/5 phases complete (Phase 13-17) — Phase 999.2/999.3/999.4(backlog) 전부 완료
+Progress: [░░░░░░░░░░] v4.0 milestone: requirements/roadmap 정의 중
 ```
 
 ---
@@ -127,16 +129,27 @@ Full decision log lives in `.planning/PROJECT.md` Key Decisions table. Recent hi
 **How to resume after /clear:**
 
 1. Read `.planning/STATE.md` (this file) — current position and decisions
-2. Read `.planning/ROADMAP.md` — v3.1 section active (Phase 13-17); v1.0/v2.0/v3.0 archived in collapsed `<details>`
-3. Read `.planning/REQUIREMENTS.md` — v3.1 requirements + traceability (18/18 mapped)
-4. Read `.planning/research/SUMMARY.md` — architecture/pitfall context for Phase 13-17
-5. Read `.planning/phases/16-boss-room-lifecycle/16-CONTEXT.md` — 리팩토링 배치(D-01~D-08) + 미논의 보스 룸 그레이 에어리어 목록
-6. Read `.planning/phases/15-fsm/15-CONTEXT.md` D-11/D-12 — SUPERSEDED 표시 확인 (Room_Debug 삭제, 점수 상쇄 우회책 불필요화 — 16-02/16-03/15-02 완료로 이제 코드에도 반영됨)
-7. Next action: 15-05-PLAN.md Task 3(checkpoint:human-action) 재개 — 먼저 `git merge worktree-agent-a6441b325656830c7 --ff-only`로 Task 1/2 커밋을 병합한 뒤, Unity 에디터에서 컴파일 확인 → Fast/Phase15/Build Room_BossFsmTest → Fast/Phase15/Wire Boss Into BossFsmTest Room 실행 (15-05-PLAN.md Task 3 how-to-verify 참고). 15-04-PLAN.md는 SUPERSEDED — 실행하지 않음
+2. Read `.planning/PROJECT.md` — Current Milestone: v4.0 (보스 캐릭터 확장 & 게임 모드)
+3. Read `.planning/REQUIREMENTS.md` / `.planning/ROADMAP.md` once created for v4.0
+4. Next action: `/gsd:new-milestone` 계속 진행 중이었다면 research 여부 결정 → REQUIREMENTS.md 작성 → 로드맵 생성 단계부터 재개. 이미 로드맵까지 완료됐다면 `/gsd:discuss-phase [N]` 또는 `/gsd:plan-phase [N]`으로 첫 v4.0 phase 시작
 
-**Last session:** 2026-07-16T04:22:42.446Z
-**Stopped at:** Checkpoint reached in 15-05-PLAN.md Task 3 (checkpoint:human-action) -- Task 1/2 complete
+**Last session:** 2026-07-20T02:00:00.000Z
+**Stopped at:** Milestone v4.0 시작 — PROJECT.md/STATE.md 갱신 완료, requirements/roadmap 정의 진행 중
+
+### Parked Milestone: v3.1 (보스 룸 & 연출 고도화) — 재개 방법
+
+v4.0 완료 후 v3.1 잔여 범위(Phase 15 Task 3 이후, Phase 16/17)를 재검토할 때 아래 절차로 재개:
+
+1. Read `.planning/ROADMAP.md` — v3.1 section (Phase 13-17); v1.0/v2.0/v3.0 archived in collapsed `<details>`
+2. Read `.planning/REQUIREMENTS.md` — v3.1 requirements + traceability (18/18 mapped, 파일이 v4.0으로 덮어써졌다면 git history에서 복원)
+3. Read `.planning/research/SUMMARY.md` — architecture/pitfall context for Phase 13-17
+4. Read `.planning/phases/16-boss-room-lifecycle/16-CONTEXT.md` — 리팩토링 배치(D-01~D-08) + 미논의 보스 룸 그레이 에어리어 목록
+5. Read `.planning/phases/15-fsm/15-CONTEXT.md` D-11/D-12 — SUPERSEDED 표시 확인 (Room_Debug 삭제, 점수 상쇄 우회책 불필요화 — 16-02/16-03/15-02 완료로 이제 코드에도 반영됨)
+6. Next action: 15-05-PLAN.md Task 3(checkpoint:human-action) 재개 — 먼저 `git merge worktree-agent-a6441b325656830c7 --ff-only`로 Task 1/2 커밋을 병합한 뒤, Unity 에디터에서 컴파일 확인 → Fast/Phase15/Build Room_BossFsmTest → Fast/Phase15/Wire Boss Into BossFsmTest Room 실행 (15-05-PLAN.md Task 3 how-to-verify 참고). 15-04-PLAN.md는 SUPERSEDED — 실행하지 않음
+
+**v3.1 Last session:** 2026-07-16T04:22:42.446Z
+**v3.1 Stopped at:** Checkpoint reached in 15-05-PLAN.md Task 3 (checkpoint:human-action) -- Task 1/2 complete
 
 ---
 *State initialized: 2026-05-27*
-*Last updated: 2026-07-16 — Plan 15-05 Task 1/2(RoomBossFsmTestBuilder.cs 신설 + BossEnemyPrefabBuilder.cs 재배선, D-11 RE-RESOLVED checker fix) 완료 — Task 3(checkpoint:human-action)에서 대기 중. 15-04-PLAN.md는 SUPERSEDED로 남고 15-05가 최종 실행 플랜.*
+*Last updated: 2026-07-20 — 마일스톤 v4.0(보스 캐릭터 확장 & 게임 모드) 시작. v3.1은 Phase 15 Task 3(checkpoint:human-action)에서 파킹, 재개 절차는 "Parked Milestone" 섹션 참고.*

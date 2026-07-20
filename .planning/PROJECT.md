@@ -14,6 +14,23 @@
 
 전체 상세: `.planning/MILESTONES.md`, `.planning/milestones/v3.0-ROADMAP.md`
 
+## Current Milestone: v4.0 보스 캐릭터 확장 & 게임 모드
+
+**Goal:** F.I.O.R.A(이미 구현된 Overclock Mode의 원본)를 제외한 4개 신규 보스(DeadEye/SAMURAI/MAX/NOVA)의 고유 전투 메커니즘과 보스 패턴을 구현하고, 보스 격파→능력 해금 진행 시스템과 게임 모드 2종(한계 시험/보스 러시)을 추가한다.
+
+**Target features:**
+- DeadEye 보스: 6연발 조준/재장전 자원관리 메커니즘 + 보스 패턴(조준점 6개 남기고 발사)
+- SAMURAI 보스: 패링(반사/정타이밍) 메커니즘 + 보스 패턴 (튜토리얼 보스, 최우선 해금)
+- MAX 보스: 순수 속도/관성 이동=공격, 벽과 충돌 시 즉사 리스크 + 보스 패턴(벽 유도→스턴→타격)
+- NOVA 보스: 이원화 조작(본체+드론) 메커니즘 + 보스 패턴(본체 회피 + 드론 견제)
+- 보스 격파 → 능력 해금 진행 시스템 (해금된 모듈 저장/선택)
+- 게임 모드: 한계 시험(단일 모듈 로그라이크 층 등반), 보스 러시(자유 전환 엔드리스)
+
+**Key context:** v3.1(보스 룸 & 연출 고도화)은 Phase 15(fsm) Task 3(human-action 체크포인트)에서 블로킹된 채 미완료 상태로 파킹됨. Phase 16(boss-room-lifecycle)/17 미착수. v4.0은 v3.1이 구축한 보스 룸 프레임워크(BossEnemy, FSM) 위에서 이어감.
+
+<details>
+<summary>이전 Current Milestone 섹션 (v3.1, 미완료 파킹 — Phase 15 블로킹)</summary>
+
 ## Current Milestone: v3.1 보스 룸 & 연출 고도화
 
 **Goal:** 보스 룸 콘텐츠(1종, 확장 가능한 프레임워크)를 추가하고, 기존 포탈/히트/사망 연출에 사운드와 타이밍 개선을 더하고, 적 등장(스폰) 연출을 신설한다.
@@ -22,6 +39,8 @@
 - 보스 룸: EXIT 포탈처럼 확률적 스폰, 보스 1종(공격 패턴+스프라이트+아레나 구조 모두 고유), 솔로 전투, 처치 시 점수 보너스, 층 진입은 기존 EXIT 포탈 그대로 필요
 - 적 등장 연출: 플레이어처럼 포탈을 타고 나오는 스폰 연출 신설
 - 기존 연출 개선: 포탈전환/히트/사망에 사운드 추가 + 타이밍·피드백 어색함 수정
+
+</details>
 
 <details>
 <summary>이전 Current Milestone 섹션 (v3.0 진행 중 스냅샷, 아카이브)</summary>
@@ -90,11 +109,10 @@
 ### Out of Scope
 
 - 복잡한 성장 시스템 (레벨업, 영구 강화, 상점) — 핵심 전투 검증이 목적, 성장은 검증 후 추가
-- 보스전 — 프로토타입 범위 초과
 - 이단 점프 / 벽점프 / 벽타기 / 공중 대시 — 기본 점프만으로 검증, 추후 업데이트 후보
 - 별도 대시 버튼 (이동 목적의 대시) — 돌진은 공격에 귀속, 순수 이동 대시는 게임성 오염
 - 랭킹, 광고, 과금 — 프로토타입 단계 외
-- 콤보 시스템, 패링, 무기 강화 — 핵심 검증과 무관
+- 콤보 시스템, 무기 강화 — 핵심 검증과 무관 (패링은 v4.0에서 SAMURAI 보스 메커니즘으로 In Scope 전환)
 
 ## Context
 
@@ -112,10 +130,11 @@
 
 **코드베이스 현황 (v3.0 shipped 기준):** MainMenu/AttackSelect/SampleScene 3씬 구성. PlayerController/CombatController/GaugeController/RollController(전투), MeleeEnemy/RangedEnemy FSM(적), WorldGenerator/RoomConnector/ExitPortal/FloorTimer/ScoreManager(룸-길 무한 생성 + 층 전환 + 타이머/점수), HUDController/DeathScreenController(UI), FloorTransitionEffect/PortalEffectBuilder/HitSparkBuilder 등 애니메이션 폴리싱 컴포넌트. Room 프리팹은 Tilemap 기반(Complex_Room 6종), Corridor 3종은 TilemapCollider2D 기반.
 
-**v3.1 이후 후보 (이번 마일스톤에서 제외):**
-- 튜토리얼 (온보딩 UI/조작법 설명) — v3.1에서 보스 룸+연출로 범위를 좁히면서 별도 마일스톤으로 분리
+**v4.0 이후 후보 (이번 마일스톤에서 제외):**
+- 튜토리얼 (온보딩 UI/조작법 설명) — 별도 마일스톤으로 분리
 - 프리셋 기반 고정 층 레이아웃 (현재 Complex_Room 6종 랜덤 풀)
 - 실제 플레이테스트로 6개 프로토타입 검증 목표 결과 수집
+- v3.1 잔여 범위(연출 사운드/타이밍 개선, 보스 룸 라이프사이클)는 v4.0 완료 후 재검토
 
 ## Constraints
 
@@ -159,4 +178,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-07-10 — Phase 14(적 등장 스폰 연출) 완료. ISpawnGatable 게이팅 브릿지, EnemySpawner 2단계(Spawn/Activate) 분리, Room+Corridor 3종 포탈 스폰 연출 통일, 플레이테스트 10항목 전 통과. 다음: Phase 15 보스 FSM & 빈틈 타겟팅.*
+*Last updated: 2026-07-20 — 마일스톤 v4.0(보스 캐릭터 확장 & 게임 모드) 시작. v3.1은 Phase 15 블로킹 상태로 파킹. Out of Scope에서 패링 제외 항목 제거(v4.0에서 SAMURAI 메커니즘으로 In Scope 전환).*
