@@ -118,6 +118,7 @@ Full decision log lives in `.planning/PROJECT.md` Key Decisions table. Recent hi
 |---|-------------|------|--------|-----------|
 | 260714-fnr | MeleeEnemy prefab ExclamationIcon sprite 미할당 수정 | 2026-07-14 | 93a3d99 | [260714-fnr-meleeenemy-prefab-exclamationicon-sprite](./quick/260714-fnr-meleeenemy-prefab-exclamationicon-sprite/) |
 | 260715-kci | WorldGenerator.cs RemoveTail/RemoveHead/FloorTransitionSequence 중복 정리 로직을 CleanupSection() 헬퍼로 추출 (Phase 16 사전 정지 작업) | 2026-07-15 | 646a5f4 | [260715-kci-worldgenerator-cs-removetail-removehead-](./quick/260715-kci-worldgenerator-cs-removetail-removehead-/) |
+| 260720-f16 | STORY.md — F.I.O.R.A/DeadEye/SAMURAI/MAX/NOVA 5개 보스 세계관, 보스 해금 구조, 게임 모드 2종(한계 시험/보스 러시) 추가 | 2026-07-20 | 9362b94, 8e6d96a | [260720-f16-story-md-fiora-deadeye-samurai-max-nova-](./quick/260720-f16-story-md-fiora-deadeye-samurai-max-nova-/) |
 
 ---
 
