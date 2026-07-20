@@ -1,16 +1,16 @@
 ---
 gsd_state_version: 1.0
-milestone: v4.0
-milestone_name: — 보스 캐릭터 확장 & 게임 모드
-status: roadmap-ready
-stopped_at: "Milestone v4.0 roadmap created (Phase 18-24, 27/27 requirements mapped). Ready to plan Phase 18. v3.1 parked at 15-06-PLAN.md Task 3 (checkpoint:human-action), see Parked Milestone section below."
-last_updated: "2026-07-20T03:00:00.000Z"
+milestone: v3.1
+milestone_name: — 보스 룸 & 연출 고도화
+status: "Roadmap ready — awaiting /gsd:plan-phase 18 (or discuss-phase 18 first)"
+stopped_at: Phase 18 context gathered; platform target reset Android->PC
+last_updated: "2026-07-20T05:09:12.845Z"
 last_activity: 2026-07-20
 progress:
-  total_phases: 7
-  completed_phases: 0
-  total_plans: 0
-  completed_plans: 0
+  total_phases: 15
+  completed_phases: 6
+  total_plans: 28
+  completed_plans: 27
 ---
 
 # Project State: Fast (가칭)
@@ -133,8 +133,8 @@ Full decision log lives in `.planning/PROJECT.md` Key Decisions table. Recent hi
 3. Read `.planning/REQUIREMENTS.md` / `.planning/ROADMAP.md` — v4.0 Phase 18-24 already defined
 4. Next action: `/gsd:discuss-phase 18` 또는 곧바로 `/gsd:plan-phase 18`으로 v4.0 첫 Phase(공유 인프라) 계획 시작 — ROADMAP.md/REQUIREMENTS.md는 이미 Phase 18-24로 완성됨
 
-**Last session:** 2026-07-20T03:00:00.000Z
-**Stopped at:** v4.0 로드맵 생성 완료 — ROADMAP.md(Phase 18-24)/REQUIREMENTS.md(traceability 27/27) 갱신 완료, Phase 18 계획 대기 중
+**Last session:** 2026-07-20T05:09:12.838Z
+**Stopped at:** Phase 18 context gathered; platform target reset Android->PC
 
 ### Parked Milestone: v3.1 (보스 룸 & 연출 고도화) — 재개 방법
 
