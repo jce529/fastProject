@@ -1,296 +1,235 @@
-# Domain Pitfalls: Boss Room + VFX/Audio Polish (Fast v3.1)
+# Pitfalls Research: v4.0 보스 캐릭터 확장 & 게임 모드
 
-**Project:** Fast (가칭)
-**Domain:** Adding boss room content, spawn-in VFX, and a first-ever audio system to an existing Unity 6 LTS / URP 2D mobile platformer with infinite procedural room generation, slow-motion combat, and one-shot-kill balance
-**Researched:** 2026-07-08
-**Confidence:** HIGH for codebase-specific pitfalls (verified by directly reading `WorldGenerator.cs`, `ExitPortal.cs`, `EnemySpawner.cs`, `CombatController.cs`, `MeleeEnemy.cs`, `RangedEnemy.cs`, `EnemyDeathEffect.cs`, `FloorTimer.cs`, `RoomClearCondition.cs`, `FloorTransitionEffect.cs`, `CameraFollow.cs`, `IEnemy.cs`, `GameBootstrapper.cs`); MEDIUM for general Unity audio/boss-design claims (verified via WebSearch against Unity community discussions/support docs; no Context7 library applies since this is engine-level behavior, not a package API)
+**Domain:** Adding 4 mechanically-distinct boss modules (DeadEye/SAMURAI/MAX/NOVA) + boss-unlock progression + 2 game modes to an existing single-mechanic Unity 2D mobile platformer prototype ("Fast")
+**Researched:** 2026-07-20
+**Confidence:** HIGH (grounded in direct read of current source: `BossEnemy.cs`, `EnemyBase.cs`, `CombatController.cs`, `WorldGenerator.cs`, `InputManager.cs`, `ScoreManager.cs`, `FloorManager.cs`, `DeathScreenController.cs`, `Assets/InputSystem_Actions.inputactions`, `.planning/phases/16-boss-room-lifecycle/16-CONTEXT.md`, `.planning/phases/15-fsm/15-06-PLAN.md`, `STORY.md`)
 
-> Note: this file supersedes the previous (pre-v1.0, 2026-05-27) generic Unity/mobile pitfalls research. Those pitfalls (timeScale/physics compensation, i-frame timing, dash tunneling, camera jitter, GC in Update, IL2CPP stripping, on-screen button dead zones, floor-recycle memory leaks) are now **already solved and enforced** per `CLAUDE.md`'s hard-won constraints (`Time.unscaledDeltaTime` everywhere, `Continuous`+`Interpolate` Rigidbody2D, layer-swap invincibility, `WaitForSecondsRealtime` for all timers, pre-allocated `OverlapCircle` buffers). This file focuses exclusively on **new** pitfalls introduced by the v3.1 milestone: boss room, spawn VFX, and first-time audio.
+> Note: this file supersedes the previous (v3.1, 2026-07-08) boss-room/VFX/audio pitfalls research. That milestone's pitfalls (regular enemies leaking into the boss room's shared spawn pipeline, etc.) targeted a single boss and a different set of concerns. This file focuses exclusively on the **new** pitfalls introduced by v4.0: 4 additional mechanically-distinct bosses, module-swap progression, persistence across the death/restart loop, and touch-input requirements for those new mechanics. Every pitfall below is anchored to a specific file/pattern that already exists in this repo — not generic Unity advice.
 
 ## Critical Pitfalls
 
-### Pitfall 1: Boss room silently gets regular enemies via the shared spawn pipeline
+### Pitfall 1: New boss timers silently skip the `unscaledDeltaTime`/`WaitForSecondsRealtime` convention
 
 **What goes wrong:**
-`WorldGenerator.SpawnNextPair()`/`SpawnPrevPair()`/`Start()` call `TrySpawnExitPortal(room)` and `TrySpawnEnemies(room, floor)` unconditionally on **every** room instantiated from `_roomPrefabs[]`, with zero knowledge of room "type." `TrySpawnEnemies` just walks `room.GetComponentsInChildren<EnemySpawner>(true)` and fills melee/ranged counts per `GetEnemyCount(floor)`. If the boss room prefab is added to `_roomPrefabs` (or spawned through the same code path) and happens to contain any leftover `EnemySpawner` markers — very likely if the boss room is built by duplicating an existing `Complex_Room` prefab, the fastest way to reuse its Tilemap/CameraBound/RoomConnector/ExitSpawnPoint setup — regular melee/ranged enemies will spawn and fight alongside the boss, silently breaking "solo 전투" with no error or warning.
+DeadEye's 6-shot reload timer, SAMURAI's parry window, MAX's wall-stun duration, and NOVA's independent drone attack-cooldown are all "counts down while combat continues" timers — exactly the class of state this codebase has a hard-won, repeatedly-documented rule for. If any of the 4 new boss scripts (or the player-side parry/reload/drone-control counterparts) use `Time.deltaTime`, `WaitForSeconds`, or a `float elapsed; elapsed += Time.deltaTime` loop instead of the real-time equivalents, that timer will **appear to work in normal play** but freeze or crawl to near-zero speed during the player's own Overclock Mode slowmo (`Time.timeScale = 0.2`, `CombatController.cs`) and freeze completely during `HitFreeze` (`Time.timeScale = 0f`, `CombatController.cs:312-322`). Because slowmo is triggered by the *player's own attack button*, this bug is invisible until a specific interaction is tested (e.g., "hold Attack while DeadEye is mid-reload" or "roll during SAMURAI's parry window") — it will not show up in a boss fought in isolation without ever pressing Attack.
 
 **Why it happens:**
-The generation pipeline has no concept of room categories today — `_roomPrefabs` is a flat pool, and `TrySpawnEnemies` gating is purely count-based, not type-based. The boss room will almost certainly be authored by duplicating a Complex_Room prefab, which carries over its `EnemySpawner` children unless manually stripped.
+Every existing boss/player timer in the codebase (`BossEnemy.cs` telegraph/vulnerable/hit-reaction loops, `InvincibilityHandler.cs`, `RollController.cs`, `ChronoGaugeController.cs`, `FloorTimer`) was written against this rule from day one because it was baked into Phase 1 (`PROJECT.md` Key Decisions: "Time.timeScale 보정을 Phase 1에 선반영"). A developer writing 4 *new* boss scripts under time pressure, copy-pasting from generic Unity tutorials or from patterns that predate the boss FSM, can easily reintroduce `Time.deltaTime` because it "just works" in isolated testing (no Attack button pressed during that specific playtest pass).
 
 **How to avoid:**
-- Give the boss room prefab **zero** `EnemySpawner` components (delete them after duplicating the base prefab), and additionally add an explicit `isBossRoom` flag (e.g. a `BossRoomMarker` MonoBehaviour on the room root) that `WorldGenerator` checks before calling `TrySpawnEnemies` — belt-and-suspenders, so a future accidental leftover `EnemySpawner` is still skipped by code, not just by prefab hygiene.
-- The boss room should NOT be selected through the same `_roomPrefabs[Random.Range(...)]` pool as regular rooms — spawn it through its own probability roll (mirroring `TrySpawnExitPortal`'s `_exitSpawnChance`/`_maxExitsActive` pattern) so it can never appear as a random lookahead/lookbehind filler room by accident.
+- Add a one-line Definition-of-Done checklist item to every new-boss task: "grep the new file for `Time.deltaTime` and `WaitForSeconds(` (not `WaitForSecondsRealtime`) — must be zero matches outside intentionally-scaled visual tweens."
+- Where a boss timer must visually "feel" affected by slowmo (e.g., a projectile that should look natural inside slowmo), make that an explicit, commented exception — don't let it be silent.
+- Reuse `BossEnemy.cs`'s existing pattern literally (its Telegraph/Attack/Vulnerable loops already use `Time.unscaledDeltaTime` and `WaitForSecondsRealtime`) as the copy-paste template for the new bosses' pattern loops, rather than starting from scratch.
 
 **Warning signs:**
-A melee/ranged enemy patrolling in the background during boss-room playtesting; `GetComponentsInChildren<EnemySpawner>(true)` returning non-empty on the boss room prefab in the Inspector.
+- Any `while (elapsed < duration) { elapsed += Time.deltaTime; ... }` in a new boss script.
+- Any `yield return new WaitForSeconds(x)` (missing `Realtime`) in boss/parry/reload code.
+- QA report of the form "the boss's [attack/reload/stun] seems to freeze if I hold the attack button."
 
 **Phase to address:**
-Boss room core/gating phase — must be solved before any boss AI work; this is structural wiring, not a balance tweak.
+The phase(s) implementing each new boss's pattern FSM (DeadEye/SAMURAI/MAX/NOVA), verified by an explicit playtest step "trigger boss pattern while holding Attack / during HitFreeze" in each boss's success criteria — do not defer this check to a later polish phase.
 
 ---
 
-### Pitfall 2: WorldGenerator's 2-ahead/behind recycle rule can Destroy() the boss room mid-fight
+### Pitfall 2: 4x copy-paste of the non-inherited `BossEnemy.cs` FSM instead of extracting a shared boss base
 
 **What goes wrong:**
-`WorldGenerator.Update()` trims the chain purely by **player X position relative to room ENT/EXIT connectors** (`UpdatePlayerIndex()` → `RemoveTail()`/`RemoveHead()`), with no awareness of "is the player currently in combat in this room." A boss fight is expected to keep the player inside one room for much longer than a normal room, and unlike normal enemies (which die in one dash-hit and never block the player), a boss fight might involve knockback or the player retreating to dodge a pattern — which can push `_playerCurrentIndex` outside the `_lookbehindCount`/`_lookaheadCount` window. If that happens, `RemoveTail()`/`RemoveHead()` fires and `Destroy(room)` deletes the boss GameObject **while `CombatController`'s dash coroutine still holds `IEnemy cachedTarget` referencing it**, or while the boss's own attack-pattern coroutine is still running on it.
+`BossEnemy.cs` (Phase 15) is a **standalone** `MonoBehaviour, IEnemy, ISpawnGatable` implementation that does **not** inherit `EnemyBase` — this was already flagged as a known gap in Phase 16's own context ("Boss Enemy(Phase 15, 아직 미구현)도 이 EnemyBase를 상속하도록 향후 설계하면 3번째 복붙을 방지할 수 있음 — 단 이번 Phase 범위는 아님", `16-CONTEXT.md` D-05). It currently duplicates, rather than shares, `EnemyBase`'s: `OnPlayerDeath` subscribe/unsubscribe, `SetSpawnGate`, death-sequence boilerplate (rb static, colliders disabled, animator `isDead`, `EnemyDeathEffect` trigger), and the "IsAlive overloaded as vulnerability, not death" pattern documented at length in its own header comment. Building DeadEye/SAMURAI/MAX/NOVA by copy-pasting `BossEnemy.cs` four more times creates **5 independent copies** of this non-trivial FSM plumbing. Any bugfix found in one (e.g., a death-sequence ordering bug, or an `_isDefeated` race condition) now needs to be manually propagated to 4 other files, and inevitably drifts — one boss gets the fix, three don't.
 
 **Why it happens:**
-`RemoveTail`/`RemoveHead` are unconditional `Destroy()` calls, added in v3.0 purely for mobile memory management of *disposable* combat rooms where losing an enemy mid-fight is harmless. A boss encounter breaks that assumption: it has persistent state (phase/timers) that must not evaporate underneath an in-progress coroutine.
+The fastest path to "make a second boss" is to duplicate the working `BossEnemy.cs` and rename fields — it compiles immediately and behaves correctly on day one. The cost only appears later, when a shared bug is found or a shared behavior (e.g., "all bosses should exempt WorldGenerator cleanup during combat," Pitfall 4 below) needs retrofitting into 5 places instead of 1.
 
 **How to avoid:**
-- Add an explicit "boss encounter active" guard checked at the top of the trim loops in `Update()`: if the room about to be destroyed contains an unresolved boss, skip the destroy this frame (and don't advance `_playerCurrentIndex` either, to keep the invariant consistent).
-- Simplest option: freeze the entire chain-gating pipeline while a boss encounter is active — a single `_bossEncounterActive` boolean checked at the top of `Update()` that skips `SpawnNextPair`/`SpawnPrevPair`/`RemoveTail`/`RemoveHead` for the duration of the fight. This is cheaper and safer than per-room checks, and mirrors how `ForceExitCombatState`/`LockInput` already pause other systems during floor transitions.
-- Any boss coroutine (attack patterns, telegraphs) should guard against destruction the same way `MeleeEnemy.TelegraphAndAttack()`/`RangedEnemy.TelegraphAndFire()` already guard with `if (!IsAlive) yield break;`.
+- Before writing the first of the 4 new bosses, do a small, scoped extraction: pull `BossEnemy.cs`'s IsAlive/vulnerability-window pattern, `_isDefeated` guard, `OnPlayerDied` cleanup, and death-sequence trigger into a shared boss base (parallel to the existing minimal `EnemyBase`, or ideally by finally making `BossEnemy` inherit `EnemyBase` per Phase 16's own deferred note) — do this **once**, before the 4x fan-out, not as a retrofit after 4 divergent copies exist.
+- Each of the 4 new bosses' *pattern* content (telegraph shape, hit/defeat condition, unique per-boss mechanic) stays boss-specific; only the FSM plumbing/death/spawn-gate boilerplate gets shared.
+- Do not attempt the "full inheritance refactor" of `MeleeEnemy`/`RangedEnemy` alongside this — Phase 16 already explicitly scoped that as "minimal extraction only, not full inheritance" per user instruction; keep the same discipline for bosses.
+- Note also: `BossEnemy.cs`'s current defeat condition is a flat `RequiredHits = 7` counter — this does not generalize to SAMURAI's parry-punish, MAX's wall-stun window, or DeadEye's reload-vulnerability window, all of which are fundamentally different "when is this boss killable" conditions, not just a different hit count. The shared base should abstract "defeated" as a boss-owned decision, not assume every boss shares F.I.O.R.A/BOSS-04's N-hits-then-die shape.
 
 **Warning signs:**
-`MissingReferenceException` thrown from a boss coroutine or from `CombatController.ExecuteDash()`'s `target.OnDashHit()` call during a boss fight; boss visually vanishing mid-fight.
+- A second boss script appears with `_isDefeated`, `IsAlive`-as-vulnerability, and the exact same `OnPlayerDied`/death-sequence block copy-pasted with only cosmetic renames.
+- A bugfix commit touches only one boss file when the same bug logically applies to all bosses.
 
 **Phase to address:**
-Boss room lifecycle/gating phase — must be solved before any boss AI/pattern work, since it silently corrupts any pattern coroutine built on top of it.
+A dedicated "shared boss infrastructure" phase (or an explicit Task 0 inside the first new-boss phase) that must land **before** the second, third, and fourth boss are implemented — sequencing this after even one additional boss copy exists means the extraction has to reconcile divergence instead of starting clean.
 
 ---
 
-### Pitfall 3: Naive `IEnemy` implementation makes the boss die to one dash, defeating the purpose
+### Pitfall 3: Module-swap (mid-combat, Boss Rush) leaks state because `CombatController` has no module abstraction at all
 
 **What goes wrong:**
-Every existing enemy (`MeleeEnemy`, `RangedEnemy`) implements `IEnemy.OnDashHit()` as an unconditional, instant one-shot kill — exactly how `CombatController.ExecuteDash()` treats **any** `IEnemy` in range. If the boss simply implements `IEnemy` the same way — the path of least resistance, and the only precedent in the codebase — the "boss" is functionally a reskinned `MeleeEnemy` that dies in one dash like everything else, trivializing the entire encounter.
+`CombatController.cs` is not "F.I.O.R.A's module implementation with room for 4 more" — it **is** the entire combat system, hardcoded. `AttackTypeSelector.Selected` (Linear/Fan) is the *only* existing "variant" axis, and it only toggles a search-shape branch inside the one dash-to-target mechanic; it says nothing about how to represent DeadEye's ammo/reload resource, SAMURAI's parry-input-detection, MAX's momentum-is-the-attack, or NOVA's second controllable unit. If the 5 modules are bolted on as more `if (currentModule == X)` branches inside the same `Update()`/`ExecuteDash()` methods (the same shape as the existing `AttackTypeSelector.Selected == AttackType.Linear` checks), mid-combat swapping in 보스 러시 mode will leak state across the switch: `_isSlowMo`/`Time.timeScale` left engaged from the outgoing module, `ChronoGaugeController.Value` (F.I.O.R.A-specific resource) still draining/regenerating while DeadEye's ammo-count is active, `_isBusy` stuck true if a dash coroutine was mid-flight when the swap happened, a leftover `_lastHighlighted` enemy never cleared, or (for NOVA) an orphaned drone GameObject left alive after swapping away from NOVA's module.
+`ForceExitCombatState()` already exists and is the correct *pattern* for this (it's called by `WorldGenerator` before floor transitions specifically to prevent this class of leak) — but it only resets F.I.O.R.A's own state (`ExitSlowMotion()` + `ExitAttackPending()`). It knows nothing about DeadEye/SAMURAI/MAX/NOVA state and won't be extended automatically just by adding new modules elsewhere.
 
 **Why it happens:**
-`IEnemy` (`Assets/Scripts/Enemy/IEnemy.cs`) is deliberately minimal — `IsAlive`, `OnDashHit()`, `ClearHighlight()` — with no HP/phase concept anywhere in the codebase (by design: one-shot-kill for both sides is an explicit, unchanged v1.0-v3.0 decision per `PROJECT.md`). Simply satisfying the interface contract compiles and "works" without any deliberate design pass, which is exactly why it's easy to skip.
+The single-module, single-scene-lifetime assumption is baked into every layer: `AttackSelectController` sets the choice once at scene load and never again; `CombatController` is a single `MonoBehaviour` with no concept of "current module" as swappable data; `ChronoGaugeController`, `InvincibilityHandler`, `RangeDisplay` are all `[RequireComponent]`-coupled to `CombatController` as if there's exactly one combat system. Adding modules by branching inside this monolith is the path of least resistance for each *individual* boss, but it's precisely what causes cross-module leaks the moment swapping (not just picking-once-before-Play) is required.
 
 **How to avoid:**
-- Preserve the core value (one-hit-kill dash) but gate *when* the dash is lethal, not *whether* it is — e.g. the boss has a distinct "vulnerable" window (only lethal during a telegraphed opening after a pattern), similar to Titan Souls' single-hit-kill-both-ways design where challenge comes from exposing a weak point rather than surviving repeated hits. Concretely: keep the boss's `IsAlive` semantics identical to other enemies, but gate whether it's a valid target at all during `CombatController.FindNearestEnemyInRange()` — cheapest lever, since `CombatController` already skips any enemy where `!enemy.IsAlive` (reuse that exact mechanism: only flip a boss's effective targetability, not literal death, in vulnerable windows).
-- Decide explicitly (document as a Key Decision) whether the boss also one-shot-kills the player identically to regular enemies, or needs longer/more readable telegraph timing given the added complexity — don't let this default silently.
-- Since the requirement explicitly asks for "확장 가능한 프레임워크" for future boss types, this is the one place where a light abstraction is justified: a small reusable base (e.g. a `BossController` exposing `SetVulnerable(bool)` checked by a shared `OnDashHit()`/targeting gate) — but keep it to exactly this pattern. Do not build a generic boss-phase-config ScriptableObject system for a single boss; that is over-engineering for this milestone.
+- Introduce an explicit module abstraction (interface or per-module component) *before* implementing DeadEye/SAMURAI/MAX/NOVA's player-side counterpart mechanics — each module owns enter/exit lifecycle hooks analogous to `ForceExitCombatState()`, called by a swap-orchestrator whenever the active module changes (both at 한계 시험's pre-run selection and at 보스 러시's mid-combat swap).
+- Module exit must be idempotent and defensive: stop own coroutines, zero own timeScale/gauge influence, destroy/deactivate own spawned objects (NOVA's drone), and clear own highlight/target state — mirroring exactly what `ForceExitCombatState()` already does for F.I.O.R.A, generalized.
+- Reuse `AttackTypeSelector`'s proven "static selection + live zone-trigger swap" pattern as *precedent that live swapping is safe for a narrow axis* — but do not assume it validates swapping entire control schemes; the state surface being swapped is far larger (gauge, dash, invincibility, animator bools, spawned sub-objects) than Linear/Fan ever was.
+- 한계 시험 mode (single module, chosen pre-run, roguelike floors) can ship with the *simpler* half of this abstraction (enter-once, no swap) — but design the interface so 보스 러시's mid-combat swap doesn't require a second incompatible implementation later.
 
 **Warning signs:**
-Boss dies in under 2 seconds to the very first dash, indistinguishable from a `MeleeEnemy`; no visible strategic difference between fighting the boss and fighting a regular enemy.
+- Slowmo still active (or `Time.timeScale` stuck non-1) after switching modules mid-fight.
+- Gauge/resource UI showing the wrong module's meter after a swap.
+- NOVA's drone still visible/active in the scene after swapping to a different module.
+- `_isBusy`-style lockouts left permanently true, freezing all future input after a swap performed during a dash/whiff coroutine.
 
 **Phase to address:**
-Boss AI/pattern design phase — this design decision should be locked before implementation starts, since it changes the shape of the FSM (telegraphed phases vs. instant idle→chase→attack).
+A "module abstraction" phase must precede (or be Task 0 of) the first boss whose mechanic is fundamentally incompatible with the current F.I.O.R.A-shaped `CombatController` (likely DeadEye or SAMURAI, whichever is built first) — retrofitting the abstraction after 2+ modules are hardcoded as branches is significantly more expensive than designing it up front. The mid-combat-swap-specific leak testing belongs in the 보스 러시 game-mode phase, using every module pairing (not just one), since leaks are typically module-pair-specific (e.g., NOVA-drone-orphan only reproduces when swapping *away from* NOVA, not *into* it).
 
 ---
 
-### Pitfall 4: FloorTimer's 60-second countdown keeps ticking through the boss fight
+### Pitfall 4: The "boss room is already exempted from WorldGenerator cleanup" premise is false — it does not exist in code yet
 
 **What goes wrong:**
-`FloorTimer.Tick()` runs unconditionally every frame inside `WorldGenerator.Update()` regardless of room or combat state, and calls `PlayerController.TriggerDeath()` the instant `RemainingSeconds` hits 0 (`Time.unscaledTime`-based, so slow-motion/hit-freeze do not pause it — by design). A solo boss fight (telegraphs, dodge windows, multiple attempts) will plausibly take longer than whatever budget remains from the floor's 60s countdown, since the boss room is entered mid-floor like any other room — not via an EXIT portal, which is the only thing that currently calls `FloorTimer.Reset()`. The player can be killed by the timer *during* the boss encounter, an unrelated system silently ending what's meant to be a self-contained set-piece fight.
+Direct inspection of `WorldGenerator.cs` confirms it has **zero boss-awareness**. `CleanupSection()` (called by both `RemoveTail()` and `RemoveHead()`) unconditionally destroys any room/corridor that falls outside the `_lookaheadCount`/`_lookbehindCount` window around the player's chain position — there is no check for "is a boss fight currently active in this room." Phase 16's own context file lists "전투 판정 & 생명주기 게이팅 세부조건... BOSS-10 예외의 정확한 트리거 조건" explicitly under `<deferred>` as **"미논의, 다음 세션 필수"** (undiscussed, mandatory to discuss next session) — it was never implemented, only proposed as a requirement ID (BOSS-10) in `REQUIREMENTS.md`/`ROADMAP.md`. If v4.0 assumes this exemption already exists and simply adds 4 more boss rooms on top, every one of them inherits the *actual* current behavior: a boss room can be `Destroy()`-ed mid-fight the moment the player's chain index moves far enough away, which is entirely plausible for MAX (constant forward momentum can push the player past the boss room's trailing edge while the fight is still in progress) or for any boss fight that runs long relative to normal room traversal pacing.
 
 **Why it happens:**
-`FloorTimer` was designed around "fast escape" tension for the standard room+corridor loop (v3.0's core validation goal), with no concept of an exception room. Nothing in `WorldGenerator`/`FloorTimer` currently pauses or extends the timer for any room type.
+A requirement ID existing in `REQUIREMENTS.md`/`ROADMAP.md` (BOSS-10) is not the same as implemented code — this is an easy false-positive when working from planning docs instead of source, and it's exactly what happened here: BOSS-10 was proposed and named, then explicitly deferred without implementation when the Phase 16 session redirected to a pure refactoring track.
 
 **How to avoid:**
-- Decide explicitly whether the boss room pauses `FloorTimer` for the fight duration, grants a time bonus/extension on entry, or is deliberately exempt from the countdown. `FloorTimer` is a static class with only `Reset()`/`RemainingSeconds`/`Tick()` — adding `Pause()`/`Resume()` (a `_paused` bool checked at the top of `Tick()`) is a small, additive change, not a rewrite.
-- Whatever is chosen, document it as a Key Decision — this cross-system interaction is easy to miss because `FloorTimer` and boss room live in different mental "phases" of the milestone but share runtime state every frame.
+- Treat "boss-room-exempt-from-cleanup" as **net-new work for v4.0**, not a solved precondition. This must be designed before or alongside the first new boss room, not assumed.
+- The Phase 16 deferred gray areas are the right starting menu of design questions to resolve first: spawn architecture (chain-slot replacement vs. branch portal — this decision determines whether "exemption" even means "skip cleanup of a chain node" or something structurally different), and the precise trigger condition for "combat active" (boss `IsAlive`/`_isDefeated` state is already a reasonable signal to gate on, per `BossEnemy.cs`'s existing fields).
+- Because 5 bosses now exist (not 1), the exemption logic must be boss-type-agnostic (query via `IEnemy`/whatever shared boss base emerges from Pitfall 2, not `BossEnemy`-the-single-class specifically) — do not hardcode this check against one concrete type only to redo it when the 2nd-5th bosses arrive.
+- Do not confuse the currently-swapped-in `Room_BossFsmTest` scene-data hack (single-element room pool, `_lookaheadCount`/`_lookbehindCount` forced to 0, per `15-06-PLAN.md`) with a real fix — that hack exists purely to isolate one boss's FSM for testing and deliberately disables the chain-generation machinery entirely, so it cannot exercise (or validate a fix for) this cleanup-exception problem at all.
 
 **Warning signs:**
-Player dies to "시간 초과" mid-boss-fight in playtesting with no visible indication the death was timer-related versus boss-related.
+- A boss fight ends with a `MissingReferenceException`/null-ref referencing a destroyed boss GameObject, or the boss visually vanishes mid-fight without a death sequence.
+- Player defeats a boss but score/unlock doesn't register because the boss GameObject (and its `Die()` call) was already destroyed by `CleanupSection()` before the killing hit landed.
+- QA report of "boss room disappeared while I was still fighting," specifically when a boss fight runs unusually long or the player is pushed/dashes far during the fight (MAX is the highest-risk case here given its stated "can't stop moving" design).
 
 **Phase to address:**
-Boss room lifecycle/gating phase — same phase as Pitfall 2, since both concern what "boss room active" should suspend.
+Must be resolved as its own explicit design+implementation step (this is literally the still-open Phase 16 deferred item) before or in parallel with the first new boss room being wired into the real chain-based spawn flow — not bundled silently into an individual boss's implementation phase where it's likely to be overlooked again.
 
 ---
 
-### Pitfall 5: Boss activates immediately on room instantiation, before the player has "entered" for a solo fight
+### Pitfall 5: Mouse-only aim direction + zero touch bindings for movement — the existing input layer cannot run on the target platform, and new boss mechanics will inherit that gap
 
 **What goes wrong:**
-`WorldGenerator.SpawnNextPair()`/`SpawnPrevPair()` instantiate rooms **2 lookahead pairs in advance** of the player (`_lookaheadCount = 2`), and `TrySpawnEnemies()` calls `spawner.Spawn(...)` **and immediately** `spawner.Activate()` — regular enemies are already active (patrolling, `Update()`-driven, detection colliders live) the instant the room exists, typically while the player is still 1-2 rooms away and the room is off-screen. If the boss is spawned/activated through the same immediate pattern, a "solo fight" won't actually gate on the player entering the room — the boss's FSM/telegraph timers could start running off-screen, or the fight could already be "in progress" by the time the player's camera catches up, undermining the dramatic "enter room → fight begins" framing implied by "솔로 전투."
+Two separate, compounding issues, both confirmed directly in code:
+1. `CombatController.GetMouseWorldDirection()` calls `UnityEngine.InputSystem.Mouse.current` unconditionally to compute attack-aim direction (used for both Linear/Fan target-shape filtering). On an Android device with no mouse, `Mouse.current` is `null`, and the fallback path (`_mainCamera.WorldToScreenPoint(origin)`) collapses aim direction to a degenerate vector pointing at the player's own screen position — meaning **aim-direction-dependent targeting is already non-functional on touch**, independent of anything new in v4.0.
+2. `Assets/InputSystem_Actions.inputactions` has **no touch/on-screen-control binding for the `Move` action at all** (only `<Gamepad>/leftStick`, keyboard WASD/arrows, `<Joystick>/stick`, XR — confirmed by direct inspection of the action asset). There is also no on-screen joystick/button UI implementation anywhere in `Assets/` (no `OnScreenStick`, no virtual-joystick `Canvas`, etc. — none found). The `Attack` action does have `<Touchscreen>/primaryTouch/tap` bound, but that only covers "tap to trigger the button," not the aim-direction problem in #1.
+
+Given this, any new mechanic that depends on directional aiming (DeadEye's reticle-at-boss, or reading a screen position for a parry-timing tap) inherits the same broken assumption, and the source design doc's PC-specific bindings (left-click hold / right-click fire / arrow-keys for a second unit — NOVA's drone) have **no existing analog to port from** on this input layer; they'd need to be designed from scratch for touch, not "ported."
 
 **Why it happens:**
-The existing spawn pipeline was built entirely around "ambient" enemies that don't need a scripted start (patrol from spawn, chase on detection) — there's no precedent in the codebase for "wait until player crosses a trigger, then start." `RoomClearCondition.cs` exists but only *reacts* to enemies already being dead to *reveal* something afterward — it doesn't gate combat *start*.
+The prototype was clearly developed and playtested in the Unity Editor with mouse+keyboard, and Android-readiness for the *input layer specifically* was never validated end-to-end, even though `ProjectSettings` already targets Android (minSdk 25, ARM64) and the project constraints call out Android as the primary platform. This is a pre-existing gap that predates v4.0, but v4.0 is the first milestone whose new mechanics (aim reticles, timing-based parries, a second controllable unit) cannot function at all without solving it first — the existing single mechanic (auto-target-nearest-in-range) is largely aim-direction-independent in practice (`FindNearestEnemyInRange` already auto-selects rather than requiring precise aim), which is likely why this gap has gone unnoticed so far.
 
 **How to avoid:**
-- Do not use `EnemySpawner.Spawn()+Activate()` for the boss at all. Instead: instantiate the boss **disabled** (`SetActive(false)`, matching how standby rooms are already handled), and use a separate boss-room-only entry trigger (a `Collider2D` at the room's ENT `RoomConnector`, conceptually the mirror of `ExitPortal`'s trigger) to activate the boss and (optionally) seal the room only once the player physically walks in — the same "player-triggered activation" pattern already proven by `ExitPortal.OnTriggerEnter2D()`.
-- Because the boss room still needs to sit in the lookahead window for chain integrity, "instantiated early but inert until entry-triggered" is the correct model — don't try to delay instantiation itself, which would require special-casing the chain-building loop.
+- Do not treat "port PC bindings to touch" as a per-boss task — solve the underlying input abstraction once: replace `Mouse.current`-based aim direction with a touch/pointer-agnostic source (Unity Input System's `<Pointer>` covers mouse+touch uniformly, or explicit `Touchscreen.current` handling with a designed on-screen aim mechanism, e.g., drag-to-aim or auto-aim-toward-nearest as the primary touch paradigm instead of a reticle).
+- For NOVA's dual-unit control (body + drone) specifically: do not attempt a literal "arrow keys for drone" port — this needs a touch-native redesign (e.g., auto-piloted drone with a tap-to-target toggle, or a second on-screen virtual stick) decided explicitly, not inherited from the PC design doc by default.
+- Add a basic on-screen touch control layer (movement + attack-hold + roll, at minimum) as its own early infrastructure task if the project intends to actually validate on Android during this milestone — this is foundational and blocks realistic playtesting of every new mechanic, not just the boss-specific ones.
+- If Android validation is explicitly out-of-scope for v4.0 and Editor mouse/keyboard testing is accepted as sufficient for this milestone, that must be an explicit, written scope decision (not a silent assumption) — because the project constraints state Android as the primary target.
 
 **Warning signs:**
-Boss visibly moving/attacking before the player's camera has scrolled into the room; boss telegraph or attack triggering with the player nowhere near the arena.
+- Any new boss playtest note along the lines of "works fine in Editor" without ever running on an actual Android build/device.
+- A new mechanic's design spec references "click," "right-click," or "arrow keys" without a corresponding touch-equivalent decision recorded anywhere.
+- `Mouse.current` (or any other `Mouse`/`Keyboard`-specific API) appearing in new boss-adjacent player scripts.
 
 **Phase to address:**
-Boss room lifecycle/gating phase.
+Should be resolved (or explicitly descoped with a written decision) before or very early in the milestone — ideally as shared infrastructure alongside Pitfall 3's module abstraction, since aim-direction and on-screen controls are needed by essentially every new module. Deferring it risks discovering the gap only when the first Android build is actually tested, potentially very late.
 
 ---
 
-### Pitfall 6: Enemy prefab's spawn-in VFX fires in `Awake()`/`OnEnable()` — off-screen, at standby time, or twice
+### Pitfall 6: Persisting boss-unlock state is entirely new — no persistence infrastructure exists, and the "reset everything on death" convention is currently absolute
 
 **What goes wrong:**
-Standby-room enemies are already instantiated well before they're relevant: `TrySpawnExitPortal()` instantiates the next floor's standby room (and calls `TrySpawnEnemies` on it, up to `_floorHeight = 40` units above the current room) — but `Instantiate(standbyPrefab, ...)` runs the room's (and its children's) `Awake()` synchronously **before** the very next line, `standbyRoom.SetActive(false)`, executes. `EnemySpawner.Spawn()` does the identical thing: `Instantiate(prefab, ...)` (runs the enemy's `Awake()`) followed immediately by `_spawned.SetActive(false)`. If a new "spawn-in VFX" is naively implemented as "play on `Awake()`" or "play on `OnEnable()`," it will fire the instant the enemy is instantiated — potentially far off-screen, a floor early, long before the player will ever see it — and then fire **a second time** when `EnemySpawner.Activate()` later calls `SetActive(true)` (re-triggering `OnEnable()`).
+Direct inspection confirms there is **no persistence mechanism anywhere** in the codebase — no `PlayerPrefs`, no serialized save file, no third-party save library. The only "state that survives a scene reload" today is plain C# static fields (`FloorManager.CurrentFloor`, `ScoreManager.Score`), and both are **explicitly, unconditionally reset to their defaults** in `DeathScreenController.RestartGame()` (`FloorManager.CurrentFloor = 1; ScoreManager.Reset();`) before reloading the `AttackSelect` scene. In other words, the existing convention is not "some things survive death, some don't" — it is "literally nothing survives death, by explicit design." Boss-unlock progression is the **first ever feature** that needs to survive the death/restart loop, and there is no existing pattern to extend — this has to be designed from zero, and if it's bolted on carelessly (e.g., stored as another static field that nobody remembers to *exclude* from `RestartGame()`'s reset sweep, or the reverse — accidentally reset by a future refactor of that method), unlocked modules will either wrongly vanish on every death (breaking the core unlock-progression premise) or wrongly persist across an actual app relaunch/reinstall when the design only intended within-session persistence.
+There's also a scope ambiguity baked into the design itself: `STORY.md`'s loop description ("F.A.S.T.가 쓰러지면 시뮬레이션은 재시작된다... 매 회차마다 데이터가 쌓인다") implies unlocks should survive the death loop indefinitely (i.e., real save-game persistence across app sessions, not just within one Play session), but nothing in the current codebase distinguishes "survives scene reload within a session" from "survives app process restart" — these require different mechanisms (a static field vs. `PlayerPrefs`/a save file) and the milestone doesn't yet specify which is required.
 
 **Why it happens:**
-`Awake()`/`OnEnable()` on a prefab feel like the obvious place to kick off a spawn animation, but this codebase's spawn pipeline deliberately separates "exists in memory" (`Spawn()`, inactive) from "gameplay-active" (`Activate()`), specifically for lookahead pre-generation — any VFX trigger must be wired to the same seam `Activate()` already provides, not to Unity lifecycle callbacks.
+The prototype has intentionally avoided all persistent-progression systems so far (`PROJECT.md`'s "Out of Scope" explicitly lists "복잡한 성장 시스템... 성장은 검증 후 추가" — growth systems were deferred until now), so there is no existing precedent, utility class, or convention to follow. This is a green-field subsystem being added to a codebase whose only related pattern (`FloorManager`/`ScoreManager` static classes) is a deliberate *anti*-pattern for this exact need (unconditional reset on death).
 
 **How to avoid:**
-- Add the spawn-in VFX trigger as an explicit step inside `EnemySpawner.Activate()` (or a method the enemy exposes, e.g. `PlaySpawnIn()`, called by `Activate()` alongside/instead of raw `SetActive(true)`) — never inside the enemy's own `Awake()`/`OnEnable()`/`Start()`.
-- The enemy's gameplay-active state (FSM `Update()` ticking, detection `OverlapCircle` calls, hitbox colliders) should not start until the spawn-in VFX completes — see Pitfall 7 for the concrete mechanism.
+- Make an explicit, written decision early: does "boss-unlock persists" mean (a) survives the death→AttackSelect→SampleScene loop within one continuous play session, (b) survives closing and reopening the app, or both? This determines whether a new static class (session-scoped, like `FloorManager`) or `PlayerPrefs`/file-backed storage (app-restart-scoped) is correct — do not default to whichever is easiest to code without confirming which the design requires.
+- Whichever mechanism is chosen, the "reset on death" call site (`DeathScreenController.RestartGame()`) must be explicitly audited and kept in sync: it currently resets `FloorManager` + `ScoreManager` unconditionally, and the new unlock-state class must be deliberately *excluded* from that reset (or given its own explicit non-reset path) — a future contributor touching `RestartGame()` for something else could easily "helpfully" add a full reset of all statics, silently breaking unlock persistence.
+- Scope exactly what unlock state must NOT reset on death (unlocked module list) vs. what still must reset (floor progress, score, any per-run resource) — write this down as an explicit list, since this codebase has never before had to distinguish these two categories.
+- If cross-app-session persistence is required, this is also the first time the project needs any serialization strategy at all — keep it minimal (a small `PlayerPrefs` int bitmask or JSON blob of unlocked boss IDs is more than sufficient for 4-5 booleans; do not over-engineer a generic save system for a prototype).
 
 **Warning signs:**
-Portal/spawn VFX playing in a room the player just left (standby room instantiated ahead of time), or playing twice on the same enemy; VFX firing with no player anywhere near the camera.
+- Unlocked modules disappearing after a death/restart in playtesting (persistence not wired, or wrongly caught by an existing reset call).
+- Unlocked modules persisting across a full app close/reopen when only within-session persistence was intended (or vice versa) — surfaces as confusing playtest reports ("I unlocked SAMURAI but it's gone now" / "why do I still have everything after reinstalling").
+- A future edit to `DeathScreenController.RestartGame()` (e.g., for an unrelated reset need) that iterates/resets "all game statics" generically and inadvertently wipes unlock state.
 
 **Phase to address:**
-Spawn VFX phase — but the fix (hooking into `Activate()`) has a hard dependency on the existing v3.0 `EnemySpawner` code, so it must be scoped against `EnemySpawner.cs` directly, not designed in isolation.
-
----
-
-### Pitfall 7: Enemy becomes lethal/detectable before its spawn-in VFX finishes (or vice versa)
-
-**What goes wrong:**
-`MeleeEnemy`/`RangedEnemy`'s `Update()` FSM (`UpdateIdle`/`UpdateChase`) and collision-based detection (`Physics2D.OverlapCircle` in `IsPlayerInRange`) run every frame the instant the GameObject is active — there is currently no "spawning" state distinct from "idle" in the FSM. If `EnemySpawner.Activate()` is changed to call `SetActive(true)` and simultaneously start a spawn-in animation, the enemy's `Update()` starts running in the very same frame the VFX begins — meaning the enemy can detect the player, chase, or even reach `TelegraphAndAttack()` while still visually emerging from a portal. Conversely, if the FSM is naively frozen for the VFX duration without deciding the intended interaction, the player might land a dash-kill on something meant to still be "arriving" and untargetable.
-
-**Why it happens:**
-Extending an FSM that has exactly one "always-on-when-active" assumption (`Idle`→`Chase`→`Telegraph`→`Attack`, no `SpawningIn` state) requires deliberately inserting a new state and deciding where detection/hitboxes/dash-targetability turn on relative to it — easy to skip because the enemy "looks fine" in isolation without the new state; the timing sync between animation and danger is then accidental rather than designed.
-
-**How to avoid:**
-- Add an explicit `SpawningIn` FSM state (entered on `Activate()`, before `Idle`) during which `Update()`'s switch does nothing (mirrors how `Telegraph`/`Attack` already "do nothing, coroutine owns this state"), detection `OverlapCircle` calls are skipped, and the enemy is excluded from `CombatController.FindNearestEnemyInRange()` targeting — cheapest lever: keep `IsAlive` false until the VFX completes, then flip true, reusing the *existing* dead-enemy skip check (`if (enemy == null || !enemy.IsAlive) continue;`) in `CombatController.cs` for free.
-- Decide the intended feel explicitly (does the spawn VFX telegraph "incoming danger" the player should react to, or is it purely cosmetic before gameplay starts?) — this determines whether hitboxes activate at VFX start or VFX end, and should be a documented decision, not an accident of implementation order.
-
-**Warning signs:**
-Player takes a "surprise" hit from an enemy still mid-spawn-animation; player can dash-kill a "spawning" enemy that shouldn't yet be a valid target.
-
-**Phase to address:**
-Spawn VFX phase, same pass as Pitfall 6 — both are about wiring the new VFX seam into the existing `EnemySpawner`/enemy FSM contract and should be solved together.
-
----
-
-### Pitfall 8: Slow-motion/hit-freeze breaks new audio timing if built on `Time.deltaTime`-based coroutines
-
-**What goes wrong:**
-This project has **no audio system at all today** (zero `AudioSource`/`AudioListener`/`AudioClip` references anywhere in `Assets/Scripts`) — every audio feature (SFX-timed-to-hit, portal transition sound, death sound) is new code, and the single most common first-audio-system mistake in a project with a slow-motion/hit-freeze mechanic is writing any fade/sequencing logic (volume fade-in/out, delayed SFX cues) using `Time.deltaTime`/`WaitForSeconds` instead of `Time.unscaledDeltaTime`/`WaitForSecondsRealtime` — which this codebase enforces everywhere else (i-frames, telegraphs, floor timer, transition effects) but is easy to forget for a brand-new subsystem with no existing pattern to copy from.
-Additionally, `AudioSource.pitch` is **not** automatically affected by `Time.timeScale` in Unity — if the intent is for SFX to audibly "slow down" during slow-mo (a natural expectation given the existing dash-trail/hit-spark/camera-shake polish already ties visual feel to the slow-mo state), that must be done manually (e.g. `audioSource.pitch = basePitch * Time.timeScale`, updated via `Time.unscaledDeltaTime`-driven logic) — nothing does this by default, so naive `AudioSource.Play()` calls play at full speed/pitch regardless of slow-mo. Separately, `Time.timeScale = 0f` during `CombatController.HitFreeze()` does **not** pause already-playing `AudioSource`s — a sustained SFX started on dash keeps playing through the 75ms world-freeze unless explicitly designed for.
-
-**Why it happens:**
-There is no existing audio code to imitate the project's `Time.unscaledDeltaTime` convention from — the default tutorial pattern of `Time.deltaTime` is correct in most Unity projects but wrong in this one specifically.
-
-**How to avoid:**
-- Any new fade/sequencing coroutine for audio must use `Time.unscaledDeltaTime`/`WaitForSecondsRealtime`, exactly like `InvincibilityHandler`/`MeleeEnemy`/`RangedEnemy`/`FloorTransitionEffect` already do — treat this as a hard project convention to carry into the new subsystem, not something to re-derive.
-- Explicitly decide (as a Key Decision) whether SFX should pitch-shift with `Time.timeScale` during slow-mo/hit-freeze; if so, implement it as a small centralized helper (e.g. an `AudioManager.PlaySfx(clip)` that reads `Time.timeScale` once per call) rather than duplicating pitch math at every call site.
-
-**Warning signs:**
-An SFX fade-out or delayed cue audibly "pausing"/stretching during slow-motion/hit-freeze in a way nothing else in the game does; SFX playing at a jarringly normal pitch/speed while the whole screen is in bullet-time.
-
-**Phase to address:**
-Audio system phase (foundational — must be settled before wiring individual SFX to portal/hit/death/boss events, since every call site inherits whichever convention the core audio helper establishes).
-
----
-
-### Pitfall 9: Rapid dash-kills overlapping/clipping SFX with no voice management
-
-**What goes wrong:**
-The core loop (dash → kill → next dash) can chain kills in well under a second (`postKillLockout = 0.2f`, `hitFreezeDuration = 0.075f`), and multiple enemies can die in quick succession (regular rooms already spawn 2-4 melee + 0-3 ranged per `GetEnemyCount`). A naive one-`AudioSource.PlayOneShot()`-per-kill approach, or `Instantiate`-ing a fresh `GameObject`+`AudioSource` per event (mirroring how `SpawnHitSpark()`/`EnemyDeathEffect.SpawnDeathParticles()` already instantiate a throwaway VFX object per event), will either clip/stack indistinguishably under the default 32-voice limit, or generate GC churn on mobile from constant `Instantiate`/`Destroy` — the same GC-pressure lesson this codebase already learned and fixed for detection buffers (`_hitBuffer`, `_detectionBuffer` pre-allocated) but hasn't yet applied to audio because none exists.
-
-**Why it happens:**
-`PlayOneShot`-per-event is the simplest possible first implementation and works fine in isolated testing (one enemy, one kill) — the failure mode only appears under this game's actual rapid-chain-kill conditions, which won't show up unless explicitly tested with a room full of enemies.
-
-**How to avoid:**
-- Use a small pre-warmed pool of reusable `AudioSource`s (e.g. 4-8) for SFX playback instead of instantiating a new `AudioSource`/GameObject per event — same pre-allocation principle already applied to `Collider2D[]` buffers elsewhere in this codebase.
-- For kill SFX specifically, consider a short per-clip cooldown/max-simultaneous-instances guard so several near-simultaneous kills don't all fire the same clip at full volume and phase-clip into distortion.
-
-**Warning signs:**
-Audio sounding distorted/harsh in multi-enemy rooms; GC spikes correlated with kill events once audio is added; frame hitches during rooms with several clustered enemies.
-
-**Phase to address:**
-Audio system phase — the pooling decision should be made when the core audio-playing helper is built, not retrofitted after every call site already assumes naive `PlayOneShot`/`Instantiate`.
+Should be designed and implemented as its own small, early phase (before or alongside the first boss whose defeat is meant to grant an unlock) since every subsequent boss-defeat phase depends on it working correctly, and retrofitting persistence after several unlock call-sites already exist ad hoc is more error-prone than building the one shared API first (e.g., `BossUnlockManager.Unlock(BossId)` / `IsUnlocked(BossId)`) and having every boss's `Die()` call into it.
 
 ---
 
 ## Technical Debt Patterns
 
 | Shortcut | Immediate Benefit | Long-term Cost | When Acceptable |
-|----------|--------------------|-----------------|------------------|
-| Boss implements plain `IEnemy.OnDashHit()` with no vulnerability gating (ships as a reskinned `MeleeEnemy`) | Fastest path to a "working" boss room for a demo | Defeats the entire point of the milestone ("보스전답게" framing); needs a rework the moment anyone playtests it | Never — this is the one thing this milestone is explicitly about |
-| Boss room prefab duplicated from Complex_Room without stripping `EnemySpawner` markers | Reuses proven Tilemap/RoomConnector/CameraBound/ExitSpawnPoint setup instantly | Regular enemies silently co-spawn with the boss, breaking solo-fight framing (Pitfall 1) | Never — must strip/gate before first playtest, not "later" |
-| New audio code written with `Time.deltaTime`/`WaitForSeconds` instead of unscaled equivalents | Slightly less code to think about, matches generic Unity tutorials | Audio desyncs from visuals during every slow-mo/hit-freeze moment — i.e. constantly, since slow-mo is the core loop | Never in this project |
-| Spawn-in VFX triggered from `Awake()`/`OnEnable()` instead of `EnemySpawner.Activate()` | Looks correct in a quick single-enemy test scene | Fires off-screen at standby-room instantiation time and/or double-fires on `Activate()` (Pitfall 6) | Never — always wire to `Activate()` |
-| `AudioSource`/effect-GameObject `Instantiate()` per SFX event instead of pooling | Works fine in isolated testing, less upfront plumbing | GC churn + voice clipping once multiple enemies die in quick succession (Pitfall 9) | Acceptable only for a first internal prototype pass explicitly flagged for a pooling follow-up before any real playtest/profiling pass |
-| Skipping `FloorTimer` interaction entirely ("boss room just happens to always have enough time") | No code change needed right now | Silent, confusing mid-fight deaths the moment a playtester takes longer than expected (Pitfall 4) | Never — must be an explicit decision, even if the decision is "boss room grants +N seconds" |
+|----------|-------------------|-----------------|-----------------|
+| Copy-paste `BossEnemy.cs` for the next boss instead of extracting shared base first | Fastest way to get boss #2 on screen | 4x maintenance surface, guaranteed drift on shared bugfixes (Pitfall 2) | Never — the extraction cost is small and known upfront |
+| Add new module as `if (currentModule == X)` branches inside `CombatController` | No new files/abstraction needed for boss #1's player-side mechanic | Mid-combat swap leaks (Pitfall 3); branch count becomes unmanageable at 5 modules | Only acceptable for 한계 시험-only, never-swapped modules, and only if 보스 러시's swap requirement is confirmed descoped |
+| Reuse the `_roomPrefabs`-swapped-to-1-element / `_lookaheadCount=0` scene hack (currently left in place per `15-06-PLAN.md` checkpoint) as "the" boss room testing method going forward | Already works, zero new tooling | Not a real spawn architecture — doesn't exercise lookahead/lookbehind/cleanup interactions at all, so it cannot catch Pitfall 4 | Acceptable only for isolated FSM-behavior testing of a single new boss's pattern loop; must be restored (`Fast/Phase15/Restore WorldGenerator Original Room Pool`) before any integration/lifecycle testing |
+| Store boss-unlock state as a bare new static class field without designing app-restart vs. session-scope explicitly | Works immediately in Editor testing | Wrong persistence scope discovered only via confusing playtest reports (Pitfall 6) | Never for the initial implementation — acceptable only as a very short-lived spike explicitly labeled as such |
 
 ## Integration Gotchas
 
 | Integration | Common Mistake | Correct Approach |
 |-------------|-----------------|-------------------|
-| Boss room ↔ `WorldGenerator` chain (`_roomPrefabs`, `SpawnNextPair`/`SpawnPrevPair`) | Adding the boss room straight into `_roomPrefabs[]` so it can appear as any random lookahead/lookbehind filler room | Spawn boss room through its own dedicated probability roll/marker, analogous to `TrySpawnExitPortal`'s `_exitSpawnChance`, never as a plain pool entry |
-| Boss room ↔ EXIT portal requirement ("층 진입은 기존 EXIT 포탈 그대로 필요") | Building a bespoke boss-exit mechanic instead of reusing `ExitPortal`/`ExitSpawnPoint` | Boss room should still contain a normal `ExitPortal`+`ExitSpawnPoint`, gated so it doesn't spawn/activate until the boss is defeated — reuse `RoomClearCondition`'s "watch a list of IEnemy, activate targetObject on all-dead" pattern directly, it already exists for exactly this "reveal exit after clearing enemies" shape |
-| Boss activation ↔ `EnemySpawner`/`Activate()` seam | Reusing `EnemySpawner.Spawn()+Activate()` verbatim for the boss (immediate activation on lookahead spawn, Pitfall 5) | Boss needs its own entry-triggered activation (mirrors `ExitPortal.OnTriggerEnter2D`), not the ambient always-active pattern regular enemies use |
-| New audio subsystem ↔ existing `Time.unscaledDeltaTime` convention | Writing fade/sequencing timers with `Time.deltaTime`/`WaitForSeconds` because no existing audio code to copy from | Follow the exact convention already used by `InvincibilityHandler`/`FloorTransitionEffect`/enemy telegraphs: `Time.unscaledDeltaTime` + `WaitForSecondsRealtime` everywhere |
-| Spawn VFX ↔ `EnemyDeathEffect`'s `RuntimeMaskSprite`/SpriteMask pattern | Building a completely separate spawn-in visual technique from scratch | Reuse the already-proven `RuntimeMaskSprite.CreateMaskSprite()` + `SpriteMask` rise/shrink pattern (used identically by `FloorTransitionEffect` for entry/exit and `EnemyDeathEffect` for death) — a mirrored "mask shrinks away to reveal" is a natural, consistent spawn-in visual and avoids inventing a new masking technique |
-| Camera bounds ↔ boss room's `CameraBound` | Forgetting the boss room needs its own `CameraBound` child marker (like every existing Complex_Room) — without it, `RecomputeCameraBounds()` silently falls back to a merged bounds from adjacent rooms/corridors, letting the camera drift outside the boss arena during the fight | Add a `CameraBound` sized to the boss arena exactly like existing rooms; verify `RecomputeCameraBounds()` is re-triggered appropriately if the boss encounter isolates the chain |
+| New boss FSM ↔ `PlayerController.OnPlayerDeath` static event | Forgetting `OnDisable` unsubscribe (crashes/double-fires on next Play session since the event is `static` and survives domain-reload-disabled Editor settings) | Always mirror `BossEnemy.cs`'s existing `OnEnable`/`OnDisable` subscribe/unsubscribe pair exactly |
+| New module ↔ `ChronoGaugeController`/`InvincibilityHandler` (`[RequireComponent]`-coupled to `CombatController`) | Assuming every module needs its own gauge/invincibility component, duplicating them per module | Decide per-module whether F.I.O.R.A's gauge concept applies at all (DeadEye's "6-shot then reload" is not a drain/regen gauge) — don't force-fit every module into the existing gauge shape |
+| New boss room ↔ `WorldGenerator._chain` (`LinkedList`) | Assuming the boss room can be treated as "just another Complex_Room" for spawn/cleanup purposes | Resolve Pitfall 4's spawn-architecture decision (chain-slot vs. branch-portal) before wiring any new boss room into the real (non-test-hack) flow |
+| Boss-unlock state ↔ `DeathScreenController.RestartGame()` | Letting the unlock-state reset call get silently added to (or omitted from) this method by an unrelated future change | Give unlock state its own explicitly-named, explicitly-audited reset boundary, not "whatever `RestartGame()` happens to touch" |
 
 ## Performance Traps
 
 | Trap | Symptoms | Prevention | When It Breaks |
 |------|----------|------------|-----------------|
-| Per-kill `AudioSource`/effect GameObject `Instantiate()` (mirroring existing `SpawnHitSpark`/`SpawnDeathParticles` pattern, now applied to audio) | GC spikes/frame hitches on Android during multi-enemy rooms | Pre-allocate a small `AudioSource` pool (4-8 sources) instead of instantiate-per-event | Breaks once 3+ enemies die within ~1 second (very achievable given `postKillLockout=0.2s`) |
-| Boss pattern coroutines using `GetComponentsInChildren`/`FindObjectsOfType`/LINQ per frame (easy to reach for when scripting multi-phase attack patterns) | Frame time spikes during boss fight specifically — the single most scrutinized scene in the milestone | Reuse the project's established pattern: pre-allocated `Collider2D[]` buffers + `Physics2D.OverlapCircle(ContactFilter2D, results[])`, cached layer masks in `Awake()` | Immediately on first profiling pass of the boss fight |
-| Spawn-in VFX using a new `ParticleSystem`/mask `GameObject` per enemy spawn without cleanup (copy of `EnemyDeathEffect.SpawnDeathParticles`'s per-instance pattern, now also applied at spawn time in addition to death time) | Rooms with several spawners (2-4 melee + 0-3 ranged per `GetEnemyCount`) doubling transient GameObject churn (spawn effect + existing death effect) | Confirm `stopAction = ParticleSystemStopAction.Destroy` (or equivalent) is set on any new spawn-VFX `ParticleSystem`, same as death VFX already does | Noticeable once rooms with 4+ enemies (max `GetEnemyCount`, floor 11+) all spawn-in within the same lookahead-generation frame |
+| NOVA's drone as a second fully-simulated `Rigidbody2D` + its own `Physics2D.OverlapCircle` detection loop, times however many are active in 보스 러시 free-swap | Frame drops specifically in Boss Rush mode when NOVA-type patterns are active alongside other module overhead | Reuse existing pre-allocated buffer patterns (`CombatController._hitBuffer`, `EnemyBase._detectionBuffer`) for any new per-frame physics query — do not allocate new arrays per-frame | Noticeable on Android (ARM64, mobile GPU/CPU budget) well before it would show up in Editor testing on a dev PC |
+| 4 new boss FSMs each independently polling `FindFirstObjectByType<PlayerController>()` in `Awake()` (as `BossEnemy.cs` already does) | Non-issue at 1 boss per room (current architecture guarantees solo boss fights), but worth confirming this assumption still holds for any new boss-room design that changes solo-fight guarantees | Keep the "one boss room = one active boss" invariant explicit in the new spawn architecture (Pitfall 4) rather than assuming it by convention only | Only relevant if a future spawn-architecture change (chain-slot vs branch-portal) accidentally allows multiple boss instances active simultaneously |
 
 ## Security Mistakes
 
-Not applicable in the traditional sense — this is a single-player offline prototype with no network/auth/backend. No domain-specific security concerns beyond standard Unity asset hygiene (no untrusted user-generated audio/asset loading is planned).
+Not applicable in the traditional sense — this is a local single-player prototype with no network layer, accounts, or server-authoritative state. The closest analog is client-side-only persistence integrity (Pitfall 6): since unlock state will live in `PlayerPrefs`/local storage with no server validation, there's no meaningful "cheating" risk worth engineering against at prototype stage — do not over-invest in tamper-proofing a save file that only the local player can ever read.
 
 ## UX Pitfalls
 
 | Pitfall | User Impact | Better Approach |
-|---------|--------------|-------------------|
-| Boss dies to the very first dash with no visible resistance (Pitfall 3) | Anticlimactic — "boss" feels like a reskinned regular enemy, breaking the sense of occasion the milestone is meant to create | Gate lethality behind a telegraphed vulnerability window; make the boss's non-vulnerable state visually distinct (shield/color VFX) so players understand why a dash didn't kill it, rather than it feeling broken |
-| Player killed by `FloorTimer` mid-boss-fight, indistinguishable from a normal "시간 초과" death (Pitfall 4) | Feels like an unrelated system betrayal — player was doing well in the fight and lost for reasons outside the encounter | Explicitly pause/extend the timer for boss rooms, or clearly signal (HUD) that the boss room is exempt, so players never wonder "did I lose to the boss or the clock?" |
-| Spawn-in VFX plays but the enemy is already lethal underneath it, or vice versa (Pitfall 7) | Player takes a "cheap" hit from something still visually arriving, or wastes a dash on something not yet a valid target — feels unfair/buggy rather than intentional | Explicitly design and test the vulnerability/hitbox timing relative to VFX start/end as one decision, not an accidental byproduct of implementation order |
-| New portal/hit/death SFX added without a relative-volume/mix pass (first-ever audio, easy to just wire clips without comparing loudness) | Some SFX (e.g. death) can drown out others (e.g. hit spark) or feel jarringly loud/quiet relative to each other since there's no existing baseline | Do a dedicated relative-volume pass across all new SFX together (portal, hit, death, boss-specific) rather than tuning each in isolation as it's added |
+|---------|-------------|-------------------|
+| Porting DeadEye's "6 reticles then fire" pattern literally 1:1 from a mouse-precision design to touch without adjusting reticle size/telegraph timing | Reticles too small/fast to read or dodge on a phone screen, unlike on a monitor | Treat DeadEye's telegraph readability as a touch-specific tuning pass, not a direct value copy from the design doc |
+| SAMURAI's parry window (precise-timing input) implemented with the same input-polling cadence as existing button-press detection, but touch input latency/jitter differs from mouse/keyboard | Parry feels "unfair" or inconsistent specifically on touch devices even if it feels fine in Editor testing with mouse | Playtest SAMURAI's parry timing window specifically on-device (Android), not just in Editor, before tuning the window width |
+| Boss Rush's "swap module anytime mid-fight" without a clear on-screen affordance for touch (no cursor to hover a module icon) | Players may not discover or reliably execute mid-combat swapping on a touchscreen | Design the swap UI/gesture for touch first (e.g., dedicated on-screen module buttons), not adapted from a hypothetical PC hotkey scheme |
 
 ## "Looks Done But Isn't" Checklist
 
-- [ ] **Boss room prefab:** Often still contains leftover `EnemySpawner` markers copied from the base Complex_Room prefab it was duplicated from — verify `GetComponentsInChildren<EnemySpawner>(true)` returns empty (or an explicit gate skips them even if present).
-- [ ] **Boss `IEnemy` implementation:** Often technically "implements the interface" (compiles, `CombatController` can target/kill it) without any vulnerability-window gating — verify the boss survives at least one dash outside its telegraphed opening before declaring the encounter "done."
-- [ ] **Spawn-in VFX:** Often triggers correctly in a hand-placed single-enemy test scene but not verified against the actual lookahead-pregeneration path (`SpawnNextPair`'s `TrySpawnEnemies` calling `Spawn()`+`Activate()` back-to-back on a room the player hasn't reached, plus the separate standby-room pre-instantiation in `TrySpawnExitPortal`) — verify by watching Scene view (not just Game view) for VFX firing on off-screen/standby rooms.
-- [ ] **Audio timing:** Often "works" in normal-speed testing but not verified during an actual slow-mo hold + hit-freeze + dash sequence — verify by deliberately triggering SFX while slow-mo/hit-freeze is active and confirming no fade/coroutine desyncs (`Time.deltaTime` leaks).
-- [ ] **FloorTimer × boss room:** Often not tested end-to-end with a long boss fight (dev testers might beat the boss quickly, hiding the interaction) — verify by deliberately taking 60+ real seconds inside the boss room and confirming the intended timer behavior, not an accidental death.
-- [ ] **WorldGenerator recycle vs. boss room:** Often not tested with player movement patterns that push `_playerCurrentIndex` outside the lookbehind/lookahead window mid-fight (e.g. deliberately backing away from the boss room entrance and re-entering) — verify the boss room is never `Destroy()`-ed while a boss encounter is unresolved.
-- [ ] **Multiple simultaneous SFX:** Often only tested against a single enemy — verify against a full room (max `GetEnemyCount`, floor 11+: 2 melee + up to 3 ranged) killed in rapid succession without audible clipping/distortion.
+- [ ] **New boss pattern FSM:** Often missing a check against slowmo/HitFreeze interaction — verify by holding Attack (entering slowmo) while the boss is mid-pattern, and by landing a kill on a *different* enemy (triggering `HitFreeze`, `Time.timeScale=0`) while the new boss's timer is running.
+- [ ] **Module swap (Boss Rush):** Often missing teardown of the *outgoing* module's spawned sub-objects/timeScale/gauge — verify by swapping away from each module mid-slowmo, mid-dash-coroutine, and (for NOVA) while its drone is alive.
+- [ ] **New boss room:** Often missing verification that the room survives while the player's chain index would normally trigger `RemoveTail()`/`RemoveHead()` — verify by deliberately stalling combat (or triggering MAX's forward-momentum) long enough that a normal room would already have been cleaned up.
+- [ ] **Boss-unlock persistence:** Often missing an explicit test of the *reset boundary* — verify unlocked modules survive a full death→restart cycle, and separately verify whether they are (or are not) expected to survive an app close/reopen, matching the explicit scope decision made for Pitfall 6.
+- [ ] **Touch input for any new directional/aim mechanic:** Often only tested with Editor mouse — verify on an actual Android build/device, not just Play-mode-in-Editor with a mouse simulating touch.
 
 ## Recovery Strategies
 
 | Pitfall | Recovery Cost | Recovery Steps |
-|---------|-----------------|------------------|
-| Boss trivialized by naive one-shot `IEnemy` (Pitfall 3) | MEDIUM | Introduce a vulnerability flag and gate targetability/`OnDashHit()` on it; requires revisiting the attack-pattern coroutine to insert vulnerability windows, but doesn't require touching `CombatController` itself |
-| Regular enemies leaking into boss room (Pitfall 1) | LOW | Strip `EnemySpawner` children from the boss prefab and/or add the type-check gate in `TrySpawnEnemies`; no runtime state migration needed, this is prefab/authoring hygiene |
-| WorldGenerator destroying boss room mid-fight (Pitfall 2) | MEDIUM | Add the `_bossEncounterActive` guard to `Update()`'s trim loops; requires careful testing of chain invariants (`_playerCurrentIndex` math) to ensure skipping a trim doesn't desync lookahead/lookbehind counts once the guard lifts |
-| FloorTimer killing player mid-boss-fight (Pitfall 4) | LOW | Add `Pause()`/`Resume()` to `FloorTimer` (small additive static-class change); wire calls at boss-room-entered/boss-defeated hooks |
-| Spawn VFX firing off-screen/twice (Pitfall 6) | LOW | Move the trigger call from `Awake()`/`OnEnable()` into `EnemySpawner.Activate()`; delete the erroneous early call site |
-| Audio desyncing during slow-mo (Pitfall 8) | LOW-MEDIUM | Replace `Time.deltaTime`/`WaitForSeconds` with unscaled equivalents in affected audio coroutines; low cost if caught early, medium if many call sites already copied the wrong pattern |
-| SFX clipping/GC churn under rapid kills (Pitfall 9) | MEDIUM | Retrofit an `AudioSource` pool behind existing "play SFX" call sites; requires touching every call site that currently does `Instantiate`-per-event, but the pool itself is a small, self-contained addition |
-
-## Phase-Specific Warnings
-
-| Phase Topic | Likely Pitfall | Mitigation |
-|-------------|----------------|------------|
-| Boss room core/gating (room type, activation, lifecycle) | Regular enemies leak in (P1); WorldGenerator destroys boss room mid-fight (P2); FloorTimer kills player mid-fight (P4); boss activates before player enters (P5) | Strip `EnemySpawner` from boss prefab + explicit type gate; freeze chain trimming during encounter; pause/extend `FloorTimer`; entry-triggered activation mirroring `ExitPortal` |
-| Boss AI/pattern design | Naive one-shot `IEnemy` trivializes the fight (P3) | Vulnerability-window gating on targetability, not a rewrite of `IEnemy`/`CombatController` |
-| Spawn VFX (enemy spawn-in) | VFX fires in Awake/OnEnable — off-screen/double-fire (P6); enemy lethal/detectable before VFX completes or vice versa (P7) | Wire VFX trigger into `EnemySpawner.Activate()` only; add a `SpawningIn` FSM state gating detection/targetability until VFX completes |
-| Audio system (first-ever) | `Time.deltaTime`-based audio desyncs during slow-mo/hit-freeze (P8); rapid-kill SFX clipping/GC churn (P9) | Enforce `Time.unscaledDeltaTime`/`WaitForSecondsRealtime` convention from day one; build a pooled `AudioManager` before wiring individual SFX call sites |
+|---------|----------------|------------------|
+| Pitfall 1 (timeScale convention violated) | LOW | Mechanical find-replace of `Time.deltaTime`→`Time.unscaledDeltaTime` and `WaitForSeconds`→`WaitForSecondsRealtime` in the offending script, since the pattern is already well-established elsewhere in the codebase to copy from |
+| Pitfall 2 (4x boss duplication drift) | MEDIUM | Retroactive extraction of a shared boss base after the fact — larger diff than doing it upfront, but mechanical (diff the 4-5 boss files to find the true common subset, same methodology already used for `EnemyBase`'s Phase 16 extraction) |
+| Pitfall 3 (module-swap state leak) | MEDIUM-HIGH | Requires designing the missing abstraction after multiple modules already exist as branches — higher cost than doing it first, since existing branch-based code has to be refactored into the new module interface rather than written against it originally |
+| Pitfall 4 (boss room destroyed mid-fight) | HIGH | Requires resolving the deferred Phase 16 spawn-architecture decision under pressure (post-bug-report) rather than as planned design work; may require reworking however many boss rooms were already wired into the un-exempted flow |
+| Pitfall 5 (mouse-only input) | MEDIUM | Input abstraction swap (`Mouse.current`→`Pointer`/`Touchscreen`-aware) is localized to `CombatController.GetMouseWorldDirection()` plus whatever new aim code was added per-module — contained if caught before many modules copy the same mouse-only pattern |
+| Pitfall 6 (persistence scoping wrong) | LOW-MEDIUM | Migrating from wrong-scope storage (e.g., session-only static) to correct-scope storage (`PlayerPrefs`) is a small, isolated change if the unlock API (`BossUnlockManager.Unlock/IsUnlocked`) was designed as a clean seam from the start — costly only if unlock checks were scattered ad hoc across many call sites instead |
 
 ## Pitfall-to-Phase Mapping
 
 | Pitfall | Prevention Phase | Verification |
-|---------|--------------------|-----------------|
-| 1. Regular enemies leak into boss room | Boss Room Core/Gating phase | Boss room prefab has zero `EnemySpawner` children; a deliberately-reintroduced test `EnemySpawner` is still skipped by code, not just absent |
-| 2. WorldGenerator destroys boss room mid-fight | Boss Room Core/Gating phase | Move the player back-and-forth across the lookbehind/lookahead boundary while the boss encounter is unresolved; boss room and boss state must survive |
-| 3. Boss trivialized by naive one-shot kill | Boss AI/Pattern Design phase | A dash outside the telegraphed vulnerability window does not kill the boss; a dash inside the window does |
-| 4. FloorTimer kills player mid-fight | Boss Room Core/Gating phase | Spend 60+ real seconds inside the boss room without triggering the countdown death (unless "boss room grants extension" was the explicit decision, in which case verify that instead) |
-| 5. Boss activates before player enters room | Boss Room Core/Gating phase | Watch Scene view while the boss room is lookahead-only (player hasn't reached it) — boss must be inert until an entry trigger fires |
-| 6. Spawn VFX fires in Awake/OnEnable (off-screen/double-fire) | Spawn VFX phase | Watch Scene view during standby-room pre-instantiation (`TrySpawnExitPortal`) and lookahead generation (`SpawnNextPair`) — VFX must not fire until `Activate()` is called on an on-screen-relevant enemy |
-| 7. Enemy lethal/detectable before spawn VFX completes | Spawn VFX phase | During the VFX window, the enemy must not appear in `CombatController.FindNearestEnemyInRange()` results and must not damage the player; confirm the moment gameplay-active starts relative to VFX end is an explicit, tested decision |
-| 8. Audio breaks during slow-mo/hit-freeze | Audio System phase | Trigger a fading/sequenced SFX, then immediately enter slow-mo and hit-freeze mid-playback — fade timing must track real time, not scaled time |
-| 9. Rapid-kill SFX clipping/GC churn | Audio System phase | Profile (or at minimum audibly test) a full room's worth of enemies (floor 11+ max count) killed in quick succession; no distortion, no GC spike correlated with kill events |
+|---------|--------------------|----------------|
+| 1. TimeScale convention violation in new boss/module timers | Each new boss's pattern-FSM implementation phase | Explicit playtest step: trigger boss pattern while holding Attack / during a HitFreeze from killing another enemy; grep new files for `Time.deltaTime`/`WaitForSeconds(` |
+| 2. Non-inherited boss duplication drift | Dedicated "shared boss infrastructure" phase (or Task 0 of the first new-boss phase), before boss #2 | Diff the resulting boss files — shared plumbing (spawn-gate, death sequence, player-death cleanup) should be structurally identical/inherited, not copy-pasted with renames |
+| 3. Mid-combat module-swap state leaks | "Module abstraction" phase preceding the first non-F.I.O.R.A-shaped boss mechanic; leak-specific testing in the 보스 러시 game-mode phase | Swap through every module pairing mid-slowmo, mid-dash-coroutine, and with NOVA's drone alive; confirm `Time.timeScale`, gauge/resource UI, and spawned sub-objects are all correctly torn down each time |
+| 4. Boss-room WorldGenerator cleanup exception missing | Its own explicit design+implementation step, before/alongside the first production (non-test-hack) boss room | Deliberately stall a boss fight (or use MAX's forward momentum) past the point a normal room would be `Destroy()`-ed; confirm the boss room and its shared-boss-base instance survive until combat resolves |
+| 5. Mouse-only aim / missing touch bindings | Shared input-infrastructure phase, early in the milestone, alongside Pitfall 3's abstraction work | Run on an actual Android build/device (not just Editor mouse) for at least one aim-dependent new mechanic and basic movement |
+| 6. Unscoped death/restart persistence | Its own small early phase, before the first boss whose defeat grants an unlock | Full death→restart cycle confirms unlocked modules survive; explicit written decision on app-restart-scope is confirmed against actual behavior |
 
 ## Sources
 
-- Direct source reading (HIGH confidence, this codebase): `Assets/Scripts/World/WorldGenerator.cs`, `Assets/Scripts/World/ExitPortal.cs`, `Assets/Scripts/World/EnemySpawner.cs`, `Assets/Scripts/World/FloorTimer.cs`, `Assets/Scripts/World/FloorManager.cs`, `Assets/Scripts/World/RoomConnector.cs`, `Assets/Scripts/World/FloorTransitionEffect.cs`, `Assets/Scripts/Room/RoomClearCondition.cs`, `Assets/Scripts/Player/CombatController.cs`, `Assets/Scripts/Player/InvincibilityHandler.cs`, `Assets/Scripts/Enemy/MeleeEnemy.cs`, `Assets/Scripts/Enemy/RangedEnemy.cs`, `Assets/Scripts/Enemy/EnemyDeathEffect.cs`, `Assets/Scripts/Enemy/IEnemy.cs`, `Assets/Scripts/Camera/CameraFollow.cs`, `Assets/Scripts/World/GameBootstrapper.cs`, `.planning/PROJECT.md`
-- [PlayOneShot Performance — Unity Discussions](https://discussions.unity.com/t/playoneshot-performance/595405) — MEDIUM confidence, community discussion on voice-count/pooling
-- [10 Unity Audio Optimisation Tips — Game Dev Beginner](https://gamedevbeginner.com/unity-audio-optimisation-tips/) — MEDIUM confidence, mobile pooling/GC guidance
-- [How to fix the audio when using Time.TimeScale? — Unity Discussions](https://discussions.unity.com/t/how-to-fix-the-audio-when-using-time-timescale/843414) — MEDIUM confidence, confirms `AudioSource.pitch` is not auto-linked to `Time.timeScale`
-- [Adjust audio playback rate with Time.timeScale — Unity Discussions](https://discussions.unity.com/t/adjust-audio-playback-rate-with-time-timescale/40379) — MEDIUM confidence, corroborates manual pitch-scaling pattern
-- [I am getting a lot of sound latency when developing my game for Android — Unity Support](https://support.unity.com/hc/en-us/articles/206116316) — MEDIUM confidence, Android audio latency baseline (200-300ms) and DSP buffer trade-offs
-- [70 Tips for Better Boss Battles — M.T. Black Games](https://www.mtblackgames.com/blog/65-tips-for-better-boss-battles) — MEDIUM confidence, general boss-design telegraphing guidance
-- [What are your thoughts on insta-kill attacks? — NeoGAF](https://www.neogaf.com/threads/what-are-your-thoughts-on-insta-kill-attacks.1419454/) — LOW-MEDIUM confidence, community discussion; cited for the Titan Souls one-hit-kill-both-ways precedent as design grounding for Pitfall 3
+- Direct source inspection (HIGH confidence, primary evidence for every pitfall above): `Assets/Scripts/Enemy/BossEnemy.cs`, `Assets/Scripts/Enemy/EnemyBase.cs`, `Assets/Scripts/Player/CombatController.cs`, `Assets/Scripts/Player/InputManager.cs`, `Assets/Scripts/Player/RollController.cs`, `Assets/Scripts/Player/InvincibilityHandler.cs`, `Assets/Scripts/Player/ChronoGaugeController.cs`, `Assets/Scripts/Player/PlayerController.cs`, `Assets/Scripts/Player/PlayerDeathHandler.cs`, `Assets/Scripts/World/WorldGenerator.cs`, `Assets/Scripts/World/FloorManager.cs`, `Assets/Scripts/World/ScoreManager.cs`, `Assets/Scripts/World/EnemySpawner.cs`, `Assets/Scripts/Room/RoomClearCondition.cs`, `Assets/Scripts/UI/DeathScreenController.cs`, `Assets/Scripts/UI/AttackSelectController.cs`, `Assets/Scripts/UI/AttackTypeSelector.cs`, `Assets/InputSystem_Actions.inputactions`
+- Project planning docs (HIGH confidence, primary evidence): `.planning/PROJECT.md`, `.planning/phases/16-boss-room-lifecycle/16-CONTEXT.md`, `.planning/phases/16-boss-room-lifecycle/16-DISCUSSION-LOG.md`, `.planning/phases/15-fsm/15-06-PLAN.md`, `STORY.md`
+- No external/Context7/WebSearch sources were needed or used — every pitfall here is specific to this codebase's actual current implementation, not generic Unity/mobile-game domain knowledge.
 
 ---
-*Pitfalls research for: Fast (가칭) v3.1 — 보스 룸 콘텐츠 + 연출 고도화(사운드/타이밍/신규 스폰 VFX)*
-*Researched: 2026-07-08*
+*Pitfalls research for: Fast v4.0 (보스 캐릭터 확장 & 게임 모드)*
+*Researched: 2026-07-20*

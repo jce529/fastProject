@@ -1,160 +1,288 @@
 # Feature Research
 
-**Domain:** 2D action platformer / roguelite climber — boss encounter design + spawn VFX + audio polish
-**Researched:** 2026-07-08
-**Confidence:** MEDIUM (genre conventions well-documented via Dead Cells/Rogue Legacy/Downwell-style references; specifics verified only via WebSearch, not Context7/official docs — no official "boss design spec" exists for this genre)
+**Domain:** Mobile 2D action platformer — 4 new boss mechanics, meta-progression unlock, 2 game modes (v4.0 milestone)
+**Researched:** 2026-07-20
+**Confidence:** MEDIUM (genre-pattern analysis from established action-game design conventions, cross-checked against current codebase; no single canonical "mobile dual-control boss" source exists to verify against, so mechanic-specific risk calls are flagged LOW where noted)
+
+## Context Established From Codebase
+
+Before the mechanic-by-mechanic breakdown, four load-bearing facts from the existing code shape every recommendation below:
+
+1. **`CombatController.cs` is a single monolithic control scheme** — hold Attack = slow-mo, release = dash-teleport-kill nearest target in a Linear/Fan shape selected via the static `AttackTypeSelector`. There is no existing concept of "swappable attack modules." Aim direction is currently derived from **`Mouse.current`** (`GetMouseWorldDirection()`), a desktop-only input — this is a pre-existing gap, not new to v4.0, but every new mechanic that needs an aim/steer direction (DeadEye, NOVA, arguably MAX) will expose it harder than Linear/Fan ever did on a touch device.
+2. **`BossEnemy.cs` does not inherit `EnemyBase`** — it is a standalone `MonoBehaviour` implementing `IEnemy`/`ISpawnGatable` directly, with its own Telegraph→Attack→Vulnerable FSM and its own `IsAlive` semantic override (`IsAlive` means "targetable," not "alive" — a real `_isDefeated` flag tracks death). This is the reusable pattern for new bosses' base contract, but the Telegraph→Attack→Vulnerable *loop* itself does not fit SAMURAI (no vulnerable window, pure parry timing), MAX (no telegraph, continuous careening), or NOVA (two independently-acting bodies) — each new boss needs a **parallel FSM**, not a subclass extension.
+3. **No persistence layer exists anywhere in the codebase.** `ScoreManager`, `AttackTypeSelector`, `FloorManager` are all static in-memory classes reset on scene reload. Meta-progression (unlock persisting across runs/deaths) is **100% new infrastructure**.
+4. **SAMURAI explicitly drops slow-mo** and MAX explicitly replaces normal movement with momentum-as-attack — both mean the "module" a player equips is not a variant of `CombatController`, it is a **full alternate control scheme that must suppress/replace `CombatController`'s hold-release loop while active**. This reframes "4 mechanics + 2 modes" as building 4 near-independent control schemes plus a runtime module-swap orchestrator — the single largest architectural undertaking implied by the design doc.
+
+---
 
 ## Feature Landscape
 
-### Table Stakes (Users Expect These)
+### DeadEye — Revolver / Reload-Economy Combat
 
-Features players assume exist once a "boss room" is announced. Missing these makes the boss feel like a reskinned regular enemy, not a boss.
+Genre precedent: resource-scarcity gunplay (Resident Evil-style ammo tension, Enter the Gungeon's reload-as-tempo-break), aim-then-fire fan weapons already partially precedented by the existing Fan attack type.
 
 | Feature | Why Expected | Complexity | Notes |
 |---------|--------------|------------|-------|
-| Telegraphed attacks (clear visual/audio cue before each attack lands) | Genre standard (Dead Cells: attacks show a red line/wind-up before executing) — players expect to react, not guess | LOW-MEDIUM | Fast already does this for regular enemies (melee wind-up animation, ranged aim line). Boss needs the same discipline, just with a more distinct/exaggerated tell since stakes are higher. |
-| Dedicated arena / solo fight (no regular enemies mixed in) | Already specified as a milestone requirement; also genre-standard — mixing trash mobs into a boss fight muddies readability | LOW-MEDIUM | Requires a boss-specific room prefab distinct from the 6 Complex_Room variants; must guarantee no other Spawner_* points activate in that room. |
-| Clear defeat feedback (visual + audio + score payoff) | Boss kill needs to feel more significant than a regular one-shot kill, or the "boss" label is meaningless | LOW | Reuse existing enemy death particle/fade pattern, extend with a bigger flourish (longer particle burst, camera shake, distinct SFX) + ScoreManager bonus. |
-| Readable "danger state" vs "opening state" | Players must be able to tell when the boss is attacking (avoid) vs vulnerable (attack) — core to any boss loop | MEDIUM | This is the load-bearing design decision for this milestone — see Dependency Notes below for how it interacts with the game's one-shot-kill rule. |
-| Boss doesn't ambush the player | Player needs at least a beat of warning before the fight starts (entering room != instant attack) | LOW | Satisfied by the spawn-in VFX itself if it has any wind-up (portal appears, then boss emerges) — see spawn VFX section. |
-
-### Differentiators (Competitive Advantage)
-
-Features that make the FIRST boss room memorable without adding disproportionate scope.
+| Visible ammo counter (6-round) | Any resource-gated weapon is unreadable without a persistent count — players must always know "can I fire?" | LOW | New HUD element, similar scope to existing gauge UI in `HUDController` |
+| Reload state feedback (auto 1/round/sec, 3s full from empty) | Silent reload = player confusion about why attack didn't fire | LOW-MEDIUM | Needs its own timer component (`AmmoController`), unscaled-time based like `ChronoGaugeController`/roll cooldown to stay immune to slow-mo timeScale |
+| Empty-fire feedback (dry-fire cue, no silent fail) | Universal resource-system table stakes — silent failure reads as a bug | LOW | Reuse `AudioManager` SFX pattern |
+| Boss: 6 tracking reticles with a fire delay | Mirrors the player's own ammo count thematically — matches genre convention of "boss uses the mechanic it's about to teach you" | MEDIUM | Reuses BossEnemy's Telegraph-then-Attack shape conceptually but Attack phase spawns/tracks N independent markers instead of one hitbox |
 
 | Feature | Value Proposition | Complexity | Notes |
 |---------|-------------------|------------|-------|
-| Invulnerable-except-during-opening pattern (boss attacks in a way that covers most of the arena, then exposes a brief one-shot-killable window) | Preserves the game's core one-shot-kill value (both directions) instead of bolting on an HP bar — makes the boss "hard to reach" rather than "hard to kill," which is a natural extension of the existing dash-kill mechanic | MEDIUM | Recommended approach — see Dependency Notes. Reuses the existing "closest enemy in range" dash-target logic; the opening is just a timing gate on when the boss becomes targetable. |
-| Boss intro beat (brief camera pan/zoom or pause on room entry before the fight starts) | Signals "this is different" without dialogue/cutscene overhead; matches existing polish level (camera shake, portal SpriteMask reveal already exist) | LOW-MEDIUM | Can piggyback on the existing FloorTransitionEffect/camera-lock pattern used for portal transitions — same toolkit, new trigger. |
-| Distinct boss spawn stinger (2-3 second audio+visual flourish, not full music) | Cheap way to make the boss feel like an "event" without a music system | LOW | A single one-shot SFX + the spawn VFX (see below) covers this; no adaptive music needed. |
-| Unique arena silhouette/layout (not just a reskinned Complex_Room) | Reinforces "this room is special" spatially, reduces reliance on UI/text to signal boss presence | MEDIUM-HIGH | Milestone already requires a dedicated arena; complexity is in tilemap/prefab authoring, not code. |
-
-### Anti-Features (Commonly Requested, Often Problematic)
-
-Features that look like standard "boss fight" requirements but conflict with this project's scope or core value.
+| Reload-timing risk decisions (push with rounds left vs. retreat-reload) | Creates a resource-tension decision loop genuinely distinct from Overclock's auto-regen gauge | MEDIUM | Only a differentiator if reload cost is tuned to bite — see pitfall below |
+| Weave-between-reticles boss pattern | Direct "read the pattern, don't get hit" skill test distinct from BossEnemy's existing single-hitbox dodge | MEDIUM | Six independently-tracking reticles is more dodge-pattern complexity than the current single-boss telegraph |
 
 | Feature | Why Requested | Why Problematic | Alternative |
 |---------|---------------|------------------|-------------|
-| Multi-hit boss with HP bar | Nearly every action-game boss reference (Dead Cells, Rogue Legacy) uses HP bars and damage-over-time fights | Directly conflicts with the validated core rule "원샷원킬 (플레이어·적 모두)" — introducing a damage/health system for one enemy type means building a parallel combat model (HP tracking, damage numbers, hit-reduction UI) that doesn't exist anywhere else in the codebase, for a single fight. High cost, validates a different mechanic than the one this prototype exists to test. | Invulnerable-except-during-opening pattern (see Differentiators) — boss is still one-shot-killable, just gated by timing instead of HP. |
-| Multi-phase fights (attack set changes at HP thresholds) | Standard in Dead Cells/Rogue Legacy-style bosses to keep long fights fresh | Requires the HP system above as a prerequisite (phases are usually triggered by HP%), plus extra animation/attack authoring for a single fight in a prototype milestone explicitly scoped to "1 boss type" | Single continuous attack-pattern loop (e.g. cycle through 2-3 telegraphed attacks) is enough to validate the boss-room concept; save phase transitions for a future milestone once the base loop is proven fun. |
-| Adaptive/dynamic music system (intensity layers, boss theme swapping in/out) | "Games have boss music" is a strong genre expectation | No music system exists in the codebase at all today (confirmed: zero audio currently implemented) — building an adaptive music layer before even having basic SFX is solving a problem two steps ahead of where the project is | Short audio stinger on boss spawn + existing ambient (if any); defer full music to a dedicated audio milestone. |
-| Full boss roster / boss variety this milestone | "Why build a boss framework for just one boss?" | Milestone explicitly scopes to 1 boss type; over-building the framework (e.g. data-driven attack-pattern authoring tools) before a second boss exists to validate the abstraction risks guessing wrong about what needs to be generic | Build the one boss with a lightweight FSM (same pattern as existing MeleeEnemy/RangedEnemy), but keep boss-specific logic in its own script/prefab rather than forcing a generic "BossBase" abstraction prematurely — extract shared code only once a second boss is actually being built. |
-| Boss dialogue / voice lines / name-card cutscene | Common in narrative-driven boss intros | Adds VO/localization/UI scope with no connection to validating the core combat feel (the 6 prototype validation goals in PROJECT.md are all about combat feel, not narrative) | Visual-only intro beat (camera + spawn VFX + stinger SFX) carries the "this is a boss" signal without dialogue systems. |
-| Frame-perfect hit-stop/combo timing systems | Common "juice" advice for action games | This game has no combo system (one dash-kill per engagement, explicitly out of scope: "콤보 시스템... 핵심 검증과 무관") — a combo-oriented hit-stop economy is solving for a mechanic that doesn't exist here | Simple, fixed-duration hit-stop (a few frames) synced to a single hit-impact SFX on both regular hits and boss hits — already partially implied by existing HitSparkBuilder/camera shake, just needs an audio hook. |
+| Ammo mechanic without keeping slow-mo aim | Feels "more like a real gun" | Removing slow-mo here (unlike SAMURAI, which explicitly drops it) is not specified in the design doc and would fragment the Core Value across 3 of 4 modules instead of 1 — undermines the "hold=slowmo" hypothesis this whole game exists to test | Keep DeadEye's hold=slow-mo/aim, release=fire; gate only the **release** action by ammo count, matching the design doc's framing as a variant on the existing philosophy, not a replacement of it |
+| Manual/skill-based reload (mash button, timed reload bar) | Adds "depth" | Not specified in design doc (1/sec auto is explicit); a timed-reload minigame is scope creep for a prototype validating whether resource-gating itself is fun | Ship the flat auto-reload rates as specified; only consider a skill-reload layer post-validation |
+
+**Dependencies on existing systems:** `CombatController` (needs a parallel/alternate branch or a fully separate `DeadEyeCombatController` that reuses its slow-mo/highlight/dash-kill skeleton but gates fire by ammo), `ChronoGaugeController` (co-exists, not replaced), `IEnemy`/`BossEnemy` pattern-loop shape (reused for the reticle-fire phase), `HUDController` (new ammo UI element), `AudioManager` (dry-fire/reload SFX).
+
+---
+
+### SAMURAI — Parry / No-Slowmo Tutorial Boss
+
+Genre precedent: Sekiro-style posture/parry timing, Cuphead's timed parry bounce, Punch-Out!!-style pattern-read-and-react — and, per PROJECT.md's own note, this is explicitly the game's **first unlock/tutorial** and the mechanism by which parrying (previously Out of Scope for the whole project) enters scope at all.
+
+| Feature | Why Expected | Complexity | Notes |
+|---------|--------------|------------|-------|
+| High-contrast, unambiguous parry telegraph | "Wrong input = instant death" demands the fairest possible read — any subtlety here reads as unfair rather than skillful | LOW-MEDIUM | Visual + audio double-signal, same "redundant signaling" pattern BossEnemy already uses (color tint + stop) |
+| Generous parry window tuned for touchscreens | Precision-timing mechanics are latency-sensitive; touch input has materially worse precision/latency than mouse/controller | MEDIUM | See pitfall below — this is the single most important tuning flag for this mechanic |
+| Distinct input from existing Attack/Roll gestures | Player must not confuse "parry" with "dash-teleport-kill" or "dodge-roll" muscle memory already trained by the base game | LOW-MEDIUM | Input-mapping decision needed: reuse Roll button contextually, or introduce a dedicated Parry input — flag as open design question |
+| Clear success (counter opening) vs. failure (death) feedback | Since failure is lethal, ambiguity between "did I parry or not" is the single fastest way to make this feel cheap | LOW | Reuse existing hit-flash/death patterns already in the codebase |
+
+| Feature | Value Proposition | Complexity | Notes |
+|---------|-------------------|------------|-------|
+| Counter-hit window on successful parry | Rewards precision generously — teaches "parry is worth it," critical for a tutorial-positioned boss | LOW-MEDIUM | Simplest version: successful parry = enemy enters BossEnemy-style Vulnerable state briefly |
+| SAMURAI as the philosophical anchor for "reflex over resource" | Differentiates cleanly against DeadEye (resource), MAX (momentum), NOVA (multitasking) — four genuinely distinct combat philosophies is the differentiator across the whole roster, not any one boss alone | N/A | Design framing only, no extra implementation cost |
+
+| Feature | Why Requested | Why Problematic | Alternative |
+|---------|---------------|------------------|-------------|
+| Frame-perfect / sub-150ms parry windows (genre-authentic "hardcore" timing) | Feels more "Sekiro-authentic," more skill-expressive | Touch input adds real latency and imprecision on top of the coded window (targeting tasks measurably degrade at latencies as low as ~41ms per UX research); a PC-tight parry window ported verbatim to touch will read as broken/unfair, not as a skill mechanic, and will contaminate "is parry fun" validation with "is touch laggy" noise | Widen the window generously (400-600ms class, tune in playtest) and treat window width as an explicit exposed tunable, the same way `CombatController`/`RollController` already expose timing values as `[SerializeField]` fields |
+| Mixed parry-only + normal-dodge-required attacks in the same fight | More "authentic" boss variety | Doubles the FSM surface (two attack categories with two different correct-response rules) for the *tutorial* boss, which should have the lowest cognitive load of the four — risks muddying the very first lesson the game teaches | MVP: make every SAMURAI attack parry-gated (uniform rule, one thing to learn); defer attack variety to post-validation if the core parry loop proves fun |
+
+**Dependencies on existing systems:** New parallel FSM (does **not** reuse `BossEnemy`'s Telegraph→Attack→Vulnerable loop structure — parry timing is a different shape entirely); must actively **suppress** `CombatController`'s hold=slow-mo behavior while this module/arena is active (no existing "disable combat controller" toggle exists beyond `ForceExitCombatState()`, which is a one-shot reset, not a suppression flag — new state needed); `PlayerController.TriggerDeath()` reused as-is for the instant-death path; explicitly **no** dependency on `ChronoGaugeController` — this mechanic actually *reduces* dependency surface versus the other three, which is a genuine argument for building it first.
+
+---
+
+### MAX — Movement-Is-Attack, Unstoppable Momentum
+
+Genre precedent: the boss-side pattern (lure an unstoppable foe into a wall for a stun window) is a well-worn trope (Dark Souls' Taurus Demon-style environmental-bait bosses, classic Zelda "ram the boss into a pillar" fights) and is low-risk to implement. The **player-side** mechanic (an unstoppable, wall-lethal momentum kit as a reward ability) has few clean 1:1 genre precedents — closest analogues are momentum/skate-physics runners and "constant-motion, no braking" arcade movement, not a commonly-shipped melee-combat verb. Flag this honestly as the least-precedented of the four, which raises (not lowers) its validation importance.
+
+| Feature | Why Expected | Complexity | Notes |
+|---------|--------------|------------|-------|
+| Readable "unstoppable" feedback (speed trail, escalating camera shake/FOV cues) | Player must instantly understand "I cannot stop" or every wall death will feel like a bug, not a consequence | LOW-MEDIUM | Reuses `TrailRenderer`/`CameraFollow.Shake` patterns already wired into `CombatController` |
+| Unambiguous collision rules (wall = death, enemy = kill, hazard tags consistent) | Inconsistent collision consequences is the fastest way to make a risk/reward mechanic feel arbitrary rather than exciting | LOW-MEDIUM | Needs clean tagging/layer discipline, not new tech |
+| Boss: careen-into-wall stun window | Direct genre-standard "environmental bait" pattern, well understood, safe to implement | MEDIUM | Reuses BossEnemy's velocity-based Telegraph movement conceptually; the stun window is a variant of the existing Vulnerable-state concept |
+
+| Feature | Value Proposition | Complexity | Notes |
+|---------|-------------------|------------|-------|
+| High risk/reward tension (weapon = grenade) | Sharpest possible contrast against DeadEye/SAMURAI/NOVA's philosophies — good differentiation axis for the module roster as a whole | N/A | Design framing, contingent on tuning quality below |
+| Player agency in steering an "unstoppable" body | Distinct control fantasy from anything else in the game (including the existing core Overclock dash, which is a single teleport, not sustained travel) | MEDIUM-HIGH | See pitfalls — this is the actual implementation risk |
+
+| Feature | Why Requested | Why Problematic | Alternative |
+|---------|---------------|------------------|-------------|
+| Full physics-simulated momentum (acceleration curves, drift, wall bounce/ricochet angles) | "More authentic" momentum feel | Classic scope-creep bait for a prototype whose job is to validate *whether unstoppable momentum is fun*, not to ship a physics sandbox; also compounds the mobile-control-precision risk below | Kinematic constant-speed-with-steering model (`Rigidbody2D.MovePosition` along a steered direction at fixed speed) — same technique `BossEnemy`'s Telegraph phase already uses — is sufficient to test the hypothesis |
+| Zero-buffer instant death on any wall contact | "Pure" risk/reward, no assists | Touchscreen steering of a constantly-moving, instant-death-on-touch object is one of the hardest control schemes to make feel fair on mobile (touch has materially more input imprecision/latency than a mouse or d-pad); a zero-buffer version risks reading as "the controls are bad" rather than "the risk is real," polluting the validation signal | Add a small forgiving grace/buffer window before lethal collision registers, exposed as a tunable (same pattern as `RollController.iFrameDuration`), tune in playtest |
+
+**Dependencies on existing systems:** Needs a new movement-override component (conceptually a `MomentumController` sibling to `PlayerController`/`RollController`) that supersedes normal WASD movement and disables `CombatController`'s dash logic while MAX's module is active; interaction with `RollController`'s i-frames while MAX is active is an **open design question** (does Roll still exist under MAX? flag for planning, don't assume); reuses `CameraFollow.Shake`; new `MaxBoss` FSM reusing BossEnemy's velocity-driven-movement idiom but replacing Telegraph/Attack/Vulnerable with careen/wall-stun states. **Mobile-prototype flag:** this is, alongside NOVA, the highest technical-risk mechanic for a touchscreen build — recommend it not be built first, and recommend the kinematic/buffered version described above be treated as the actual MVP spec rather than the "pure" unstoppable/zero-buffer version implied by the design doc's wording.
+
+---
+
+### NOVA — Dual Independent Control (Body + Drone)
+
+Genre precedent: R-Type's detachable "Force" pod (closest classic analogue — a companion device that can separate from and rejoin the main unit) is the cleanest precedent for a body+companion split; true simultaneous dual-analog control of two independently-moving bodies (à la *Brothers: A Tale of Two Sons*, which is a puzzle-platformer, not action-combat) is rare specifically in **combat** contexts because it collides with mobile's fundamental thumb-budget problem.
+
+| Feature | Why Expected | Complexity | Notes |
+|---------|--------------|------------|-------|
+| Clear "which entity is active" indicator | With two controllable/relevant bodies on screen, ambiguity about who's currently being steered is an immediate usability failure | LOW | Highlight/tint, same idiom as existing enemy-target highlight in `CombatController.UpdateHighlight()` |
+| Independent hitboxes for body vs. drone | Design doc explicitly requires the player be able to choose "hit orb first or go straight for body" — both must be separately damageable | MEDIUM | Both likely need their own `IEnemy` implementation so `CombatController.FindNearestEnemyInRange()` can discriminate between them as distinct targets |
+| Boss: body evades + drone harasses concurrently | Core differentiator of the "separated-control/harassment" philosophy — both halves must feel like part of one coordinated foe | MEDIUM-HIGH | Two coordinated-but-independent behaviors running at once; more moving FSM parts than any of the other 3 bosses |
+
+| Feature | Value Proposition | Complexity | Notes |
+|---------|-------------------|------------|-------|
+| Genuinely novel "manage two things at once" combat philosophy | Sharpest differentiation of the whole module roster — no other module asks the player to split attention across two simultaneously-relevant entities | N/A | Contingent entirely on the control-scheme resolution below |
+| Player-chosen engagement order (orb vs. body first) | Meaningful strategic choice at prototype scale without needing deep systems | LOW-MEDIUM | Emerges for free once both are independently damageable — no extra system needed beyond the hitbox split above |
+
+| Feature | Why Requested | Why Problematic | Alternative |
+|---------|---------------|------------------|-------------|
+| True simultaneous free-movement dual-stick control (body on one virtual stick, drone on another) + a separate attack button | "Faithful" to "dual independent control" as literally worded in the design doc | This is 3 concurrent touch zones on one mobile screen at once — widely regarded as a control-scheme foot-gun even in dedicated twin-stick-shooter mobile ports, which is why mobile MOBAs resolve "pet/summon" control via auto-follow + tap-command rather than true dual analog; attempting this as literally specified is the single highest control-scheme risk in the entire milestone | A **toggle/possession-swap** scheme — one input target is "active" (freely moved) at a time, the other holds position or runs simple auto-behavior, with a quick tap/button to swap control — validates the "manage two things" hypothesis without requiring 3-way simultaneous touch input. Treat this as the actual MVP; true simultaneous dual-stick is a stretch goal only if the toggle version proves the hypothesis and players want more |
+| Full pathfinding-quality evasion AI for the boss body | "Smarter" boss feels more challenging | Scope creep for a prototype — sophisticated evasion AI is a substantial systems investment unrelated to validating the core "dual control" hypothesis | Simple reactive flee-from-player heuristic, same complexity class as BossEnemy's existing directional Telegraph movement |
+| Fully autonomous independent AI companion behavior for the drone's "harass" pattern | Feels more alive/unpredictable | Inventing a new AI system from scratch when a much cheaper reuse exists | Reuse `RangedEnemy`'s aim-line telegraph pattern for the drone's lunge/attack cadence instead of building new AI |
+
+**Dependencies on existing systems:** `InputManager` needs a wholly new concept (possession/control-target swap) that doesn't exist today — mobile button budget is already tight (Move + Attack + Roll), so this input likely needs to reuse an existing button contextually rather than add a fourth persistent control; new drone `GameObject` with simplified (no-gravity) movement; both body and orb need `IEnemy` for `CombatController` targeting to discriminate; `CameraFollow` needs a leash-range cap on the drone to keep both entities on-screen on a mobile viewport — an explicit mobile-specific scope-limiter worth designing in from the start rather than discovering during playtesting.
+
+---
+
+## Meta-Progression (Boss Defeat → Module Unlock)
+
+| Feature | Why Expected | Complexity | Notes |
+|---------|--------------|------------|-------|
+| Persistent unlock storage across runs/app-restarts | Currently **nothing** persists in this codebase (`ScoreManager`/`AttackTypeSelector`/`FloorManager` are all in-memory statics) — this is baseline new infrastructure, not an enhancement | LOW | `PlayerPrefs` is sufficient and appropriate for a local prototype; do not build a JSON save file or backend |
+| Unlock notification + module-select screen | Player must clearly see "SAMURAI unlocked" and be able to pick it before a run | LOW-MEDIUM | Natural extension of the existing `AttackSelectController` scene, generalized from 2-way (Linear/Fan) to N-way module choice |
+| Unlock survives player death | Boss-defeat progress must be independent from a run's score/floor state, which already resets on death | LOW | As long as the unlock write happens at boss-death time (in each new boss's `Die()`, alongside the existing `ScoreManager.AddBossKillScore()` call pattern already established in `BossEnemy.cs`), this falls out naturally |
+
+| Feature | Value Proposition | Complexity | Notes |
+|---------|-------------------|------------|-------|
+| Narrative framing (HELIX "unlocking" F.A.S.T.'s modules) | Reinforces Core Value/story instead of reading as a bolted-on achievement system, at near-zero extra implementation cost | LOW | Copy/flavor-text only |
+
+| Feature | Why Requested | Why Problematic | Alternative |
+|---------|---------------|------------------|-------------|
+| Full loadout/inventory system (multiple modules equipped at once, upgrade tiers, currency shop) | "Feels more like a real progression system" | Explicitly banned by PROJECT.md Out of Scope ("복잡한 성장 시스템 — 레벨업, 영구 강화, 상점") | A flat boolean-per-module unlock array; no tiers, no shop |
+| Boss-order gating / prerequisite tree (must beat X before Y appears) | "More structured progression" | Design doc only specifies SAMURAI as first/tutorial; a full gating tree is unspecified scope creep requiring level-select UI | SAMURAI always available by default; the other 3 bosses unlock independently whenever encountered and defeated, in whatever order the floor RNG produces them |
+| Cloud save / cross-device sync | "Modern" expectation | Unnecessary infrastructure for a local Android prototype | `PlayerPrefs` on-device only |
+
+**Dependencies on existing systems:** New `PlayerPrefs`-backed unlock manager (net-new); each new `XBoss.Die()` must call it, following the exact pattern `BossEnemy.Die()` already uses for `ScoreManager.AddBossKillScore()`; `AttackSelectController`/its scene extended from a 2-choice to an N-choice, gated by which modules are unlocked.
+
+---
+
+## Game Mode 1: 한계 시험 (Limit Test)
+
+Genre precedent: single-loadout-per-run roguelike structure (Hades' single-weapon-per-run choice, Risk of Rain's single-survivor-per-run) — this maps almost directly onto the *existing* infinite floor-climb loop (`WorldGenerator`/`FloorTimer`/`ScoreManager`/death→restart), just with a module chosen instead of an attack-type at the start.
+
+| Feature | Why Expected | Complexity | Notes |
+|---------|--------------|------------|-------|
+| Module-select before run start | Direct reuse of the existing `AttackSelectController` pre-run screen | LOW | Natural fit — this mode requires the *least* new plumbing of anything in the milestone |
+| Score = HELIX evaluation metric | Reuses existing `ScoreManager` kill/clear/time-bonus scoring near verbatim | LOW | Framing/copy pass more than new logic |
+| Locked module for the whole run; death returns to module-select | Matches the existing death→`AttackSelect` flow already shipped | LOW | No new state machine needed |
+
+| Feature | Why Requested | Why Problematic | Alternative |
+|---------|---------------|------------------|-------------|
+| Mid-run relic/power-up drafts (Hades-style boons between floors) | "More roguelike" | Not specified in the design doc; explicit scope creep beyond PROJECT.md's Out of Scope ban on growth systems | None needed — "roguelike" here means infinite-climb + permadeath-into-restart, which v1.0-v3.0 already validated; the only new variable is which module is locked in |
+
+**Complexity:** LOW overall — the main integration risk is ensuring whichever module's control scheme runs cleanly through the existing room/corridor/EXIT-portal pipeline that was designed only around the base Overclock loop (e.g., MAX's uncontrollable momentum could clip through geometry or overshoot an EXIT portal it can't stop for in time — flag as an integration test specific to MAX, not a Limit Test mode problem in general).
+
+**Dependencies on existing systems:** `WorldGenerator`, `FloorTimer`, `ScoreManager`, `ExitPortal` (all reused as-is); `AttackSelectController` (extended); the meta-progression unlock manager (gates which modules are selectable).
+
+---
+
+## Game Mode 2: 보스 러시 (Boss Rush)
+
+Genre precedent: classic strip-everything-but-bosses structure (Mega Man boss-rush stages, Cuphead's boss-only campaign, Furi's whole-game structure) with an endless/looping variant (Nuclear Throne/Enter the Gungeon-style endless boss cycling) matching "no run limit."
+
+| Feature | Why Expected | Complexity | Notes |
+|---------|--------------|------------|-------|
+| Back-to-back boss gauntlet with no floor/corridor traversal | Definitional to the "boss rush" genre label | MEDIUM | A new, much simpler "boss arena only" scene flow that bypasses `WorldGenerator` entirely |
+| Free module switching mid-fight | The single differentiator that separates this mode from Limit Test | HIGH | Requires a runtime module-swap orchestrator that can cleanly enable/disable each module's control-scheme MonoBehaviours mid-encounter — the single largest net-new architecture piece in the whole milestone |
+| Looping/escalating difficulty, no fixed endpoint | Matches "no run limit, endless" | LOW-MEDIUM | Reuse the existing floor-based difficulty-scaling *philosophy* (`FloorManager.CurrentFloor`-driven scaling), applied per boss-lap instead of per-floor |
+
+| Feature | Why Requested | Why Problematic | Alternative |
+|---------|---------------|------------------|-------------|
+| True randomized boss order + weighted difficulty curve | "More replayable" | Overkill for a prototype validating "is boss rush fun" — randomization adds a tuning surface unrelated to the core hypothesis | Fixed repeating sequence (e.g., SAMURAI→DeadEye→MAX→NOVA→repeat with a minor per-lap difficulty bump); defer true randomization to post-validation |
+| Zero-cost, any-instant module switching | "Maximum flexibility" | Could let players cheese each mechanic's core tension (e.g., swap out of MAX right before a lethal wall hit) — trivializes the very tension each module exists to test | A minimal switch cooldown or a "can't switch during a vulnerable/committed window" rule — but avoid over-designing a complex ruleset upfront; treat exact restriction as a playtest-tuning question, not a system to build in one pass |
+
+**Complexity:** MEDIUM-HIGH — this mode inherits *all* the risk of the 4 individual mechanics, then adds runtime-swap-safety on top (stale coroutines/velocity/input-listeners from one module must be fully torn down before the next module's MonoBehaviours take over — conceptually similar to the cleanup `CombatController.ForceExitCombatState()` already performs for floor transitions, but that method is a one-shot reset, not built for hot-swapping between fundamentally different control schemes). **Sequencing flag:** Boss Rush should be built **last**, only after all 4 modules are independently stable in solo-boss-room testing (Limit Test / standalone testing) — attempting free-switching before each module is proven on its own is a dependency-ordering risk for the roadmap.
+
+**Dependencies on existing systems:** All 4 boss FSMs + all 4 modules (must exist first); a new lightweight boss-arena scene/prefab bypassing `WorldGenerator`; a module-swap UI affordance (mobile screen space is a real constraint — likely a small persistent HUD cycle-button); a new orchestrating layer that supersedes `CombatController`'s single-fixed-scheme assumption.
+
+---
 
 ## Feature Dependencies
 
 ```
-Boss Room Feature
-    |--requires--> Boss arena room prefab (new, dedicated layout, no regular enemy spawn points)
-    |--requires--> Boss enemy behavior (FSM extending existing MeleeEnemy/RangedEnemy pattern)
-    |--requires--> Probabilistic room-type spawn logic (extends ExitPortal/WorldGenerator pattern: chance-based, max 1 concurrent)
-    |--requires--> Enemy spawn-in VFX (shared with regular enemy spawn-in, see below)
-    `--enhances--> ScoreManager (adds a one-off bonus-scoring hook on boss defeat)
+SAMURAI module (no slow-mo, no dual-control, no momentum-physics, no ammo economy)
+    └── lowest dependency surface of the 4 — recommend building FIRST (also the design doc's own tutorial-first intent)
 
-Invulnerable-except-during-opening pattern (boss combat design)
-    `--requires--> Existing dash-target/closest-enemy-in-range logic (CombatController) -- extends it with a
-                   targetable/untargetable flag driven by boss attack-state, not a new damage system
+DeadEye module
+    └──requires──> existing CombatController hold/release/highlight/dash skeleton (extends, doesn't replace)
+    └──requires (new)──> AmmoController/reload timer
 
-Enemy Spawn-in VFX (regular + boss)
-    `--requires--> Generalizing the existing player-only portal entry effect (PortalEffectBuilder / SpriteMask
-                   reveal) into a reusable "spawn at point" component -- currently coupled to player-only usage
+MAX module
+    └──requires (new)──> MomentumController (movement override, replaces PlayerController+CombatController for its duration)
+    └──open question──> interaction with RollController i-frames while active
 
-Audio Polish (portal / hit / death / boss spawn SFX)
-    |--requires--> New AudioManager / SFX-pooling infrastructure (currently zero audio in codebase -- foundational,
-    |              built from scratch, not an extension of an existing system)
-    `--enhances--> Portal transition, Hit impact, Enemy death, Boss spawn/intro (hooks into existing VFX trigger points)
+NOVA module
+    └──requires (new)──> possession/control-swap input concept in InputManager
+    └──requires (new)──> drone GameObject + IEnemy split (body + orb both targetable)
+    └──requires──> CameraFollow leash-range cap (mobile viewport constraint)
 
-Boss intro camera beat
-    `--enhances--> Boss Room Feature (uses existing FloorTransitionEffect/camera-lock toolkit, new trigger point)
+Meta-progression (PlayerPrefs unlock manager)
+    └──requires──> at least 1 boss's Die() to call into it (can be stubbed early, low coupling to the mechanics themselves)
+
+한계 시험 (Limit Test)
+    └──requires──> 1+ stable modules + meta-progression unlock manager + existing WorldGenerator/FloorTimer/ScoreManager (already built)
+
+보스 러시 (Boss Rush)
+    └──requires──> ALL 4 modules independently stable
+    └──requires (new)──> runtime module-swap orchestrator (highest-risk net-new architecture in the milestone)
 ```
 
 ### Dependency Notes
 
-- **Boss Room requires probabilistic room-type spawn logic that extends the ExitPortal pattern:** ExitPortal already solves "spawn something with a probability, cap at 1 concurrent, inside a room" for floor transitions. The boss room should reuse this exact pattern (probability roll during room generation, max-1-concurrent guard) rather than invent a new spawn-gating mechanism. The dependency is on WorldGenerator's room-selection logic being extended to recognize a "boss room" room-type, separate from the existing Complex_Room random pool.
-- **Invulnerable-except-during-opening pattern requires the existing dash-target logic, not a new damage system:** This is the key design decision this milestone must make explicit. The project's validated core rule is one-shot-kill for both player and enemies, system-wide, across all of v1.0-v3.0. A genre-standard HP-bar boss would break that rule for exactly one enemy type. The lower-cost, value-consistent alternative is to keep the boss one-shot-killable but gate *when* it can be targeted/dashed-to (e.g., only during a telegraphed "opening" after an attack sequence, similar to how "적 없으면 헛베기" already gates on range/proximity). This should be surfaced to the user as an explicit decision before phase planning, not assumed silently.
-- **Enemy Spawn VFX enhances Boss Room:** the milestone asks for enemy spawn-in VFX as a general feature (applies to regular enemies too), and boss entrance is the highest-value place to use it dramatically (paired with the intro camera beat). Building it as a generic "spawn at point" component (rather than boss-only) means regular enemy spawning gets the same polish for near-zero extra cost.
-- **Audio Polish has no existing system to extend:** unlike VFX (which already has PortalEffectBuilder/HitSparkBuilder to build on), there is currently no AudioManager, no AudioSource pooling, and no SFX assets anywhere in the project. This work is foundational and should be scoped as its own early step before hooking sounds into portal/hit/death/boss-spawn trigger points -- not bundled in as an afterthought during boss VFX work.
-- **Boss intro camera beat enhances but does not block Boss Room:** the boss room MVP works without a camera flourish (arena + telegraph + defeat feedback are enough to validate the concept); the intro beat is additive polish using tooling that already exists (FloorTransitionEffect-style camera lock).
+- **DeadEye requires the existing `CombatController` skeleton:** its hold=slow-mo/aim, release=fire loop is a variant of the current Fan-attack shape, not a rebuild — lowest architectural risk of the three non-SAMURAI mechanics.
+- **MAX and NOVA both require entirely new control-scheme components** that don't extend anything in the current player-scripting layer — they are the two highest-complexity, highest-mobile-risk mechanics and should be sequenced later, with simplified fallback specs (kinematic MAX, toggle-swap NOVA) treated as the real MVP rather than the "pure" spec wording.
+- **Boss Rush requires all 4 modules to pre-exist and be individually stable** — it is a pure integration/stress-test mode on top of the mechanics, not a parallel workstream; building it early would mean debugging module-swap issues and individual-mechanic issues simultaneously.
+- **Meta-progression has almost no dependency on mechanic complexity** — it can and should be built early/in parallel, gated only by "at least one boss exists to unlock something."
+
+---
 
 ## MVP Definition
 
-### Launch With (v1 -- this milestone, v3.1)
+### Launch With (v4.0 minimum to validate hypotheses)
 
-Minimum viable product -- what's needed to validate "does a boss room work in this game."
+- [ ] SAMURAI boss + parry mechanic, generous touch-tuned window, **all** attacks parry-gated (no mixed variety yet) — cheapest full slice, matches tutorial-first design intent
+- [ ] DeadEye boss + revolver/reload mechanic, reusing existing hold-release/Fan-shape skeleton with an ammo gate on release
+- [ ] MAX boss + **kinematic** constant-momentum player mechanic (no physics drift/bounce sim) with a forgiving wall-collision buffer, not zero-buffer
+- [ ] NOVA boss + **toggle/possession-swap** dual control (not true simultaneous dual-stick), body and orb both independently damageable
+- [ ] `PlayerPrefs`-based module unlock persistence + module-select UI extension (generalize `AttackSelectController` from 2-way to N-way)
+- [ ] 한계 시험 (Limit Test) mode — near-direct reuse of the existing floor-climb loop with module lock-in at start
 
-- [ ] Boss room: probabilistic spawn reusing the ExitPortal pattern (chance roll, max 1 concurrent, dedicated arena room) -- core ask of the milestone
-- [ ] One boss type with a small telegraphed attack-pattern loop (2-3 attacks cycling) and an invulnerable-except-during-opening targeting gate (preserves one-shot-kill core value) -- essential to make the fight readable and consistent with existing combat feel
-- [ ] Solo fight guarantee (no regular enemy spawns active in the boss room) -- required so the fight is legible as "the boss encounter," not a mob fight
-- [ ] Score bonus on boss defeat, hooked into existing ScoreManager -- required by milestone, low cost
-- [ ] Enemy spawn-in VFX for both regular enemies and the boss, generalized from the existing player portal-entry effect -- explicit milestone ask, and needed so the boss's arrival doesn't feel like it silently "was already there"
-- [ ] Basic AudioManager/SFX-pooling infrastructure -- prerequisite for any sound at all; currently zero audio exists
-- [ ] SFX for: portal transition, hit impact, enemy death, boss spawn (each with basic pitch/volume randomization to avoid repetition fatigue) -- explicit milestone ask, addresses "currently silent" gap
+### Add After Validation (v4.x)
 
-### Add After Validation (v1.x -- future milestone, if boss room proves fun)
+- [ ] 보스 러시 (Boss Rush) mode with free module switching — only after all 4 modules independently validated as fun and stable
+- [ ] True simultaneous dual-stick NOVA control — only if the toggle-swap version validates the "manage two things" hypothesis and testers explicitly want more
+- [ ] Full physics-based MAX momentum (drift/bounce) — only if the kinematic version proves the risk/reward hypothesis fun but feels too rigid
+- [ ] Mixed parry + normal-dodge attack variety for SAMURAI — only after the uniform all-parry version proves the core loop fun
 
-Features to add once the core boss-room loop is confirmed engaging in playtesting.
+### Future Consideration (v5+, explicitly deferred)
 
-- [ ] Second and third boss types (validate the extensibility of the boss framework built this milestone) -- triggered by: v3.1 boss room testing well and roadmap wanting more content variety
-- [ ] Arena environmental hazards beyond the boss's own attacks (e.g. edge hazards, moving terrain) -- triggered by: base fight feeling "flat" without extra spatial pressure
-- [ ] Boss intro camera beat (pan/zoom/pause before fight starts) -- nice-to-have polish, defer if time-constrained since arena+telegraph+defeat feedback already validate the core concept
-
-### Future Consideration (v2+)
-
-Features to defer until the core combat/boss concept has more validation data.
-
-- [ ] Multi-phase boss fights (attack-set changes at thresholds) -- defer until/unless the invulnerable-except-during-opening pattern is validated as fun; phases assume an HP-based system this project doesn't have
-- [ ] Full music system (ambient + boss theme + adaptive layers) -- defer to a dedicated audio milestone; this milestone is scoped to SFX polish only
-- [ ] Boss dialogue/name-card intro -- defer indefinitely; no narrative validation goal in PROJECT.md
-- [ ] Data-driven boss-attack authoring tools (ScriptableObject-based pattern editor) -- defer until a second/third boss actually exists to prove the abstraction is worth building
+- [ ] Module upgrade tiers / passive skill trees — banned by PROJECT.md Out of Scope precedent (no growth systems)
+- [ ] Boss-order randomization / weighted difficulty curves in Boss Rush — pure replayability polish, unrelated to the core "is this fun" hypothesis
+- [ ] Cross-device/cloud save for unlock progression — unnecessary for a local prototype
 
 ## Feature Prioritization Matrix
 
 | Feature | User Value | Implementation Cost | Priority |
-|---------|------------|----------------------|----------|
-| Boss room probabilistic spawn (reuse ExitPortal pattern) | HIGH | MEDIUM | P1 |
-| Boss telegraph + invulnerable-except-opening attack pattern | HIGH | MEDIUM | P1 |
-| Solo-fight guarantee (no mob mixing) | HIGH | LOW | P1 |
-| Score bonus on boss defeat | MEDIUM | LOW | P1 |
-| Enemy spawn-in VFX (regular + boss, generalized portal effect) | MEDIUM-HIGH | LOW-MEDIUM | P1 |
-| Basic AudioManager/SFX pooling infra | HIGH | LOW-MEDIUM | P1 |
-| Core SFX set (portal/hit/death/boss-spawn, pitch-varied) | HIGH | LOW | P1 |
-| Boss intro camera beat | MEDIUM | MEDIUM | P2 |
-| Arena environmental hazards | LOW-MEDIUM | HIGH | P3 |
-| Second/third boss types | MEDIUM | MEDIUM-HIGH | P3 (future milestone) |
-| Multi-phase boss fights | LOW (conflicts with core value) | HIGH | Anti-feature / P3+ |
-| Adaptive music system | LOW (no system exists yet) | HIGH | Anti-feature / P3+ |
-| Boss HP bar / multi-hit combat | LOW (conflicts with core value) | HIGH | Anti-feature |
+|---------|------------|---------------------|----------|
+| SAMURAI parry mechanic + boss | HIGH | MEDIUM | P1 |
+| DeadEye ammo mechanic + boss | HIGH | MEDIUM | P1 |
+| MAX kinematic momentum mechanic + boss | HIGH | MEDIUM-HIGH | P1 |
+| NOVA toggle-swap dual control + boss | HIGH | HIGH | P1 |
+| Meta-progression unlock (`PlayerPrefs`) | HIGH | LOW | P1 |
+| 한계 시험 (Limit Test) mode | HIGH | LOW | P1 |
+| 보스 러시 (Boss Rush) mode w/ free switching | MEDIUM-HIGH | HIGH | P2 |
+| True simultaneous dual-stick NOVA | MEDIUM | HIGH | P3 |
+| Full physics MAX momentum (drift/bounce) | LOW-MEDIUM | MEDIUM-HIGH | P3 |
+| Module upgrade tiers / shop | LOW (out of scope) | HIGH | P3 (explicitly deferred) |
 
 **Priority key:**
-- P1: Must have for this milestone (v3.1)
-- P2: Should have, add if time allows within v3.1
-- P3: Nice to have, explicitly deferred to a future milestone
+- P1: Must have to validate the milestone's core hypotheses
+- P2: Should have, but sequenced after P1 mechanics are independently stable
+- P3: Nice to have, future consideration only if playtesting signals demand it
 
-## Competitor Feature Analysis
+## Genre-Precedent Reference
 
-| Feature | Dead Cells | Rogue Legacy | Fast (v3.1 plan) |
-|---------|------------|---------------|-------------------|
-| Attack telegraphing | Red line/wind-up cues before every boss attack | Boss-specific tells (e.g. charge-up glow) before each attack | Reuse existing melee/ranged telegraph conventions, exaggerated for the boss |
-| Damage model | Multi-hit HP bar, damage numbers | Multi-hit HP bar, RNG-modified stats | One-shot-kill preserved via invulnerable-except-during-opening gating (no HP bar) -- deliberate divergence to stay consistent with core value |
-| Arena design | Boss-specific hazards (e.g. water, tentacles reshaping the fight) | Fixed arena per castle, boss interacts with room geometry | Dedicated arena room prefab, hazards deferred to future milestone (arena shape only, no dynamic terrain this pass) |
-| Fight structure | Multi-phase, escalating intensity | Single continuous fight with escalating patterns per difficulty | Single continuous attack-pattern loop (no HP-based phases) -- matches "1 boss type" milestone scope |
-| Music/audio on boss entry | Full boss theme track | Full boss theme track | Short SFX stinger only -- no music system exists yet, explicitly deferred |
+| Mechanic | Closest Genre Precedent | Our Approach |
+|----------|--------------------------|---------------|
+| DeadEye reload economy | Resident Evil-style ammo tension, Enter the Gungeon reload tempo-break | Gate only the existing hold/release loop's release-action by ammo; auto-reload rates as specified |
+| SAMURAI parry | Sekiro/Cuphead-style timed parry, tuned for touch instead of mouse/controller | Wide, tunable parry window; uniform all-attacks-parryable for MVP |
+| MAX momentum + wall-stun boss | Player side: momentum/skate-physics runners (weak precedent, genuinely novel). Boss side: Dark Souls/Zelda-style "lure into wall" bait bosses (strong, well-worn precedent) | Kinematic constant-speed steering with a forgiving collision buffer, not full physics sim |
+| NOVA dual control | R-Type "Force" pod (companion device) is the closest analogue; true simultaneous dual-stick combat control is rare specifically because of the mobile thumb-budget problem | Toggle/possession-swap control scheme as MVP, not literal simultaneous dual-stick |
+| Boss Rush mode | Mega Man/Cuphead boss-rush structure; Nuclear Throne/Enter the Gungeon endless-boss-cycling for the "no run limit" variant | Fixed repeating boss sequence with a minor per-lap difficulty bump; defer randomization |
+| Limit Test mode | Hades/Risk of Rain single-loadout-per-run roguelike structure | Near-direct reuse of existing floor-climb loop, module replaces attack-type as the pre-run choice |
 
 ## Sources
 
-- [Boss Battles-How to Design One? (Medium)](https://medium.com/@foster_sawyer2/boss-battles-how-to-design-one-733c788e5494) -- MEDIUM confidence, general design essay
-- [Boss Design: How to Make an Unforgettable Boss Battle (GameDesignSkills)](https://gamedesignskills.com/game-design/game-boss-design/) -- MEDIUM confidence, cross-referenced with multiple other sources on telegraphing/arena design
-- [Boss Battle Design and Structure (Game Developer / Gamasutra)](https://www.gamedeveloper.com/design/boss-battle-design-and-structure) -- MEDIUM confidence, industry publication
-- [Dead Cells Wiki -- Conjunctivius](https://deadcells.fandom.com/wiki/Conjunctivius) -- MEDIUM confidence, specific boss mechanic reference (tentacle/eye pattern, telegraphed beams)
-- [Dead Cells -- Wikipedia](https://en.wikipedia.org/wiki/Dead_Cells) -- MEDIUM confidence, general game structure reference
-- [Mastering VFX in Unity: Spawning, Collision, and Explosions (Medium)](https://medium.com/@Brian_David/mastering-vfx-in-unity-spawning-collision-and-explosions-efc33791f2e0) -- LOW-MEDIUM confidence, general Unity VFX approach, not project-specific
-- [Using State Patterns for Dynamic AI in Unity (Medium)](https://medium.com/@Brian_David/using-state-patterns-for-dynamic-ai-1579e089931d) -- MEDIUM confidence, confirms FSM approach already used in this codebase (MeleeEnemy/RangedEnemy) generalizes to boss design
-- [State Machines and Boss Fights (Unibear Studio)](https://www.unibearstudio.com/tutorial/state-machines-and-boss-fights) -- MEDIUM confidence, IBossState pattern reference
-- [The 2026 Indie Dev's Roadmap to Game Audio (Tortuga Soundtracks)](https://tortugasoundtracks.com/blogs/the-ultimate-guide-to-game-audio-how-sound-shapes-player-experience/posts/7684069/the-2026-indie-dev-s-roadmap-to-game-audio-strategic-sound-design-for-high-conversion-titles) -- LOW-MEDIUM confidence, marketing-adjacent blog but consistent with general audio-design consensus (bake audio in early, avoid "audio debt")
-- [Feel (More Mountains) -- game feel/juice asset docs](https://feel.moremountains.com/) -- MEDIUM confidence, documents standard hit-stop/audio-sync/screenshake patterns used as a reference model (not necessarily to be adopted as a dependency)
-- Existing codebase inspection (PROJECT.md) for current state: PortalEffectBuilder, HitSparkBuilder, FloorTransitionEffect, WorldGenerator, ExitPortal, ScoreManager, MeleeEnemy/RangedEnemy FSM -- HIGH confidence (primary source, own repo)
+- Existing codebase: `Assets/Scripts/Player/CombatController.cs`, `Assets/Scripts/Enemy/BossEnemy.cs`, `Assets/Scripts/Enemy/EnemyBase.cs`, `Assets/Scripts/World/ScoreManager.cs`, `Assets/Scripts/Player/RollController.cs`, `Assets/Scripts/Player/InputManager.cs`, `Assets/Scripts/UI/AttackSelectController.cs`, `Assets/Scripts/UI/AttackTypeSelector.cs`, `Assets/Scripts/World/FloorManager.cs` (read directly, HIGH confidence on all architectural/dependency claims)
+- `.planning/PROJECT.md` (milestone goal, Out of Scope constraints, target feature spec — HIGH confidence, primary source of truth)
+- Genre-pattern analysis (training-data knowledge, MEDIUM confidence): Sekiro/Cuphead parry conventions, Resident Evil/Enter the Gungeon ammo-tension design, Dark Souls/Zelda environmental-bait boss patterns, R-Type Force-pod dual-entity precedent, Hades/Risk of Rain single-loadout roguelike structure, Mega Man/Cuphead/Furi boss-rush structure
+- [Touch Controls for Mobile Games: Input Patterns and Feedback (Cursa)](https://cursa.app/en/page/touch-controls-for-mobile-games-input-patterns-and-feedback) — MEDIUM confidence, corroborates touch-input latency/precision concerns raised for SAMURAI/MAX
+- [How Display Response Time Affects Parry and Block Timing in Action RPGs (KTC Play)](https://us.ktcplay.com/blogs/technology-hub/display-response-time-affects-parry-timing-action-rpgs) — MEDIUM confidence, supports the "widen the parry window for touch" recommendation
+- [Boss Rush explained (Pudgy Cat)](https://pudgycat.io/what-is-boss-rush-explained/) and [Boss Rush (TV Tropes)](https://tvtropes.org/pmwiki/pmwiki.php/Main/BossRush) — MEDIUM confidence, genre-structure grounding for the Boss Rush mode section
+- Endless/roguelike mode structure comparison (WebSearch synthesis, LOW-MEDIUM confidence, single-pass search not cross-verified against a canonical source) — informs the Limit Test vs. Boss Rush "fixed endpoint vs. endless" framing
 
 ---
-*Feature research for: 2D action platformer boss room content + spawn VFX + audio polish (Fast v3.1)*
-*Researched: 2026-07-08*
+*Feature research for: mobile 2D action platformer boss-mechanic expansion (Fast v4.0)*
+*Researched: 2026-07-20*

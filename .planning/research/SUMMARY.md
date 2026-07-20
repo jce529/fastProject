@@ -1,165 +1,171 @@
 # Project Research Summary
 
-**Project:** Fast (가칭) — v3.1 milestone
-**Domain:** Boss room content (extensible framework) + VFX/audio polish for an existing Unity 6 URP 2D mobile action platformer with infinite procedural room generation
-**Researched:** 2026-07-08
-**Confidence:** HIGH
+**Project:** Fast (가칭) — v4.0 보스 캐릭터 확장 & 게임 모드
+**Domain:** Mobile 2D action platformer — pluggable combat-module boss expansion, meta-progression, game modes
+**Researched:** 2026-07-20
+**Confidence:** MEDIUM-HIGH
 
 ## Executive Summary
 
-This milestone adds no new technology to the project — it is 100% new C# scripts and Editor-script-authored prefabs layered onto the existing, already-shipped v3.0 architecture (`WorldGenerator`, `IEnemy`/`MeleeEnemy`/`RangedEnemy`, `CombatController`, `ExitPortal`, `ScoreManager`). Three things are being added: (1) a solo boss encounter room, reusing the existing "probabilistic room-slot overlay" pattern already proven by `ExitPortal`; (2) generalized spawn-in VFX for enemies (and the boss), reusing the existing `RuntimeMaskSprite`/`SpriteMask` cosmetic-coroutine pattern already proven by `EnemyDeathEffect`/`FloorTransitionEffect`; and (3) the project's first-ever audio system (zero `AudioSource`/`AudioClip` usage exists today), which needs a small `MonoBehaviour`-singleton `AudioManager` with a pooled `AudioSource` array.
+Fast v4.0 takes a single-mechanic mobile action prototype (hold=slowmo, release=dash-teleport-OHK, i.e. "Overclock"/F.I.O.R.A) and turns it into a 5-module combat system: 4 new mechanically-distinct bosses (DeadEye's ammo/reload economy, SAMURAI's parry-timing tutorial fight, MAX's unstoppable-momentum risk/reward, NOVA's dual body+drone control) each paired with a player-side control scheme, plus a persistent boss-unlock progression layer and two game modes (한계 시험: single locked module, roguelike floor-climb; 보스 러시: free module-swap, endless boss gauntlet). All four research passes agree this is fundamentally an architecture-extraction problem before it is a content problem: the existing codebase has never needed pluggability (one hardcoded CombatController, one non-inherited BossEnemy FSM, zero persistence, mouse-only aim direction) and every one of the 4 new mechanics stresses one of those hardcoded assumptions simultaneously.
 
-The single most important design decision — flagged consistently across all four research files — is how the boss stays "one-shot-killable" (the game's core, non-negotiable value) without becoming either trivial (dies to the first dash, indistinguishable from a regular enemy) or a genre-standard HP-bar fight (which would break the one-shot-kill rule system-wide for one enemy type). The recommended resolution is an **invulnerable-except-during-a-telegraphed-opening** pattern: the boss's `IsAlive`/one-shot-kill mechanics stay identical to every other enemy, but its *targetability* (via `CombatController.FindNearestEnemyInRange()`) is gated by an attack-pattern-driven vulnerability flag. This requires zero changes to `IEnemy` or `CombatController` — the boss's own coroutine flips whether it is currently a valid target, reusing the exact "skip if `!IsAlive`" check that already exists.
+The recommended approach, consistent across STACK/ARCHITECTURE/PITFALLS research, is: (1) extract a small IPlayerCombatModule strategy interface from CombatController, migrating the existing Overclock logic verbatim as the first module (pure refactor, must be regression-tested byte-for-byte before new modules are added); (2) extract a BossEnemyBase sibling to EnemyBase from the current BossEnemy.cs (its _isDefeated/vulnerability/death-sequence plumbing) before writing a second boss, not after, to avoid 4x copy-paste drift; (3) build BossUnlockManager as a new PlayerPrefs-backed static class, this project's first-ever disk persistence, kept structurally isolated from DeathScreenController.RestartGame()'s existing "reset everything" convention; (4) fix the pre-existing Mouse.current-only aim-direction gap (no touch equivalent exists today) as shared infrastructure, since 3 of 4 new mechanics need a working touch aim/target signal. No new Unity packages are required anywhere; com.unity.inputsystem@1.19.0 already ships EnhancedTouch, OnScreenStick/Button, and Pointer, covering every input need identified.
 
-The key risks are almost entirely about **integration correctness with the existing procedural generation and timing systems**, not about the new content itself: (a) the boss room must be excluded from the normal room pool and its own `EnemySpawner` markers must not leak in, or regular enemies silently co-spawn with the boss; (b) `WorldGenerator`'s 2-room lookahead/lookbehind trim can `Destroy()` the boss room mid-fight if the player's position drifts outside the window during a longer encounter; (c) the 60-second `FloorTimer` keeps ticking through the boss fight with no exemption today and can kill the player mid-encounter; (d) any new spawn-in VFX must hook into `EnemySpawner.Activate()`, never `Awake()`/`OnEnable()`, or it fires off-screen/twice; and (e) all new audio timing code must follow the project's `Time.unscaledDeltaTime`/`WaitForSecondsRealtime` convention (already enforced everywhere else) or SFX will visibly desync during the game's core slow-motion/hit-freeze loop. All five are addressable with small, additive changes; none require restructuring existing systems.
+The dominant risk is not any single mechanic's feasibility (all 4 are technically buildable with what's installed) but sequencing and state-leak risk at the seams: mid-combat module swapping (보스 러시) will silently leak Time.timeScale, gauge state, _isBusy lockouts, or orphaned GameObjects (NOVA's drone) across a swap unless an explicit enter/exit lifecycle is designed before the second module exists; boss rooms have no exemption from WorldGenerator's cleanup sweep today (a requirement ID was proposed and deferred, never implemented) so a long or momentum-driven fight (MAX especially) can have its room destroyed mid-combat; and every new boss/module timer must use the existing unscaledDeltaTime/WaitForSecondsRealtime convention or it will silently break under the player's own slowmo/hit-freeze. All four research files independently converge on the same build order: shared infrastructure first (unlock manager, module interface, input fix), SAMURAI second (lowest mechanical novelty, designed as the tutorial boss), DeadEye third, MAX and NOVA last (highest mobile-control and architecture risk), Boss Rush mode dead last (pure integration on top of all 4 modules, mirrors this project's own prior-milestone history of getting blocked exactly this way in Phase 15/16).
 
 ## Key Findings
 
 ### Recommended Stack
 
-No new UPM packages are needed — every capability required (`AudioSource`/`AudioMixer`, `ParticleSystem`, `Animator`, `SpriteMask`) is already installed and used elsewhere in the codebase. The work is entirely new C# + Editor-script authoring following established project conventions (menu-item prefab builders, coroutine-driven FSMs, self-attaching cosmetic components).
+No new packages needed. Everything required (multi-touch tracking, virtual on-screen controls, pointer-agnostic input) already ships inside the installed com.unity.inputsystem@1.19.0. The one required fix is architectural, not a dependency: Mouse.current-based aim direction has to become Pointer.current/EnhancedTouch-based, since it currently silently degrades to a dead vector on any device without a mouse (i.e., every Android build).
 
 **Core technologies:**
-- `AudioSource` + `AudioMixer` (built into `com.unity.modules.audio`, already installed) — sufficient for ~5-8 one-shot SFX cues; audio middleware (FMOD/Wwise) is explicitly rejected as overkill for a prototype
-- `BossEnemyBase`/`BossEnemy` as a plain `IEnemy`-implementing class (inheritance, not ScriptableObject-driven data authoring) — matches the existing `MeleeEnemy`/`RangedEnemy` style, right-sized for "1 boss now, extensible later"
-- Coroutine + enum-phase FSM (same idiom as `MeleeEnemy.TelegraphAndAttack()`) — boss attack-pattern sequencing, already timeScale-safe via `WaitForSecondsRealtime`
-- `RuntimeMaskSprite` + hand-rolled coroutine scale/mask animation (same pattern as `FloorTransitionEffect`) — reused for a new generalized `EnemySpawnEffect`
-- `UnityEngine.Pool.ObjectPool<T>` — explicitly NOT needed at current scale; defer unless profiling shows GC pressure
+- EnhancedTouch.Touch.activeTouches (installed, com.unity.inputsystem 1.19.0) — per-finger stable-ID multi-touch tracking, required for NOVA's dual streams and DeadEye's multi-tap marking; the raw positional Touchscreen.touches[n] array is unusable for this since slots reassign as fingers lift.
+- OnScreenStick/OnScreenButton (UnityEngine.InputSystem.OnScreen, installed) — virtual joystick/buttons wired into the existing action-map architecture instead of a parallel bespoke touch system; avoids third-party joystick asset packages entirely.
+- PlayerPrefs (built-in) — sufficient for the entire unlock-progression scope (a handful of module-unlock booleans); this project has zero existing persistence code, so this is genuinely new infrastructure, but does not need a save-system package.
+- Pointer.current (replacing Mouse.current) — resolves to whichever device produced input last (mouse in Editor, touch on device) without branching code; the single most important "fix before building anything new" item from Stack research.
 
 ### Expected Features
 
-Genre convention (Dead Cells/Rogue Legacy-style boss design) strongly implies HP bars and multi-phase fights, but both are explicitly flagged as **anti-features** for this project because they conflict with the validated one-shot-kill core value. The MVP is scoped tightly around validating "does a boss room work in this game," not building a full boss roster.
+**Must have (table stakes / MVP for v4.0):**
+- SAMURAI boss + parry mechanic (all attacks parry-gated, no mixed variety yet) — tutorial-first, lowest dependency surface
+- DeadEye boss + ammo/reload mechanic, reusing the existing hold-release/Fan-shape skeleton with a release-side ammo gate
+- MAX boss + kinematic constant-momentum player mechanic (no physics drift/bounce sim), forgiving wall-collision buffer (not zero-buffer)
+- NOVA boss + toggle/possession-swap dual control (not true simultaneous dual-stick), body and drone independently damageable
+- PlayerPrefs-based module unlock persistence + N-way module-select UI (generalized from existing 2-way AttackSelectController)
+- 한계 시험 (Limit Test) mode — near-direct reuse of existing floor-climb loop, module locked in at run start
 
-**Must have (table stakes):**
-- Telegraphed attacks (clear visual/audio cue before each attack lands), exaggerated versus regular enemies
-- Dedicated solo arena (no regular enemies mixed in)
-- Clear defeat feedback (visual + audio + score payoff), bigger than a regular kill
-- Readable danger-state vs. opening-state signaling (load-bearing for the invulnerable-except-opening pattern)
-- Basic AudioManager/SFX infrastructure + core SFX set (portal, hit, death, boss spawn) — currently zero audio exists
+**Should have (after P1 validated):**
+- 보스 러시 (Boss Rush) mode with free module switching — only once all 4 modules are independently stable
+- True simultaneous dual-stick NOVA control — only if toggle-swap validates the hypothesis and testers want more
+- Full physics-based MAX momentum (drift/bounce) — only if kinematic version proves fun but feels too rigid
 
-**Should have (differentiators):**
-- Invulnerable-except-during-opening pattern (preserves one-shot-kill without an HP bar)
-- Boss spawn stinger (audio+visual flourish) using the generalized spawn-in VFX
-- Unique arena silhouette (dedicated room prefab, not a reskinned Complex_Room)
-
-**Defer (v2+):**
-- Multi-phase boss fights (assumes an HP system this project deliberately doesn't have)
-- Full adaptive music system (no music system exists at all yet; scope this milestone to SFX only)
-- Boss dialogue/name-card intro (no narrative validation goal)
-- Data-driven ScriptableObject attack-pattern authoring tools (defer until a 2nd/3rd boss actually exists)
-- Second/third boss types, arena environmental hazards, boss intro camera beat (P2/P3, nice-to-have polish)
+**Defer (v2+/explicitly out of scope):**
+- Module upgrade tiers, passive skill trees, shops — explicitly banned by PROJECT.md's Out of Scope
+- Boss-order randomization/weighted difficulty in Boss Rush — replayability polish, not core-hypothesis-relevant
+- Cloud save / cross-device sync — unnecessary for a local Android prototype
 
 ### Architecture Approach
 
-The boss room and its supporting systems integrate as parallel siblings to existing patterns rather than new architecture: the boss room is a new dedicated prefab selected via a **separate probabilistic roll** mirroring `ExitPortal`'s `_exitSpawnChance`/`_maxExitsActive` gating (never appended to the flat `_roomPrefabs` pool, which would make it appear ~1-in-7 rooms with no floor gate). `BossEnemy` is a new `IEnemy` sibling to `MeleeEnemy`/`RangedEnemy` — `IEnemy`'s 3-member contract is left untouched, and `CombatController` needs zero changes to dash-kill a boss. Audio is added as a `MonoBehaviour` singleton (`AudioManager.Instance` + static `PlaySfx()` wrapper) rather than a pure static class, since it must own real `AudioSource` components — this deliberately deviates from the project's existing pure-static-class manager pattern (`ScoreManager`/`FloorTimer`) in the same way `WorldGenerator` already does for the same reason.
+The existing codebase has exactly one instance of each pattern this milestone needs multiples of: one hardcoded combat scheme (CombatController), one standalone non-inherited boss FSM (BossEnemy), zero persistence, and a straight-line scene flow with a single binary choice. The research converges on extracting minimal, proven-necessary abstractions rather than building speculative generalized frameworks, consistent with this project's own established convention ("minimal extraction, not full inheritance," per EnemyBase's own header comment).
 
 **Major components:**
-1. `AudioManager` (new, `MonoBehaviour` singleton, pooled `AudioSource[]`) — single call-in point for all new sound, `DontDestroyOnLoad` across the 3-scene flow
-2. `BossEnemy : MonoBehaviour, IEnemy` (new FSM sibling) — owns its own attack-pattern states, vulnerability gating, and calls `ScoreManager.AddBossKillBonus()` itself from `OnDashHit()`
-3. `EnemySpawnEffect` (new, mirrors `EnemyDeathEffect`) — reusable spawn-in VFX for regular enemies and boss, wired into `EnemySpawner.Activate()` (never `Awake()`/`OnEnable()`)
-4. `WorldGenerator` extension (`SelectRoomPrefab`, `TrySpawnBoss`, `_bossRoomPrefab`/`_bossSpawnChance`/`_maxBossRoomsActive`/`_bossMinFloor`) — highest blast-radius change, done last per the suggested build order
-
-**Suggested build order (dependency-driven):** `AudioManager` → sound/timing polish on existing components → `EnemySpawnEffect` (validated on existing enemies first) → `BossEnemy` FSM (standalone, tested in isolation) → boss room prefab authoring (parallel with above) → `WorldGenerator` integration (last, highest risk).
+1. IPlayerCombatModule (new interface) + OverclockModule/DeadEyeModule/SamuraiParryModule/MaxMomentumModule/NovaDualModule — CombatController becomes a host retaining slow-mo lifecycle/gauge/_isBusy lockout/hit-freeze, delegating only targeting+resolution to the active module.
+2. BossEnemyBase (new, sibling to EnemyBase, not inheriting it) — extracted from current BossEnemy.cs: defeat-guard, death sequence, spawn-gate wiring, player-death cleanup, vulnerable-tint highlight helpers. Each of the 4 new bosses subclasses this with its own independent pattern-loop state machine (no shared generalized Telegraph-Attack-Vulnerable FSM, the 4 mechanics don't share a state shape).
+3. BossUnlockManager (new, static, PlayerPrefs-backed) — first disk persistence in the project; deliberately kept out of DeathScreenController.RestartGame()'s existing unconditional reset sweep.
+4. GameModeManager (new, static, data-only, mirrors FloorManager convention) + ModeSelectController — inserted as MainMenu -> ModeSelect -> ModuleSelect(extended AttackSelectController) -> SampleScene.
+5. WorldGenerator mode-branch (modified last, highest risk) — 보스 러시's endless boss-only loop either branches this highest-fan-in file or forks a parallel simpler generator; deferred to the final integration step, matching this project's own prior-milestone pattern of saving WorldGenerator integration for last.
 
 ### Critical Pitfalls
 
-1. **Boss room silently gets regular enemies via the shared spawn pipeline** — the boss prefab will likely be duplicated from an existing Complex_Room and may carry over leftover `EnemySpawner` markers; strip them and add a belt-and-suspenders type-check gate in `WorldGenerator`, and never add the boss prefab to the flat `_roomPrefabs` pool.
-2. **WorldGenerator's lookahead/lookbehind recycle can `Destroy()` the boss room mid-fight** if the player's position drifts outside the trim window during a longer-than-normal encounter — freeze chain trimming (`_bossEncounterActive` guard) for the duration of an unresolved boss fight.
-3. **Naive `IEnemy` implementation trivializes the boss** — implementing `OnDashHit()` the same unconditional way as `MeleeEnemy` makes the "boss" a reskinned regular enemy; gate targetability (not literal one-shot-kill semantics) behind a telegraphed vulnerability window instead.
-4. **`FloorTimer`'s 60-second countdown keeps ticking through the boss fight** with no exemption today, and can kill the player mid-encounter for reasons unrelated to the fight; this must be an explicit decision (pause/extend/exempt), not silently skipped.
-5. **Spawn-in VFX fires in `Awake()`/`OnEnable()`** — off-screen at lookahead/standby-room instantiation time, or twice (once on instantiate, once on `Activate()`) — must be wired into `EnemySpawner.Activate()` exclusively, paired with a new `SpawningIn` FSM state that gates detection/targetability until the VFX completes.
-6. **Audio timing breaks under slow-motion/hit-freeze** if built on `Time.deltaTime`/`WaitForSeconds` instead of the project's existing `Time.unscaledDeltaTime`/`WaitForSecondsRealtime` convention — easy to violate on a brand-new subsystem with no existing audio code to copy from.
+1. New boss/module timers silently break under the player's own slowmo/hit-freeze — any new script using Time.deltaTime/WaitForSeconds instead of Time.unscaledDeltaTime/WaitForSecondsRealtime will freeze or crawl during Overclock's slowmo or HitFreeze (Time.timeScale=0), invisible until a specific interaction (holding Attack during another boss's pattern) is tested. Prevention: grep-check for zero Time.deltaTime/WaitForSeconds( matches in every new boss file; copy BossEnemy.cs's existing realtime pattern verbatim.
+2. 4x copy-paste of the non-inherited BossEnemy.cs FSM instead of extracting a shared base first — creates 5 independent copies of non-trivial death/spawn-gate/vulnerability plumbing that will drift on any shared bugfix. Prevention: extract BossEnemyBase once, before boss #2 is written, not as a retrofit after 4 divergent copies exist.
+3. Mid-combat module swap (Boss Rush) leaks state — CombatController has no module abstraction today; swapping modules mid-fight without dedicated enter/exit lifecycle hooks will leave Time.timeScale stuck, gauge/resource UI showing the wrong module, _isBusy permanently locked, or NOVA's drone orphaned in the scene. Prevention: design the module interface's enter/exit teardown (generalizing the existing ForceExitCombatState() pattern) before implementing the second module, and test every module-pair swap combination, not just one.
+4. Boss rooms have no exemption from WorldGenerator's cleanup sweep — this was proposed (BOSS-10) and explicitly deferred in Phase 16, never implemented; a long or momentum-driven fight (MAX especially, given constant forward motion) can have its room Destroy()-ed mid-combat today. Prevention: treat this as net-new required work, resolved before/alongside the first new boss room touching the real chain-based spawn flow, not assumed solved.
+5. Mouse-only aim direction + zero existing touch bindings for movement — CombatController.GetMouseWorldDirection() reads Mouse.current unconditionally, degenerate on Android; InputSystem_Actions.inputactions has no touch/on-screen binding for Move at all. Prevention: fix once as shared input infrastructure (Pointer/EnhancedTouch-based), not per-boss; do this early since 3 of 4 new mechanics need working touch aim.
 
 ## Implications for Roadmap
 
-Based on research, suggested phase structure:
+Based on combined research, suggested phase structure (7 phases, risk-ordered):
 
-### Phase 1: Audio Foundation + Sound Polish Pass
-**Rationale:** Zero dependencies, foundational for every other new sound hook (spawn VFX, boss cues); lowest risk since it's additive to already-stable, small components (`FloorTransitionEffect`, `CombatController`, `EnemyDeathEffect`).
-**Delivers:** `AudioManager` singleton + pool, SFX for portal transition/hit impact/enemy death, all using `Time.unscaledDeltaTime` conventions from day one.
-**Addresses:** "Basic AudioManager/SFX infrastructure" and "core SFX set" from FEATURES.md (both P1).
-**Avoids:** Pitfall 6 (`Time.deltaTime`-based audio desync) and Pitfall 9 (rapid-kill SFX clipping/GC churn) — build the pool and unscaled-time convention correctly from the start rather than retrofitting.
+### Phase 1: Shared Infrastructure — Unlock Persistence + Combat Module Abstraction + Touch Input Fix
+**Rationale:** Zero/low coupling to gameplay content; every subsequent boss/module phase depends on these three seams existing correctly. Retrofitting any of the three after 2+ modules/bosses exist is materially more expensive (Pitfalls 2, 3, 5's recovery costs are all MEDIUM-HIGH vs. LOW if done first).
+**Delivers:** BossUnlockManager (PlayerPrefs-backed, isolated from RestartGame()'s reset sweep); IPlayerCombatModule interface with OverclockModule as the first migrated (verbatim, zero-behavior-change) concrete module; Pointer/EnhancedTouch-based aim-direction replacement for Mouse.current.
+**Addresses:** Meta-progression unlock storage (FEATURES.md); module pluggability precondition for all 4 new mechanics.
+**Avoids:** Pitfall 3 (module-swap leaks), Pitfall 5 (mouse-only input), Pitfall 6 (persistence scoping).
 
-### Phase 2: Enemy Spawn-in VFX (generalized)
-**Rationale:** Validates the spawn-VFX-visibility tradeoff and the `Activate()`-seam wiring against the two *existing* enemy types before a third (boss) is introduced; depends only on Phase 1 for its spawn sound.
-**Delivers:** `EnemySpawnEffect` component (mirrors `EnemyDeathEffect`, reuses `RuntimeMaskSprite`), wired into `EnemySpawner.Activate()`, plus a `SpawningIn` FSM state gating detection/targetability.
-**Uses:** `RuntimeMaskSprite`/`SpriteMask` pattern from STACK.md; `AudioManager.PlaySfx()` from Phase 1.
-**Implements:** "Cosmetic Layer" component from ARCHITECTURE.md.
-**Addresses:** "Enemy spawn-in VFX (regular + boss, generalized portal effect)" from FEATURES.md (P1).
-**Avoids:** Pitfall 5/6/7 (VFX firing off-screen/twice, enemy lethal before VFX completes).
+### Phase 2: Shared Boss Infrastructure — BossEnemyBase Extraction
+**Rationale:** Must land before boss #2 is written (Pitfall 2); reuses the exact "minimal extraction, not full inheritance" methodology this project already applied to EnemyBase in Phase 16.
+**Delivers:** BossEnemyBase (sibling to EnemyBase) carrying _isDefeated guard, death sequence, spawn-gate wiring, player-death cleanup, vulnerable-tint highlight helpers, abstracted so "defeated" is a boss-owned decision (not a flat hit-counter).
+**Uses:** Direct extraction from current BossEnemy.cs.
+**Implements:** Architecture Q2 recommendation (do not force one generalized Telegraph-Attack-Vulnerable FSM across 4 structurally different bosses).
 
-### Phase 3: Boss Enemy FSM + Vulnerability Design
-**Rationale:** Standalone and testable in an isolated debug scene (drop into an empty scene with a player, confirm dash-kill/score/death/spawn VFX all fire) before touching `WorldGenerator` at all — the highest-value design decision (invulnerable-except-opening) should be locked and validated in isolation first.
-**Delivers:** `BossEnemy : MonoBehaviour, IEnemy` with a telegraph → windup → hitbox → recover attack-pattern loop (2-3 attacks cycling) and a vulnerability-window targeting gate; `ScoreManager.AddBossKillBonus()`.
-**Addresses:** "One boss type with a small telegraphed attack-pattern loop and an invulnerable-except-during-opening targeting gate" from FEATURES.md MVP (P1).
-**Avoids:** Pitfall 3 (naive one-shot kill trivializes the boss) — this is the phase's central risk and must be explicitly decided, not defaulted.
+### Phase 3: SAMURAI Boss + Parry Module
+**Rationale:** PROJECT.md itself flags this as tutorial/highest-priority unlock; architecturally closest to existing precedent (melee+telegraph already proven); lowest dependency surface of the 4 (no slowmo, no ammo economy, no momentum physics, no dual control), genuine argument for building first per FEATURES.md's dependency graph.
+**Delivers:** SamuraiBoss : BossEnemyBase, parry-timing player-side module (own component or module, not IEnemy-contract-extended), touch-tuned generous parry window (recommend 200-250ms initial, tune on real low-end Android device).
+**Addresses:** SAMURAI mechanic (FEATURES.md P1); tutorial-boss role.
+**Avoids:** Pitfall 1 (realtime timers) — first real test of the convention on a genuinely new timing-sensitive mechanic.
 
-### Phase 4: Boss Room Content + Lifecycle Gating
-**Rationale:** Can run in parallel with Phase 3 once the boss's collider/silhouette dimensions are known; must solve room-generation integration (solo-fight guarantee, chain-trim safety, timer interaction, entry-triggered activation) before wiring into `WorldGenerator`, since these are structural, not balance, concerns.
-**Delivers:** `Room_Boss` prefab (dedicated arena, `RoomConnector`/`CameraBound`/`ExitSpawnPoint`, single `BossSpawner`, zero `EnemySpawner`), an entry-triggered boss activation (mirrors `ExitPortal.OnTriggerEnter2D`), a `_bossEncounterActive` chain-trim guard, and an explicit `FloorTimer` pause/extend/exempt decision.
-**Addresses:** "Boss room: probabilistic spawn... Solo fight guarantee" from FEATURES.md MVP (P1).
-**Avoids:** Pitfall 1 (regular enemies leak in), Pitfall 2 (WorldGenerator destroys boss room mid-fight), Pitfall 4 (FloorTimer kills player mid-fight), Pitfall 5 (boss activates before player enters).
+### Phase 4: DeadEye Boss + Ammo/Reload Module
+**Rationale:** Next-lowest risk — reuses existing hold-release/Fan-shape/RangedEnemy aim-line precedent; only new piece is a shot-counter/reload state, no new physics or input paradigm. Sequencing after SAMURAI stress-tests the module interface on a second, still-conventional case before the true outliers (MAX, NOVA).
+**Delivers:** DeadEyeBoss : BossEnemyBase (6 tracking reticles + fire delay), DeadEyeModule (ammo-gated release action, unscaled-time reload timer), ammo-counter HUD element.
+**Uses:** IPlayerCombatModule interface, EnhancedTouch for the 6-tap marking gesture (fat-finger mitigations: generous hit-test radius, immediate visual tag confirmation, untag-on-retap).
 
-### Phase 5: WorldGenerator Integration (Boss Room Spawn Gating)
-**Rationale:** Highest blast-radius change to the most complex existing script; only makes sense once `BossEnemy` (Phase 3) and the boss room prefab (Phase 4) both already work standalone — done last per ARCHITECTURE.md's explicit build-order recommendation.
-**Delivers:** `SelectRoomPrefab(floor)` refactor centralizing the 4 duplicated room-pick call sites, `_bossRoomPrefab`/`_bossSpawnChance`/`_maxBossRoomsActive`/`_bossMinFloor` fields, `TrySpawnBoss` wired at the same 4 sites as `TrySpawnEnemies`, `_activeBossCount` bookkeeping matching the existing `_activeExitCount` pattern.
-**Delivers:** Full end-to-end boss encounter reachable through normal floor traversal.
+### Phase 5: MAX Boss + Momentum Module
+**Rationale:** Highest architecture-fit risk of the "normal" cases — "movement IS the attack" may not fit the hold-slowmo-release-resolve shape at all, and needs a novel collision-triggered (not timer-triggered) vulnerability signal. Sequencing after 2 conventional modules means interface gaps surface on stable ground first.
+**Delivers:** MaxBoss : BossEnemyBase (careen-into-wall stun trigger), kinematic constant-speed-with-steering player mechanic (not full physics sim), forgiving wall-collision buffer, Time.timeScale-compensated velocity lock (reusing PlayerController's existing compensation pattern).
+**Avoids:** Pitfall 4 (WorldGenerator cleanup) is highest-stakes here specifically, since MAX's constant forward momentum is the likeliest mechanic to push a player past a room's cleanup boundary mid-fight — this phase should not proceed until Phase 4.5 below is resolved.
+
+### Phase 4.5 (parallel or just before Phase 5): WorldGenerator Boss-Room Cleanup Exemption
+**Rationale:** This is explicitly still-open, deferred work from Phase 16 (BOSS-10), not solved infrastructure — must not be assumed. MAX's design (highest risk of triggering the missing exemption) makes this a hard prerequisite before MAX's boss room goes into the real spawn flow.
+**Delivers:** Boss-type-agnostic (not BossEnemy-specific) cleanup exemption logic in WorldGenerator.CleanupSection(), gated on shared-base IsAlive/_isDefeated state.
+**Avoids:** Pitfall 4 directly — recovery cost is flagged HIGH if discovered post-bug-report rather than designed upfront.
+
+### Phase 6: NOVA Boss + Dual-Body/Drone Module
+**Rationale:** Highest content and mobile-control risk of the 4 — two coordinated objects, an open design question (is the drone independently IEnemy-targetable), and the mobile thumb-budget problem makes literal PC-style dual-stick control a known foot-gun. Build last among bosses so interface adjustments discovered in Phases 3-5 are already stable.
+**Delivers:** NovaBoss : BossEnemyBase (body-evade + drone-harass concurrent behavior), toggle/possession-swap player control (MVP; not true simultaneous dual-stick), CameraFollow leash-range cap for the drone.
+**Research Flag:** The body-vs-drone IEnemy targetability decision (Architecture Q2) is a game-design call that should be resolved explicitly during this phase's planning, not defaulted silently.
+
+### Phase 7: Game Modes — 한계 시험 + 보스 러시
+**Rationale:** True integration step, analogous to WorldGenerator's role in the v3.0 milestone — depends on all 4 modules + unlock system existing and individually validated. This project's own history (Phase 15/16 blocking) shows attempting integration before individual pieces are proven causes exactly this kind of stall; do this decisively last.
+**Delivers:** GameModeManager, ModeSelectController, mode-aware DeathScreenController.RestartGame(), WorldGenerator mode-branch for the endless boss-only loop of Boss Rush mode (or a parallel simpler generator).
+**Research Flag:** The endless boss-only floor loop of Boss Rush mode is the single highest-risk piece in the entire milestone — flag for dedicated research/design discussion during phase planning, not assumed to be a simple mode toggle.
 
 ### Phase Ordering Rationale
 
-- Audio comes first because every later phase (spawn VFX, boss cues) has an inbound dependency on it, and it is the lowest-risk, most isolated piece of new work.
-- Spawn VFX is validated on the two *existing* enemy types before the boss exists, so the `Activate()`-seam wiring and `SpawningIn` FSM state are proven independently of boss complexity.
-- Boss FSM/vulnerability design and boss room content can run in parallel (different files/prefabs, no shared dependency) but both must complete before `WorldGenerator` integration, which is deliberately last because it is the highest blast-radius change to the most complex existing system (`WorldGenerator`).
-- This ordering directly avoids the pitfalls that stem from touching `WorldGenerator` before the pieces it wires together are independently proven (Pitfalls 1, 2, 4, 5 are all `WorldGenerator`-adjacent lifecycle issues that are cheaper to design correctly upfront than retrofit).
+- Dependency graph from FEATURES.md is explicit: SAMURAI has the lowest dependency surface (no slowmo/dual-control/momentum/ammo), meta-progression has almost no dependency on mechanic complexity (build early/parallel), and Boss Rush requires all 4 modules pre-existing and stable.
+- Architecture research's "risk-ordered build order" and Pitfalls research's "phase to address" columns independently converge on the identical sequence: shared infrastructure -> shared boss base -> SAMURAI -> DeadEye -> MAX -> NOVA -> game modes.
+- This mirrors the project's own documented history (v3.0 Phase 8 before Phase 9's WorldGenerator integration; v3.1 Phase 15's isolated test-room tooling before the still-blocked Phase 16 WorldGenerator integration) — the same "isolate and validate before touching the highest-fan-in file" discipline applies here.
 
 ### Research Flags
 
 Phases likely needing deeper research during planning:
-- **Phase 3 (Boss FSM + Vulnerability Design):** The invulnerable-except-opening mechanic is a novel design decision for this codebase with no existing precedent to copy — worth a focused design pass even though the underlying code pattern (targetability gate reusing the `!IsAlive` skip check) is simple.
-- **Phase 5 (WorldGenerator Integration):** Touches the most complex, highest-risk existing script; the `_activeBossCount`/chain-trim-guard interaction should be re-verified against the current `WorldGenerator.cs` at implementation time since it's easy to miss one of the 3+ places `_activeExitCount`-equivalent bookkeeping must be mirrored.
+- **Phase 3 (SAMURAI):** Exact real-device parry-window millisecond tuning is unverified (MEDIUM-LOW confidence in STACK.md) — needs on-device Android measurement, not ported from mouse/keyboard timing.
+- **Phase 4.5 (WorldGenerator exemption):** Genuinely undiscussed design space (Phase 16's own deferred item) — spawn-architecture decision (chain-slot replacement vs. branch portal) needs explicit resolution before implementation.
+- **Phase 6 (NOVA):** Control-scheme choice (toggle-swap vs. split-zone drag vs. dual-stick) is a playtesting question, not solved by this research pass — flag for an early playable-prototype pass before committing.
+- **Phase 7 (Boss Rush):** Endless boss-only loop design (fork WorldGenerator vs. parallel generator) is the highest-risk net-new architecture piece in the milestone — needs its own focused research/design pass.
 
 Phases with standard patterns (skip research-phase):
-- **Phase 1 (Audio Foundation):** Well-documented Unity built-in API (`AudioSource`/`AudioMixer`/pooling), directly analogous to the existing `WorldGenerator.Instance` singleton pattern already in the codebase.
-- **Phase 2 (Spawn VFX):** Directly mirrors the already-implemented `EnemyDeathEffect`/`FloorTransitionEffect` pattern; no new technique needed.
-- **Phase 4 (Boss Room Content):** Directly mirrors the already-implemented `ExitPortal` probabilistic-overlay pattern and existing Complex_Room prefab authoring convention.
+- **Phase 1 (shared infra):** Well-documented — PlayerPrefs, EnhancedTouch, Pointer.current are all standard, verified-stable Input System APIs; BossUnlockManager follows the project's own existing FloorManager/ScoreManager static-class convention.
+- **Phase 2 (BossEnemyBase):** Direct, mechanical extraction from existing code using the same methodology already applied to EnemyBase — no new unknowns.
+- **Phase 4 (DeadEye):** Reuses existing RangedEnemy/hold-release/Fan-shape precedent almost directly — lowest architectural novelty of the 4 mechanics.
 
 ## Confidence Assessment
 
 | Area | Confidence | Notes |
 |------|------------|-------|
-| Stack | HIGH | Built entirely on direct inspection of the existing codebase; zero new dependencies to evaluate, so uncertainty is minimal. |
-| Features | MEDIUM | Genre conventions (Dead Cells/Rogue Legacy) are well-documented via WebSearch, but no official "boss design spec" exists for this specific genre/scope combination — the anti-feature analysis (HP bar rejection) is a project-specific inference, not externally validated. |
-| Architecture | HIGH | All claims verified directly against current source in this repo; corrected a factual error in the original milestone framing (Editor-only builders vs. runtime components) during research. |
-| Pitfalls | HIGH for codebase-specific pitfalls (verified by direct source reading); MEDIUM for general Unity audio/timeScale claims (verified via WebSearch/community discussion, no official Unity doc directly addresses `AudioSource.pitch` + `Time.timeScale` interaction). |
+| Stack | MEDIUM-HIGH | Input System APIs verified against official docs (HIGH); mobile touch-latency/parry-window figures are general HCI literature, not Unity-specific or project-measured (MEDIUM) |
+| Features | MEDIUM | Genre-pattern analysis cross-checked against actual codebase (HIGH on architectural claims); no single canonical "mobile dual-control boss" source exists, so several mechanic-specific feel/risk calls are explicitly flagged LOW-MEDIUM pending playtest |
+| Architecture | HIGH | 100% codebase-derived — every claim traces to a specific file read in this session; no web research needed since this is a pure internal-architecture question |
+| Pitfalls | HIGH | Grounded in direct source inspection of the actual current implementation (not generic Unity/mobile advice); cross-referenced against this project's own planning docs and prior-milestone history |
 
-**Overall confidence:** HIGH
+**Overall confidence:** MEDIUM-HIGH
 
 ### Gaps to Address
 
-- **FloorTimer × boss room interaction is an unresolved design decision, not just an implementation detail** — whether the boss room pauses, extends, or is exempt from the 60-second countdown must be decided explicitly (documented as a Key Decision) before Phase 4 implementation, not left to be discovered during playtesting.
-- **Whether SFX should pitch-shift with `Time.timeScale` during slow-mo/hit-freeze** is an open aesthetic decision (nothing does this by default in Unity) — should be decided during Phase 1 so the `AudioManager.PlaySfx()` API shape is right the first time rather than needing every call site touched later.
-- **Whether the boss also one-shot-kills the player identically to regular enemies** (vs. needing longer/more readable telegraph timing given added attack complexity) is flagged in PITFALLS.md as a decision that must not default silently — surface this explicitly during Phase 3 planning.
-- Feature research confidence is MEDIUM (no official boss-design spec for this genre) — the anti-feature list (HP bar, multi-phase, adaptive music) should be treated as strong recommendations grounded in this project's specific core-value constraint, not universal genre truths, and can be revisited if playtesting data contradicts them.
+- **SAMURAI parry window exact timing:** No project-specific or Unity-specific benchmark exists for touch-input parry latency; must be measured on an actual minSdk-25-class low-end Android device during Phase 3, not tuned solely in Editor.
+- **MAX's fit into the IPlayerCombatModule interface:** "Movement IS the attack" may not cleanly fit the hold-slowmo-release-resolve shape the interface assumes; Architecture research explicitly flags this as the single highest-uncertainty item and defers a final answer to Phase 5 planning.
+- **NOVA's control scheme and orb-targetability:** Both are explicitly unresolved design questions (not architecture questions) across FEATURES.md, ARCHITECTURE.md, and STACK.md — all three recommend a default (toggle-swap control; single-authority targeting) but flag it for explicit confirmation, not silent adoption, during Phase 6 planning.
+- **The endless boss-only floor-loop design for Boss Rush mode (fork vs. parallel generator):** Entirely unspecified at the research stage — this is the same class of decision that stalled the prior v3.1 milestone (Phase 15/16) and should get a dedicated research/design pass before Phase 7 implementation begins.
+- **Whether unlock persistence must survive app-restart, not just within-session death/restart:** STORY.md's framing implies real save-game persistence, but this is not explicitly confirmed against PROJECT.md's stated scope — recommend confirming this as a written decision during Phase 1 planning rather than defaulting silently.
 
 ## Sources
 
 ### Primary (HIGH confidence)
-- Direct inspection of `Assets/Scripts/World/{WorldGenerator,ExitPortal,EnemySpawner,FloorTimer,FloorManager,RoomConnector,FloorTransitionEffect,ScoreManager,RuntimeMaskSprite,GameBootstrapper}.cs`
-- Direct inspection of `Assets/Scripts/Enemy/{IEnemy,MeleeEnemy,RangedEnemy,EnemyDeathEffect}.cs`, `Assets/Scripts/Player/{CombatController,PlayerController,InvincibilityHandler}.cs`, `Assets/Scripts/Camera/CameraFollow.cs`, `Assets/Scripts/Room/RoomClearCondition.cs`
-- Direct inspection of `Assets/Editor/{PortalEffectBuilder,HitSparkBuilder}.cs` (confirmed Editor-only, not runtime — corrected an error in the original milestone framing)
-- Direct inspection of `Packages/manifest.json`/`packages-lock.json` (confirmed no new UPM packages needed)
-- `.planning/PROJECT.md` (milestone requirements, decision log, Out of Scope list)
+- Direct codebase inspection across all 4 research passes: Assets/Scripts/Player/CombatController.cs, PlayerController.cs, InputManager.cs, ChronoGaugeController.cs, RollController.cs, InvincibilityHandler.cs, RangeDisplay.cs; Assets/Scripts/Enemy/BossEnemy.cs, EnemyBase.cs, IEnemy.cs, ISpawnGatable.cs, MeleeEnemy.cs; Assets/Scripts/World/WorldGenerator.cs, FloorManager.cs, ScoreManager.cs, GameBootstrapper.cs; Assets/Scripts/UI/AttackSelectController.cs, AttackTypeSelector.cs, MainMenuController.cs, DeathScreenController.cs; Assets/InputSystem_Actions.inputactions; Packages/manifest.json
+- .planning/PROJECT.md, .planning/phases/16-boss-room-lifecycle/16-CONTEXT.md, .planning/phases/15-fsm/15-06-PLAN.md, STORY.md — milestone scope, deferred Phase 16 gaps, prior-milestone history
+- https://docs.unity3d.com/Packages/com.unity.inputsystem@1.19/manual/Touch.html — EnhancedTouch multi-touch API
+- https://docs.unity3d.com/Packages/com.unity.inputsystem@1.19/manual/OnScreen.html — OnScreenStick/OnScreenButton
+- https://docs.unity3d.com/Packages/com.unity.inputsystem@1.19/manual/UISupport.html — InputSystemUIInputModule multi-pointer handling
 
 ### Secondary (MEDIUM confidence)
-- Unity official docs (`docs.unity3d.com/Manual/class-AudioSource.html`) and WebSearch on Unity 6 2D mobile audio best practice (AudioMixer as baseline before middleware)
-- Unity Discussions threads on `PlayOneShot` performance/pooling and `AudioSource.pitch` vs. `Time.timeScale` interaction
-- Boss design references: Dead Cells Wiki (Conjunctivius), GameDesignSkills, Game Developer/Gamasutra boss battle design articles
-- Unity ScriptableObject boss attack-pattern FSM authoring pattern search (confirms SO-Strategy pattern is a recognized but premature alternative for this milestone's scope)
+- General mobile touch-latency figures (50-200ms commercial touchscreen latency, ~69-96ms tap-perception JND) — general HCI/mobile literature, not Unity-specific
+- Genre-precedent analysis (Sekiro/Cuphead parry, Resident Evil/Enter the Gungeon ammo tension, Dark Souls/Zelda environmental-bait bosses, R-Type Force-pod dual-entity, Hades/Risk of Rain single-loadout roguelike, Mega Man/Cuphead boss-rush structure) — training-data genre-pattern knowledge, cross-checked against codebase constraints
+- Touch Controls for Mobile Games (Cursa), Display Response Time / Parry Timing (KTC Play) — corroborate touch-latency and parry-window-widening recommendations
 
 ### Tertiary (LOW confidence)
-- NeoGAF community discussion cited only as design grounding for the Titan Souls one-hit-kill-both-ways precedent (Pitfall 3) — illustrative, not authoritative
-- Tortuga Soundtracks blog on 2026 indie audio strategy — marketing-adjacent, used only for general "bake audio in early" consensus framing
+- Endless/roguelike mode structure comparison (single-pass WebSearch synthesis, not cross-verified against a canonical source) — informs the fixed-endpoint-vs-endless framing between the two game modes only
 
 ---
-*Research completed: 2026-07-08*
+*Research completed: 2026-07-20*
 *Ready for roadmap: yes*
