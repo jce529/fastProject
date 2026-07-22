@@ -4,15 +4,16 @@ using UnityEngine;
 /// <summary>
 /// ATCK-02, ATCK-03, ATCK-04, FEEL-01: Core combat state machine.
 ///
-/// Owns the slow-motion lifecycle (enter on Attack held, exit on release or gauge empty),
-/// dash to nearest enemy (MovePosition over 3 FixedUpdate frames), whiff branch,
-/// hit-freeze sequence, and _isBusy lockout to prevent re-entrance.
+/// Owns the slow-motion lifecycle (enter on Attack held, exit on release or gauge empty)
+/// and the _isBusy lockout to prevent re-entrance. Targeting and dash/whiff resolution are
+/// delegated to _activeModule (IPlayerCombatModule — Phase 18 INFRA-01), which currently
+/// hosts OverclockModule, the F.I.O.R.A combat logic.
 ///
 /// Does NOT own the gauge — ChronoGaugeController handles drain/regen.
 /// Does NOT own range display — RangeDisplay (Plan 02-03) handles visual feedback.
 ///
 /// Review fixes applied:
-///   [HIGH]   Obstacle linecast: ExecuteDash linecast-checks the path before dashing;
+///   [HIGH]   Obstacle linecast: the active module linecast-checks the path before dashing;
 ///            blocked path converts the attack to a whiff.
 ///   [MEDIUM] Slow-mo timeout: maxSlowMoDuration safety timer prevents infinite slow-mo
 ///            if Input System drops the release event.
@@ -78,6 +79,10 @@ public class CombatController : MonoBehaviour
     // -- Enemy highlight tracking ---------------------------------------------------
     private IEnemy _lastHighlighted;
 
+    // -- Combat module (Phase 18 INFRA-01) ------------------------------------------
+    private IPlayerCombatModule _activeModule;
+    private CombatContext _ctx;
+
     private void Awake()
     {
         _rb                   = GetComponent<Rigidbody2D>();
@@ -97,6 +102,34 @@ public class CombatController : MonoBehaviour
         // [HIGH — Gemini] Default/Ground/Platform layers contain walls and floors for the obstacle linecast.
         // Enemy layer is deliberately excluded — an enemy standing behind another enemy must not block targeting.
         _obstacleMask   = LayerMask.GetMask("Default", "Ground", "Platform");
+
+        _activeModule = new OverclockModule();
+        _ctx = new CombatContext
+        {
+            Rb                   = _rb,
+            SpriteRenderer       = _spriteRenderer,
+            Animator             = _animator,
+            TrailRenderer        = _trailRenderer,
+            Invincibility        = _invincibilityHandler,
+            CameraFollow         = _cameraFollow,
+            Gauge                = _gauge,
+            MainCamera           = _mainCamera,
+            HitSparkPrefab       = _hitSparkPrefab,
+            DashDuration         = dashDuration,
+            HitFreezeDuration    = hitFreezeDuration,
+            PostKillLockout      = postKillLockout,
+            WhiffLockout         = whiffLockout,
+            CameraShakeDuration  = _cameraShakeDuration,
+            CameraShakeAmplitude = _cameraShakeAmplitude,
+            SearchRadius         = searchRadius,
+            FanRadius            = fanRadius,
+            FanHalfAngleDeg      = fanHalfAngleDeg,
+            LinearHalfAngleDeg   = linearHalfAngleDeg,
+            EnemyFilter          = _enemyFilter,
+            HitBuffer            = _hitBuffer,
+            ObstacleMask         = _obstacleMask,
+            SetAttackCooldown    = sec => _attackCooldown = sec,
+        };
     }
 
     private void Start()
@@ -141,7 +174,7 @@ public class CombatController : MonoBehaviour
 
         // 공격 대기 중 — 가장 가까운 적 하이라이트 갱신 (D-04)
         if (_isAttackPending && !_isBusy)
-            UpdateHighlight(FindNearestEnemyInRange());
+            UpdateHighlight(_activeModule.FindTarget((Vector2)transform.position, _ctx));
 
         // Gauge-empty auto-exit: slow-mo ends but player can still release to dash
         if (_isSlowMo && _gauge.IsEmpty)
@@ -234,91 +267,19 @@ public class CombatController : MonoBehaviour
         // 하이라이트된 적을 우선 사용, 없으면 재탐색
         var target = (cachedTarget != null && cachedTarget.IsAlive)
             ? cachedTarget
-            : FindNearestEnemyInRange();
+            : _activeModule.FindTarget((Vector2)transform.position, _ctx);
         if (target != null)
         {
-            yield return ExecuteDash(target);
+            ExitSlowMotion();
+            yield return _activeModule.Resolve(target, _ctx);
         }
         else
         {
-            yield return ExecuteWhiff();
+            yield return _activeModule.Whiff(_ctx);
         }
 
         _animator?.SetBool("IsAttacking", false);
         _isBusy = false;
-    }
-
-    private IEnumerator ExecuteDash(IEnemy target)
-    {
-        if (target == null)
-        {
-            Debug.LogError("[Combat] ExecuteDash: TARGET IS NULL at start! Aborting.");
-            yield break;
-        }
-
-        // 1. ExitSlowMotion BEFORE first yield — ensures MovePosition runs at timeScale=1
-        ExitSlowMotion();
-
-        Vector2 startPos    = _rb.position;
-        Vector2 destination = (Vector2)((MonoBehaviour)target).transform.position;
-        Vector2 dirToTarget = (destination - startPos).normalized;
-
-        // 3. 대상 방향으로 스프라이트 전환
-        _spriteRenderer.flipX = destination.x < startPos.x;
-
-        // 4. Setup visual, animation, invincibility
-        _animator?.SetBool("IsDashing", true);
-        _invincibilityHandler.StartInvincibility(dashDuration + 0.05f);
-        if (_trailRenderer != null) _trailRenderer.emitting = true;
-        _rb.linearVelocity = Vector2.zero;
-
-        // 5. 대시 이동 (smoothstep 보간으로 가속-감속 느낌)
-        float elapsed = 0f;
-        while (elapsed < dashDuration)
-        {
-            float t = elapsed / dashDuration;
-            float smooth = t * t * (3f - 2f * t); // smoothstep
-            _rb.MovePosition(Vector2.Lerp(startPos, destination, smooth));
-            elapsed += Time.fixedDeltaTime;
-            yield return new WaitForFixedUpdate();
-        }
-        _rb.MovePosition(destination);
-
-        // 6. Cleanup visual and animation
-        _animator?.SetBool("IsDashing", false);
-        if (_trailRenderer != null) _trailRenderer.emitting = false;
-
-        // 6. Kill and effects — D-08(Phase 16): 점수 적립 호출은 각 적의 OnDashHit()(EnemyBase 공통 부분,
-        // 16-03에서 구현)로 이동했다 — 여기서는 더 이상 점수 적립 API를 직접 호출하지 않는다.
-        target.OnDashHit();
-        AudioManager.PlaySfx(Sfx.Slash); // SFX-03/D-05: 처치 확정 순간 슬래시 — HitFreeze 이전 호출, DSP는 timeScale=0 중에도 계속 재생
-        SpawnHitSpark(destination);
-        _cameraFollow?.Shake(_cameraShakeDuration, _cameraShakeAmplitude);
-        yield return StartCoroutine(HitFreeze(hitFreezeDuration));
-
-        _attackCooldown = postKillLockout;
-        _gauge.AddKillBonus();
-    }
-
-    private IEnumerator ExecuteWhiff()
-    {
-        Debug.Log("[Combat] Executing Whiff (Penalty)");
-        _animator?.SetTrigger("Whiff");
-
-        // Longer lockout than kill — ATCK-04: whiff penalty must be clearly longer
-        yield return new WaitForSecondsRealtime(whiffLockout);
-    }
-
-    private IEnumerator HitFreeze(float realSeconds)
-    {
-        // FEEL-01: world freeze. Both timeScale AND fixedDeltaTime must be zeroed.
-        Time.timeScale      = 0f;
-        Time.fixedDeltaTime = 0f;
-        // WaitForSecondsRealtime is mandatory — WaitForSeconds never resumes when timeScale=0 (Pitfall 2)
-        yield return new WaitForSecondsRealtime(realSeconds);
-        // Restore both — forgetting fixedDeltaTime causes physics to stop permanently (Pitfall 5)
-        Time.timeScale      = 1f;
-        Time.fixedDeltaTime = 0.02f;
     }
 
     // -- Hit impact (D-07, D-10) ----------------------------------------------------
@@ -335,71 +296,7 @@ public class CombatController : MonoBehaviour
         trail.colorGradient = grad;
     }
 
-    /// <summary>D-07: 처치 위치에 히트 스파크 이펙트를 재생한다.</summary>
-    private void SpawnHitSpark(Vector2 position)
-    {
-        if (_hitSparkPrefab == null) return;
-        Instantiate(_hitSparkPrefab, position, Quaternion.identity);
-    }
-
     // -- Enemy detection -----------------------------------------------------------
-
-    /// <summary>D-06(Phase 16): FindNearestEnemyInRange()의 Linear/Fan 두 분기가 거의 동일하게
-    /// 복붙하던 마우스→월드 방향 계산을 통합. 마우스가 origin과 거의 겹치는 예외 상황
-    /// (sqrMagnitude 낮음)에는 Vector2.right로 폴백 — 기존 Fan 분기에만 있던 안전장치를
-    /// Linear 분기에도 동일하게 적용한다(정상 플레이 동작 변경 없음, 극단적 edge case만 보강).</summary>
-    private Vector2 GetMouseWorldDirection(Vector2 origin)
-    {
-        UnityEngine.InputSystem.Mouse mouse = UnityEngine.InputSystem.Mouse.current;
-        Vector2 mousePos = mouse != null ? mouse.position.ReadValue() : (Vector2)_mainCamera.WorldToScreenPoint(origin);
-        Vector3 mouseWorld = _mainCamera.ScreenToWorldPoint(new Vector3(mousePos.x, mousePos.y, Mathf.Abs(_mainCamera.transform.position.z)));
-        Vector2 dir = (Vector2)mouseWorld - origin;
-        return dir.sqrMagnitude > 0.001f ? dir.normalized : Vector2.right;
-    }
-
-    private IEnemy FindNearestEnemyInRange()
-    {
-        Vector2 origin = (Vector2)transform.position;
-
-        // D-06(Phase 16): Linear/Fan 분기가 거의 동일했던 마우스→월드 방향 계산을 헬퍼로 통합.
-        Vector2 attackDir = GetMouseWorldDirection(origin);
-        float currentMaxDist = (AttackTypeSelector.Selected == AttackType.Linear) ? searchRadius : fanRadius;
-
-        // Pre-allocated buffer — no GC (ROADMAP Stack Constraint)
-        int count = Physics2D.OverlapCircle(origin, searchRadius, _enemyFilter, _hitBuffer);
-
-        IEnemy nearest    = null;
-        float  bestSqDist = float.MaxValue;
-
-        for (int i = 0; i < count; i++)
-        {
-            var enemy = _hitBuffer[i].GetComponent<IEnemy>();
-            // Skip dead enemies — physics broadphase may lag behind collider.enabled=false (Pitfall 6)
-            if (enemy == null || !enemy.IsAlive) continue;
-
-            Vector2 targetPos = (Vector2)_hitBuffer[i].transform.position;
-            Vector2 toTarget = targetPos - origin;
-            float dist = toTarget.magnitude;
-
-            // Shape and distance filter: checks specific arc/beam and radius
-            if (!IsInAttackShape(toTarget / dist, dist, attackDir, currentMaxDist)) continue;
-
-            // Wall/platform block check — physics query, so runs last (most expensive filter).
-            // Blocked candidates are skipped; the loop keeps scanning remaining candidates so a
-            // farther-but-unobstructed enemy can still be selected as `nearest`.
-            if (Physics2D.Linecast(origin, targetPos, _obstacleMask)) continue;
-
-            // SqrMagnitude avoids sqrt — sufficient for closest-enemy comparison
-            float sqDist = dist * dist;
-            if (sqDist < bestSqDist)
-            {
-                bestSqDist = sqDist;
-                nearest    = enemy;
-            }
-        }
-
-        return nearest;
-    }
 
     /// <summary>
     /// Update enemy highlight (D-04): red on nearest, clear previous.
@@ -415,21 +312,5 @@ public class CombatController : MonoBehaviour
             if (sr != null) sr.color = Color.red;
         }
         _lastHighlighted = nearest;
-    }
-
-    /// <summary>
-    /// Filter enemies by attack shape and distance.
-    /// Linear mode: checks narrow beam towards aim.
-    /// Fan mode: checks forward-facing arc and fan radius.
-    /// </summary>
-    private bool IsInAttackShape(Vector2 normalizedToTarget, float distance, Vector2 attackDir, float maxDistance)
-    {
-        if (distance > maxDistance) return false;
-
-        float dot = Vector2.Dot(attackDir, normalizedToTarget);
-        float thresholdAngle = (AttackTypeSelector.Selected == AttackType.Linear) ? linearHalfAngleDeg : fanHalfAngleDeg;
-        float cosHalf = Mathf.Cos(thresholdAngle * Mathf.Deg2Rad);
-
-        return dot >= cosHalf;
     }
 }
