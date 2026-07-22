@@ -1,3 +1,4 @@
+using System.Collections;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -21,6 +22,9 @@ public class DebugRoomTeleporter : MonoBehaviour
     [Header("Boss (D-11)")]
     [SerializeField] private GameObject _bossPrefab;
 
+    [Header("TEMPORARY — Phase 18 체크포인트 플레이테스트 편의용 (Phase 16 정식 기능 아님, 완료 후 제거)")]
+    [SerializeField] private bool _autoTriggerOnStart = false;
+
     // 모든 인스턴스가 공유하는 static 상태 — 다른 텔레포터로 전환 시 이전 방 정리 보장
     private static GameObject s_lastDebugRoom;
     private static Vector3    s_nextSpawnPos = Vector3.zero;
@@ -34,6 +38,23 @@ public class DebugRoomTeleporter : MonoBehaviour
     {
         _player          = FindFirstObjectByType<PlayerController>();
         _playerTransform = _player != null ? _player.transform : null;
+    }
+
+    // TEMPORARY — Phase 18 체크포인트 플레이테스트 편의용. 트리거 존 진입+Up Arrow 입력 없이
+    // 씬 시작 시 자동으로 TeleportToRoom()을 1회 실행한다. Phase 16 정식 보스 룸 스폰 구현이
+    // 완료되면 이 필드/메서드를 통째로 제거할 것 (또는 _autoTriggerOnStart를 false로 되돌릴 것).
+    private void Start()
+    {
+        if (_autoTriggerOnStart) StartCoroutine(AutoTriggerAfterFrame());
+    }
+
+    private IEnumerator AutoTriggerAfterFrame()
+    {
+        // WorldGenerator.Start()가 시작 룸 텔레포트(플레이어를 Vector3.zero 기준 시작 룸 ExitSpawnPoint로
+        // 이동)를 먼저 끝내도록 한 프레임 양보한다 — 그래야 이 자동 텔레포트가 그 위치를 덮어써서
+        // 최종적으로 플레이어가 보스 룸에 있게 된다.
+        yield return null;
+        TeleportToRoom();
     }
 
     private void OnTriggerEnter2D(Collider2D other)
