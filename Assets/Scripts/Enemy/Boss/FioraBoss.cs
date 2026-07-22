@@ -2,21 +2,22 @@ using System.Collections;
 using UnityEngine;
 
 /// <summary>
-/// BOSS-03/04/05/06 (Phase 15): 예고(Telegraph)→공격(Attack)→빈틈(Vulnerable) 단일 패턴 루프를 반복하는 보스 FSM.
+/// BOSS-03/04/05/06 (Phase 15): 예고(Telegraph)→공격(Attack)→빈틈(Vulnerable) 단일 패턴 루프를 반복하는
+/// F.I.O.R.A 전용 보스 FSM. Phase 18(INFRA-03)에서 범용 plumbing(defeat-guard/사망시퀀스/스폰게이팅/
+/// 피격하이라이트)이 BossEnemyBase로 추출되고 이 클래스(BossEnemy.cs에서 rename)는 F.I.O.R.A 고유
+/// 패턴 루프만 담는다.
 /// IEnemy.IsAlive는 MeleeEnemy/RangedEnemy와 다르게 "생존 여부"가 아니라 "현재 타겟 가능(빈틈) 여부"로
 /// 오버로드된다 — CombatController.FindNearestEnemyInRange()의 기존 !enemy.IsAlive 스킵 체크를 그대로
 /// 재사용해 빈틈 상태에서만 돌진 대상이 되도록 한다(로드맵 Implementation Notes, D-locked). 실제 처치 여부는
-/// 별도의 _isDefeated 플래그로 관리한다(15-RESEARCH.md Pitfall 2 — IsAlive를 처치 판정에 재사용하면
-/// CombatController.ExecuteDash()의 ~0.15초 대시 이동 시간 동안 빈틈 창이 닫히는 레이스 컨디션으로 히트가
-/// 무시될 수 있음).
+/// 별도의 _isDefeated 플래그(BossEnemyBase.Die()가 설정)로 관리한다(15-RESEARCH.md Pitfall 2 — IsAlive를
+/// 처치 판정에 재사용하면 CombatController.ExecuteDash()의 ~0.15초 대시 이동 시간 동안 빈틈 창이 닫히는
+/// 레이스 컨디션으로 히트가 무시될 수 있음).
 /// D-10: 신규 아트 없음 — 기존 MeleeEnemy 스프라이트/애니메이터를 재사용하며 프리팹 단계(15-03)에서 크기/색조만 변형.
-/// D-12 SUPERSEDED(15-CONTEXT.md): Phase 16(EnemyBase 리팩토링)이 점수 적립 시점을
-/// CombatController.ExecuteDash()에서 각 적의 OnDashHit()로 옮기면서 CombatController는 더 이상
-/// 무조건적으로 AddKillScore()를 호출하지 않는다 — BossEnemy는 EnemyBase를 상속하지 않으므로 이 흐름에
-/// 아예 포함되지 않아 비치명타 상쇄 로직이 불필요해졌다(OnDashHit() 참조).
 /// </summary>
-public class BossEnemy : MonoBehaviour, IEnemy, ISpawnGatable
+public class FioraBoss : BossEnemyBase
 {
+    public const string BossId = "Fiora"; // D-03(18-02): BossUnlockManager.Unlock/IsUnlocked 키
+
     private const int RequiredHits = 7; // BOSS-04: 정확히 7회 피격 시 처치
 
     // -- Telegraph & Attack (D-01, D-04) --------------------------------------------
@@ -49,74 +50,21 @@ public class BossEnemy : MonoBehaviour, IEnemy, ISpawnGatable
     private enum BossState { Telegraph, Attack, Vulnerable, HitReaction, Dead }
     private BossState _state = BossState.Telegraph;
 
-    // -- Runtime refs --------------------------------------------------------------------
-    private Rigidbody2D    _rb;
-    private Animator       _animator;
-    private SpriteRenderer _sr;
-    private Transform      _playerTransform;
-    private CameraFollow   _cameraFollow;
-    private Coroutine      _patternCoroutine;
-    private Color          _baseColor; // D-10: 프리팹에 지정된 보스 전용 색조 — Telegraph/Attack 복귀 시 기준색(Pitfall 3 일반화)
-
-    private int  _hitCount;   // BOSS-05: private, UI/Inspector 바인딩 없음
-    private bool _isDefeated; // OnDashHit()이 유일하게 참조하는 종료 플래그 — IsAlive(빈틈 여부)와 분리 (Pitfall 2)
-
-    // -- IEnemy --------------------------------------------------------------------------
-    public bool IsAlive { get; private set; } = true; // MeleeEnemy와 동일 기본값 — SetSpawnGate(true)가 스폰 중 false로 전환
+    private int _hitCount; // BOSS-05: private, UI/Inspector 바인딩 없음
 
     // -------------------------------------------------------------------------------
 
-    private void Awake()
+    protected override void Awake()
     {
-        _rb        = GetComponent<Rigidbody2D>();
-        _animator  = GetComponent<Animator>();
-        _sr        = GetComponent<SpriteRenderer>();
-        _baseColor = _sr.color; // D-10: BossEnemyPrefabBuilder(15-03)가 지정한 색조를 기준색으로 캡처
-
-        var player = FindFirstObjectByType<PlayerController>();
-        _playerTransform = player != null ? player.transform : null;
-
-        var cam = Camera.main;
-        _cameraFollow = cam != null ? cam.GetComponent<CameraFollow>() : null;
-
+        base.Awake();
         if (_meleeHitbox     != null) _meleeHitbox.enabled     = false;
         if (_exclamationIcon != null) _exclamationIcon.enabled = false;
     }
 
-    private void Start()
+    // -- Player death listener cleanup hook (base.OnPlayerDied 골격 재사용) -----------
+
+    protected override void OnPlayerDiedCleanup()
     {
-        // SPWN-02 호환: EnemySpawner.Activate() 경로는 SetSpawnGate(true)를 Awake보다 먼저 호출하므로
-        // 이 시점에 IsAlive == false다 — 그 경우 패턴은 SetSpawnGate(false)가 열릴 때 시작된다.
-        // D-11 DebugRoomTeleporter 직접 Instantiate 경로(15-03)는 SetSpawnGate 호출이 없어 IsAlive == true
-        // 그대로이므로 여기서 즉시 시작한다.
-        if (IsAlive && _patternCoroutine == null && !_isDefeated)
-            _patternCoroutine = StartCoroutine(PatternLoop());
-    }
-
-    private void OnEnable()
-    {
-        PlayerController.OnPlayerDeath += OnPlayerDied;
-    }
-
-    private void OnDisable()
-    {
-        PlayerController.OnPlayerDeath -= OnPlayerDied;
-    }
-
-    // -- ISpawnGatable (SPWN-01/02, Phase 14 파이프라인 재사용 전제) -------------------
-
-    public void SetSpawnGate(bool isSpawning)
-    {
-        IsAlive = !isSpawning;
-        if (!isSpawning && _patternCoroutine == null && !_isDefeated)
-            _patternCoroutine = StartCoroutine(PatternLoop());
-    }
-
-    // -- Player death listener -------------------------------------------------------
-
-    private void OnPlayerDied()
-    {
-        if (_patternCoroutine != null) { StopCoroutine(_patternCoroutine); _patternCoroutine = null; }
         if (_exclamationIcon != null) _exclamationIcon.enabled = false;
         if (_meleeHitbox     != null) _meleeHitbox.enabled     = false;
         _animator?.SetBool("isMoving", false);
@@ -124,7 +72,7 @@ public class BossEnemy : MonoBehaviour, IEnemy, ISpawnGatable
 
     // -- Pattern loop (BOSS-03: 예고→공격→빈틈 단일 패턴 반복, D-01/D-02/D-03/D-04/D-05) --
 
-    private IEnumerator PatternLoop()
+    protected override IEnumerator PatternLoop()
     {
         while (true)
         {
@@ -190,9 +138,9 @@ public class BossEnemy : MonoBehaviour, IEnemy, ISpawnGatable
         }
     }
 
-    // -- IEnemy.OnDashHit (BOSS-04, D-12(SUPERSEDED), Pitfall 1/2/6) ------------------------------
+    // -- IEnemy.OnDashHit (BOSS-04, Pitfall 1/2/6) ------------------------------
 
-    public void OnDashHit()
+    public override void OnDashHit()
     {
         if (_isDefeated) return; // 오직 처치 여부만 가드 — IsAlive(빈틈 여부)는 절대 참조하지 않는다 (Pitfall 2)
 
@@ -201,20 +149,12 @@ public class BossEnemy : MonoBehaviour, IEnemy, ISpawnGatable
         _hitCount++;
         if (_hitCount >= RequiredHits) // Pitfall 1: 증가 후 >= 비교 — 정확히 7회째에 처치
         {
-            _isDefeated = true;
-            IsAlive = false;
-            Die();
+            Die(bossMaskRiseDuration, bossParticleColor, bossParticleBurstCount,
+                bossDeathShakeDuration, bossDeathShakeAmplitude, BossId);
             return;
         }
 
-        // D-12 SUPERSEDED(15-CONTEXT.md, Phase 16 discuss-phase 세션): 원안은 CombatController.ExecuteDash()가
-        // OnDashHit() 직후 무조건 ScoreManager.AddKillScore(false)(+100)를 호출한다는 전제로, 비치명타마다
-        // 그 +100을 SubtractScore()로 상쇄하는 설계였다. Phase 16(EnemyBase 리팩토링)이 점수 적립 호출을
-        // CombatController에서 각 적의 OnDashHit()(EnemyBase 공통부)로 옮기면서 CombatController는 더 이상
-        // 무조건적으로 점수를 더하지 않는다(CombatController.cs:291-293 확인) — BossEnemy는 EnemyBase를
-        // 상속하지 않아 이 흐름 자체에 포함되지 않으므로, 상쇄할 점수가 애초에 존재하지 않는다.
-        // 따라서 1~6회차 비치명타는 점수 관련 호출을 전혀 하지 않는다.
-
+        // 1~6회차 비치명타는 점수 관련 호출을 전혀 하지 않는다 (15-CONTEXT.md D-12 SUPERSEDED).
         _patternCoroutine = StartCoroutine(HitReactionAndReset());
     }
 
@@ -251,28 +191,6 @@ public class BossEnemy : MonoBehaviour, IEnemy, ISpawnGatable
         _patternCoroutine = StartCoroutine(PatternLoop());
     }
 
-    // -- 처치 (BOSS-04/06, D-08/D-09) --------------------------------------------------
-
-    private void Die()
-    {
-        _state = BossState.Dead;
-        if (_patternCoroutine != null) { StopCoroutine(_patternCoroutine); _patternCoroutine = null; }
-        if (_meleeHitbox     != null) _meleeHitbox.enabled     = false;
-        if (_exclamationIcon != null) _exclamationIcon.enabled = false;
-
-        if (_rb != null) { _rb.linearVelocity = Vector2.zero; _rb.bodyType = RigidbodyType2D.Static; }
-        foreach (var c in GetComponents<Collider2D>()) c.enabled = false;
-        _animator?.SetBool("isDead", true);
-
-        var deathEffect = GetComponent<EnemyDeathEffect>();
-        if (deathEffect == null) deathEffect = gameObject.AddComponent<EnemyDeathEffect>();
-        deathEffect.ConfigureIntensity(bossMaskRiseDuration, bossParticleColor, bossParticleBurstCount); // D-08
-        StartCoroutine(deathEffect.PlayDeathSequence(_animator));
-
-        _cameraFollow?.Shake(bossDeathShakeDuration, bossDeathShakeAmplitude); // D-08
-        ScoreManager.AddBossKillScore(); // BOSS-06/D-09 — 7회째 히트 자체는 EnemyBase 경로를 거치지 않아 별도 KillScore 적립이 없으므로, 보스 보너스만 그대로 가산
-    }
-
     // -- Physics / melee hit (플레이어 원샷킬 — MeleeEnemy.OnTriggerEnter2D()와 동일 패턴) --
 
     private void OnTriggerEnter2D(Collider2D other)
@@ -286,11 +204,7 @@ public class BossEnemy : MonoBehaviour, IEnemy, ISpawnGatable
 
     // -- IEnemy.ClearHighlight override (Pitfall 3 — 하드코딩된 흰색이 빈틈 색조를 지우는 문제 방지) ----
 
-    public void ClearHighlight()
-    {
-        if (_sr == null) return;
-        _sr.color = (_state == BossState.Vulnerable) ? vulnerableTintColor : _baseColor;
-    }
+    protected override Color GetHighlightColor() => (_state == BossState.Vulnerable) ? vulnerableTintColor : _baseColor;
 
     // -- Helpers --------------------------------------------------------------------
 

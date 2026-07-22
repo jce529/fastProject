@@ -39,7 +39,7 @@ public static class BossEnemyPrefabBuilder
         var oldMelee = clone.GetComponent<MeleeEnemy>();
         if (oldMelee != null) Object.DestroyImmediate(oldMelee);
 
-        var boss = clone.AddComponent<BossEnemy>();
+        var boss = clone.AddComponent<FioraBoss>();
 
         var exclamation = clone.transform.Find("ExclamationIcon")?.GetComponent<SpriteRenderer>();
         var hitbox      = clone.transform.Find("MeleeHitbox")?.GetComponent<Collider2D>();
