@@ -668,6 +668,16 @@ Plans:
 
 ---
 
+### Phase 18.1: FioraBoss AI 패턴을 FIORA.md 컨셉(맵 종단 돌진 + 랜덤 빈틈 타이밍)에 맞춰 재설계 (INSERTED)
+
+**Goal:** FioraBoss.PatternLoop()가 FIORA.md 보스 패턴 스펙(맵 끝에서 끝으로 연속 돌진 공격 + 랜덤 타이밍 빈틈)대로 동작한다 — 기존 제자리 근접 공격(Telegraph→Attack) 컨셉을 룸 경계 왕복 연속 돌진으로 대체하고, BOSS-03/04/05/06 판정 로직은 회귀 없이 유지한다.
+**Requirements**: 없음 (formal REQ-ID 미매핑 — urgent-work 삽입 Phase, 18.1-CONTEXT.md D-01~D-08을 요구사항 앵커로 사용. BOSS-03/04/05/06은 must-not-regress 참고용으로만 참조)
+**Depends on:** Phase 18
+**Plans:** 1 plan (1 wave)
+
+Plans:
+- [ ] 18.1-01-PLAN.md — FioraBoss.PatternLoop() 룸 경계 기반 연속 돌진 패턴 재작성 + BossEnemy.prefab Rigidbody2D Interpolate 수정 (D-01~D-08)
+
 ### Phase 19: SAMURAI 보스 & 패링 모듈 & 모듈 선택 UI 확장
 **Goal**: 튜토리얼 보스 SAMURAI를 격파하면 패링 모듈이 최초로 해금되고, 플레이어는 확장된 N-way 선택 화면(screen)에서 해금/잠금 상태를 확인하며 모듈을 골라 시작할 수 있다
 **Depends on**: Phase 18
