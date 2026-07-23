@@ -122,7 +122,7 @@ Full decision log lives in `.planning/PROJECT.md` Key Decisions table. Recent hi
 | 260715-kci | WorldGenerator.cs RemoveTail/RemoveHead/FloorTransitionSequence 중복 정리 로직을 CleanupSection() 헬퍼로 추출 (Phase 16 사전 정지 작업) | 2026-07-15 | 646a5f4 | [260715-kci-worldgenerator-cs-removetail-removehead-](./quick/260715-kci-worldgenerator-cs-removetail-removehead-/) |
 | 260720-f16 | STORY.md — F.I.O.R.A/DeadEye/SAMURAI/MAX/NOVA 5개 보스 세계관, 보스 해금 구조, 게임 모드 2종(한계 시험/보스 러시) 추가 | 2026-07-20 | 9362b94, 8e6d96a | [260720-f16-story-md-fiora-deadeye-samurai-max-nova-](./quick/260720-f16-story-md-fiora-deadeye-samurai-max-nova-/) |
 | 260722-okm | DebugRoomTeleporter에 임시 자동 트리거 플래그 추가 — Play 시 즉시 Room_BossFsmTest/FioraBoss로 텔레포트(Phase 18 체크포인트 플레이테스트 편의용) | 2026-07-22 | eaf5983, d3da7e6 | [260722-okm-room-bossfsmtest-fioraboss-worldgenerato](./quick/260722-okm-room-bossfsmtest-fioraboss-worldgenerato/) |
-| 260723-fwf | 디버그 전용 Scene(DebugScene.unity) 신설 — WorldGenerator 흐름과 완전 분리된 고정좌표 Player+FioraBoss 배치, GameBootstrapper 예외 처리로 DebugScene Play 시 격리 실행, 우측 하단 버튼으로 SampleScene 복귀 | 2026-07-23 | (pending) | [260723-fwf-scene-worldgenerator](./quick/260723-fwf-scene-worldgenerator/) |
+| 260723-fwf | 디버그 전용 Scene(DebugScene.unity) 신설 — WorldGenerator 흐름과 완전 분리된 고정좌표 Player+FioraBoss 배치, GameBootstrapper 예외 처리로 DebugScene Play 시 격리 실행, 우측 하단 버튼으로 SampleScene 복귀 | 2026-07-23 | 6ccaa34, cde9242 | [260723-fwf-scene-worldgenerator](./quick/260723-fwf-scene-worldgenerator/) |
 
 ---
 
