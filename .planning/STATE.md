@@ -1,13 +1,13 @@
 ---
 gsd_state_version: 1.0
-milestone: v4.0
-milestone_name: — 보스 캐릭터 확장 & 게임 모드
+milestone: v3.1
+milestone_name: — 보스 룸 & 연출 고도화
 status: executing
-stopped_at: "Checkpoint reached in 18-02-PLAN.md Task 3 (checkpoint:human-verify) -- Task 1/2 complete, awaiting manual Unity playtest"
-last_updated: "2026-07-23T02:26:54.769Z"
-last_activity: 2026-07-23 -- Completed quick task 260723-fwf: DebugScene.unity 신설 (WorldGenerator 분리, FioraBoss 고정좌표 디버깅)
+stopped_at: Phase 18.1 context gathered
+last_updated: "2026-07-23T03:18:45.367Z"
+last_activity: 2026-07-22 -- Phase 18 execution started
 progress:
-  total_phases: 15
+  total_phases: 16
   completed_phases: 6
   total_plans: 30
   completed_plans: 27
@@ -47,6 +47,10 @@ Progress: [░░░░░░░░░░] 0/7 v4.0 phases complete (Phase 18-24
 ---
 
 ## Accumulated Context
+
+### Roadmap Evolution
+
+- Phase 18.1 inserted after Phase 18: FioraBoss AI 패턴을 FIORA.md 컨셉(맵 종단 돌진 + 랜덤 빈틈 타이밍)에 맞춰 재설계 (URGENT) — Phase 15에서 잠긴 BOSS-03/04(예고→빈틈 단일 루프, 매 사이클 고정 1초 빈틈)는 5개 보스가 공유하는 범용 프레임워크로 의도적으로 단순하게 만들어졌으나, 이후(2026-07-20, quick 260720-f16) FIORA.md에 추가된 펜싱/레이피어 컨셉("맵 끝~끝 연속 돌진, 랜덤 타이밍 빈틈")과 실제 구현이 어긋남을 사용자가 지적 — 문서만 갱신되고 코드는 갱신 안 됨
 
 ### Key Decisions Locked for v3.1 (2026-07-08 roadmap kickoff)
 
@@ -135,8 +139,8 @@ Full decision log lives in `.planning/PROJECT.md` Key Decisions table. Recent hi
 3. Read `.planning/REQUIREMENTS.md` / `.planning/ROADMAP.md` — v4.0 Phase 18-24 already defined
 4. Next action: `/gsd:discuss-phase 18` 또는 곧바로 `/gsd:plan-phase 18`으로 v4.0 첫 Phase(공유 인프라) 계획 시작 — ROADMAP.md/REQUIREMENTS.md는 이미 Phase 18-24로 완성됨
 
-**Last session:** 2026-07-22T02:56:24.141Z
-**Stopped at:** Checkpoint reached in 18-02-PLAN.md Task 3 (checkpoint:human-verify) -- Task 1/2 complete, awaiting manual Unity playtest
+**Last session:** 2026-07-23T03:18:45.361Z
+**Stopped at:** Phase 18.1 context gathered
 
 ### Parked Milestone: v3.1 (보스 룸 & 연출 고도화) — 재개 방법
 
