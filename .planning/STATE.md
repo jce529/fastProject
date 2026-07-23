@@ -1,11 +1,11 @@
 ---
 gsd_state_version: 1.0
-milestone: v3.1
-milestone_name: — 보스 룸 & 연출 고도화
+milestone: v4.0
+milestone_name: — 보스 캐릭터 확장 & 게임 모드
 status: executing
 stopped_at: Phase 18.1 context gathered
 last_updated: "2026-07-23T03:18:45.367Z"
-last_activity: 2026-07-22 -- Phase 18 execution started
+last_activity: 2026-07-23 -- Phase 18.1(FioraBoss AI 패턴 재설계) context 수집 완료
 progress:
   total_phases: 16
   completed_phases: 6
