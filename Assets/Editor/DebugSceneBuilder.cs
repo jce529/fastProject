@@ -76,7 +76,9 @@ public static class DebugSceneBuilder
             Debug.LogWarning($"[DebugSceneBuilder] {BossPrefabPath} not found — DebugScene will have no boss to debug.");
         }
 
-        // 4. 고정 카메라 — CameraFollow 없이 이 격리된 소구역(x:0~6 근방)만 정적으로 프레이밍
+        // 4. CameraFollow + CameraBound 재사용 — 룸 전체를 아우르는 바운드 안에서만 카메라가 플레이어를
+        //    추적한다(Phase 18.1 deviation, 사용자 플레이테스트 피드백). WorldGenerator/DebugRoomTeleporter의
+        //    기존 SnapToRoom 배선 패턴과 동일 컨벤션 — DebugSceneCameraBinder가 Start() 1회 연결한다.
         var camGO = new GameObject("Main Camera");
         camGO.tag = "MainCamera";
         var cam = camGO.AddComponent<Camera>();
@@ -84,6 +86,17 @@ public static class DebugSceneBuilder
         cam.orthographicSize = 8f;
         camGO.transform.position = entryPos + new Vector3(4f, 3f, -10f);
         camGO.AddComponent<AudioListener>();
+
+        var camFollow = camGO.AddComponent<CameraFollow>();
+        var camFollowSO = new SerializedObject(camFollow);
+        camFollowSO.FindProperty("target").objectReferenceValue = playerCopy.transform;
+        camFollowSO.ApplyModifiedProperties();
+
+        var camBinder = camGO.AddComponent<DebugSceneCameraBinder>();
+        var camBinderSO = new SerializedObject(camBinder);
+        camBinderSO.FindProperty("_cameraFollow").objectReferenceValue   = camFollow;
+        camBinderSO.FindProperty("_roomRoot").objectReferenceValue       = roomInstance.transform;
+        camBinderSO.ApplyModifiedProperties();
 
         // 5. Canvas + EventSystem + 우측 하단 "메인 씬으로" 버튼
         var canvasGO = new GameObject("Canvas");

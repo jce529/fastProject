@@ -78,6 +78,17 @@ public static class RoomBossFsmTestBuilder
         // BossEnemy.prefab을 nested prefab instance로 미리 심어둔다 — 기존 DebugRoomTeleporter._bossPrefab의
         // "텔레포트 시점 즉시 Instantiate" 동작을 prefab-build 시점으로 이전한 것. WorldGenerator/EnemySpawner의
         // Melee/Ranged 전용 EnemyType 계약은 전혀 건드리지 않는다(D-13 취지, 정밀한 변경).
+        // Phase 18.1 deviation (사용자 플레이테스트 피드백) — 룸 전체를 아우르는 CameraBound.
+        // DebugSceneCameraBinder/DebugRoomTeleporter가 CameraFollow.SnapToRoom(Bounds)로 재사용한다.
+        // 폭은 ENT/EXIT 스팬(28)+여유, 높이는 사실상 무제한(천장 없는 개방형 테스트 룸이라 수직 클램프 불필요).
+        var camBoundGO = new GameObject("CameraBound");
+        camBoundGO.transform.SetParent(root.transform, false);
+        camBoundGO.transform.localPosition = new Vector3(0f, 10f, 0f);
+        camBoundGO.AddComponent<CameraBound>();
+        var camBoundSO = new SerializedObject(camBoundGO.GetComponent<CameraBound>());
+        camBoundSO.FindProperty("_size").vector2Value = new Vector2(30f, 40f);
+        camBoundSO.ApplyModifiedProperties();
+
         var bossPrefab = AssetDatabase.LoadAssetAtPath<GameObject>(BossPrefabPath);
         if (bossPrefab == null)
         {
