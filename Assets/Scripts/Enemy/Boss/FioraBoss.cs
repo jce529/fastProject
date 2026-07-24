@@ -22,9 +22,9 @@ public class FioraBoss : BossEnemyBase
     private const int RequiredHits = 7; // BOSS-04: 정확히 7회 피격 시 처치
 
     // -- Dash pattern (D-01~D-08, Phase 18.1 FIORA.md 재설계) --------------------------
-    [SerializeField] private float baseDashSpeed = 16f;               // D-05: _hitCount 0~1 구간 기준 속도 (units/sec)
-    private const float DashSpeedTier2Multiplier = 1.25f;              // D-03: _hitCount 2~4 구간 -> 20 u/s
-    private const float DashSpeedTier3Multiplier = 1.5f;               // D-03: _hitCount 5~6 구간 -> 24 u/s
+    [SerializeField] private float baseDashSpeed = 20f;                // D-05: _hitCount 0~1 구간 기준 속도 (units/sec) — 18.1-01 플레이테스트 피드백으로 16→20 상향
+    private const float DashSpeedTier2Multiplier = 1.25f;              // D-03: _hitCount 2~4 구간 -> 25 u/s (20×1.25)
+    private const float DashSpeedTier3Multiplier = 1.5f;               // D-03: _hitCount 5~6 구간 -> 30 u/s (20×1.5)
     [SerializeField] private float firstDashTelegraphDuration = 0.25f; // D-07: 0.2~0.3초, 사이클당 첫 돌진에만
     private const float WallDwellMin = 0.1f;                           // D-06
     private const float WallDwellMax = 0.2f;                           // D-06
@@ -49,7 +49,7 @@ public class FioraBoss : BossEnemyBase
     private bool  _boundsResolved;
 
     // -- Vulnerable window (D-02, D-03) ----------------------------------------------
-    [SerializeField] private float vulnerableDuration = 1.0f;                        // D-03: 0.8~1.2초 범위 내
+    [SerializeField] private float vulnerableDuration = 1.6f;                        // D-03: 원래 0.8~1.2초 범위였으나 18.1-01 플레이테스트 피드백("공격가능시간이 너무 짧다")으로 1.6초로 연장
     [SerializeField] private Color vulnerableTintColor = new Color(1f, 0.85f, 0.1f);  // D-02: 정지+색상 이중 신호 중 색상 축
 
     // -- Hit reaction & pattern reset (D-06, D-07) ------------------------------------
