@@ -41,18 +41,30 @@ public static class BossEnemyPrefabBuilder
 
         var boss = clone.AddComponent<FioraBoss>();
 
-        var exclamation = clone.transform.Find("ExclamationIcon")?.GetComponent<SpriteRenderer>();
-        var hitbox      = clone.transform.Find("MeleeHitbox")?.GetComponent<Collider2D>();
-        if (exclamation == null || hitbox == null)
+        var exclamation   = clone.transform.Find("ExclamationIcon")?.GetComponent<SpriteRenderer>();
+        var meleeHitboxGO = clone.transform.Find("MeleeHitbox");
+        if (exclamation == null || meleeHitboxGO == null)
         {
             Debug.LogError("[BossEnemyPrefabBuilder] ExclamationIcon/MeleeHitbox child not found on cloned MeleeEnemy structure.");
             Object.DestroyImmediate(clone);
             return;
         }
 
+        // Phase 18.1 deviation (사용자 피드백) — MeleeEnemy 구조를 그대로 물려받은 별도 자식 MeleeHitbox
+        // 콜라이더 대신, 루트 바디 콜라이더와 동일 모양의 트리거 콜라이더를 루트에 compound로 추가한다.
+        // 자식 오프셋이 루트 스케일(1.6배)과 어긋나 재발하던 정렬 버그를 구조적으로 제거하기 위함.
+        Object.DestroyImmediate(meleeHitboxGO.gameObject);
+
+        var bodyCapsule = clone.GetComponent<CapsuleCollider2D>();
+        var hitboxCapsule = clone.AddComponent<CapsuleCollider2D>();
+        hitboxCapsule.isTrigger = true;
+        hitboxCapsule.direction = bodyCapsule.direction;
+        hitboxCapsule.offset    = bodyCapsule.offset;
+        hitboxCapsule.size      = bodyCapsule.size * 1.08f; // 살짝 크게 — 경계 정밀도 여유
+
         var so = new SerializedObject(boss);
         so.FindProperty("_exclamationIcon").objectReferenceValue = exclamation;
-        so.FindProperty("_meleeHitbox").objectReferenceValue     = hitbox;
+        so.FindProperty("_meleeHitbox").objectReferenceValue     = hitboxCapsule;
         so.ApplyModifiedProperties();
 
         clone.transform.localScale = BossScale; // D-10: 크기 확대
