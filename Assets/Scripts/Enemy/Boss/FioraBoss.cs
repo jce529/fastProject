@@ -31,6 +31,9 @@ public class FioraBoss : BossEnemyBase
     [SerializeField] private SpriteRenderer _exclamationIcon;          // Child SpriteRenderer - 15-03 프리팹 빌더가 할당 (그대로 유지)
     [SerializeField] private Collider2D     _meleeHitbox;              // Child Trigger Collider2D - 15-03 프리팹 빌더가 할당 (그대로 유지)
 
+    [Header("DEBUG — 패턴 관찰용 임시 스위치 (Phase 18.1 playtest, 확인 끝나면 false로 되돌릴 것)")]
+    [SerializeField] private bool _debugDisableLethalHit = true; // TEMPORARY: 사용자 요청으로 기본값 true — 패턴 관찰 끝나면 false로 되돌려야 함 (D-08 정식 사양은 항상 즉사)
+
     // -- Dash path telegraph overlay (Phase 18.1 plan 범위 밖 deviation, 사용자 플레이테스트 피드백) --------
     // D-07 타이밍/범위(사이클당 첫 돌진 패스 전에만)는 그대로 유지, 표시 형태만 작은 느낌표 아이콘에서
     // 이번 패스의 전체 돌진 경로를 가리키는 붉은 반투명 라인 오버레이로 교체한다. _exclamationIcon은
@@ -302,6 +305,7 @@ public class FioraBoss : BossEnemyBase
         if (_meleeHitbox == null || !_meleeHitbox.enabled) return;
         if (other.CompareTag("Player"))
         {
+            if (_debugDisableLethalHit) return; // TEMPORARY: 패턴 관찰용 — 즉사 없이 그대로 관통
             PlayerController.TriggerDeath();
         }
     }
