@@ -1,16 +1,16 @@
 ---
 gsd_state_version: 1.0
-milestone: v4.0
-milestone_name: — 보스 캐릭터 확장 & 게임 모드
+milestone: v3.1
+milestone_name: — 보스 룸 & 연출 고도화
 status: executing
-stopped_at: Phase 18.1 context gathered
-last_updated: "2026-07-23T03:18:45.367Z"
-last_activity: 2026-07-23 -- Phase 18.1(FioraBoss AI 패턴 재설계) context 수집 완료
+stopped_at: Phase 18.1 Plan 01 complete (checkpoint approved 2026-07-24)
+last_updated: "2026-07-24T17:42:46+09:00"
+last_activity: 2026-07-24 -- Phase 18.1 Plan 01 Task 3 체크포인트 최종 승인, SUMMARY.md 작성
 progress:
   total_phases: 16
   completed_phases: 6
-  total_plans: 30
-  completed_plans: 27
+  total_plans: 31
+  completed_plans: 28
 ---
 
 # Project State: Fast (가칭)
@@ -35,13 +35,13 @@ progress:
 
 ## Current Position
 
-Phase: 18 (shared-infra) — EXECUTING
-Plan: 2 of 2 (18-02) — paused at checkpoint:human-verify (Task 3), Task 1/2 committed
-Status: Executing Phase 18
-Last activity: 2026-07-22 -- Phase 18 execution started
+Phase: 18.1 (fioraboss-ai-fiora-md) — Plan 01 COMPLETE (checkpoint approved 2026-07-24)
+Plan: 1 of 1 — done
+Status: Phase 18.1 execution complete, awaiting phase-level verification/roadmap close-out
+Last activity: 2026-07-24 -- 18.1-01-PLAN.md Task 3 체크포인트 최종 승인 (디버그 스위치 OFF 상태로 17개 항목 전부 통과), SUMMARY.md 작성 완료
 
 ```
-Progress: [░░░░░░░░░░] 0/7 v4.0 phases complete (Phase 18-24)
+Progress: [░░░░░░░░░░] 0/7 v4.0 phases complete (Phase 18-24) — 18.1은 v4.0 Phase 18-24 카운트 밖의 삽입 Phase
 ```
 
 ---
@@ -51,6 +51,7 @@ Progress: [░░░░░░░░░░] 0/7 v4.0 phases complete (Phase 18-24
 ### Roadmap Evolution
 
 - Phase 18.1 inserted after Phase 18: FioraBoss AI 패턴을 FIORA.md 컨셉(맵 종단 돌진 + 랜덤 빈틈 타이밍)에 맞춰 재설계 (URGENT) — Phase 15에서 잠긴 BOSS-03/04(예고→빈틈 단일 루프, 매 사이클 고정 1초 빈틈)는 5개 보스가 공유하는 범용 프레임워크로 의도적으로 단순하게 만들어졌으나, 이후(2026-07-20, quick 260720-f16) FIORA.md에 추가된 펜싱/레이피어 컨셉("맵 끝~끝 연속 돌진, 랜덤 타이밍 빈틈")과 실제 구현이 어긋남을 사용자가 지적 — 문서만 갱신되고 코드는 갱신 안 됨
+- Phase 18.1 Plan 01 완료(2026-07-24) — FioraBoss.PatternLoop() 룸 경계 돌진 재작성(908401f/8ab268f) + Task 3 체크포인트 실플레이에서 발견된 카메라 미배선/히트박스 정렬버그/물리 밀림 4건 수정(48d0147/c815704/a02ae58/c75cde8/c05ce21) + 수치 튜닝(ffe2695) + 재사용 가능한 디버그 토글 2종(b1ac85b/49ceb73, 기본 false로 원복 cf2d7a4) — 상세는 [18.1-01-SUMMARY.md](./phases/18.1-fioraboss-ai-fiora-md/18.1-01-SUMMARY.md) 참고. 디버그 스위치 OFF 정식 스펙 상태에서 17개 체크리스트 전부 통과 최종 승인
 
 ### Key Decisions Locked for v3.1 (2026-07-08 roadmap kickoff)
 
@@ -93,6 +94,11 @@ Progress: [░░░░░░░░░░] 0/7 v4.0 phases complete (Phase 18-24
 | BossEnemy.cs 신설 완료 — Telegraph→Attack→Vulnerable 단일 패턴 루프, IsAlive를 "빈틈 여부"로 오버로드 + 별도 _isDefeated로 처치 판정 분리, 7회 피격 처치 + 보스 전용 사망 연출/점수 보너스 (Plan 15-02) | BOSS-03/04/05/06 — EnemyBase를 상속하지 않는 독립 IEnemy+ISpawnGatable 구현으로 다중 히트/패턴 리셋 요구를 EnemyBase.OnDashHit()의 단발성 사망 경로와 분리. D-12(비치명타 점수 자기 상쇄) 코드는 최종 제거 — Phase 16(16-02/16-03)이 ScoreManager.AddKillScore() 호출을 CombatController.ExecuteDash()에서 EnemyBase.OnDashHit()으로 이미 옮겨서 CombatController가 보스 히트에 +100을 더 이상 주지 않으므로 상쇄할 점수 자체가 없음 (15-CONTEXT.md D-12 SUPERSEDED와 일치) |
 | BossEnemyPrefabBuilder.cs 신설 완료 — MeleeEnemy.prefab 구조 복제해 BossEnemy.prefab 생성(1.6배 스케일+진한 붉은색 틴트) + Room_Debug.prefab 배선 도구 2종, DebugRoomTeleporter._bossPrefab 필드로 EnemySpawner 우회 직접 Instantiate 스폰 배선 완료 (Plan 15-03) | BOSS-03/04/05/06/D-10/D-11 — 두 메뉴("Build BossEnemy Prefab", "Wire Boss Into Room Debug") 모두 멱등적, 실제 실행(프리팹 자산 생성/Room_Debug 배선)은 Unity 에디터 조작이 필요한 15-04로 연기. 보스는 EnemySpawner를 거치지 않고 직접 Instantiate되어 BossEnemy 기본 IsAlive=true + Start() 가드로 패턴 루프 즉시 시작(RESEARCH.md Open Question 2 권장안, Phase 16에서 EnemySpawner 경유로 교체 예정) |
 | 15-04-PLAN.md SUPERSEDED, 15-05-PLAN.md가 D-11 재논의(RE-RESOLVED) 반영해 대체 — Task 1(RoomBossFsmTestBuilder.cs)/Task 2(BossEnemyPrefabBuilder.cs 재배선) 완료, Task 3(checkpoint:human-action) 대기 중 (Plan 15-05) | D-11 RE-RESOLVED — 목적지 룸을 Room_Debug.prefab이 아니라 신규 독립 프리팹 Room_BossFsmTest.prefab으로, 진입 지점을 Room_Debug.prefab 자식이 아니라 영속 씬(SampleScene.unity)의 독립 GameObject "BossFsmTest_Teleporter"로 배치해 Phase 16의 Room_Debug 삭제와 완전히 무관하게 함. Room_Debug.prefab git diff 0 확인. 실행 환경 참고: 이 세션은 격리된 git worktree(branch worktree-agent-a6441b325656830c7)에서 작업 — 세션 시작 시 main보다 92커밋 뒤처져 있어(Phase 999.4까지만 반영) 편집 전 `git merge main --ff-only`로 무손실 동기화 후 Task 1/2 커밋(a220a39, 42d404c) 진행. Unity 에디터를 열어 Task 3 메뉴를 실행하기 전, 실제 프로젝트 체크아웃에서 `git merge worktree-agent-a6441b325656830c7 --ff-only`로 이 두 커밋을 반드시 먼저 병합해야 함(충돌 없는 순수 fast-forward) |
+| FioraBoss.PatternLoop()를 룸 경계 왕복 연속 돌진(D-01~D-08)으로 전면 재작성 완료, BossEnemy.prefab Rigidbody2D Interpolate 수정 (Plan 18.1-01 Task 1/2, 908401f/8ab268f) | FIORA.md 보스 패턴 스펙("맵 끝~끝 연속 돌진 + 랜덤 빈틈") 구현 — BOSS-03/04/05/06 판정 로직/BossEnemyBase 계약은 전혀 변경 없이 PatternLoop() 내부만 교체 |
+| 돌진 히트박스를 자식 MeleeHitbox 오브젝트에서 보스 루트의 compound trigger collider로 통합 (Plan 18.1-01 Task 3 대응, a02ae58/c75cde8) | Task 3 실플레이에서 자식 오브젝트의 수동 Y offset이 보스 1.6배 스케일과 곱해져 히트박스가 플레이어 콜라이더와 수직으로 전혀 겹치지 않던(즉사 판정 불가) 버그 발견 — 1차로 offset만 재정렬했으나, 자식 오브젝트 자체를 없애고 루트와 동일 스케일을 공유하는 compound collider로 바꿔 이 버그 클래스를 구조적으로 재발 불가능하게 함 |
+| 플레이어-적(보스+MeleeEnemy+RangedEnemy) 물리 밀림을 레이어 매트릭스가 아닌 `Physics2D.IgnoreCollision`로 제거 (Plan 18.1-01 Task 3 대응, c05ce21) | Enemy×PlayerHurtbox 레이어 쌍을 매트릭스에서 끄면 트리거 기반 피격판정과 OverclockModule.FindTarget()의 Enemy 레이어 타겟팅이 함께 죽음 — 특정 콜라이더 쌍(바디-바디)에만 `IgnoreCollision`을 걸어 트리거 판정은 그대로 유지 |
+| DebugScene 전용 CameraFollow/CameraBound 배선 + 신규 DebugSceneCameraBinder.cs (Plan 18.1-01 Task 3 대응, 48d0147) | DebugScene.unity Main Camera에 CameraFollow가 아예 없어 새 돌진 패턴이 화면 밖에서 발생하던 버그 — SampleScene/WorldGenerator/DebugRoomTeleporter는 전혀 건드리지 않고 DebugScene 전용 최소 바인더로 해결 |
+| baseDashSpeed 16→20u/s, vulnerableDuration 1.0→1.6s로 재조정, 재사용 가능한 디버그 토글 2종(`_debugDisableLethalHit`/`_debugSkipDashPhase`, 기본 false) 추가 (Plan 18.1-01 Task 3 대응, ffe2695/b1ac85b/49ceb73/cf2d7a4) | 사용자 플레이테스트 피드백(돌진 속도/빈틈 지속시간 체감 재조정) + 패턴/피격판정 디버깅 편의를 위한 임시 스위치 — 디버그 스위치는 삭제하지 않고 기본 false로 남겨 향후 재사용 가능 |
 
 ### Key Decisions Locked (v1.0/v2.0/v3.0)
 
@@ -139,8 +145,8 @@ Full decision log lives in `.planning/PROJECT.md` Key Decisions table. Recent hi
 3. Read `.planning/REQUIREMENTS.md` / `.planning/ROADMAP.md` — v4.0 Phase 18-24 already defined
 4. Next action: `/gsd:discuss-phase 18` 또는 곧바로 `/gsd:plan-phase 18`으로 v4.0 첫 Phase(공유 인프라) 계획 시작 — ROADMAP.md/REQUIREMENTS.md는 이미 Phase 18-24로 완성됨
 
-**Last session:** 2026-07-23T03:18:45.361Z
-**Stopped at:** Phase 18.1 context gathered
+**Last session:** 2026-07-24T17:42:46+09:00
+**Stopped at:** Phase 18.1 Plan 01 complete — Task 3 체크포인트 최종 승인, SUMMARY.md 작성 완료. 다음 행동: phase-level 검증(gsd-verifier) 및 로드맵 phase-complete 처리(오케스트레이터)
 
 ### Parked Milestone: v3.1 (보스 룸 & 연출 고도화) — 재개 방법
 
@@ -158,4 +164,4 @@ v4.0 완료 후 v3.1 잔여 범위(Phase 15 Task 3 이후, Phase 16/17)를 재�
 
 ---
 *State initialized: 2026-05-27*
-*Last updated: 2026-07-20 — v4.0 로드맵 생성 완료 (Phase 18-24, 27/27 requirements mapped). v3.1은 Phase 15 Task 3(checkpoint:human-action)에서 파킹, 재개 절차는 "Parked Milestone" 섹션 참고.*
+*Last updated: 2026-07-24 — Phase 18.1 Plan 01(FioraBoss 룸 경계 돌진 재설계) 완료, Task 3 체크포인트 최종 승인. v4.0 로드맵은 2026-07-20 생성 완료(Phase 18-24, 27/27 requirements mapped). v3.1은 Phase 15 Task 3(checkpoint:human-action)에서 파킹, 재개 절차는 "Parked Milestone" 섹션 참고.*
