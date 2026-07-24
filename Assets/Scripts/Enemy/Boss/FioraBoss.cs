@@ -32,8 +32,8 @@ public class FioraBoss : BossEnemyBase
     [SerializeField] private Collider2D     _meleeHitbox;              // Child Trigger Collider2D - 15-03 프리팹 빌더가 할당 (그대로 유지)
 
     [Header("DEBUG — 패턴 관찰용 임시 스위치 (Phase 18.1 playtest, 확인 끝나면 false로 되돌릴 것)")]
-    [SerializeField] private bool _debugDisableLethalHit = true; // TEMPORARY: 사용자 요청으로 기본값 true — 패턴 관찰 끝나면 false로 되돌려야 함 (D-08 정식 사양은 항상 즉사)
-    [SerializeField] private bool _debugSkipDashPhase = true; // TEMPORARY: 사용자 요청 — 공격판정 디버깅용, 돌진 없이 즉시 빈틈(Vulnerable) 진입. 확인 끝나면 false로 되돌릴 것
+    [SerializeField] private bool _debugDisableLethalHit = false; // TEMPORARY: 기본값 false로 복귀 — D-08 정식 사양(즉사) 활성. 패턴 관찰 필요 시 Inspector에서 재활성화
+    [SerializeField] private bool _debugSkipDashPhase = false; // TEMPORARY: 기본값 false로 복귀 — D-01/D-02 정식 사양(돌진 랜덤 티어) 활성. 공격판정 디버깅 필요 시 Inspector에서 재활성화
 
     // -- Dash path telegraph overlay (Phase 18.1 plan 범위 밖 deviation, 사용자 플레이테스트 피드백) --------
     // D-07 타이밍/범위(사이클당 첫 돌진 패스 전에만)는 그대로 유지, 표시 형태만 작은 느낌표 아이콘에서
