@@ -40,8 +40,9 @@ public class MeleeEnemy : EnemyBase
 
     // -------------------------------------------------------------------------------
 
-    private void Awake()
+    protected override void Awake()
     {
+        base.Awake(); // Phase 18.1 deviation: EnemyBase가 플레이어와의 바디 콜라이더 IgnoreCollision 처리
         _rb            = GetComponent<Rigidbody2D>();
         _animator      = GetComponent<Animator>();
         _sr            = GetComponent<SpriteRenderer>();

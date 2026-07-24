@@ -31,6 +31,28 @@ public abstract class BossEnemyBase : MonoBehaviour, IEnemy, ISpawnGatable
         _playerTransform = player != null ? player.transform : null;
         var cam = Camera.main;
         _cameraFollow = cam != null ? cam.GetComponent<CameraFollow>() : null;
+
+        IgnorePlayerCollision(player);
+    }
+
+    /// <summary>
+    /// Phase 18.1 deviation (사용자 피드백) — 플레이어-적 물리 밀림(push-back) 제거. 이 보스의 논트리거
+    /// 바디 콜라이더(들)와 플레이어의 바디 콜라이더 사이에만 IgnoreCollision을 건다. 트리거 콜라이더
+    /// (돌진 히트박스 등, Task A 이후 루트 compound의 두 번째 CapsuleCollider2D)는 명시적으로 제외 —
+    /// 포함시키면 공격 판정 자체가 무효화된다. EnemyBase.IgnorePlayerCollision()과 동일한 근거
+    /// (레이어 매트릭스로 끄면 트리거 오버랩까지 죽고, 바디 콜라이더 레이어를 옮기면
+    /// OverclockModule.FindTarget()의 GetComponent&lt;IEnemy&gt;() 타겟팅이 회귀함).
+    /// </summary>
+    private void IgnorePlayerCollision(PlayerController player)
+    {
+        if (player == null) return;
+        var playerCollider = player.GetComponent<Collider2D>();
+        if (playerCollider == null) return;
+        foreach (var c in GetComponents<Collider2D>())
+        {
+            if (c.isTrigger) continue;
+            Physics2D.IgnoreCollision(c, playerCollider, true);
+        }
     }
 
     protected virtual void Start()

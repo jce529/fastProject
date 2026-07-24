@@ -20,6 +20,42 @@ public abstract class EnemyBase : MonoBehaviour, IEnemy, ISpawnGatable
     // -- IEnemy -----------------------------------------------------------------------
     public bool IsAlive { get; protected set; } = true;
 
+    // Phase 18.1 deviation (사용자 피드백) — 플레이어-적 물리 밀림(push-back) 제거용 바디 콜라이더 캐시.
+    private Collider2D _bodyCollider;
+
+    /// <summary>
+    /// MeleeEnemy/RangedEnemy 공통 초기화. 서브클래스는 `protected override void Awake() { base.Awake(); ... }`
+    /// 로 자신의 _rb/_animator 등을 이어서 설정한다(기존 로직 변경 없음, 호출 순서만 추가).
+    /// Phase 18.1 deviation (사용자 피드백) — 플레이어와의 물리적 밀림을 없애기 위해 이 개체의 논트리거
+    /// 바디 콜라이더와 플레이어의 바디 콜라이더 사이에만 IgnoreCollision을 건다. 공격용 트리거 콜라이더
+    /// (_meleeHitbox 등)는 별도 Collider2D 인스턴스라 전혀 영향받지 않음 — 피격판정/타겟팅 그대로 유지.
+    /// 레이어 매트릭스로 끄지 않는 이유: Enemy×PlayerHurtbox 레이어 쌍을 끄면 트리거 오버랩(피격판정)까지
+    /// 함께 죽고, 바디 콜라이더를 다른 레이어로 옮기면 OverclockModule.FindTarget()의
+    /// GetComponent&lt;IEnemy&gt;() 타겟팅에 회귀가 생긴다(둘 다 확인됨).
+    /// </summary>
+    protected virtual void Awake()
+    {
+        _bodyCollider = GetBodyCollider();
+        IgnorePlayerCollision();
+    }
+
+    private Collider2D GetBodyCollider()
+    {
+        foreach (var c in GetComponents<Collider2D>())
+            if (!c.isTrigger) return c;
+        return null;
+    }
+
+    private void IgnorePlayerCollision()
+    {
+        if (_bodyCollider == null) return;
+        var player = FindFirstObjectByType<PlayerController>();
+        if (player == null) return;
+        var playerCollider = player.GetComponent<Collider2D>();
+        if (playerCollider == null) return;
+        Physics2D.IgnoreCollision(_bodyCollider, playerCollider, true);
+    }
+
     protected virtual void OnEnable()
     {
         PlayerController.OnPlayerDeath += OnPlayerDied;
