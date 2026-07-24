@@ -33,6 +33,7 @@ public class FioraBoss : BossEnemyBase
 
     [Header("DEBUG — 패턴 관찰용 임시 스위치 (Phase 18.1 playtest, 확인 끝나면 false로 되돌릴 것)")]
     [SerializeField] private bool _debugDisableLethalHit = true; // TEMPORARY: 사용자 요청으로 기본값 true — 패턴 관찰 끝나면 false로 되돌려야 함 (D-08 정식 사양은 항상 즉사)
+    [SerializeField] private bool _debugSkipDashPhase = true; // TEMPORARY: 사용자 요청 — 공격판정 디버깅용, 돌진 없이 즉시 빈틈(Vulnerable) 진입. 확인 끝나면 false로 되돌릴 것
 
     // -- Dash path telegraph overlay (Phase 18.1 plan 범위 밖 deviation, 사용자 플레이테스트 피드백) --------
     // D-07 타이밍/범위(사이클당 첫 돌진 패스 전에만)는 그대로 유지, 표시 형태만 작은 느낌표 아이콘에서
@@ -149,6 +150,7 @@ public class FioraBoss : BossEnemyBase
 
     private void GetDashTier(int hitCount, out int minDashes, out int maxDashes, out float speed)
     {
+        if (_debugSkipDashPhase) { minDashes = 0; maxDashes = 0; speed = baseDashSpeed; return; } // TEMPORARY: 공격판정 디버깅용 즉시 빈틈 진입
         if (hitCount <= 1)      { minDashes = 3; maxDashes = 5; speed = baseDashSpeed; }                           // D-02 초반
         else if (hitCount <= 4) { minDashes = 4; maxDashes = 6; speed = baseDashSpeed * DashSpeedTier2Multiplier; } // D-02 중반
         else                    { minDashes = 5; maxDashes = 7; speed = baseDashSpeed * DashSpeedTier3Multiplier; } // D-02 막판 (5~6)

@@ -331,6 +331,7 @@ MonoBehaviour:
   _exclamationIcon: {fileID: 543834810774040916}
   _meleeHitbox: {fileID: 9100000001}
   _debugDisableLethalHit: 1
+  _debugSkipDashPhase: 1
   vulnerableDuration: 1.6
   vulnerableTintColor: {r: 1, g: 0.85, b: 0.1, a: 1}
   hitFlashColor: {r: 1, g: 1, b: 1, a: 1}
