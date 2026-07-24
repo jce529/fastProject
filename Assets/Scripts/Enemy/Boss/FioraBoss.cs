@@ -31,6 +31,15 @@ public class FioraBoss : BossEnemyBase
     [SerializeField] private SpriteRenderer _exclamationIcon;          // Child SpriteRenderer - 15-03 프리팹 빌더가 할당 (그대로 유지)
     [SerializeField] private Collider2D     _meleeHitbox;              // Child Trigger Collider2D - 15-03 프리팹 빌더가 할당 (그대로 유지)
 
+    // -- Dash path telegraph overlay (Phase 18.1 plan 범위 밖 deviation, 사용자 플레이테스트 피드백) --------
+    // D-07 타이밍/범위(사이클당 첫 돌진 패스 전에만)는 그대로 유지, 표시 형태만 작은 느낌표 아이콘에서
+    // 이번 패스의 전체 돌진 경로를 가리키는 붉은 반투명 라인 오버레이로 교체한다. _exclamationIcon은
+    // 프리팹 배선을 그대로 유지하되(과거 참조 보존, 완전 제거 금지) 더 이상 주 시각 신호로 쓰이지 않는다.
+    private const float DashPathOverlayThickness = 0.35f;
+    private static readonly Color DashPathOverlayColor = new Color(1f, 0f, 0f, 0.45f);
+    private SpriteRenderer _dashPathOverlay;
+    private static Sprite  s_dashPathSprite;
+
     // -- Room bounds cache (D-04) ------------------------------------------------------
     private float _leftBoundX;
     private float _rightBoundX;
@@ -66,6 +75,7 @@ public class FioraBoss : BossEnemyBase
         base.Awake();
         if (_meleeHitbox     != null) _meleeHitbox.enabled     = false;
         if (_exclamationIcon != null) _exclamationIcon.enabled = false;
+        CreateDashPathOverlay();
     }
 
     // -- Player death listener cleanup hook (base.OnPlayerDied 골격 재사용) -----------
@@ -74,7 +84,50 @@ public class FioraBoss : BossEnemyBase
     {
         if (_exclamationIcon != null) _exclamationIcon.enabled = false;
         if (_meleeHitbox     != null) _meleeHitbox.enabled     = false;
+        HideDashPathTelegraph();
         _animator?.SetBool("isMoving", false);
+    }
+
+    // -- Dash path telegraph overlay helpers (Phase 18.1 deviation) -------------------
+
+    private void CreateDashPathOverlay()
+    {
+        var overlayGO = new GameObject("DashPathOverlay");
+        overlayGO.transform.SetParent(transform, false);
+        _dashPathOverlay = overlayGO.AddComponent<SpriteRenderer>();
+        _dashPathOverlay.sprite = GetDashPathSprite();
+        _dashPathOverlay.color  = DashPathOverlayColor;
+        _dashPathOverlay.sortingOrder = 1; // 보스 스프라이트 위에 그려지도록
+        _dashPathOverlay.enabled = false;
+    }
+
+    private static Sprite GetDashPathSprite()
+    {
+        if (s_dashPathSprite != null) return s_dashPathSprite;
+        var tex = new Texture2D(1, 1);
+        tex.SetPixel(0, 0, Color.white);
+        tex.Apply();
+        s_dashPathSprite = Sprite.Create(tex, new Rect(0f, 0f, 1f, 1f), new Vector2(0.5f, 0.5f), 1f); // pixelsPerUnit=1 -> localScale이 그대로 world 유닛 크기
+        return s_dashPathSprite;
+    }
+
+    // fromX/toX는 월드 X 좌표 - 보스 자신의 localScale(1.6배)에 영향받지 않도록 lossyScale로 보정한다.
+    private void ShowDashPathTelegraph(float fromX, float toX)
+    {
+        if (_dashPathOverlay == null) return;
+        float midX   = (fromX + toX) * 0.5f;
+        float length = Mathf.Abs(toX - fromX);
+        Vector3 lossy = transform.lossyScale;
+        float sx = lossy.x != 0f ? lossy.x : 1f;
+        float sy = lossy.y != 0f ? lossy.y : 1f;
+        _dashPathOverlay.transform.position   = new Vector3(midX, transform.position.y, transform.position.z);
+        _dashPathOverlay.transform.localScale = new Vector3(length / sx, DashPathOverlayThickness / sy, 1f);
+        _dashPathOverlay.enabled = true;
+    }
+
+    private void HideDashPathTelegraph()
+    {
+        if (_dashPathOverlay != null) _dashPathOverlay.enabled = false;
     }
 
     // -- Pattern loop (BOSS-03: 룸 경계 기반 연속 돌진 -> 빈틈 반복, D-01~D-08) --
@@ -116,10 +169,13 @@ public class FioraBoss : BossEnemyBase
 
             for (int pass = 0; pass < dashCount; pass++)
             {
-                // D-07: 이 사이클의 첫 돌진 패스에만 짧은 예고
+                float targetX = dirX > 0f ? _rightBoundX : _leftBoundX; // 예고 오버레이가 먼저 필요해 위로 이동 (동작 변화 없음)
+
+                // D-07: 이 사이클의 첫 돌진 패스에만 짧은 예고 — 붉은 돌진 경로 오버레이 (사용자 피드백, deviation)
                 if (pass == 0)
                 {
-                    if (_exclamationIcon != null) _exclamationIcon.enabled = true;
+                    if (_exclamationIcon != null) _exclamationIcon.enabled = true; // 기존 배선 유지(과거 참조 보존), 주 시각 신호 아님
+                    ShowDashPathTelegraph(transform.position.x, targetX);
                     float teleElapsed = 0f;
                     while (teleElapsed < firstDashTelegraphDuration)
                     {
@@ -128,6 +184,7 @@ public class FioraBoss : BossEnemyBase
                         yield return null;
                     }
                     if (_exclamationIcon != null) _exclamationIcon.enabled = false;
+                    HideDashPathTelegraph();
                     if (_isDefeated) yield break;
                 }
 
@@ -136,7 +193,6 @@ public class FioraBoss : BossEnemyBase
                 _animator?.SetBool("isMoving", true);
                 if (_meleeHitbox != null) _meleeHitbox.enabled = true;
 
-                float targetX = dirX > 0f ? _rightBoundX : _leftBoundX;
                 while ((dirX > 0f && transform.position.x < targetX) ||
                        (dirX < 0f && transform.position.x > targetX))
                 {
@@ -213,6 +269,7 @@ public class FioraBoss : BossEnemyBase
         IsAlive = false; // 스태거 중에는 타겟 불가
         if (_exclamationIcon != null) _exclamationIcon.enabled = false;
         if (_meleeHitbox     != null) _meleeHitbox.enabled     = false;
+        HideDashPathTelegraph(); // Pitfall 2 레이스 컨디션으로 예고 표시 중 히트가 발생해도 잔상이 남지 않도록 방어
 
         // D-06: 색상 플래시 + 넉백/스태거 (히트스파크는 CombatController.ExecuteDash()가 모든 적 공통으로
         // 이미 SpawnHitSpark(destination)를 호출하므로 여기서 별도 재생 불필요 — CombatController.cs:295)
