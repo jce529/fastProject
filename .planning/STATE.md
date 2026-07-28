@@ -1,16 +1,16 @@
 ---
 gsd_state_version: 1.0
-milestone: v4.0
-milestone_name: 보스 캐릭터 확장 & 게임 모드
-status: executing
-stopped_at: Phase 18 + Phase 18.1 실플레이 검증 완료 (2026-07-28) -- 둘 다 전체 체크리스트 통과, Phase 19(SAMURAI) 계획 착수 가능
-last_updated: "2026-07-28T00:00:00+09:00"
-last_activity: 2026-07-28 -- Phase 18/18.1 Task 3 실제 플레이테스트 완료(전 항목 통과). DebugScene 재빌드 중 DebugSceneBuilder.cs 보스 중복 스폰 버그 발견/수정. PlayerPrefs boss_unlock_Fiora=1 확인 및 Play 재시작 후 유지 확인(UNLOCK-01)
+milestone: v3.1
+milestone_name: — 보스 룸 & 연출 고도화
+status: "Phase 18/18.1 모두 완료. Phase 19(SAMURAI) 계획(`/gsd:plan-phase 19`) 착수 가능"
+stopped_at: Phase 19 context gathered
+last_updated: "2026-07-28T12:34:42.643Z"
+last_activity: 2026-07-28 -- DebugScene 재빌드 → Phase 18/18.1 통합 체크리스트 실플레이 전부 통과. 재빌드 중 발견된 DebugSceneBuilder.cs 보스 중복 스폰 버그(Room_BossFsmTest.prefab에 이미 nested된 BossEnemy를 모르고 재차 Instantiate) 수정 및 재검증. PlayerPrefs boss_unlock_Fiora=1, Play 재시작 후에도 유지 확인(UNLOCK-01)
 progress:
   total_phases: 16
-  completed_phases: 6
+  completed_phases: 8
   total_plans: 31
-  completed_plans: 28
+  completed_plans: 30
 ---
 
 # Project State: Fast (가칭)
@@ -148,8 +148,8 @@ Full decision log lives in `.planning/PROJECT.md` Key Decisions table. Recent hi
 3. Read `.planning/REQUIREMENTS.md` / `.planning/ROADMAP.md` — v4.0 Phase 18-24 already defined
 4. Next action: Phase 18/18.1 모두 코드+실플레이 검증 완료 — `/gsd:plan-phase 19`(SAMURAI 보스 & 패링 모듈 & 모듈 선택 UI 확장)로 진행
 
-**Last session:** 2026-07-28
-**Stopped at:** Phase 18/18.1 문서 정합화 + Task 3 실제 플레이테스트까지 전부 완료. DebugSceneBuilder.cs 보스 중복 스폰 버그 수정. Phase 19 착수 가능 상태
+**Last session:** 2026-07-28T12:34:42.635Z
+**Stopped at:** Phase 19 context gathered
 
 ### Parked Milestone: v3.1 (보스 룸 & 연출 고도화) — 재개 방법
 
