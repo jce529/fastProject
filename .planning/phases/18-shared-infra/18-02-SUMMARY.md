@@ -70,7 +70,7 @@ completed: 2026-07-22
 | `BossEnemyPrefabBuilder.cs`가 `AddComponent<FioraBoss>` 사용, 구 타입 참조 0건 | PASS |
 | `BossEnemyBase.cs`에 `BossUnlockManager.Unlock` 호출 | PASS |
 
-**Task 3 (checkpoint:human-verify) 상태:** 기록 없음 — 4개 커밋(18-01 2개 + 18-02 2개)이 7분 이내(11:49~11:56)에 연속 커밋되어, 계획서가 요구하는 실제 Unity Play 플레이테스트(7회 피격 처치/패턴 리셋/사망 연출/PlayerPrefs 영속성 재시작 확인 체크리스트 6개 항목)가 수행되었다는 근거가 없다. **주의**: 18.1-VERIFICATION.md가 이후(2026-07-24) 별도로 발견한 바, `DebugScene.unity` 작업트리 상태에 보스 인스턴스가 없거나 stale — 이 Task 3의 "7회 피격 처치" 플레이테스트가 실제로 수행됐다면 그 이후 씬 편집 과정에서 보스가 제거된 것으로 추정되나 확인 불가. **Phase 19(SAMURAI) 착수 전 이 Task 3 체크리스트의 실제 플레이테스트를 권장.**
+**Task 3 (checkpoint:human-verify) 상태:** 2026-07-28에 뒤늦게 실제 플레이테스트로 확인 완료. `Fast/Debug/Build DebugScene`으로 씬을 재생성하는 과정에서 보스가 2마리 스폰되는 별도 버그를 발견 — `DebugSceneBuilder.cs`가 `Room_BossFsmTest.prefab`(D-13에서 이미 BossEnemy가 nested prefab으로 심어져 있음)을 모른 채 같은 우측 6유닛 위치에 보스를 한 번 더 Instantiate하고 있었음. 중복 Instantiate 블록 제거 후 재빌드하여 보스 1마리만 존재함을 확인. 이후 체크리스트 6개 항목(7회 피격 시 1~6회차 패턴 재시작 / 빈틈 아닐 때 타겟 안 됨 / 7회째 사망 연출+카메라 쉐이크+점수 보너스 / `PlayerPrefs`에 `boss_unlock_Fiora=1` 기록 확인(MCP RunCommand로 직접 조회) / Play 재시작 후에도 값 유지 확인) 전부 통과 승인.
 
 ## Files Created/Modified
 
@@ -78,6 +78,11 @@ completed: 2026-07-22
 - `Assets/Scripts/Enemy/Boss/BossEnemyBase.cs` (신규)
 - `Assets/Scripts/Enemy/Boss/FioraBoss.cs` (rename from `Assets/Scripts/Enemy/BossEnemy.cs`, GUID 보존)
 - `Assets/Editor/BossEnemyPrefabBuilder.cs` (수정)
+
+### Task 3 검증 중 발견된 deviation (2026-07-28)
+
+- `Assets/Editor/DebugSceneBuilder.cs` — 룸 프리팹에 이미 nested된 BossEnemy를 모른 채 별도로 한 번 더 Instantiate하던 중복 스폰 버그 수정(해당 Instantiate 블록 + `BossPrefabPath` 상수 제거, 클래스 doc 주석 정정)
+- `Assets/Scenes/DebugScene.unity` — 수정된 빌더로 재생성(보스 1마리만 존재하도록)
 
 ## User Setup Required
 

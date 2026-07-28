@@ -64,7 +64,7 @@ completed: 2026-07-22
 | `_activeModule.` 호출 4곳 | PASS |
 | `new CombatContext` 1곳 (Awake) | PASS |
 
-**Task 3 (checkpoint:human-verify) 상태:** 기록 없음 — 이 4개 커밋(18-01 2개 + 18-02 2개)이 7분 이내(11:49~11:56)에 연속 커밋되어, 계획서가 요구하는 실제 Unity Play 플레이테스트(슬로우모션/대시/헛치기/게이지소진 체크리스트 5개 항목)가 그 사이에 수행되었다는 근거가 없다. 코드 구조는 정확하나 **런타임 회귀 여부는 미확인 상태**로 남아있음 — SAMURAI(Phase 19) 착수 전 실제 플레이테스트 권장.
+**Task 3 (checkpoint:human-verify) 상태:** 2026-07-28에 뒤늦게 실제 플레이테스트로 확인 완료 — 체크리스트 5개 항목(홀드 시 슬로우모션+범위표시 / 릴리즈 시 대시-원샷처치+히트스파크/쉐이크/힛프리즈 / 범위 밖 릴리즈 시 헛치기+긴 락아웃 / 게이지 소진 후에도 릴리즈 대시 가능 / 콘솔 에러 없음) 전부 통과 승인. DebugScene 재빌드 과정에서 별도 버그(보스 중복 스폰, `DebugSceneBuilder.cs` — Room_BossFsmTest.prefab에 이미 nested된 BossEnemy를 모르고 한 번 더 Instantiate하던 문제) 발견 및 수정.
 
 ## Files Created/Modified
 

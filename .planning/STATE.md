@@ -1,11 +1,11 @@
 ---
 gsd_state_version: 1.0
-milestone: v3.1
-milestone_name: — 보스 룸 & 연출 고도화
+milestone: v4.0
+milestone_name: 보스 캐릭터 확장 & 게임 모드
 status: executing
-stopped_at: Phase 18 (18-01/18-02) + Phase 18.1 코드 완료, 문서 정합화 완료 (2026-07-28) -- Phase 18/18.1 Task 3 human-verify 플레이테스트 대기
+stopped_at: Phase 18 + Phase 18.1 실플레이 검증 완료 (2026-07-28) -- 둘 다 전체 체크리스트 통과, Phase 19(SAMURAI) 계획 착수 가능
 last_updated: "2026-07-28T00:00:00+09:00"
-last_activity: 2026-07-28 -- STATE.md/ROADMAP.md/REQUIREMENTS.md가 실제 git 이력과 어긋나 있던 것 발견(Phase 18-01/18-02는 2026-07-22에 이미 커밋됐으나 SUMMARY/체크박스 누락) -- 18-01-SUMMARY.md/18-02-SUMMARY.md 소급 작성, ROADMAP/REQUIREMENTS 체크박스 동기화
+last_activity: 2026-07-28 -- Phase 18/18.1 Task 3 실제 플레이테스트 완료(전 항목 통과). DebugScene 재빌드 중 DebugSceneBuilder.cs 보스 중복 스폰 버그 발견/수정. PlayerPrefs boss_unlock_Fiora=1 확인 및 Play 재시작 후 유지 확인(UNLOCK-01)
 progress:
   total_phases: 16
   completed_phases: 6
@@ -27,7 +27,7 @@ progress:
 
 **Last Shipped Milestone:** v3.0 — 무한 복도 층 시스템 (2026-07-08)
 
-**Current Milestone:** v4.0 — 보스 캐릭터 확장 & 게임 모드 (roadmap 완성 — Phase 18-24, 27/27 requirements mapped. Phase 18(18-01/18-02) 코드 완료 2026-07-22 + Phase 18.1 코드 완료 2026-07-24, 둘 다 Task 3/human-verify 플레이테스트 미기록 — Phase 19 착수 전 권장)
+**Current Milestone:** v4.0 — 보스 캐릭터 확장 & 게임 모드 (roadmap 완성 — Phase 18-24, 27/27 requirements mapped. Phase 18(18-01/18-02) + Phase 18.1 모두 코드+실플레이 검증 완료(2026-07-28) — Phase 19(SAMURAI) 계획 착수 가능)
 
 **Parked Milestone:** v3.1 — 보스 룸 & 연출 고도화 (Phase 13-17, Phase 15에서 human-action 체크포인트로 블로킹, 미완료 상태로 파킹 — v4.0 완료 후 재검토)
 
@@ -35,13 +35,13 @@ progress:
 
 ## Current Position
 
-Phase: 18-shared-infra (18-01/18-02) — 코드 완료 2026-07-22, Task 3 human-verify 미기록
-Phase: 18.1 (fioraboss-ai-fiora-md) — Plan 01 코드 검증 완료 (18.1-VERIFICATION.md, 2026-07-24, status: human_needed)
-Status: 두 Phase 모두 정적/코드 레벨 검증 통과. 남은 것은 (1) Phase 18의 실제 Unity 플레이테스트(18-01 Task 3 체크리스트 5개, 18-02 Task 3 체크리스트 6개) 미수행 확인, (2) 18.1-VERIFICATION.md가 지적한 DebugScene.unity 보스 미배치 working-tree 문제
-Last activity: 2026-07-28 -- STATE.md가 실제 git 이력과 어긋나 있음을 발견(18-01/18-02는 2026-07-22 커밋되었으나 STATE.md는 "Phase 18 계획 대기 중"이라고 기록). /gsd:health 실행(0건 auto-repairable) 후 18-01-SUMMARY.md/18-02-SUMMARY.md 소급 작성, ROADMAP.md/REQUIREMENTS.md 체크박스를 실제 코드 상태에 맞춰 동기화
+Phase: 18-shared-infra (18-01/18-02) — 코드+실플레이 검증 완료 (2026-07-22 코드, 2026-07-28 플레이테스트)
+Phase: 18.1 (fioraboss-ai-fiora-md) — Plan 01 코드+실플레이 검증 완료 (18.1-VERIFICATION.md status: resolved, 2026-07-28)
+Status: Phase 18/18.1 모두 완료. Phase 19(SAMURAI) 계획(`/gsd:plan-phase 19`) 착수 가능
+Last activity: 2026-07-28 -- DebugScene 재빌드 → Phase 18/18.1 통합 체크리스트 실플레이 전부 통과. 재빌드 중 발견된 DebugSceneBuilder.cs 보스 중복 스폰 버그(Room_BossFsmTest.prefab에 이미 nested된 BossEnemy를 모르고 재차 Instantiate) 수정 및 재검증. PlayerPrefs boss_unlock_Fiora=1, Play 재시작 후에도 유지 확인(UNLOCK-01)
 
 ```
-Progress: [██░░░░░░░░] 1/7 v4.0 phases 코드 완료 (Phase 18) — human-verify 플레이테스트는 별도 확인 필요. 18.1은 v4.0 Phase 18-24 카운트 밖의 삽입 Phase
+Progress: [███░░░░░░░] 1/7 v4.0 phases 완료 (Phase 18, 코드+실플레이) — 18.1은 v4.0 Phase 18-24 카운트 밖의 삽입 Phase, 완료
 ```
 
 ---
@@ -51,7 +51,8 @@ Progress: [██░░░░░░░░] 1/7 v4.0 phases 코드 완료 (Phase 
 ### Roadmap Evolution
 
 - Phase 18.1 inserted after Phase 18: FioraBoss AI 패턴을 FIORA.md 컨셉(맵 종단 돌진 + 랜덤 빈틈 타이밍)에 맞춰 재설계 (URGENT) — Phase 15에서 잠긴 BOSS-03/04(예고→빈틈 단일 루프, 매 사이클 고정 1초 빈틈)는 5개 보스가 공유하는 범용 프레임워크로 의도적으로 단순하게 만들어졌으나, 이후(2026-07-20, quick 260720-f16) FIORA.md에 추가된 펜싱/레이피어 컨셉("맵 끝~끝 연속 돌진, 랜덤 타이밍 빈틈")과 실제 구현이 어긋남을 사용자가 지적 — 문서만 갱신되고 코드는 갱신 안 됨
-- Phase 18(18-01/18-02) 문서 정합화(2026-07-28) — 실제 코드/커밋(93a19c9, 0a4748f, 74b11aa, afd85e2, 전부 2026-07-22 11:49~11:56 KST에 연속 커밋)은 이미 존재했으나 SUMMARY.md/ROADMAP 체크박스/REQUIREMENTS 체크박스/STATE.md 갱신이 누락된 채 Phase 18.1이 먼저 진행됨. gsd-verifier 없이 acceptance_criteria만 재확인 후 문서 동기화(사용자 확정) — 코드 구조는 두 플랜의 모든 must_haves/artifacts/key_links를 만족하나, 두 플랜의 Task 3(checkpoint:human-verify) 실제 플레이테스트 수행 근거가 없어 런타임 회귀 여부는 미확인 상태. 상세는 [18-01-SUMMARY.md](./phases/18-shared-infra/18-01-SUMMARY.md)/[18-02-SUMMARY.md](./phases/18-shared-infra/18-02-SUMMARY.md) 참고
+- Phase 18(18-01/18-02) 문서 정합화(2026-07-28) — 실제 코드/커밋(93a19c9, 0a4748f, 74b11aa, afd85e2, 전부 2026-07-22 11:49~11:56 KST에 연속 커밋)은 이미 존재했으나 SUMMARY.md/ROADMAP 체크박스/REQUIREMENTS 체크박스/STATE.md 갱신이 누락된 채 Phase 18.1이 먼저 진행됨. acceptance_criteria 재확인 후 문서 동기화, 이어서 같은 세션에서 Task 3 실제 플레이테스트까지 완료(아래 항목). 상세는 [18-01-SUMMARY.md](./phases/18-shared-infra/18-01-SUMMARY.md)/[18-02-SUMMARY.md](./phases/18-shared-infra/18-02-SUMMARY.md) 참고
+- Phase 18/18.1 Task 3 실플레이 검증 완료 + DebugSceneBuilder.cs 보스 중복 스폰 버그 수정(2026-07-28) — `Fast/Debug/Build DebugScene` 재빌드 과정에서 보스가 2마리 스폰되는 것을 발견: `Room_BossFsmTest.prefab`은 D-13(RoomBossFsmTestBuilder.cs)에서 이미 `BossEnemy`를 nested prefab으로 심어뒀는데, `DebugSceneBuilder.cs`가 이를 모른 채(클래스 doc 주석도 반대로 잘못 적혀 있었음) 같은 우측 6유닛 위치에 별도로 한 번 더 Instantiate하고 있었음. 중복 Instantiate 블록 + `BossPrefabPath` 상수 제거, doc 주석 정정 후 재빌드하여 보스 1마리만 존재함을 확인. 이후 Phase 18-01(슬로우모션/대시/헛치기/게이지소진) + 18-02(7회 피격 패턴 리셋/사망 연출/PlayerPrefs 해금 영속성) 통합 체크리스트 전부 통과, `PlayerPrefs.GetInt("boss_unlock_Fiora")`가 Play 재시작 후에도 1로 유지됨을 Unity RunCommand로 직접 확인
 - Phase 18.1 Plan 01 완료(2026-07-24) — FioraBoss.PatternLoop() 룸 경계 돌진 재작성(908401f/8ab268f) + Task 3 체크포인트 실플레이에서 발견된 카메라 미배선/히트박스 정렬버그/물리 밀림 4건 수정(48d0147/c815704/a02ae58/c75cde8/c05ce21) + 수치 튜닝(ffe2695) + 재사용 가능한 디버그 토글 2종(b1ac85b/49ceb73, 기본 false로 원복 cf2d7a4) — 상세는 [18.1-01-SUMMARY.md](./phases/18.1-fioraboss-ai-fiora-md/18.1-01-SUMMARY.md) 참고. 디버그 스위치 OFF 정식 스펙 상태에서 17개 체크리스트 전부 통과 최종 승인
 
 ### Key Decisions Locked for v3.1 (2026-07-08 roadmap kickoff)
@@ -123,9 +124,7 @@ Full decision log lives in `.planning/PROJECT.md` Key Decisions table. Recent hi
 
 | Date | Title | Area | File |
 |------|-------|------|------|
-| 2026-07-28 | Phase 18(18-01/18-02) Task 3 human-verify 실제 플레이테스트 수행 (슬로우모션/대시/헛치기 회귀 + 보스 7회 피격/해금 영속성) — Phase 19 착수 전 권장 | testing | [18-01-PLAN.md](./phases/18-shared-infra/18-01-PLAN.md), [18-02-PLAN.md](./phases/18-shared-infra/18-02-PLAN.md) |
-| 2026-07-28 | DebugScene.unity 보스 미배치 working-tree 문제 해결 — `Fast/Debug/Build DebugScene` 재실행 또는 수동 재배치, 커밋 여부 결정 | editor | [18.1-VERIFICATION.md](./phases/18.1-fioraboss-ai-fiora-md/18.1-VERIFICATION.md) |
-| 2026-07-28 | 신규 스크립트 9개(.meta 미커밋: CombatContext.cs, IPlayerCombatModule.cs, OverclockModule.cs, BossUnlockManager.cs, BossFsmTestPoolSwapTool.cs 등) .meta 파일 git add 필요 — GUID 드리프트 방지 | git-hygiene | (git status 참고) |
+| _None pending_ | | | |
 
 ### Quick Tasks Completed
 
@@ -136,6 +135,7 @@ Full decision log lives in `.planning/PROJECT.md` Key Decisions table. Recent hi
 | 260720-f16 | STORY.md — F.I.O.R.A/DeadEye/SAMURAI/MAX/NOVA 5개 보스 세계관, 보스 해금 구조, 게임 모드 2종(한계 시험/보스 러시) 추가 | 2026-07-20 | 9362b94, 8e6d96a | [260720-f16-story-md-fiora-deadeye-samurai-max-nova-](./quick/260720-f16-story-md-fiora-deadeye-samurai-max-nova-/) |
 | 260722-okm | DebugRoomTeleporter에 임시 자동 트리거 플래그 추가 — Play 시 즉시 Room_BossFsmTest/FioraBoss로 텔레포트(Phase 18 체크포인트 플레이테스트 편의용) | 2026-07-22 | eaf5983, d3da7e6 | [260722-okm-room-bossfsmtest-fioraboss-worldgenerato](./quick/260722-okm-room-bossfsmtest-fioraboss-worldgenerato/) |
 | 260723-fwf | 디버그 전용 Scene(DebugScene.unity) 신설 — WorldGenerator 흐름과 완전 분리된 고정좌표 Player+FioraBoss 배치, GameBootstrapper 예외 처리로 DebugScene Play 시 격리 실행, 우측 하단 버튼으로 SampleScene 복귀 | 2026-07-23 | 6ccaa34, cde9242 | [260723-fwf-scene-worldgenerator](./quick/260723-fwf-scene-worldgenerator/) |
+| 260728-dbg | DebugSceneBuilder.cs 보스 중복 스폰 버그 수정 — Room_BossFsmTest.prefab에 이미 nested된 BossEnemy를 모르고 재차 Instantiate하던 문제, 중복 블록 제거 후 DebugScene.unity 재빌드 | 2026-07-28 | c43540b | (Phase 18/18.1 재검증 세션 중 발견) |
 
 ---
 
@@ -146,10 +146,10 @@ Full decision log lives in `.planning/PROJECT.md` Key Decisions table. Recent hi
 1. Read `.planning/STATE.md` (this file) — current position and decisions
 2. Read `.planning/PROJECT.md` — Current Milestone: v4.0 (보스 캐릭터 확장 & 게임 모드)
 3. Read `.planning/REQUIREMENTS.md` / `.planning/ROADMAP.md` — v4.0 Phase 18-24 already defined
-4. Next action: Phase 18/18.1 모두 코드는 완료됐으나 Task 3 human-verify 플레이테스트가 미기록 상태 — (a) DebugScene.unity 보스 배치 문제 해결 후 실제 플레이테스트로 Phase 18/18.1 체크리스트 확인, (b) untracked .meta 9개 커밋, (c) 통과 확인되면 `/gsd:plan-phase 19`(SAMURAI)로 진행
+4. Next action: Phase 18/18.1 모두 코드+실플레이 검증 완료 — `/gsd:plan-phase 19`(SAMURAI 보스 & 패링 모듈 & 모듈 선택 UI 확장)로 진행
 
 **Last session:** 2026-07-28
-**Stopped at:** STATE.md/ROADMAP.md/REQUIREMENTS.md를 실제 git 이력에 맞춰 문서 정합화 완료(18-01-SUMMARY.md/18-02-SUMMARY.md 소급 작성). Phase 18/18.1 코드는 acceptance_criteria 재확인 결과 전부 통과하나, 두 Phase 모두 Task 3(human-verify) 실제 플레이테스트 수행 근거가 없음 — 다음 세션은 Unity 에디터에서 이를 확인하는 것으로 시작 권장
+**Stopped at:** Phase 18/18.1 문서 정합화 + Task 3 실제 플레이테스트까지 전부 완료. DebugSceneBuilder.cs 보스 중복 스폰 버그 수정. Phase 19 착수 가능 상태
 
 ### Parked Milestone: v3.1 (보스 룸 & 연출 고도화) — 재개 방법
 
@@ -167,4 +167,4 @@ v4.0 완료 후 v3.1 잔여 범위(Phase 15 Task 3 이후, Phase 16/17)를 재�
 
 ---
 *State initialized: 2026-05-27*
-*Last updated: 2026-07-24 — Phase 18.1 Plan 01(FioraBoss 룸 경계 돌진 재설계) 완료, Task 3 체크포인트 최종 승인. v4.0 로드맵은 2026-07-20 생성 완료(Phase 18-24, 27/27 requirements mapped). v3.1은 Phase 15 Task 3(checkpoint:human-action)에서 파킹, 재개 절차는 "Parked Milestone" 섹션 참고.*
+*Last updated: 2026-07-28 — Phase 18(18-01/18-02) + Phase 18.1 문서 정합화 및 Task 3 실플레이 검증 전부 완료(DebugSceneBuilder.cs 보스 중복 스폰 버그 수정 포함). v4.0 로드맵은 2026-07-20 생성 완료(Phase 18-24, 27/27 requirements mapped). v3.1은 Phase 15 Task 3(checkpoint:human-action)에서 파킹, 재개 절차는 "Parked Milestone" 섹션 참고.*

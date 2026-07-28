@@ -638,7 +638,7 @@ Plans:
 
 ## Phases
 
-- [x] **Phase 18: 공유 인프라 — 전투 모듈 추상화 & 보스 베이스** - 기존 Overclock 로직이 IPlayerCombatModule로 무손상 이관되고, BossEnemyBase가 추출되고, 보스 해금이 영구 저장된다 (코드 완료 2026-07-22, Task 3 human-verify 미기록 — 2026-07-28 문서 정합화)
+- [x] **Phase 18: 공유 인프라 — 전투 모듈 추상화 & 보스 베이스** - 기존 Overclock 로직이 IPlayerCombatModule로 무손상 이관되고, BossEnemyBase가 추출되고, 보스 해금이 영구 저장된다 (코드 완료 2026-07-22, 실플레이 검증 완료 2026-07-28)
 - [ ] **Phase 19: SAMURAI 보스 & 패링 모듈 & 모듈 선택 UI 확장** - 튜토리얼 보스 SAMURAI를 격파하면 패링 모듈이 해금되고, N-way 모듈 선택 화면에서 해금/잠금 상태를 확인하며 시작할 수 있다
 - [ ] **Phase 20: DeadEye 보스 & 탄약/재장전 모듈** - 6조준점 지정→일괄 발사→재장전 자원관리 모듈이 해금되고, DeadEye 보스는 추적 조준점 패턴으로 대응한다
 - [ ] **Phase 21: WorldGenerator 보스룸 정리 예외** - 전투 중인 보스룸이 보스 타입 무관하게 WorldGenerator의 앞뒤 자동 정리(Destroy)에서 예외 처리된다
@@ -662,11 +662,11 @@ Plans:
 
 **(2026-07-20 discuss-phase 18 세션: 플랫폼 타겟이 Android/모바일에서 PC로 재설정됨에 따라 INFRA-02(터치 조준 입력)가 이 Phase 범위에서 제거됨 — 상세는 REQUIREMENTS.md/18-CONTEXT.md 참고.)**
 
-**(2026-07-28 문서 정합화: 18-01/18-02 커밋은 2026-07-22에 이미 완료되어 있었으나 SUMMARY.md/체크박스 갱신이 누락된 채 Phase 18.1이 먼저 삽입/진행됨. 코드 레벨 acceptance_criteria는 전부 재확인 완료(각 SUMMARY.md 참고). Task 3(checkpoint:human-verify) 실제 플레이테스트 수행 근거는 없음 — Phase 19 착수 전 권장.)**
+**(2026-07-28 문서 정합화: 18-01/18-02 커밋은 2026-07-22에 이미 완료되어 있었으나 SUMMARY.md/체크박스 갱신이 누락된 채 Phase 18.1이 먼저 삽입/진행됨. 코드 레벨 acceptance_criteria 재확인 + Task 3 실제 플레이테스트로 Success Criteria 1~3 전부 통과 확인 완료(각 SUMMARY.md 참고). 검증 중 DebugSceneBuilder.cs의 보스 중복 스폰 버그를 발견해 함께 수정.)**
 
 Plans:
-- [x] 18-01-PLAN.md — IPlayerCombatModule/CombatContext/OverclockModule 추출 + CombatController host 재배선 (INFRA-01) — 코드 완료, Task 3 human-verify 미기록. 상세: [18-01-SUMMARY.md](./phases/18-shared-infra/18-01-SUMMARY.md)
-- [x] 18-02-PLAN.md — BossUnlockManager 신설 + BossEnemyBase 추출/FioraBoss rename + BossEnemyPrefabBuilder 갱신 (INFRA-03, UNLOCK-01) — 코드 완료, Task 3 human-verify 미기록. 상세: [18-02-SUMMARY.md](./phases/18-shared-infra/18-02-SUMMARY.md)
+- [x] 18-01-PLAN.md — IPlayerCombatModule/CombatContext/OverclockModule 추출 + CombatController host 재배선 (INFRA-01) — 코드+실플레이 검증 완료. 상세: [18-01-SUMMARY.md](./phases/18-shared-infra/18-01-SUMMARY.md)
+- [x] 18-02-PLAN.md — BossUnlockManager 신설 + BossEnemyBase 추출/FioraBoss rename + BossEnemyPrefabBuilder 갱신 (INFRA-03, UNLOCK-01) — 코드+실플레이 검증 완료. 상세: [18-02-SUMMARY.md](./phases/18-shared-infra/18-02-SUMMARY.md)
 
 ---
 
