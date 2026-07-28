@@ -8,9 +8,8 @@ using TMPro;
 /// <summary>
 /// Menu: Fast/Debug/Build DebugScene
 /// 층 체인 생성(월드 절차 생성) 로직과 완전히 분리된 디버그 전용 씬을 절차적으로 생성한다.
-/// Room_BossFsmTest.prefab(바닥+RoomEntry, RoomBossFsmTestBuilder.cs 산출물)을 원점에 배치하고,
-/// BossEnemy.prefab(FioraBoss)을 DebugRoomTeleporter.TeleportToRoom()과 동일하게 RoomEntry 기준
-/// 우측 6유닛 위치에 별도로 Instantiate한다(룸 프리팹 자체에는 보스가 nested되어 있지 않음).
+/// Room_BossFsmTest.prefab(바닥+RoomEntry+nested BossEnemy(FioraBoss) 인스턴스, RoomBossFsmTestBuilder.cs
+/// D-13 산출물)을 원점에 배치한다 — 보스는 룸 프리팹에 이미 심어져 있으므로 별도로 Instantiate하지 않는다.
 /// SampleScene.unity의 Player GameObject를 additive로 열어 읽기 전용 복제한 뒤 RoomEntry 위치에 놓는다.
 /// SampleScene.unity는 변경 없이 CloseScene되므로 절대 수정되지 않는다.
 /// 우측 하단 버튼(ReturnToMainSceneButton)으로 SampleScene 복귀 가능.
@@ -20,7 +19,6 @@ public static class DebugSceneBuilder
     private const string DebugScenePath  = "Assets/Scenes/DebugScene.unity";
     private const string SampleScenePath = "Assets/Scenes/SampleScene.unity";
     private const string RoomPrefabPath  = "Assets/Prefabs/Rooms/Room_BossFsmTest/Room_BossFsmTest.prefab";
-    private const string BossPrefabPath  = "Assets/Prefabs/Enemies/BossEnemy.prefab";
 
     [MenuItem("Fast/Debug/Build DebugScene")]
     public static void Build()
@@ -62,19 +60,6 @@ public static class DebugSceneBuilder
         playerCopy.transform.position = entryPos;
         var rb = playerCopy.GetComponent<Rigidbody2D>();
         if (rb != null) rb.linearVelocity = Vector2.zero;
-
-        // 3b. FioraBoss(BossEnemy.prefab) — DebugRoomTeleporter.TeleportToRoom()의 D-11 스폰 규칙(진입
-        //     지점 우측 6유닛)을 그대로 따른다. Room_BossFsmTest.prefab 자체에는 보스가 없다.
-        var bossPrefab = AssetDatabase.LoadAssetAtPath<GameObject>(BossPrefabPath);
-        if (bossPrefab != null)
-        {
-            Vector3 bossSpawnPos = entryPos + Vector3.right * 6f;
-            Object.Instantiate(bossPrefab, bossSpawnPos, Quaternion.identity, roomInstance.transform);
-        }
-        else
-        {
-            Debug.LogWarning($"[DebugSceneBuilder] {BossPrefabPath} not found — DebugScene will have no boss to debug.");
-        }
 
         // 4. CameraFollow + CameraBound 재사용 — 룸 전체를 아우르는 바운드 안에서만 카메라가 플레이어를
         //    추적한다(Phase 18.1 deviation, 사용자 플레이테스트 피드백). WorldGenerator/DebugRoomTeleporter의
