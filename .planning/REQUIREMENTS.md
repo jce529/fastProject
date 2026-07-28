@@ -9,13 +9,13 @@ Requirements for the 보스 캐릭터 확장 & 게임 모드 milestone. Each map
 
 ### 공유 인프라 (INFRA)
 
-- [ ] **INFRA-01**: CombatController의 기존 Overclock(F.I.O.R.A) 로직이 IPlayerCombatModule 인터페이스로 무손상 마이그레이션된다 (기존 동작 100% 동일, 회귀 없음)
+- [x] **INFRA-01**: CombatController의 기존 Overclock(F.I.O.R.A) 로직이 IPlayerCombatModule 인터페이스로 무손상 마이그레이션된다 (기존 동작 100% 동일, 회귀 없음) — 코드 완료 2026-07-22, Task 3 human-verify 미기록
 - ~~**INFRA-02**: 조준 방향 입력이 Mouse.current 대신 Pointer.current/EnhancedTouch 기반으로 동작해 Android 터치 기기에서도 정상 작동한다~~ **DESCOPED (2026-07-20, discuss-phase 18)** — 플랫폼 타겟이 PC로 재설정되어 터치 입력 요구사항 제거. 기존 Mouse.current 방식 유지.
-- [ ] **INFRA-03**: BossEnemy.cs에서 BossEnemyBase(EnemyBase와 별개의 형제 클래스)가 추출되어, 이후 신규 보스 4종이 이를 상속한다
+- [x] **INFRA-03**: BossEnemy.cs에서 BossEnemyBase(EnemyBase와 별개의 형제 클래스)가 추출되어, 이후 신규 보스 4종이 이를 상속한다 — 코드 완료 2026-07-22, Task 3 human-verify 미기록
 
 ### 보스 언락 진행 (UNLOCK)
 
-- [ ] **UNLOCK-01**: 보스 격파 시 해당 보스의 전투 모듈이 영구 해금된다 (PlayerPrefs 기반, 앱 재시작 후에도 유지)
+- [x] **UNLOCK-01**: 보스 격파 시 해당 보스의 전투 모듈이 영구 해금된다 (PlayerPrefs 기반, 앱 재시작 후에도 유지) — 코드 완료 2026-07-22, Task 3 human-verify 미기록
 - [ ] **UNLOCK-02**: 플레이어는 해금된 모듈 중 하나를 게임 시작 전 선택할 수 있다 (기존 AttackSelect를 N-way로 확장)
 - [ ] **UNLOCK-03**: 아직 해금되지 않은 모듈은 선택 화면에 잠금 상태로 표시된다
 
@@ -128,10 +128,10 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| INFRA-01 | Phase 18 | Pending |
+| INFRA-01 | Phase 18 | Code complete (2026-07-22), Task 3 human-verify not recorded |
 | INFRA-02 | Phase 18 | Descoped (2026-07-20, PC 전환) |
-| INFRA-03 | Phase 18 | Pending |
-| UNLOCK-01 | Phase 18 | Pending |
+| INFRA-03 | Phase 18 | Code complete (2026-07-22), Task 3 human-verify not recorded |
+| UNLOCK-01 | Phase 18 | Code complete (2026-07-22), Task 3 human-verify not recorded |
 | UNLOCK-02 | Phase 19 | Pending |
 | UNLOCK-03 | Phase 19 | Pending |
 | SAMURAI-01 | Phase 19 | Pending |

@@ -3,9 +3,9 @@ gsd_state_version: 1.0
 milestone: v3.1
 milestone_name: — 보스 룸 & 연출 고도화
 status: executing
-stopped_at: Phase 18.1 Plan 01 complete (checkpoint approved 2026-07-24)
-last_updated: "2026-07-24T17:42:46+09:00"
-last_activity: 2026-07-24 -- Phase 18.1 Plan 01 Task 3 체크포인트 최종 승인, SUMMARY.md 작성
+stopped_at: Phase 18 (18-01/18-02) + Phase 18.1 코드 완료, 문서 정합화 완료 (2026-07-28) -- Phase 18/18.1 Task 3 human-verify 플레이테스트 대기
+last_updated: "2026-07-28T00:00:00+09:00"
+last_activity: 2026-07-28 -- STATE.md/ROADMAP.md/REQUIREMENTS.md가 실제 git 이력과 어긋나 있던 것 발견(Phase 18-01/18-02는 2026-07-22에 이미 커밋됐으나 SUMMARY/체크박스 누락) -- 18-01-SUMMARY.md/18-02-SUMMARY.md 소급 작성, ROADMAP/REQUIREMENTS 체크박스 동기화
 progress:
   total_phases: 16
   completed_phases: 6
@@ -27,7 +27,7 @@ progress:
 
 **Last Shipped Milestone:** v3.0 — 무한 복도 층 시스템 (2026-07-08)
 
-**Current Milestone:** v4.0 — 보스 캐릭터 확장 & 게임 모드 (roadmap 완성 — Phase 18-24, 27/27 requirements mapped. Phase 18 계획 대기 중)
+**Current Milestone:** v4.0 — 보스 캐릭터 확장 & 게임 모드 (roadmap 완성 — Phase 18-24, 27/27 requirements mapped. Phase 18(18-01/18-02) 코드 완료 2026-07-22 + Phase 18.1 코드 완료 2026-07-24, 둘 다 Task 3/human-verify 플레이테스트 미기록 — Phase 19 착수 전 권장)
 
 **Parked Milestone:** v3.1 — 보스 룸 & 연출 고도화 (Phase 13-17, Phase 15에서 human-action 체크포인트로 블로킹, 미완료 상태로 파킹 — v4.0 완료 후 재검토)
 
@@ -35,13 +35,13 @@ progress:
 
 ## Current Position
 
-Phase: 18.1 (fioraboss-ai-fiora-md) — Plan 01 COMPLETE (checkpoint approved 2026-07-24)
-Plan: 1 of 1 — done
-Status: Phase 18.1 execution complete, awaiting phase-level verification/roadmap close-out
-Last activity: 2026-07-24 -- 18.1-01-PLAN.md Task 3 체크포인트 최종 승인 (디버그 스위치 OFF 상태로 17개 항목 전부 통과), SUMMARY.md 작성 완료
+Phase: 18-shared-infra (18-01/18-02) — 코드 완료 2026-07-22, Task 3 human-verify 미기록
+Phase: 18.1 (fioraboss-ai-fiora-md) — Plan 01 코드 검증 완료 (18.1-VERIFICATION.md, 2026-07-24, status: human_needed)
+Status: 두 Phase 모두 정적/코드 레벨 검증 통과. 남은 것은 (1) Phase 18의 실제 Unity 플레이테스트(18-01 Task 3 체크리스트 5개, 18-02 Task 3 체크리스트 6개) 미수행 확인, (2) 18.1-VERIFICATION.md가 지적한 DebugScene.unity 보스 미배치 working-tree 문제
+Last activity: 2026-07-28 -- STATE.md가 실제 git 이력과 어긋나 있음을 발견(18-01/18-02는 2026-07-22 커밋되었으나 STATE.md는 "Phase 18 계획 대기 중"이라고 기록). /gsd:health 실행(0건 auto-repairable) 후 18-01-SUMMARY.md/18-02-SUMMARY.md 소급 작성, ROADMAP.md/REQUIREMENTS.md 체크박스를 실제 코드 상태에 맞춰 동기화
 
 ```
-Progress: [░░░░░░░░░░] 0/7 v4.0 phases complete (Phase 18-24) — 18.1은 v4.0 Phase 18-24 카운트 밖의 삽입 Phase
+Progress: [██░░░░░░░░] 1/7 v4.0 phases 코드 완료 (Phase 18) — human-verify 플레이테스트는 별도 확인 필요. 18.1은 v4.0 Phase 18-24 카운트 밖의 삽입 Phase
 ```
 
 ---
@@ -51,6 +51,7 @@ Progress: [░░░░░░░░░░] 0/7 v4.0 phases complete (Phase 18-24
 ### Roadmap Evolution
 
 - Phase 18.1 inserted after Phase 18: FioraBoss AI 패턴을 FIORA.md 컨셉(맵 종단 돌진 + 랜덤 빈틈 타이밍)에 맞춰 재설계 (URGENT) — Phase 15에서 잠긴 BOSS-03/04(예고→빈틈 단일 루프, 매 사이클 고정 1초 빈틈)는 5개 보스가 공유하는 범용 프레임워크로 의도적으로 단순하게 만들어졌으나, 이후(2026-07-20, quick 260720-f16) FIORA.md에 추가된 펜싱/레이피어 컨셉("맵 끝~끝 연속 돌진, 랜덤 타이밍 빈틈")과 실제 구현이 어긋남을 사용자가 지적 — 문서만 갱신되고 코드는 갱신 안 됨
+- Phase 18(18-01/18-02) 문서 정합화(2026-07-28) — 실제 코드/커밋(93a19c9, 0a4748f, 74b11aa, afd85e2, 전부 2026-07-22 11:49~11:56 KST에 연속 커밋)은 이미 존재했으나 SUMMARY.md/ROADMAP 체크박스/REQUIREMENTS 체크박스/STATE.md 갱신이 누락된 채 Phase 18.1이 먼저 진행됨. gsd-verifier 없이 acceptance_criteria만 재확인 후 문서 동기화(사용자 확정) — 코드 구조는 두 플랜의 모든 must_haves/artifacts/key_links를 만족하나, 두 플랜의 Task 3(checkpoint:human-verify) 실제 플레이테스트 수행 근거가 없어 런타임 회귀 여부는 미확인 상태. 상세는 [18-01-SUMMARY.md](./phases/18-shared-infra/18-01-SUMMARY.md)/[18-02-SUMMARY.md](./phases/18-shared-infra/18-02-SUMMARY.md) 참고
 - Phase 18.1 Plan 01 완료(2026-07-24) — FioraBoss.PatternLoop() 룸 경계 돌진 재작성(908401f/8ab268f) + Task 3 체크포인트 실플레이에서 발견된 카메라 미배선/히트박스 정렬버그/물리 밀림 4건 수정(48d0147/c815704/a02ae58/c75cde8/c05ce21) + 수치 튜닝(ffe2695) + 재사용 가능한 디버그 토글 2종(b1ac85b/49ceb73, 기본 false로 원복 cf2d7a4) — 상세는 [18.1-01-SUMMARY.md](./phases/18.1-fioraboss-ai-fiora-md/18.1-01-SUMMARY.md) 참고. 디버그 스위치 OFF 정식 스펙 상태에서 17개 체크리스트 전부 통과 최종 승인
 
 ### Key Decisions Locked for v3.1 (2026-07-08 roadmap kickoff)
@@ -122,7 +123,9 @@ Full decision log lives in `.planning/PROJECT.md` Key Decisions table. Recent hi
 
 | Date | Title | Area | File |
 |------|-------|------|------|
-| _None pending_ | | | |
+| 2026-07-28 | Phase 18(18-01/18-02) Task 3 human-verify 실제 플레이테스트 수행 (슬로우모션/대시/헛치기 회귀 + 보스 7회 피격/해금 영속성) — Phase 19 착수 전 권장 | testing | [18-01-PLAN.md](./phases/18-shared-infra/18-01-PLAN.md), [18-02-PLAN.md](./phases/18-shared-infra/18-02-PLAN.md) |
+| 2026-07-28 | DebugScene.unity 보스 미배치 working-tree 문제 해결 — `Fast/Debug/Build DebugScene` 재실행 또는 수동 재배치, 커밋 여부 결정 | editor | [18.1-VERIFICATION.md](./phases/18.1-fioraboss-ai-fiora-md/18.1-VERIFICATION.md) |
+| 2026-07-28 | 신규 스크립트 9개(.meta 미커밋: CombatContext.cs, IPlayerCombatModule.cs, OverclockModule.cs, BossUnlockManager.cs, BossFsmTestPoolSwapTool.cs 등) .meta 파일 git add 필요 — GUID 드리프트 방지 | git-hygiene | (git status 참고) |
 
 ### Quick Tasks Completed
 
@@ -143,10 +146,10 @@ Full decision log lives in `.planning/PROJECT.md` Key Decisions table. Recent hi
 1. Read `.planning/STATE.md` (this file) — current position and decisions
 2. Read `.planning/PROJECT.md` — Current Milestone: v4.0 (보스 캐릭터 확장 & 게임 모드)
 3. Read `.planning/REQUIREMENTS.md` / `.planning/ROADMAP.md` — v4.0 Phase 18-24 already defined
-4. Next action: `/gsd:discuss-phase 18` 또는 곧바로 `/gsd:plan-phase 18`으로 v4.0 첫 Phase(공유 인프라) 계획 시작 — ROADMAP.md/REQUIREMENTS.md는 이미 Phase 18-24로 완성됨
+4. Next action: Phase 18/18.1 모두 코드는 완료됐으나 Task 3 human-verify 플레이테스트가 미기록 상태 — (a) DebugScene.unity 보스 배치 문제 해결 후 실제 플레이테스트로 Phase 18/18.1 체크리스트 확인, (b) untracked .meta 9개 커밋, (c) 통과 확인되면 `/gsd:plan-phase 19`(SAMURAI)로 진행
 
-**Last session:** 2026-07-24T17:42:46+09:00
-**Stopped at:** Phase 18.1 Plan 01 complete — Task 3 체크포인트 최종 승인, SUMMARY.md 작성 완료. 다음 행동: phase-level 검증(gsd-verifier) 및 로드맵 phase-complete 처리(오케스트레이터)
+**Last session:** 2026-07-28
+**Stopped at:** STATE.md/ROADMAP.md/REQUIREMENTS.md를 실제 git 이력에 맞춰 문서 정합화 완료(18-01-SUMMARY.md/18-02-SUMMARY.md 소급 작성). Phase 18/18.1 코드는 acceptance_criteria 재확인 결과 전부 통과하나, 두 Phase 모두 Task 3(human-verify) 실제 플레이테스트 수행 근거가 없음 — 다음 세션은 Unity 에디터에서 이를 확인하는 것으로 시작 권장
 
 ### Parked Milestone: v3.1 (보스 룸 & 연출 고도화) — 재개 방법
 
