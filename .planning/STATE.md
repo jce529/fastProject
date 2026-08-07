@@ -36,7 +36,7 @@ progress:
 ## Current Position
 
 Phase: 25 (camera-system-overhaul) — EXECUTING
-Plan: 3 of 3 (25-02 완료, 25-03 대기 — 통합 플레이테스트 검증)
+Plan: 3 of 3 (25-02 완료, 25-03 체크포인트 부분 검증 — 연쇄 대시 가능해질 때까지 보류, 아래 참고)
 Phase: 18.1 (fioraboss-ai-fiora-md) — Plan 01 코드+실플레이 검증 완료 (18.1-VERIFICATION.md status: resolved, 2026-07-28)
 Status: Ready to execute
 Last activity: 2026-08-07
@@ -61,6 +61,7 @@ Progress: [███░░░░░░░] 1/7 v4.0 phases 완료 (Phase 18, 코
 - `gsd-tools roadmap update-plan-progress 25` 실행 시 무관한 백로그 섹션(Phase 999.2)의 "Plans: 3/4 plans executed" 문구를 "1/3 plans executed"로 잘못 덮어씀(정규식이 phase 25가 아닌 다른 "Plans:" 라인을 매칭한 것으로 추정) — 수동으로 원복. 재현 시 `roadmap update-plan-progress` 실행 후 반드시 `git diff .planning/ROADMAP.md`로 의도치 않은 섹션 변경 여부를 확인할 것
 - Phase 25 Plan 02 완료(2026-08-07): `OverclockModule.Resolve()`의 대시 생명주기 3개 지점(대시 시작/이동 완료/HitFreeze 종료)에 25-01이 만든 `CameraFollow` 훅 3종(`SetAimLeadSuppressed`/`RequestDynamicZoom`/`ReleaseDynamicZoom`)을 배선(d95f2e8) — 대시 속도는 `Rigidbody2D.linearVelocity`(대시 중 0으로 고정) 대신 `dashDistance/ctx.DashDuration`으로 직접 계산(Pitfall 1 회피). `Resolve()` 외 메서드/기존 로직 diff 0, 순수 추가 변경 4줄만 삽입. 상세는 [25-02-SUMMARY.md](./phases/25-camera-system-overhaul/25-02-SUMMARY.md) 참고 — 다음: 25-03이 D-01~D-10 통합 플레이테스트 검증 수행
 - `gsd-tools roadmap update-plan-progress 25` 재실행 시 Phase 999.2 백로그 "Plans:" 라인이 재차 클로버됨(동일 버그 재현, 위 항목 참고) — 이번에도 수동 원복(`git diff .planning/ROADMAP.md` 확인 후 "3/4 plans executed"로 복원). 도구 자체 수정은 이 Plan 범위 밖이므로 매번 수동 확인/원복 필요
+- Phase 25-03 체크포인트 부분 진행(2026-08-07): 12개 체크리스트 중 1,2,4,5,6,7,11,12번 실플레이 통과. 10번(히트스탑 셰이크)은 실플레이 대신 코드 검증으로 확인 — `OverclockModule.cs` `Resolve()`에서 `ctx.CameraFollow?.Shake(...)`가 `HitFreeze()` 직전에 호출되고(값/위치 변경 없음, 기존 로직), `CameraFollow.cs` 셰이크 감쇠가 `Time.unscaledDeltaTime` 기반이라 `Time.timeScale=0`인 HitFreeze 중에도 정상 진행됨을 확인 — 통과로 간주. **3번(대시 중 리드 억제)/8·9번(텐션 캐치업)은 미검증 상태로 보류** — 연쇄 대시(3회 이상 처치 체인) 상황 자체가 아직 만들어지지 않아 실플레이 확인 불가. 사용자 결정: Phase 25를 완료 처리하지 않고, 연쇄 대시가 가능한 상황이 만들어지면(예: 근처에 적이 여럿 있는 상황) 재테스트 후 최종 승인. `25-03-SUMMARY.md` 미생성, ROADMAP.md Phase 25 체크박스 미완료 상태 유지, `update_roadmap`/`verify_phase_goal` 단계 보류
 
 ### Key Decisions Locked for v3.1 (2026-07-08 roadmap kickoff)
 
