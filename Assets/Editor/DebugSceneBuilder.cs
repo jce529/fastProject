@@ -19,6 +19,7 @@ public static class DebugSceneBuilder
     private const string DebugScenePath  = "Assets/Scenes/DebugScene.unity";
     private const string SampleScenePath = "Assets/Scenes/SampleScene.unity";
     private const string RoomPrefabPath  = "Assets/Prefabs/Rooms/Room_BossFsmTest/Room_BossFsmTest.prefab";
+    private const string SamuraiRoomPrefabPath = "Assets/Prefabs/Rooms/Room_SamuraiFsmTest/Room_SamuraiFsmTest.prefab"; // Plan 19-05
 
     [MenuItem("Fast/Debug/Build DebugScene")]
     public static void Build()
@@ -83,6 +84,32 @@ public static class DebugSceneBuilder
         camBinderSO.FindProperty("_roomRoot").objectReferenceValue       = roomInstance.transform;
         camBinderSO.ApplyModifiedProperties();
 
+        // 4.5. Room_SamuraiFsmTest 텔레포터 pad + DebugCombatModuleSwitcher (Plan 19-05, D-14/D-18)
+        //      SAMURAI-01~05를 DebugScene에서 실제로 플레이 검증할 수 있는 환경 확장 — 기존
+        //      Room_BossFsmTest 배치/카메라 로직은 위에서 이미 끝났고, 이 블록은 순수 추가다.
+        var samuraiRoomPrefab = AssetDatabase.LoadAssetAtPath<GameObject>(SamuraiRoomPrefabPath);
+        if (samuraiRoomPrefab == null)
+        {
+            Debug.LogError($"[DebugSceneBuilder] {SamuraiRoomPrefabPath} not found — run 'Fast/Phase19/Build Room_SamuraiFsmTest' first.");
+            return;
+        }
+
+        var samuraiTeleporterGO = new GameObject("ToSamuraiRoom_Teleporter");
+        var samuraiTeleporterCol = samuraiTeleporterGO.AddComponent<BoxCollider2D>();
+        samuraiTeleporterCol.isTrigger = true;
+        samuraiTeleporterCol.size = new Vector2(1f, 1f);
+        samuraiTeleporterGO.transform.position = entryPos + new Vector3(10f, 0f, 0f); // ENT/EXIT 28유닛 스팬 안쪽, 플레이어 스폰에서 도보 접근 가능
+
+        var samuraiTeleporter = samuraiTeleporterGO.AddComponent<DebugRoomTeleporter>();
+        var samuraiTeleporterSO = new SerializedObject(samuraiTeleporter);
+        samuraiTeleporterSO.FindProperty("targetRoomPrefab").objectReferenceValue = samuraiRoomPrefab; // _bossPrefab은 비워둠 — SamuraiBoss는 룸 프리팹에 이미 nested됨
+        samuraiTeleporterSO.ApplyModifiedProperties();
+
+        var moduleSwitcher = playerCopy.AddComponent<DebugCombatModuleSwitcher>();
+        var moduleSwitcherSO = new SerializedObject(moduleSwitcher);
+        moduleSwitcherSO.FindProperty("_combatController").objectReferenceValue = playerCopy.GetComponent<CombatController>();
+        moduleSwitcherSO.ApplyModifiedProperties();
+
         // 5. Canvas + EventSystem + 우측 하단 "메인 씬으로" 버튼
         var canvasGO = new GameObject("Canvas");
         var canvas = canvasGO.AddComponent<Canvas>();
@@ -144,6 +171,6 @@ public static class DebugSceneBuilder
 
         AssetDatabase.SaveAssets();
         AssetDatabase.Refresh();
-        Debug.Log($"[DebugSceneBuilder] Created {DebugScenePath} — Room_BossFsmTest + FioraBoss(BossEnemy.prefab) + cloned Player(from SampleScene, read-only) + static camera + bottom-right return button. Build Settings updated (idempotent). SampleScene.unity was opened additively and closed without saving — untouched.");
+        Debug.Log($"[DebugSceneBuilder] Created {DebugScenePath} — Room_BossFsmTest + FioraBoss(BossEnemy.prefab) + cloned Player(from SampleScene, read-only) + static camera + bottom-right return button + Room_SamuraiFsmTest 텔레포터 pad + DebugCombatModuleSwitcher(숫자키 1/2/3). Build Settings updated (idempotent). SampleScene.unity was opened additively and closed without saving — untouched.");
     }
 }

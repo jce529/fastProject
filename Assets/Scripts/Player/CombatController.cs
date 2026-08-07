@@ -149,6 +149,11 @@ public class CombatController : MonoBehaviour
         }
     }
 
+    /// <summary>D-18 대체 — 실제 로비 UI 없이 DebugScene에서 즉시 모듈을 바꿔 테스트하기 위한
+    /// 디버그 전용 훅. DebugCombatModuleSwitcher가 호출한다. 정식 플로우(Awake 시점 결정)는
+    /// 변경하지 않는다.</summary>
+    public void DebugSetActiveModule(CombatModuleId id) => _activeModule = BuildModule(id);
+
     private void Start()
     {
         // RangeDisplay is on a child GameObject — find it after all Awake() calls
