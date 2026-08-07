@@ -770,7 +770,7 @@ Plans:
 **Plans**: 3 plans (3 waves — 순차 의존: CameraFollow.cs 코어 → OverclockModule.cs 배선 → 통합 플레이테스트)
 
 Plans:
-- [ ] 25-01-PLAN.md — CameraFollow.cs: SmoothDamp 추적 + 에임 리드 오프셋 + 텐션 캐치업 + 다이나믹 줌 (D-01~D-10)
+- [x] 25-01-PLAN.md — CameraFollow.cs: SmoothDamp 추적 + 에임 리드 오프셋 + 텐션 캐치업 + 다이나믹 줌 (D-01~D-10)
 - [ ] 25-02-PLAN.md — OverclockModule.cs: 대시 생명주기 3개 지점에 카메라 훅 배선 (D-04, D-05, D-08)
 - [ ] 25-03-PLAN.md — 통합 플레이테스트 검증 (D-01~D-10 + DebugSceneCameraBinder/CameraBound 회귀 확인)
 
@@ -787,7 +787,7 @@ Plans:
 | 22. MAX 보스 & 순수 속도/관성 모듈 | 0/? | Not started | - |
 | 23. NOVA 보스 & 이원화 조작 모듈 | 0/? | Not started | - |
 | 24. 게임 모드 — 한계 시험 | 0/? | Not started | - |
-| 25. 카메라 시스템 고도화 | 0/3 | Planned | - |
+| 25. 카메라 시스템 고도화 | 1/3 | In Progress | - |
 
 ---
 
