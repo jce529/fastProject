@@ -46,16 +46,19 @@ public class CameraFollow : MonoBehaviour
     private Vector2 _leadVelocity;
     private bool _leadSuppressed;
     private Vector3 _positionVelocity;
+    private Vector3 _basePosition; // Shake()가 여기서 오프셋만 얹는다 — transform.position 누적 합산 방지 (hitfreeze-not-triggering-on-kill)
 
     private void Awake()
     {
         _camera = GetComponent<Camera>();
         _zoomTargetSize = roomOrthoSize;
+        _basePosition = transform.position;
     }
 
     /// <summary>
-    /// 처치 순간 카메라를 짧게 흔든다 (D-08). Time.unscaledDeltaTime 기반으로 감쇠하므로
-    /// HitFreeze(Time.timeScale=0) 중에도 정상 동작한다.
+    /// 처치 순간 카메라를 짧게 흔든다 (D-08). Time.unscaledDeltaTime 기반으로 감쇠한다.
+    /// HitFreeze(Time.timeScale=0) 중에는 감쇠/오프셋 적용 모두 정지되고("하드 스톱"),
+    /// 프리즈가 끝나 timeScale이 복원되는 순간부터 이어서 흔들린다 (사용자 결정, hitfreeze-not-triggering-on-kill).
     /// </summary>
     public void Shake(float duration, float amplitude)
     {
@@ -130,6 +133,7 @@ public class CameraFollow : MonoBehaviour
     {
         _hasBounds = false;
         transform.position = new Vector3(worldCenter.x, worldCenter.y, offset.z);
+        _basePosition = transform.position; // Shake()가 다음 프레임에 참조할 기준점도 즉시 동기화
         _zoomTargetSize = roomOrthoSize; // 룸 전환 시 줌 목표 리셋 — 룸-to-룸 텔레포트 중 줌 크리프 방지
         if (_camera != null) _camera.orthographicSize = roomOrthoSize;
     }
@@ -151,42 +155,59 @@ public class CameraFollow : MonoBehaviour
     {
         if (target == null) return;
 
-        // D-05~D-08: 줌 SmoothDamp — bounds clamp가 orthographicSize를 읽으므로 반드시 먼저 실행 (Pitfall 2)
-        if (_camera != null)
+        // HitFreeze 중(Time.timeScale=0, OverclockModule.HitFreeze) 카메라 추적/줌/에임 리드는 전부 정지시킨다.
+        // 이 블록의 SmoothDamp들은 Time.unscaledDeltaTime 기반이라 timeScale=0에도 계속 진행되어 왔는데,
+        // 그 결과 물리/애니메이션은 멈춰도 카메라만 계속 줌아웃/패닝해 "정지 연출이 느껴지지 않는" 문제가 있었다
+        // (hitfreeze-not-triggering-on-kill 디버그 세션). Shake()도 같은 이유로 아래에서 동일 조건으로 정지시킨다 —
+        // "완전 정지 후 임팩트 셰이크"로 읽히도록 하는 사용자 결정 (기존의 "셰이크는 HitFreeze 면역" 설계를 대체).
+        if (Time.timeScale > 0f)
         {
-            float zoomSmoothTime = (_zoomTargetSize > _camera.orthographicSize) ? zoomOutSmoothTime : zoomInSmoothTime;
-            _camera.orthographicSize = Mathf.SmoothDamp(_camera.orthographicSize, _zoomTargetSize, ref _zoomVelocity, zoomSmoothTime, Mathf.Infinity, Time.unscaledDeltaTime);
+            // D-05~D-08: 줌 SmoothDamp — bounds clamp가 orthographicSize를 읽으므로 반드시 먼저 실행 (Pitfall 2)
+            if (_camera != null)
+            {
+                float zoomSmoothTime = (_zoomTargetSize > _camera.orthographicSize) ? zoomOutSmoothTime : zoomInSmoothTime;
+                _camera.orthographicSize = Mathf.SmoothDamp(_camera.orthographicSize, _zoomTargetSize, ref _zoomVelocity, zoomSmoothTime, Mathf.Infinity, Time.unscaledDeltaTime);
+            }
+
+            Vector2 leadTarget = _leadSuppressed ? Vector2.zero : GetMouseWorldDirection() * ComputeLeadMagnitude();
+            _smoothedLead = Vector2.SmoothDamp(_smoothedLead, leadTarget, ref _leadVelocity, leadSmoothTime, Mathf.Infinity, Time.unscaledDeltaTime);
+
+            Vector3 desired = target.position + offset + (Vector3)_smoothedLead;
+            float effectiveSmoothTime = ComputeTensionAdjustedSmoothTime();
+            transform.position = Vector3.SmoothDamp(transform.position, desired, ref _positionVelocity, effectiveSmoothTime, Mathf.Infinity, Time.unscaledDeltaTime);
+
+            if (_hasBounds && _camera != null)
+            {
+                float halfH = _camera.orthographicSize;
+                float halfW = halfH * _camera.aspect;
+
+                float x = _activeBounds.size.x <= halfW * 2f
+                    ? _activeBounds.center.x
+                    : Mathf.Clamp(transform.position.x, _activeBounds.min.x + halfW, _activeBounds.max.x - halfW);
+
+                float y = _activeBounds.size.y <= halfH * 2f
+                    ? _activeBounds.center.y
+                    : Mathf.Clamp(transform.position.y, _activeBounds.min.y + halfH, _activeBounds.max.y - halfH);
+
+                transform.position = new Vector3(x, y, offset.z);
+            }
+
+            // Shake()가 매 프레임 여기서 오프셋을 얹을 "깨끗한"(흔들림 미포함) 기준점.
+            // HitFreeze 중에는 이 블록 전체가 스킵되므로 _basePosition이 그대로 고정된다 —
+            // Shake는 고정된 기준점 주변에서만 진동하고, 프레임마다 transform.position에 되먹임되어
+            // 무한 누적(랜덤워크)하지 않는다 (hitfreeze-not-triggering-on-kill 후속 발견).
+            _basePosition = transform.position;
         }
 
-        Vector2 leadTarget = _leadSuppressed ? Vector2.zero : GetMouseWorldDirection() * ComputeLeadMagnitude();
-        _smoothedLead = Vector2.SmoothDamp(_smoothedLead, leadTarget, ref _leadVelocity, leadSmoothTime, Mathf.Infinity, Time.unscaledDeltaTime);
-
-        Vector3 desired = target.position + offset + (Vector3)_smoothedLead;
-        float effectiveSmoothTime = ComputeTensionAdjustedSmoothTime();
-        transform.position = Vector3.SmoothDamp(transform.position, desired, ref _positionVelocity, effectiveSmoothTime, Mathf.Infinity, Time.unscaledDeltaTime);
-
-        if (_hasBounds && _camera != null)
-        {
-            float halfH = _camera.orthographicSize;
-            float halfW = halfH * _camera.aspect;
-
-            float x = _activeBounds.size.x <= halfW * 2f
-                ? _activeBounds.center.x
-                : Mathf.Clamp(transform.position.x, _activeBounds.min.x + halfW, _activeBounds.max.x - halfW);
-
-            float y = _activeBounds.size.y <= halfH * 2f
-                ? _activeBounds.center.y
-                : Mathf.Clamp(transform.position.y, _activeBounds.min.y + halfH, _activeBounds.max.y - halfH);
-
-            transform.position = new Vector3(x, y, offset.z);
-        }
-
-        if (_shakeTimeRemaining > 0f)
+        // 셰이크도 HitFreeze 중에는 카운트다운/오프셋 적용을 통째로 정지한다 (사용자 결정, Option A).
+        // _shakeTimeRemaining이 여기서 감소하지 않으므로, 프리즈가 끝나는 순간 셰이크는
+        // "이미 절반쯤 감쇠된" 상태가 아니라 프리즈 시작 시점 그대로 이어서 재생된다.
+        if (Time.timeScale > 0f && _shakeTimeRemaining > 0f)
         {
             _shakeTimeRemaining -= Time.unscaledDeltaTime;
             float damper = Mathf.Clamp01(_shakeTimeRemaining / _shakeDurationTotal);
             Vector2 shakeOffset = Random.insideUnitCircle * _shakeAmplitude * damper;
-            transform.position += new Vector3(shakeOffset.x, shakeOffset.y, 0f);
+            transform.position = _basePosition + new Vector3(shakeOffset.x, shakeOffset.y, 0f);
         }
     }
 }
