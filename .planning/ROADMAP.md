@@ -645,6 +645,7 @@ Plans:
 - [ ] **Phase 22: MAX 보스 & 순수 속도/관성 모듈** - 정지 불가·충돌 즉사 리스크의 모듈이 해금되고, MAX 보스는 벽 유도→스턴→타격 패턴으로 상대해야 한다
 - [ ] **Phase 23: NOVA 보스 & 이원화 조작 모듈** - 본체+드론 동시 조작 모듈이 해금되고, NOVA 보스는 회피 기동하는 본체와 견제하는 드론을 동시에 운용한다
 - [ ] **Phase 24: 게임 모드 — 한계 시험** - 해금된 모듈 중 하나만 선택해 기존 점수 체계 그대로 로그라이크 층 등반에 진입할 수 있다
+- [ ] **Phase 25: 카메라 시스템 고도화 (INSERTED)** - 에임 기반 카메라 오프셋 + SmoothDamp 추적 + 속도/거리 기반 다이나믹 줌 + 히트스탑 독립 셰이크로 연쇄 돌진 시 속도감/타격감을 극대화하는 카메라 연출
 
 ---
 
@@ -762,6 +763,19 @@ Plans:
 
 ---
 
+### Phase 25: 카메라 시스템 고도화 (INSERTED)
+**Goal**: 에임 기반 카메라 오프셋(마우스 방향으로 선제 이동, D-01~D-04) + SmoothDamp 부드러운 추적 + 속도/거리 기반 다이나믹 줌아웃(비대칭 댐핑, 최대 배율 제한, D-05~D-08) + 화면 25% 경계 기반 텐션 캐치업(지수형 안전장치, D-09/D-10) + 히트스탑 중 Time.unscaledDeltaTime 기반 독립 카메라 셰이크(기존 CameraFollow.Shake() 재사용)로 연쇄 돌진 시 화면 이탈 없이 속도감과 타격감을 극대화하는 카메라 연출 완성. (25-RESEARCH.md 확인: 실제 HitFreeze는 Time.timeScale=0f 유지 — 로드맵 문구의 0.01은 개념적 표현이었으며 이 Phase에서 코드 변경 없음)
+**Requirements**: TBD (formal REQ-ID 미매핑 — 25-CONTEXT.md의 D-01~D-10을 요구사항 앵커로 사용)
+**Depends on**: Phase 18 (기존 CameraFollow/CameraBound 위에서 확장)
+**Plans**: 3 plans (3 waves — 순차 의존: CameraFollow.cs 코어 → OverclockModule.cs 배선 → 통합 플레이테스트)
+
+Plans:
+- [ ] 25-01-PLAN.md — CameraFollow.cs: SmoothDamp 추적 + 에임 리드 오프셋 + 텐션 캐치업 + 다이나믹 줌 (D-01~D-10)
+- [ ] 25-02-PLAN.md — OverclockModule.cs: 대시 생명주기 3개 지점에 카메라 훅 배선 (D-04, D-05, D-08)
+- [ ] 25-03-PLAN.md — 통합 플레이테스트 검증 (D-01~D-10 + DebugSceneCameraBinder/CameraBound 회귀 확인)
+
+---
+
 ## Progress Table
 
 | Phase | Plans Complete | Status | Completed |
@@ -773,6 +787,7 @@ Plans:
 | 22. MAX 보스 & 순수 속도/관성 모듈 | 0/? | Not started | - |
 | 23. NOVA 보스 & 이원화 조작 모듈 | 0/? | Not started | - |
 | 24. 게임 모드 — 한계 시험 | 0/? | Not started | - |
+| 25. 카메라 시스템 고도화 | 0/3 | Planned | - |
 
 ---
 
@@ -860,6 +875,7 @@ Plans:
 - [x] 999.3-01-PLAN.md — PortalVFX 소팅 레이어 신설 + Renderer2D Camera Sorting Layer Texture 활성화 + PortalVortex.shader/.mat 신규 작성 + Play 모드 스파이크 검증 (D-01, D-02, D-08)
 - [x] 999.3-02-PLAN.md — FloorTransitionEffect.cs 재작성: PlayEntry() 소용돌이 흡입 + PlayExit() 수직 도약(IsDashing 재사용) + WorldGenerator 배선 (D-01~D-08)
 - [x] 999.3-03-PLAN.md — SampleScene WorldGenerator에 PortalVortex.mat 배선 + 전체 포탈 전환 플레이테스트 검증 (D-01~D-08)
+
 ---
 
 ### Phase 999.4: Enemy AI enhancement pack (BACKLOG)
