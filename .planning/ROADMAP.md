@@ -696,8 +696,8 @@ Plans:
 **UI hint**: yes
 
 Plans:
-- [x] 19-01-PLAN.md — IRealtimeCombatModule/IParryable/AimUtil 계약 + TapSwingCombatModuleBase + 기본전투모듈 (SAMURAI-02, D-01~D-03, D-15/D-16)
-- [ ] 19-02-PLAN.md — CombatModuleRegistry/Selector + AttackSelectController N-way 재작성 + AttackSelectUIBuilder 에디터 도구 (UNLOCK-02, UNLOCK-03)
+- [ ] 19-01-PLAN.md — IRealtimeCombatModule/IParryable/AimUtil 계약 + TapSwingCombatModuleBase + 기본전투모듈 (SAMURAI-02, D-01~D-03, D-15/D-16)
+- [x] 19-02-PLAN.md — CombatModuleRegistry/Selector + AttackSelectController N-way 재작성 + AttackSelectUIBuilder 에디터 도구 (UNLOCK-02, UNLOCK-03)
 - [ ] 19-03-PLAN.md — SamuraiParryModule(패링 판정) + CombatController host-hook/모듈 선택 배선 (SAMURAI-02, SAMURAI-03)
 - [ ] 19-04-PLAN.md — ParryableProjectile + SamuraiBoss FSM(평시/패링/그로기) (SAMURAI-01, SAMURAI-03, SAMURAI-04, SAMURAI-05)
 - [ ] 19-05-PLAN.md — SamuraiBossPrefabBuilder/RoomSamuraiFsmTestBuilder + DebugSceneBuilder 확장 + DebugCombatModuleSwitcher (SAMURAI-01, SAMURAI-05)
@@ -789,7 +789,7 @@ Plans:
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 18. 공유 인프라 | 0/2 | Planned | - |
-| 19. SAMURAI 보스 & 패링 모듈 | 1/6 | In Progress|  |
+| 19. SAMURAI 보스 & 패링 모듈 | 0/? | Not started | - |
 | 20. DeadEye 보스 & 탄약/재장전 모듈 | 0/? | Not started | - |
 | 21. WorldGenerator 보스룸 정리 예외 | 0/? | Not started | - |
 | 22. MAX 보스 & 순수 속도/관성 모듈 | 0/? | Not started | - |

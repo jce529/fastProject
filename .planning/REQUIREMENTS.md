@@ -16,8 +16,8 @@ Requirements for the 보스 캐릭터 확장 & 게임 모드 milestone. Each map
 ### 보스 언락 진행 (UNLOCK)
 
 - [x] **UNLOCK-01**: 보스 격파 시 해당 보스의 전투 모듈이 영구 해금된다 (PlayerPrefs 기반, 앱 재시작 후에도 유지) — 코드 완료 2026-07-22, 실플레이 검증 완료 2026-07-28 (PlayerPrefs.GetInt("boss_unlock_Fiora")=1, Play 재시작 후에도 유지 확인)
-- [ ] **UNLOCK-02**: 플레이어는 해금된 모듈 중 하나를 게임 시작 전 선택할 수 있다 (기존 AttackSelect를 N-way로 확장)
-- [ ] **UNLOCK-03**: 아직 해금되지 않은 모듈은 선택 화면에 잠금 상태로 표시된다
+- [x] **UNLOCK-02**: 플레이어는 해금된 모듈 중 하나를 게임 시작 전 선택할 수 있다 (기존 AttackSelect를 N-way로 확장) — 코드 완료 2026-08-07 (Plan 19-02), 씬 반영/실플레이 검증은 19-06에서 수행 예정
+- [x] **UNLOCK-03**: 아직 해금되지 않은 모듈은 선택 화면에 잠금 상태로 표시된다 — 코드 완료 2026-08-07 (Plan 19-02), 씬 반영/실플레이 검증은 19-06에서 수행 예정
 
 ### SAMURAI 보스 + 패링 모듈 (SAMURAI)
 
@@ -132,8 +132,8 @@ Which phases cover which requirements. Updated during roadmap creation.
 | INFRA-02 | Phase 18 | Descoped (2026-07-20, PC 전환) |
 | INFRA-03 | Phase 18 | Done (code 2026-07-22, playtest-verified 2026-07-28) |
 | UNLOCK-01 | Phase 18 | Done (code 2026-07-22, playtest-verified 2026-07-28) |
-| UNLOCK-02 | Phase 19 | Pending |
-| UNLOCK-03 | Phase 19 | Pending |
+| UNLOCK-02 | Phase 19 | Done (code 2026-08-07, playtest deferred to 19-06) |
+| UNLOCK-03 | Phase 19 | Done (code 2026-08-07, playtest deferred to 19-06) |
 | SAMURAI-01 | Phase 19 | Pending |
 | SAMURAI-02 | Phase 19 | Complete |
 | SAMURAI-03 | Phase 19 | Pending |
