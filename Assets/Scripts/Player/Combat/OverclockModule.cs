@@ -61,6 +61,8 @@ public class OverclockModule : IPlayerCombatModule
         Vector2 startPos    = ctx.Rb.position;
         Vector2 destination = (Vector2)((MonoBehaviour)target).transform.position;
         Vector2 dirToTarget = (destination - startPos).normalized;
+        float dashDistance = Vector2.Distance(startPos, destination);
+        float dashSpeed    = ctx.DashDuration > 0f ? dashDistance / ctx.DashDuration : 0f; // Pitfall 1: Rigidbody2D.linearVelocity는 대시 중 0으로 고정되므로 사용 불가
 
         // 3. 대상 방향으로 스프라이트 전환
         ctx.SpriteRenderer.flipX = destination.x < startPos.x;
@@ -70,6 +72,7 @@ public class OverclockModule : IPlayerCombatModule
         ctx.Invincibility.StartInvincibility(ctx.DashDuration + 0.05f);
         if (ctx.TrailRenderer != null) ctx.TrailRenderer.emitting = true;
         ctx.Rb.linearVelocity = Vector2.zero;
+        ctx.CameraFollow?.SetAimLeadSuppressed(true); // D-04: 대시 시작과 동시에 리드 오프셋 해제
 
         // 5. 대시 이동 (smoothstep 보간으로 가속-감속 느낌)
         float elapsed = 0f;
@@ -82,6 +85,8 @@ public class OverclockModule : IPlayerCombatModule
             yield return new WaitForFixedUpdate();
         }
         ctx.Rb.MovePosition(destination);
+        ctx.CameraFollow?.SetAimLeadSuppressed(false);                    // D-04: 대시 이동 완료 즉시 리드 오프셋 재개
+        ctx.CameraFollow?.RequestDynamicZoom(dashDistance, dashSpeed);    // D-05: 실제 대시 거리+속도로 줌아웃 트리거
 
         // 6. Cleanup visual and animation
         ctx.Animator?.SetBool("IsDashing", false);
@@ -94,6 +99,7 @@ public class OverclockModule : IPlayerCombatModule
         SpawnHitSpark(destination, ctx);
         ctx.CameraFollow?.Shake(ctx.CameraShakeDuration, ctx.CameraShakeAmplitude);
         yield return HitFreeze(ctx.HitFreezeDuration);
+        ctx.CameraFollow?.ReleaseDynamicZoom(); // D-08: 히트프리즈 종료 직후 줌인 시작
 
         ctx.SetAttackCooldown(ctx.PostKillLockout);
         ctx.Gauge.AddKillBonus();
