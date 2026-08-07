@@ -1,7 +1,7 @@
 ---
 gsd_state_version: 1.0
-milestone: v3.1
-milestone_name: — 보스 룸 & 연출 고도화
+milestone: v4.0
+milestone_name: — 보스 캐릭터 확장 & 게임 모드
 status: "Phase 18/18.1 모두 완료. Phase 19(SAMURAI) 계획(`/gsd:plan-phase 19`) 착수 가능"
 stopped_at: Phase 25 context gathered
 last_updated: "2026-08-07T01:23:56.269Z"
