@@ -698,8 +698,8 @@ Plans:
 Plans:
 - [x] 19-01-PLAN.md — IRealtimeCombatModule/IParryable/AimUtil 계약 + TapSwingCombatModuleBase + 기본전투모듈 (SAMURAI-02, D-01~D-03, D-15/D-16)
 - [x] 19-02-PLAN.md — CombatModuleRegistry/Selector + AttackSelectController N-way 재작성 + AttackSelectUIBuilder 에디터 도구 (UNLOCK-02, UNLOCK-03)
-- [x] 19-03-PLAN.md — SamuraiParryModule(패링 판정) + CombatController host-hook/모듈 선택 배선 (SAMURAI-02, SAMURAI-03)
-- [ ] 19-04-PLAN.md — ParryableProjectile + SamuraiBoss FSM(평시/패링/그로기) (SAMURAI-01, SAMURAI-03, SAMURAI-04, SAMURAI-05)
+- [ ] 19-03-PLAN.md — SamuraiParryModule(패링 판정) + CombatController host-hook/모듈 선택 배선 (SAMURAI-02, SAMURAI-03)
+- [x] 19-04-PLAN.md — ParryableProjectile + SamuraiBoss FSM(평시/패링/그로기) (SAMURAI-01, SAMURAI-03, SAMURAI-04, SAMURAI-05)
 - [ ] 19-05-PLAN.md — SamuraiBossPrefabBuilder/RoomSamuraiFsmTestBuilder + DebugSceneBuilder 확장 + DebugCombatModuleSwitcher (SAMURAI-01, SAMURAI-05)
 - [ ] 19-06-PLAN.md — 에디터 메뉴 실행 + Phase 19 통합 플레이테스트 (SAMURAI-01~05, UNLOCK-02, UNLOCK-03)
 

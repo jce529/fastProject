@@ -21,11 +21,11 @@ Requirements for the 보스 캐릭터 확장 & 게임 모드 milestone. Each map
 
 ### SAMURAI 보스 + 패링 모듈 (SAMURAI)
 
-- [ ] **SAMURAI-01**: SAMURAI 보스 격파 시 패링 모듈이 최초로 해금된다 (튜토리얼 보스, 최우선 해금)
+- [x] **SAMURAI-01**: SAMURAI 보스 격파 시 패링 모듈이 최초로 해금된다 (튜토리얼 보스, 최우선 해금)
 - [x] **SAMURAI-02**: 패링 모듈은 슬로우모션 없이 실시간으로 동작하며, 탭 입력 시 방향성 베기 공격을 수행한다
 - [x] **SAMURAI-03**: 적 공격과 타이밍이 겹치는 시점에 입력하면 패링이 발동해 공격을 무효화하고 투사체를 반사한다
-- [ ] **SAMURAI-04**: SAMURAI 보스는 평시 전투와 간헐적 패링 전용 타이밍을 반복하며, 패링 전용 타이밍에 공격을 시도하면 플레이어는 즉사한다
-- [ ] **SAMURAI-05**: 패링 판정 타이밍은 입력 지연을 고려해 넉넉하게 설정되고 실측 튜닝된다
+- [x] **SAMURAI-04**: SAMURAI 보스는 평시 전투와 간헐적 패링 전용 타이밍을 반복하며, 패링 전용 타이밍에 공격을 시도하면 플레이어는 즉사한다
+- [x] **SAMURAI-05**: 패링 판정 타이밍은 입력 지연을 고려해 넉넉하게 설정되고 실측 튜닝된다
 
 ### DeadEye 보스 + 탄약/재장전 모듈 (DEADEYE)
 
@@ -134,11 +134,11 @@ Which phases cover which requirements. Updated during roadmap creation.
 | UNLOCK-01 | Phase 18 | Done (code 2026-07-22, playtest-verified 2026-07-28) |
 | UNLOCK-02 | Phase 19 | Done (code 2026-08-07, playtest deferred to 19-06) |
 | UNLOCK-03 | Phase 19 | Done (code 2026-08-07, playtest deferred to 19-06) |
-| SAMURAI-01 | Phase 19 | Pending |
+| SAMURAI-01 | Phase 19 | Complete |
 | SAMURAI-02 | Phase 19 | Complete |
 | SAMURAI-03 | Phase 19 | Complete |
-| SAMURAI-04 | Phase 19 | Pending |
-| SAMURAI-05 | Phase 19 | Pending |
+| SAMURAI-04 | Phase 19 | Complete |
+| SAMURAI-05 | Phase 19 | Complete |
 | DEADEYE-01 | Phase 20 | Pending |
 | DEADEYE-02 | Phase 20 | Pending |
 | DEADEYE-03 | Phase 20 | Pending |
