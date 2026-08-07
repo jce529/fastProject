@@ -3,8 +3,8 @@ gsd_state_version: 1.0
 milestone: v3.1
 milestone_name: — 보스 룸 & 연출 고도화
 status: executing
-stopped_at: Completed 25-01-PLAN.md
-last_updated: "2026-08-07T02:29:24.623Z"
+stopped_at: Completed 25-02-PLAN.md
+last_updated: "2026-08-07T02:33:49.902Z"
 last_activity: 2026-08-07
 progress:
   total_phases: 5
@@ -36,7 +36,7 @@ progress:
 ## Current Position
 
 Phase: 25 (camera-system-overhaul) — EXECUTING
-Plan: 2 of 3
+Plan: 3 of 3 (25-02 완료, 25-03 대기 — 통합 플레이테스트 검증)
 Phase: 18.1 (fioraboss-ai-fiora-md) — Plan 01 코드+실플레이 검증 완료 (18.1-VERIFICATION.md status: resolved, 2026-07-28)
 Status: Ready to execute
 Last activity: 2026-08-07
@@ -59,6 +59,8 @@ Progress: [███░░░░░░░] 1/7 v4.0 phases 완료 (Phase 18, 코
 - Phase 25 슬러그 오생성: `generateSlugInternal()`이 설명 앞부분이 아닌 중간 파편("smoothdamp-time-timescale-0-01-time-unscaleddeltatime")을 슬러그로 추출 — 디렉토리를 `25-camera-system-overhaul`로 수동 리네임
 - Phase 25 Plan 01 완료(2026-08-07): `CameraFollow.cs` LateUpdate를 즉시 스냅에서 단일 SmoothDamp 파이프라인(줌 SmoothDamp → 리드+텐션+포지션 SmoothDamp → bounds clamp → shake)으로 전면 재작성 — 다이나믹 줌(D-05~D-08, `RequestDynamicZoom`/`ReleaseDynamicZoom`), 에임 리드 오프셋(D-01~D-04, `SetAimLeadSuppressed`), 화면 25% 경계 지수형 텐션 캐치업(D-09/D-10) 전부 구현. `SnapToRoom(Vector3)`/`SnapToRoom(Bounds)` 시그니처·즉시 스냅 동작 불변 확인(DebugSceneCameraBinder.cs git diff 0). 상세는 [25-01-SUMMARY.md](./phases/25-camera-system-overhaul/25-01-SUMMARY.md) 참고 — 다음: 25-02가 OverclockModule.cs에서 대시 생명주기 이벤트를 이 3개 훅에 배선
 - `gsd-tools roadmap update-plan-progress 25` 실행 시 무관한 백로그 섹션(Phase 999.2)의 "Plans: 3/4 plans executed" 문구를 "1/3 plans executed"로 잘못 덮어씀(정규식이 phase 25가 아닌 다른 "Plans:" 라인을 매칭한 것으로 추정) — 수동으로 원복. 재현 시 `roadmap update-plan-progress` 실행 후 반드시 `git diff .planning/ROADMAP.md`로 의도치 않은 섹션 변경 여부를 확인할 것
+- Phase 25 Plan 02 완료(2026-08-07): `OverclockModule.Resolve()`의 대시 생명주기 3개 지점(대시 시작/이동 완료/HitFreeze 종료)에 25-01이 만든 `CameraFollow` 훅 3종(`SetAimLeadSuppressed`/`RequestDynamicZoom`/`ReleaseDynamicZoom`)을 배선(d95f2e8) — 대시 속도는 `Rigidbody2D.linearVelocity`(대시 중 0으로 고정) 대신 `dashDistance/ctx.DashDuration`으로 직접 계산(Pitfall 1 회피). `Resolve()` 외 메서드/기존 로직 diff 0, 순수 추가 변경 4줄만 삽입. 상세는 [25-02-SUMMARY.md](./phases/25-camera-system-overhaul/25-02-SUMMARY.md) 참고 — 다음: 25-03이 D-01~D-10 통합 플레이테스트 검증 수행
+- `gsd-tools roadmap update-plan-progress 25` 재실행 시 Phase 999.2 백로그 "Plans:" 라인이 재차 클로버됨(동일 버그 재현, 위 항목 참고) — 이번에도 수동 원복(`git diff .planning/ROADMAP.md` 확인 후 "3/4 plans executed"로 복원). 도구 자체 수정은 이 Plan 범위 밖이므로 매번 수동 확인/원복 필요
 
 ### Key Decisions Locked for v3.1 (2026-07-08 roadmap kickoff)
 
@@ -153,8 +155,8 @@ Full decision log lives in `.planning/PROJECT.md` Key Decisions table. Recent hi
 3. Read `.planning/REQUIREMENTS.md` / `.planning/ROADMAP.md` — v4.0 Phase 18-24 already defined
 4. Next action: Phase 18/18.1 모두 코드+실플레이 검증 완료 — `/gsd:plan-phase 19`(SAMURAI 보스 & 패링 모듈 & 모듈 선택 UI 확장)로 진행
 
-**Last session:** 2026-08-07T02:29:24.617Z
-**Stopped at:** Completed 25-01-PLAN.md
+**Last session:** 2026-08-07T02:33:49.895Z
+**Stopped at:** Completed 25-02-PLAN.md
 
 ### Parked Milestone: v3.1 (보스 룸 & 연출 고도화) — 재개 방법
 
