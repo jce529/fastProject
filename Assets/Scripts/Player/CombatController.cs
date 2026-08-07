@@ -43,6 +43,9 @@ public class CombatController : MonoBehaviour
     [SerializeField] private GameObject _hitSparkPrefab;
     [SerializeField] private float _cameraShakeDuration = 0.15f;
     [SerializeField] private float _cameraShakeAmplitude = 0.2f;
+    [SerializeField] private float swingRadius = 3f;         // D-01: 기본/사무라이 전투형 모듈 스윙 반경 (Overclock의 searchRadius/fanRadius와 독립)
+    [SerializeField] private float swingHalfAngleDeg = 50f;  // D-01: 스윙 부채꼴 절반각
+    [SerializeField] private float tapLockout = 0.12f;       // D-03: 탭 공격 사이 짧은 고정 락아웃
 
     // -- Component references -------------------------------------------------------
     [SerializeField] private PlayerController _player;
@@ -103,7 +106,7 @@ public class CombatController : MonoBehaviour
         // Enemy layer is deliberately excluded — an enemy standing behind another enemy must not block targeting.
         _obstacleMask   = LayerMask.GetMask("Default", "Ground", "Platform");
 
-        _activeModule = new OverclockModule();
+        _activeModule = BuildModule(CombatModuleSelector.SelectedModuleId);
         _ctx = new CombatContext
         {
             Rb                   = _rb,
@@ -128,8 +131,22 @@ public class CombatController : MonoBehaviour
             EnemyFilter          = _enemyFilter,
             HitBuffer            = _hitBuffer,
             ObstacleMask         = _obstacleMask,
+            SwingRadius          = swingRadius,
+            SwingHalfAngleDeg    = swingHalfAngleDeg,
+            TapLockout           = tapLockout,
             SetAttackCooldown    = sec => _attackCooldown = sec,
         };
+    }
+
+    private IPlayerCombatModule BuildModule(CombatModuleId id)
+    {
+        switch (id)
+        {
+            case CombatModuleId.Overclock: return new OverclockModule();
+            case CombatModuleId.Samurai:   return new SamuraiParryModule();
+            case CombatModuleId.Basic:
+            default:                       return new BasicCombatModule();
+        }
     }
 
     private void Start()
@@ -143,6 +160,15 @@ public class CombatController : MonoBehaviour
         if (_player != null && _player.InputLocked) return;
         // _isBusy lockout: all attack state transitions blocked during dash/whiff/lockout
         if (_isBusy) return;
+
+        // SAMURAI-02: 실시간 모듈은 Overclock의 hold-slowmo→release-resolve 상태머신을 완전히 우회한다.
+        // OverclockModule은 IRealtimeCombatModule을 구현하지 않으므로 이 분기는 항상 false — Overclock
+        // 경로는 아래 기존 로직으로 그대로 흘러간다(19-RESEARCH.md §1, zero behavior change).
+        if (_activeModule is IRealtimeCombatModule realtimeModule)
+        {
+            realtimeModule.Tick(_ctx);
+            return;
+        }
 
         var input = InputManager.Instance;
 
