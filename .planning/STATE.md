@@ -3,11 +3,11 @@ gsd_state_version: 1.0
 milestone: v3.1
 milestone_name: — 보스 룸 & 연출 고도화
 status: "Phase 18/18.1 모두 완료. Phase 19(SAMURAI) 계획(`/gsd:plan-phase 19`) 착수 가능"
-stopped_at: Phase 19 context gathered
-last_updated: "2026-07-28T12:34:42.643Z"
+stopped_at: Phase 25 context gathered
+last_updated: "2026-08-07T01:23:56.269Z"
 last_activity: 2026-07-28 -- DebugScene 재빌드 → Phase 18/18.1 통합 체크리스트 실플레이 전부 통과. 재빌드 중 발견된 DebugSceneBuilder.cs 보스 중복 스폰 버그(Room_BossFsmTest.prefab에 이미 nested된 BossEnemy를 모르고 재차 Instantiate) 수정 및 재검증. PlayerPrefs boss_unlock_Fiora=1, Play 재시작 후에도 유지 확인(UNLOCK-01)
 progress:
-  total_phases: 16
+  total_phases: 17
   completed_phases: 8
   total_plans: 31
   completed_plans: 30
@@ -27,7 +27,7 @@ progress:
 
 **Last Shipped Milestone:** v3.0 — 무한 복도 층 시스템 (2026-07-08)
 
-**Current Milestone:** v4.0 — 보스 캐릭터 확장 & 게임 모드 (roadmap 완성 — Phase 18-24, 27/27 requirements mapped. Phase 18(18-01/18-02) + Phase 18.1 모두 코드+실플레이 검증 완료(2026-07-28) — Phase 19(SAMURAI) 계획 착수 가능)
+**Current Milestone:** v4.0 — 보스 캐릭터 확장 & 게임 모드 (roadmap 완성 — Phase 18-24, 27/27 requirements mapped. Phase 18(18-01/18-02) + Phase 18.1 모두 코드+실플레이 검증 완료(2026-07-28) — Phase 19(SAMURAI) 계획 착수 가능. Phase 25(카메라 시스템 고도화) 2026-08-07 추가, TBD 상태)
 
 **Parked Milestone:** v3.1 — 보스 룸 & 연출 고도화 (Phase 13-17, Phase 15에서 human-action 체크포인트로 블로킹, 미완료 상태로 파킹 — v4.0 완료 후 재검토)
 
@@ -54,6 +54,8 @@ Progress: [███░░░░░░░] 1/7 v4.0 phases 완료 (Phase 18, 코
 - Phase 18(18-01/18-02) 문서 정합화(2026-07-28) — 실제 코드/커밋(93a19c9, 0a4748f, 74b11aa, afd85e2, 전부 2026-07-22 11:49~11:56 KST에 연속 커밋)은 이미 존재했으나 SUMMARY.md/ROADMAP 체크박스/REQUIREMENTS 체크박스/STATE.md 갱신이 누락된 채 Phase 18.1이 먼저 진행됨. acceptance_criteria 재확인 후 문서 동기화, 이어서 같은 세션에서 Task 3 실제 플레이테스트까지 완료(아래 항목). 상세는 [18-01-SUMMARY.md](./phases/18-shared-infra/18-01-SUMMARY.md)/[18-02-SUMMARY.md](./phases/18-shared-infra/18-02-SUMMARY.md) 참고
 - Phase 18/18.1 Task 3 실플레이 검증 완료 + DebugSceneBuilder.cs 보스 중복 스폰 버그 수정(2026-07-28) — `Fast/Debug/Build DebugScene` 재빌드 과정에서 보스가 2마리 스폰되는 것을 발견: `Room_BossFsmTest.prefab`은 D-13(RoomBossFsmTestBuilder.cs)에서 이미 `BossEnemy`를 nested prefab으로 심어뒀는데, `DebugSceneBuilder.cs`가 이를 모른 채(클래스 doc 주석도 반대로 잘못 적혀 있었음) 같은 우측 6유닛 위치에 별도로 한 번 더 Instantiate하고 있었음. 중복 Instantiate 블록 + `BossPrefabPath` 상수 제거, doc 주석 정정 후 재빌드하여 보스 1마리만 존재함을 확인. 이후 Phase 18-01(슬로우모션/대시/헛치기/게이지소진) + 18-02(7회 피격 패턴 리셋/사망 연출/PlayerPrefs 해금 영속성) 통합 체크리스트 전부 통과, `PlayerPrefs.GetInt("boss_unlock_Fiora")`가 Play 재시작 후에도 1로 유지됨을 Unity RunCommand로 직접 확인
 - Phase 18.1 Plan 01 완료(2026-07-24) — FioraBoss.PatternLoop() 룸 경계 돌진 재작성(908401f/8ab268f) + Task 3 체크포인트 실플레이에서 발견된 카메라 미배선/히트박스 정렬버그/물리 밀림 4건 수정(48d0147/c815704/a02ae58/c75cde8/c05ce21) + 수치 튜닝(ffe2695) + 재사용 가능한 디버그 토글 2종(b1ac85b/49ceb73, 기본 false로 원복 cf2d7a4) — 상세는 [18.1-01-SUMMARY.md](./phases/18.1-fioraboss-ai-fiora-md/18.1-01-SUMMARY.md) 참고. 디버그 스위치 OFF 정식 스펙 상태에서 17개 체크리스트 전부 통과 최종 승인
+- Phase 25 추가(2026-08-07, `/gsd:add-phase`): 카메라 시스템 고도화 — 에임 기반 카메라 오프셋(마우스 방향 선제 이동) + SmoothDamp 부드러운 추적 + 속도/거리 기반 다이나믹 줌아웃(비대칭 댐핑, 최대 배율 제한) + 거리 비례 텐션 스케일링(캐치업 안전장치) + 히트스탑 중 Time.unscaledDeltaTime 기반 독립 카메라 셰이크. v4.0 로드맵 끝(Phase 24 뒤)에 삽입, Phase 18(기존 CameraFollow/CameraBound)에 의존. `.planning/phases/25-camera-system-overhaul/`. **추가 작업 중 `gsd-tools phase add` 자동 넘버링이 두 차례 오작동함**: (1) STATE.md frontmatter `milestone:` 필드가 v3.1로 stale된 상태라 파킹된 v3.1 섹션 기준으로 스코핑되어 이미 존재하는 Phase 18과 충돌하는 번호를 계산(→ frontmatter를 v4.0으로 정정, [[fix-gsd-roadmap-milestone-parsing-bug]] 세 번째 변형과 동일 원인); (2) 정정 후에도 `### Phase 999.4` 같은 백로그 소수점 표기(`999.x`)의 정수부 `999`를 유효 페이즈 번호로 오인해 다음 번호를 1000으로 계산(신규 발견 버그 — decimal-prefixed 백로그 항목이 sequential 모드의 max-integer 탐색을 오염시킴). `--id 25`로 번호를 명시 지정해 우회, ROADMAP.md 삽입 위치(파일 마지막 `---` 앞 = 백로그 섹션 중간)도 Phase 24 뒤 정위치로 수동 이동
+- Phase 25 슬러그 오생성: `generateSlugInternal()`이 설명 앞부분이 아닌 중간 파편("smoothdamp-time-timescale-0-01-time-unscaleddeltatime")을 슬러그로 추출 — 디렉토리를 `25-camera-system-overhaul`로 수동 리네임
 
 ### Key Decisions Locked for v3.1 (2026-07-08 roadmap kickoff)
 
@@ -148,8 +150,8 @@ Full decision log lives in `.planning/PROJECT.md` Key Decisions table. Recent hi
 3. Read `.planning/REQUIREMENTS.md` / `.planning/ROADMAP.md` — v4.0 Phase 18-24 already defined
 4. Next action: Phase 18/18.1 모두 코드+실플레이 검증 완료 — `/gsd:plan-phase 19`(SAMURAI 보스 & 패링 모듈 & 모듈 선택 UI 확장)로 진행
 
-**Last session:** 2026-07-28T12:34:42.635Z
-**Stopped at:** Phase 19 context gathered
+**Last session:** 2026-08-07T01:23:56.262Z
+**Stopped at:** Phase 25 context gathered
 
 ### Parked Milestone: v3.1 (보스 룸 & 연출 고도화) — 재개 방법
 
