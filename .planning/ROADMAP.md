@@ -692,8 +692,16 @@ Plans:
   4. SAMURAI 보스는 평시 전투와 패링 전용 타이밍을 번갈아 반복하며, 패링 타이밍에 공격을 시도하면 플레이어는 즉사한다
   5. 입력 지연을 고려해 넉넉하게 설정된 패링 판정 타이밍이 실측 튜닝되어 있다
   6. 게임 시작 전 선택 화면(screen)에서 해금된 모듈은 선택 가능하게, 아직 해금되지 않은 모듈은 잠금 상태(자물쇠 아이콘 등)로 표시된다
-**Plans**: TBD
+**Plans**: 6 plans (4 waves)
 **UI hint**: yes
+
+Plans:
+- [ ] 19-01-PLAN.md — IRealtimeCombatModule/IParryable/AimUtil 계약 + TapSwingCombatModuleBase + 기본전투모듈 (SAMURAI-02, D-01~D-03, D-15/D-16)
+- [ ] 19-02-PLAN.md — CombatModuleRegistry/Selector + AttackSelectController N-way 재작성 + AttackSelectUIBuilder 에디터 도구 (UNLOCK-02, UNLOCK-03)
+- [ ] 19-03-PLAN.md — SamuraiParryModule(패링 판정) + CombatController host-hook/모듈 선택 배선 (SAMURAI-02, SAMURAI-03)
+- [ ] 19-04-PLAN.md — ParryableProjectile + SamuraiBoss FSM(평시/패링/그로기) (SAMURAI-01, SAMURAI-03, SAMURAI-04, SAMURAI-05)
+- [ ] 19-05-PLAN.md — SamuraiBossPrefabBuilder/RoomSamuraiFsmTestBuilder + DebugSceneBuilder 확장 + DebugCombatModuleSwitcher (SAMURAI-01, SAMURAI-05)
+- [ ] 19-06-PLAN.md — 에디터 메뉴 실행 + Phase 19 통합 플레이테스트 (SAMURAI-01~05, UNLOCK-02, UNLOCK-03)
 
 ---
 
