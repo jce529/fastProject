@@ -1,7 +1,7 @@
 ---
 gsd_state_version: 1.0
-milestone: v3.1
-milestone_name: — 보스 룸 & 연출 고도화
+milestone: v4.0
+milestone_name: — 보스 캐릭터 확장 & 게임 모드
 status: executing
 stopped_at: Completed 25-02-PLAN.md
 last_updated: "2026-08-07T02:33:49.902Z"
