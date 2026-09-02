@@ -1,0 +1,7 @@
+interface:
+  display_name: "GSD Discuss Phase"
+  short_description: "Clarify a phase before creating its plan"
+  default_prompt: "Use $gsd-discuss-phase to clarify the next roadmap phase."
+
+policy:
+  allow_implicit_invocation: true

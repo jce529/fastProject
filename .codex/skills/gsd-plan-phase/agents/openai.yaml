@@ -1,0 +1,7 @@
+interface:
+  display_name: "GSD Plan Phase"
+  short_description: "Create and validate a detailed phase plan"
+  default_prompt: "Use $gsd-plan-phase to plan the next implementation phase."
+
+policy:
+  allow_implicit_invocation: true

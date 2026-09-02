@@ -1,0 +1,7 @@
+interface:
+  display_name: "GSD Help"
+  short_description: "Show the installed GSD command reference"
+  default_prompt: "Use $gsd-help to show the available GSD commands."
+
+policy:
+  allow_implicit_invocation: true

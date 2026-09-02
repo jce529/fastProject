@@ -1,0 +1,7 @@
+interface:
+  display_name: "GSD Verify Work"
+  short_description: "Run acceptance tests for completed phase work"
+  default_prompt: "Use $gsd-verify-work to validate the current phase deliverables."
+
+policy:
+  allow_implicit_invocation: true

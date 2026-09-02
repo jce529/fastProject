@@ -1,0 +1,7 @@
+interface:
+  display_name: "GSD Debug"
+  short_description: "Investigate bugs with persistent evidence-driven debugging"
+  default_prompt: "Use $gsd-debug to diagnose and resolve this issue."
+
+policy:
+  allow_implicit_invocation: true

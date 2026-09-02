@@ -1,0 +1,7 @@
+interface:
+  display_name: "GSD"
+  short_description: "Plan, execute, and verify work with Get Shit Done"
+  default_prompt: "Use $gsd to continue the current Get Shit Done workflow."
+
+policy:
+  allow_implicit_invocation: true

@@ -1,0 +1,7 @@
+interface:
+  display_name: "GSD Execute Phase"
+  short_description: "Execute and verify all plans in a phase"
+  default_prompt: "Use $gsd-execute-phase to execute the current planned phase."
+
+policy:
+  allow_implicit_invocation: true

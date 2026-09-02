@@ -1,0 +1,7 @@
+interface:
+  display_name: "GSD Quick"
+  short_description: "Complete a small task with lightweight GSD guarantees"
+  default_prompt: "Use $gsd-quick to complete this small standalone task."
+
+policy:
+  allow_implicit_invocation: true

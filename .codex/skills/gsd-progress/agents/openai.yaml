@@ -1,0 +1,7 @@
+interface:
+  display_name: "GSD Progress"
+  short_description: "Inspect progress and choose the next GSD action"
+  default_prompt: "Use $gsd-progress to inspect the current project state."
+
+policy:
+  allow_implicit_invocation: true

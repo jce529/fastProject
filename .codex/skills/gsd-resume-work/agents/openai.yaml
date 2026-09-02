@@ -1,0 +1,7 @@
+interface:
+  display_name: "GSD Resume Work"
+  short_description: "Resume work from saved GSD project state"
+  default_prompt: "Use $gsd-resume-work to restore the previous GSD session."
+
+policy:
+  allow_implicit_invocation: true
